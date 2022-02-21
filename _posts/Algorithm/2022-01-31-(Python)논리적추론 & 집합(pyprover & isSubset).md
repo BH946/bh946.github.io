@@ -10,31 +10,31 @@ sidebar:
 ---
 
 
-# 논리식(Logic expression)
+## 1.논리식(Logic expression)
 
-* |은 합집합, &는 곱집합, >>는 ->, ~는 not기호 그리고 given은 조건, conclu는 결론
+* \|은 합집합, &는 곱집합, >>는 ->, ~는 not기호 그리고 given은 조건, conclu는 결론
 
 
 
-#### pyprover 준비물
+### pyprover 준비물
 
-```
+```python
 pip install pyprover
 ```
 
 **기본 import**
 
-```
+```python
 from pyprover import *
 ```
 
 
 
-#### pyprover 사용법
+### pyprover 사용법
 
 **사용 방식**
 
-```
+```python
 # (P ^ Q) → P
 given = (P&Q)
 conclu = P
@@ -45,7 +45,7 @@ print("true") if proves( given, conclu ) else print("false")
 
 * 후건 부정(부정 논법) modus tollen
 
-  ```
+  ```python
   given = (~Q&(P>>Q))
   conclu = ~P
   print("true") if proves( given, conclu ) else print("false")
@@ -53,7 +53,7 @@ print("true") if proves( given, conclu ) else print("false")
 
 * 구성적 양도 논법 constructive dilemma
 
-  ```
+  ```python
   given = ((P>>Q)&(R>>S)&(P|R))
   conclu = Q|S
   print("true") if proves( given, conclu ) else print("false")
@@ -61,7 +61,7 @@ print("true") if proves( given, conclu ) else print("false")
 
 * 파괴적 양도 논법 destructive dilemma
 
-  ```
+  ```python
   given = (((P>>Q) & (R>>S)) & (~Q|~S))
   conclu = ~P|~R
   print("true") if proves( given, conclu ) else print("false")
@@ -69,7 +69,7 @@ print("true") if proves( given, conclu ) else print("false")
 
 * 전건 긍정 modus ponens
 
-  ```
+  ```python
   given = (P & (P>>Q))
   conclu = Q
   print("true") if proves( given, conclu ) else print("false")
@@ -77,7 +77,7 @@ print("true") if proves( given, conclu ) else print("false")
 
 * 가언 삼단 논법 hypothetical syllogism
 
-  ```
+  ```python
   given = ((P>>Q) & (Q>>R))
   conclu = P>>R
   print("true") if proves( given, conclu ) else print("false")
@@ -87,7 +87,7 @@ print("true") if proves( given, conclu ) else print("false")
 
   * TE는 Exist(**∃x**)를 의미하고 FA는 ForAll(**∀x**)를 의미하는 한정자이다.
 
-  ```
+  ```python
   # Statement: Not all students like homework 
   # Negation: There is at leat one student who does not like homework 
   # x: students, P: isHomeworkLikable(x)
@@ -99,15 +99,15 @@ print("true") if proves( given, conclu ) else print("false")
 
 
 
-# 부분집합(isSubset)
+## 2.부분집합(isSubset)
 
 * 데이터프레임의 경우 예시..(즉, pandas 기본적으로 import)
 
-#### 예시로 만들어보는 함수
+### 예시로 만들어보는 함수
 
 * 데이터 한개한개 전부 비교.(정확 대신 매우느림)
 
-```
+```python
 """## ■ isSubset 함수 만들기
 만약 데이터프레임 dfA, dfB가 주어질 때,
 dfA가 dfB의 서브셋이고, dfA가 dfB의 서브셋이라면(동치=equivalence) return True
@@ -116,7 +116,7 @@ dfA가 dfB의 서브셋이고, dfA가 dfB의 서브셋이라면(동치=equivalen
 """
 ```
 
-```
+```python
 첫번째 방법 알고리즘 시작
 1. dfA와 dfB를 리스트 형태로 바꿔 줍니다.
 2. dfA를 기준으로 dfB와 리스트 하나하나 비교해서 서로 다른것의 횟수(diffrenceCount)를 카운트 합니다.
@@ -156,7 +156,7 @@ def isSubset(dfA, dfB):
 
 * 아래는 기본 데이터가 같다고 가정하고 크기만 비교한 방법임.(부정확 대신 빠름)
 
-```
+```python
 """## ■ isSubset 함수 만들기
 만약 데이터프레임 dfA, dfB가 주어질 때,
 dfA가 dfB의 서브셋이고, dfA가 dfB의 서브셋이라면(동치=equivalence) return True
@@ -165,7 +165,7 @@ dfA가 dfB의 서브셋이고, dfA가 dfB의 서브셋이라면(동치=equivalen
 """
 ```
 
-```
+```python
 # 두번째 방법 알고리즘 시작
 def isSubset(dfA, dfB):
     dfC = pd.merge(dfA, dfB) # 교집합
