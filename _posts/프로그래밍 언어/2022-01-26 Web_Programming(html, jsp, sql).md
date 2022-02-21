@@ -1,4 +1,11 @@
-# 웹 프로그래밍(HTML+JSP+SQL로 구성)
+---
+title:  "Web_Programming(html, jsp, sql)"
+categories : test
+tag : [android, github]
+author_profile: false
+sidebar:
+   nav: "docs"
+---
 
 **=> 자세한건 slid파일(워드파일) 보기.**
 
