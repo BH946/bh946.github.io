@@ -1,5 +1,6 @@
 ---
-title:  "재업할것) Kotiln 기능 정리 (프로젝트에서 이용한)"
+title:  "재업할것) Kotlin 기능 정리 (프로젝트에서 이용한)"
+categories: [Kotlin, 수정필요]
 toc: true
 toc_sticky: true
 author_profile: false
@@ -7,7 +8,7 @@ sidebar:
    nav: "docs"
 ---
 
-# Kotiln 기능 정리 (프로젝트에서 이용한)
+# Kotlin 기능 정리 (프로젝트에서 이용한)
 
 ### onCreate와 onCreateView와 onViewCreated 구별
 
