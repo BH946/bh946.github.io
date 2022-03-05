@@ -11,6 +11,14 @@
             📂 <span style="font-family:'Cafe24Oneprettynight';">전체 글 수</style> <span style="font-family:'Coming Soon';">{{sum}}</style> <span style="font-family:'Cafe24Oneprettynight';">개</style> 
       </li>
       <li>
+        <span class="nav__sub-title">Revise</span>
+            <ul>
+                {% for category in site.categories %}
+                    {% if category[0] == "Revise" %}
+                        <li><a href="/categories/revise" class="">수정전 ({{category[1].size}})</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
         <!--span 태그로 카테고리들을 크게 분류 -->
         <span class="nav__sub-title">Coding Test</span>
             <!--ul 태그로 같은 카테고리들 모아둔 페이지들 나열-->
@@ -82,7 +90,14 @@
                     {% endif %}
                 {% endfor %}
             </ul>
-        
+        <span class="nav__sub-title">Java&Kotlin</span>
+            <ul>
+                {% for category in site.categories %}
+                    {% if category[0] == "Java" %}
+                        <li><a href="/categories/java" class="">Java(자바) ({{category[1].size}})</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
       </li>
   </ul>
 </nav>

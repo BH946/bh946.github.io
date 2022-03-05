@@ -1,6 +1,6 @@
 ---
 title:  "재업할것) Kotlin 기능 정리 (프로젝트에서 이용한)"
-categories: [Kotlin, 수정필요]
+categories: [Kotlin, Revise]
 toc: true
 toc_sticky: true
 author_profile: false
