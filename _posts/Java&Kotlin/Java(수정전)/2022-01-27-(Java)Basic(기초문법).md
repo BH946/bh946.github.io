@@ -1,5 +1,5 @@
 ---
-title:  "[Java]]Basic(기초 문법)_수정필요함"
+title:  "[Java]Basic(기초 문법)_수정필요함"
 categories : [Java, Revise]
 tag : [Java,Java 기초정리]
 toc: true
