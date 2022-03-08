@@ -1,10 +1,12 @@
 ---
-title:  "Web_Programming(html, jsp, sql)"
-categories : test
-tag : [android, github]
+title:  "[Html, Jsp, Sql]Web_Programming 기초"
+categories : WebProgramming
+tag : [html, jsp, sql, 웹프로그래밍]
+toc: true
+toc_sticky: true
 author_profile: false
 sidebar:
-   nav: "docs"
+  nav: "docs"
 ---
 
 **=> 자세한건 slid파일(워드파일) 정리본 보기.**

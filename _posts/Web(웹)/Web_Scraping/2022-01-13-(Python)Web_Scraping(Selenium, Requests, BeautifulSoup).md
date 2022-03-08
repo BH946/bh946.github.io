@@ -20,7 +20,7 @@ sidebar:
 
 * 예로 쿠팡의 경우 유저가아니면 접근 못함.
 
-#### 가져오는 법
+### 가져오는 법
 
 **1. 구글에 user agent string을 검색해서 what is my user agent? 들어간다.**
 
@@ -38,7 +38,7 @@ sidebar:
 
 => 주관적인 내 경험들만 작성. (자세히는 관련 공식문서 참고)
 
-#### Selenium, BeautifulSoup 준비물
+### Selenium, BeautifulSoup 준비물
 
 ```python
 1. 크롬 드라이버 다운
@@ -46,7 +46,7 @@ sidebar:
 3. pip install bs4
 ```
 
-#### Selenium, BeautifulSoup 사용법
+### Selenium, BeautifulSoup 사용법
 
 **기본 import**
 
@@ -318,7 +318,7 @@ browser.get_screenshot_as_file("google_movie.png")
   * 400대 : 코드문제
   * 500대 : 서버문제
 
-#### Requests 준비물
+### Requests 준비물
 
 ```python
 1. pip install requests
@@ -327,7 +327,7 @@ browser.get_screenshot_as_file("google_movie.png")
 
 
 
-#### Requests 사용법(나중에 합치고 수졍)
+### Requests 사용법(나중에 합치고 수졍)
 
 **기본 import**
 
@@ -476,7 +476,7 @@ url = a['href'] # str 형식으로 나옴(dict형식을 key값으로 접근한�
 
 
 
-#### 파서의 종류
+### 파서의 종류
 
 * **html파서 : html기반**
 
@@ -691,7 +691,7 @@ for i in range(1, 6):
 
 
 
-#### 풀코딩
+**풀코딩**
 
 ```python
 import requests

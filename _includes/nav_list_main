@@ -106,6 +106,22 @@
                     {% endif %}
                 {% endfor %}
             </ul>
+        <span class="nav__sub-title">Web(웹)</span>
+            <ul>
+                {% for category in site.categories %}
+                    {% if category[0] == "WebProgramming" %}
+                        <li><a href="/categories/webp" class="">웹 프로그래밍 ({{category[1].size}})</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+            <ul>
+                {% for category in site.categories %}
+                    {% if category[0] == "WebScraping" %}
+                        <li><a href="/categories/webs" class="">웹 스크래핑(파싱) ({{category[1].size}})</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+
       </li>
   </ul>
 </nav>

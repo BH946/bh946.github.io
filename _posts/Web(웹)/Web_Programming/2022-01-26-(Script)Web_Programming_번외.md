@@ -1,10 +1,12 @@
 ---
-title:  "Web_Programming(html, jsp, sql)"
-categories : test
-tag : [android, github]
+title:  "[Script]Web_Programming 번외"
+categories : WebProgramming
+tag : [Script, 자바스크립트, javascript, 웹프로그래밍]
+toc: true
+toc_sticky: true
 author_profile: false
 sidebar:
-   nav: "docs"
+  nav: "docs"
 ---
 
 **=> 자세한건 slid파일(워드파일) 정리본 보기.**
@@ -23,11 +25,13 @@ sidebar:
 
 ## 5. 번외(script)
 
+```html
 <script>
 alert("미등록 ~"); => 팝업창 띄움
 location.href="login.html"; => 다른 페이지로 이동.
 history.back() 의 장점은 예전 화면 그대로 돌아간다.(답변 내용같은거 초기화 안되는 장점)
 </script> => 자바 스크립트.
+```
 => script에서 쓰는 메소드들
 
 ```python
