@@ -1,7 +1,7 @@
 ---
 title:  "Visual_Studio 정리(+Debug)"
 categories : Visual_Studio
-tag : [Visual_Studio, Debug, 디버그]
+tag : [Visual_Studio, Debug, 디버그, ERROR, 에러]
 toc: true
 toc_sticky: true
 author_profile: false
@@ -41,3 +41,13 @@ sidebar:
 * **F7** : 디버그 종료
 
 **Ctrl + F5 : 디버그 하지않고 바로 실행**
+
+
+
+## 에러
+
+#### 다음번에 또 실수 안하기 위해 기록.
+
+**VS 들어가서 파일을 오픈할때 폴더로 열면 코드가 정상적으로 실행이 안되며 에러가 발생한다.**
+
+* 따라서 확장자가 프로젝트인 파일로 직접 열거나 VS에서 파일 오픈할때 폴더가 아닌 프로젝트로 열기를 통해서 확장자가 프로젝트인 파일을 열어서 반드시 접근해야한다.
