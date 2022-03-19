@@ -11,7 +11,6 @@ sidebar:
 # Kotlin 기능 정리 (프로젝트에서 이용한)
 
 ### onCreate와 onCreateView와 onViewCreated 구별
-
 **onCreate**부분은 Fragment가 생성될때 호출되는 부분이고, **onCreateView**는 onCreate 이후에 화면을 구성할때 호출하는 부분이고, **onViewCreated**는 onCreateView에서 inflater를 이용한 view를 불러와서 return 하여서 onViewCreated 안에서 **view?**.findViewById~~ 해서 사용하는것으로 구성되어 있다.
 
 #### 바인딩 ( onViewCreated내부) - 지역
