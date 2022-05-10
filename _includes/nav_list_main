@@ -121,6 +121,14 @@
                     {% endif %}
                 {% endfor %}
             </ul>
+        <span class="nav__sub-title">JavaScript</span>
+            <ul>
+                {% for category in site.categories %}
+                    {% if category[0] == "Modern_JavaScript_Deep_Dive" %}
+                        <li><a href="/categories/jsdd" class="">모던 자바스크립트 Deep Dive ({{category[1].size}})</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
 
       </li>
   </ul>
