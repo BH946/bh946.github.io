@@ -129,6 +129,17 @@
                     {% endif %}
                 {% endfor %}
             </ul>
+        <span class="nav__sub-title">Python</span>
+            <ul>
+                {% for category in site.categories %}
+                    {% if category[0] == "Basic_Concept_PY" %}
+                        <li><a href="/categories/bc_py" class="">Basic_Concept(기초개념) ({{category[1].size}})</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+
+
+
 
       </li>
   </ul>
