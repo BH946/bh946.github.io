@@ -137,7 +137,21 @@
                     {% endif %}
                 {% endfor %}
             </ul>
-
+            <ul>
+                {% for category in site.categories %}
+                    {% if category[0] == "Data_Process_PY" %}
+                        <li><a href="/categories/dp_py" class="">Data_Process(기초개념) ({{category[1].size}})</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+            <ul>
+                {% for category in site.categories %}
+                    {% if category[0] == "File_IO_PY" %}
+                        <li><a href="/categories/io_py" class="">File_IO(파일입출력) ({{category[1].size}})</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        
 
 
 

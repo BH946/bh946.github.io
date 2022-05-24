@@ -1,8 +1,18 @@
-# csv, xlsx등 파일 입출력(관리)
+---
+title:  "[Python]File_IO(xlsx,csv 등)"
+categories : File_IO_PY
+tag : [파이썬, os, workbook, pandas]
+toc: true
+toc_sticky: true
+author_profile: false
+sidebar:
+   nav: "docs"
+---
+
+## csv, xlsx등 파일 입출력(관리)
 
 
-
-## 1. OS
+### 1. OS
 
 #### OS 모듈 준비물
 
@@ -10,7 +20,7 @@
 
 **기본 import**
 
-```
+```python
 import os
 ```
 
@@ -55,19 +65,19 @@ import os
 
 **파일 경로의 원하는 파일들 리스트로 반환**
 
-```
+```python
 file_list = os.listdir(path_dir) # 해당 경로 파일들 이름 리스트로 반환
 ```
 
 * endswith는 기본 내장함수(str의)
 
-  ```
+  ```python
   [file for file in file_list if file.endswith('.csv')] # file_list의 경로의 '.csv'확장자 파일들 리스트로 반환
   ```
 
 **경로존재 확인 및 폴더 추가**
 
-```
+```python
 os.mkdir('경로 이름') # 폴더추가 메소드
 os.path.exists('경로 이름') # 존재 확인
 if not os.path.exists('경로 이름'): # 경로 없다면 그 경로(폴더)를 만드는 구조이다.
@@ -76,7 +86,7 @@ if not os.path.exists('경로 이름'): # 경로 없다면 그 경로(폴더)를
 
 **파일 삭제**
 
-```
+```python
 os.remove(r"C:\Users\..경로...\product_jinnyhands.xlsx") # 삭제
 ```
 
@@ -84,7 +94,7 @@ os.remove(r"C:\Users\..경로...\product_jinnyhands.xlsx") # 삭제
 
 * 원하는 경로에 '.csv'확장자 파일 발견 할때까지 무한 반복.
 
-  ```
+  ```python
   file_list_csv = []
   while(len(file_list_csv) == 0): # 이건 반드시 다운로드폴더에 csv파일 없다는 가정.
       path_dir = 'C:\\Users\\KoBongHun\\Downloads'
@@ -94,7 +104,7 @@ os.remove(r"C:\Users\..경로...\product_jinnyhands.xlsx") # 삭제
 
 * 보통 파일 삭제 방법.
 
-  ```
+  ```python
   try:
      os.remove(r"C:\Users\..경로...\product_jinnyhands.xlsx") # 삭제
   except FileNotFoundError:
@@ -106,7 +116,7 @@ os.remove(r"C:\Users\..경로...\product_jinnyhands.xlsx") # 삭제
 
 
 
-## 2. Workbook(엑셀.Xlsx을 주로)
+### 2. Workbook(엑셀.Xlsx을 주로)
 
 
 
@@ -114,7 +124,7 @@ os.remove(r"C:\Users\..경로...\product_jinnyhands.xlsx") # 삭제
 
 **기본 import**
 
-```
+```python
 from openpyxl import Workbook # 데이터 쓰기에 사용
 from openpyxl import load_workbook # 데이터 읽기에 사용
 ```
@@ -125,7 +135,7 @@ from openpyxl import load_workbook # 데이터 읽기에 사용
 
 **데이터 쓰기(write)**
 
-```
+```python
 # 엑셀파일 생성(쓰기)
 wb = Workbook()
 # 이름이 있는 시트를 생성
@@ -145,7 +155,7 @@ wb.close()
 
 **데이터 읽기(read)**
 
-```
+```python
 # data_only=True로 해줘야 수식이 아닌 값으로 받아옴. (엑셀에 함수나오는 그거 얘기임)
 wb = load_workbook("product_jinnyhands.xlsx", data_only=True)
 # 시트 이름으로 불러오기 
@@ -187,7 +197,7 @@ wb.close()
 
 * 최대 행 구하기
 
-  ```
+  ```python
   ws.max_row # 최대행 구함.
   for i in range(1, ws.max_row+1): # 이런식으로 응용. (1행 부터 마지막행 접근 i)
   ```
@@ -196,7 +206,7 @@ wb.close()
 
 
 
-## 3. CSV
+### 3. CSV
 
 
 
@@ -204,7 +214,7 @@ wb.close()
 
 **기본 import**
 
-```
+```python
 import csv
 ```
 
@@ -220,7 +230,7 @@ import csv
 
   * 아래 예시는 csv파일 읽어서 xlsx로 저장,,!(응용한것)
 
-  ```
+  ```python
   # Workbook은 저장위해 그냥 예시로 사용하겠다.
   wb = Workbook()
   ws = wb.active
@@ -239,7 +249,7 @@ import csv
 
   * writer = csv.writer(d) : 기본적으로 객체 생성방식
 
-  ```
+  ```python
   with open('nothing_jinnyhands.csv', 'a', newline='') as d:
       writer = csv.writer(d)
       writer.writerow(nothingList[i]) # 데이터또한 배열로 감싸둔 상태꺼 사용(2중배열)
@@ -249,7 +259,7 @@ import csv
 
   * newline=''을 통해서 데이터 저장시 '한줄' 자동으로 넘기는데 그부분을 제거. '\n'제거 느낌이죠.
 
-    ```
+    ```python
     ########## 출력형식
     # 1. newline='' 안했을시
     데이터1
@@ -262,7 +272,7 @@ import csv
 
   * write방식 (writerow, writerows)
 
-    ```
+    ```python
     # writerow (주로 사용) : 한줄(한행)에 데이터 출력.
     writer.writerow(dataList)
     # writerows : 한행출력 후 다음행에 출력,, 반복해서 데이터 출력.
@@ -271,7 +281,7 @@ import csv
 
   * 데이터 저장 방식(배열 추천) => 2번 4번 형식 주로 사용중!
 
-    ```
+    ```python
     dataList = ['1234', 'aaadsf']
     datasList = [['1234'], ['aaadsf']]
     string = 'asdf'
@@ -286,7 +296,7 @@ import csv
 
 * **새로보는 함수** : strip() : 불필요한 문자 삭제
 
-```
+```python
 import csv
 import requests
 from bs4 import BeautifulSoup
@@ -321,19 +331,19 @@ for page in range(1,5):
 
 
 
-## 4. Pandas(판다스) - xlsx(엑셀), csv 둘다 활용
+### 4. Pandas(판다스) - xlsx(엑셀), csv 둘다 활용
 
 * 다양한 데이터 형식(주로 데이터프레임)
 
 #### pandas 준비물
 
-```
+```python
 pip install pandas
 ```
 
 **기본 import**
 
-```
+```python
 import pandas as pd # pandas의 경우 보통 pd로 이름변경해서 사용하는것이 관례임.
 ```
 
@@ -345,14 +355,14 @@ import pandas as pd # pandas의 경우 보통 pd로 이름변경해서 사용하
 
 * 상위, 하위 호출(**head, tail**)
 
-  ```
+  ```python
   print(df.head(10)) # 명령어를 호출하여 상위 10개의 데이터를 불러옵니다.
   print(df.tail(10)) # 하위 출력
   ```
 
 * 차원(486 rows × 29 column), 통계(**shape, describe**)
 
-  ```
+  ```python
   # 2차원 행렬로 구성된 데이터 프레임의 크기 출력 ( number_of_rows, number_of_columns )
   print(f"차원 수 : {df.shape}") # 행 x 열
   print(f"행의 수 : {df.shape[0]}") # 행
@@ -362,14 +372,14 @@ import pandas as pd # pandas의 경우 보통 pd로 이름변경해서 사용하
 
 * df에 원하는 필드와 원하는 레코드만 df_sub로 저장
 
-  ```
+  ```python
   df_sub = df[['역번호','역명','구분','08시-09시']]
   df_sub = df_sub[30000:40000]
   ```
 
 * '구분'에 따른 평균,최대,최소 구하기(= '구분'에 그룹화 후 평균,최대,최소)
 
-  ```
+  ```python
   print(df_sub.groupby(['구분'],as_index=True).mean()) # mean() 평균
   # print(df_sub.groupby(['구분'],as_index=True).min()) # min() 최소
   # print(df_sub.groupby(['구분'],as_index=True).max()) # max() 최대
@@ -377,7 +387,7 @@ import pandas as pd # pandas의 경우 보통 pd로 이름변경해서 사용하
 
 * 특정 컬럼값을 만족하는 데이터프레임을 출력하기(**loc, iloc**)
 
-  ```
+  ```python
   df.loc[df['column_name'] == some_value]
   # ex) 하단역(102)에 대한 승하차정보만 갖게 필터링
   df_hadan = df.loc[df['역번호'] == 102]
@@ -392,27 +402,27 @@ import pandas as pd # pandas의 경우 보통 pd로 이름변경해서 사용하
 
 * 행, 열 교환(**Transpose** 메소드)
 
-  ```
+  ```python
    df.T
   ```
 
 
 * 열 이름 바꾸기(**rename**)
 
-  ```
+  ```python
   usa_airports = ~~.loc[:,[1,4,6,7]] # df로 구성된 usa_airports
   usa_airports.rename(columns={1: 'name', 4: 'id', 6: 'latitude', 7: 'longitude'}, inplace=True)
   ```
   
 * **리스트로 변환**
 
-  ```
+  ```python
   listA = dfA.values.tolist() # 데이터프레임의 값들을 tolist()한다.
   ```
 
 * **해당 데이터에 원하는 값이 있는지 찾기**
 
-  ```
+  ```python
   src = usa_airports[usa_airports.name.str.contains('San Francisco International Airport')]
   # 더 나아가서 공항 이름 찾은 행 데이터 src를 공항코드로 접근하기
   src = src.iloc[:,1].values[0] # 공항코드 값으로 변경
@@ -424,13 +434,13 @@ import pandas as pd # pandas의 경우 보통 pd로 이름변경해서 사용하
 
 * **read_csv()**
 
-  ```
+  ```python
   md = pd.read_csv('부산교통공사_시간대별 승하차인원_20210801.csv', encoding='cp949')
   ```
 
   * 속성들 : header, encoding, low_memory... 등
 
-    ```
+    ```python
     header=None으로 속성을 줄 수 있다.
     encoding='cp949'
     low_memory=False
@@ -439,7 +449,7 @@ import pandas as pd # pandas의 경우 보통 pd로 이름변경해서 사용하
 * 우선 ExcelWriter메소드 사용을 위해 xlsx파트에서 import 따라하기.
 * Workbook + Pandas인 응용이라 생각하면 됨.
 
-```
+```python
 # encoding은 항상 고려해줘야함. (한글이 깨질 수 있기 때문)
 md = pd.read_csv('부산교통공사_시간대별 승하차인원_20210801.csv', encoding='cp949')
 writer = pd.ExcelWriter('product_jinnyhands.xlsx') # 이때 엑셀 만들어짐.
@@ -456,7 +466,7 @@ writer.save() # 엑셀 데이터 저장
 
 * 두가지 방법 이상이 기대될수 있다. 1) pd.concat을 사용하여 데이터프레임을 유지하거나, 2) 각 데이터에 대해 list 형태로 변환한 뒤에 계산하는 방법
 
-```
+```python
 # pd.concat 사용
 
 union_commute = pd.concat([P, S], ignore_index = True) # pd.concat을 이용해 P, S를 합할수 있다. ignore_index를 통해 행 인덱스 번호도 재배열!
@@ -467,7 +477,7 @@ union_commute = union_commute.drop_duplicates() # drop_duplicates메소드를 �
 
 * pd.concat은 outer로 join이 기본값으로 되어있으므로 합집합이 나온다.(outer:합집합, inner:교집합) 따라서 join을 inner로 바꿔주거나, merge함수를 사용해주면 된다.(merge의 기본값은 inner)
 
-```
+```python
 # pd.merge 사용
 
 intersection_commute = pd.merge(P, S)
@@ -477,7 +487,7 @@ intersection_commute = pd.merge(P, S)
 
 * isin메소드 이용
 
-```
+```python
 P_only = P[P.index.isin(S.index) == False]
 S_only = S[S.index.isin(P.index) == False]
 ```
@@ -486,23 +496,23 @@ S_only = S[S.index.isin(P.index) == False]
 
 
 
-# Workbook() 이용한 엑셀파일 자세히 설명,,
+## Workbook() 이용한 엑셀파일 자세히 설명,,
 
 
 
-## 1. create_file
+### 1. create_file
 
 
 
 #### 준비물
 
-```
+```python
 from openpyxl import Workbook
 ```
 
 #### 사용법
 
-```
+```python
 wb = Workbook() # 새 워크북 생성
 ws = wb.active # 현재 활성화된 sheet 가져옴
 ws.title = "NadoSheet" # sheet 의 이름을 변경
@@ -516,7 +526,7 @@ file.write("hello" + "\n") # 이런식으로도 엑셀,csv 저장가능! ! !
 
 
 
-## 2. sheet(시트)
+### 2. sheet(시트)
 
 
 
@@ -524,7 +534,7 @@ file.write("hello" + "\n") # 이런식으로도 엑셀,csv 저장가능! ! !
 
 * create_sheet() : 생성
 
-  ```
+  ```python
   ws = wb.create_sheet() # 새로운 sheet 기본 이름으로 생성
   ws1 = wb.create_sheet("YourSheet") # 주어진 이름으로 sheet 생성
   ws2 = wb.create_sheet("NewSheet", 2) # 2번째 index에 sheet 생성
@@ -532,7 +542,7 @@ file.write("hello" + "\n") # 이런식으로도 엑셀,csv 저장가능! ! !
 
 * copy_worksheet() : 복사
 
-  ```
+  ```python
   # sheet 복사
   new_ws["A1"] = "Test" # 임의로 [A1]셀에 Test기입
   target = wb.copy_worksheet(new_ws)
@@ -543,37 +553,37 @@ file.write("hello" + "\n") # 이런식으로도 엑셀,csv 저장가능! ! !
 
 * .title : 제목변경
 
-  ```
+  ```python
   ws.title = "MySheet" # sheet 이름 변경
   ```
 
 * sheet_properties.tabColor : 색상변경
 
-  ```
+  ```python
   ws.sheet_properties.tabColor = "ff66ff" # RGB 형태로 값을 넣어주면 탭 색상 변경
   ```
 
 * .sheetnames : 이름 확인
 
-  ```
+  ```python
   print(wb.sheetnames) # 모든 sheet 이름 확인
   ```
 
 **sheet 접근(Dict형태)**
 
-```
+```python
 new_ws = wb["NewSheet"] # Dict 형태로 sheet 에 접근
 ```
 
 
 
-## 3. cell(셀)
+### 3. cell(셀)
 
 
 
 **셀에 값 입력**
 
-```
+```python
 # A1 셀에 1 이라는 값을 입력(전부동일)
 ws["A1"] = 1
 ws["A1"].value = 1
@@ -583,7 +593,7 @@ ws.cell(1,1,1) # ws.cell(column=1, row=1, value=1)
 
 **셀 정보, 값 출력**
 
-```
+```python
 ws["A1"] # A1 셀의 정보를 출력
 ws["A1"].value # A1 셀의 '값'을 출력, 값이 없을 땐 'None' 을 출력
 ws.cell(1,1) # 정보출력(동일)
@@ -592,19 +602,19 @@ ws.cell(1,1).value # 값 출력(동일)
 
 
 
-## 4. open_file(파일 load)
+### 4. open_file(파일 load)
 
 
 
 #### 준비물
 
-```
+```python
 from openpyxl import load_workbook
 ```
 
 #### 사용법
 
-```
+```python
 from openpyxl import load_workbook
 wb = load_workbook("sample.xlsx")
 ws = wb.active
@@ -624,13 +634,13 @@ for x in range(1, ws.max_row + 1):
 
 
 
-## 5. cell_range(셀 주소)
+### 5. cell_range(셀 주소)
 
 
 
 **1줄씩 데이터 넣기**
 
-```
+```python
 ws.append(["번호", "영어", "수학"]) # A, B, C열 순서로 적용
 for i in range(1, 11):
     ws.append([i, randint(0, 100), randint(0, 100)])
@@ -641,7 +651,7 @@ for i in range(1, 11):
 
 **다양한 데이터 가져오는 방식**
 
-```
+```python
 ws["B"] # B열 가져오기.
 ws["B:C"] # B,C열 가져오기.
 ws[1] # 1번째 행 가져오기.
@@ -671,9 +681,9 @@ for row in ws.iter_rows(min_row=2, max_row=11, min_col=2, max_col=3):
 
 
 
-## 6. search(검색)
+### 6. search(검색)
 
-```
+```python
 for row in ws.iter_rows(min_row=2):
     # 번호, 영어, 수학
     if int(row[1].value) > 80:
@@ -689,13 +699,13 @@ for row in ws.iter_rows(max_row=1):
 
 
 
-## 7. insert(추가)
+### 7. insert(추가)
 
 
 
 **행삽입, 열삽입**
 
-```
+```python
 ws.insert_rows(8) # 8번째 행추가.
 ws.insert_rows(8, 5) # 8번째 행기준 5행 추가
 
@@ -705,13 +715,13 @@ ws.insert_cols(2, 3) # 2번째 열기준 3열 추가
 
 
 
-## 8. delete(삭제)
+### 8. delete(삭제)
 
 
 
 **행삭제, 열삭제**
 
-```
+```python
 ws.delete_rows(8) # 8번째 행 데이터 삭제
 ws.delete_rows(8, 3) # 8번째 행부터 총 3행 삭제
 
@@ -721,31 +731,31 @@ ws.delete_cols(2, 2) # 2번째 열부터 총 2열 삭제
 
 
 
-## 9. move(이동)
+### 9. move(이동)
 
 
 
 **데이터 다른셀로 이동**
 
-```
+```python
 ws.move_range("B1:C11", rows=0, cols=1) # B1:C11이 0행 1열 간 것. (1열 옆으로 한칸 옮)
 ```
 
 
 
-## 10. chart(차트)
+### 10. chart(차트)
 
 
 
 #### 준비물
 
-```
+```python
 from openpyxl.chart import BarChart, Reference, LineChart
 ```
 
 #### 사용법
 
-```
+```python
 # B2:C11 까지의 데이터를 차트로 생성
 bar_value = Reference(ws, min_row=2, max_row=11, min_col=2, max_col=3)
 bar_chart = BarChart() # 차트 종류 설정 (Bar, Line, Pie, ..)
@@ -765,13 +775,13 @@ ws.add_chart(line_chart, "E1")
 
 
 
-## 11. cell_style(셀 스타일)
+### 11. cell_style(셀 스타일)
 
 
 
 #### 준비물
 
-```
+```python
 from openpyxl.styles import Font, Border, Side, PatternFill, Alignment
 ```
 
@@ -779,7 +789,7 @@ from openpyxl.styles import Font, Border, Side, PatternFill, Alignment
 
 **데이터 셋,,,**
 
-```
+```python
 a1 = ws["A1"] # 번호
 b1 = ws["B1"] # 영어
 c1 = ws["C1"] # 수학
@@ -789,7 +799,7 @@ c1 = ws["C1"] # 수학
 
 * column_dimensions[] : 행 or 열의 노비나 넢이 설정
 
-  ```
+  ```python
   # A 열의 너비를 5로 설정
   ws.column_dimensions["A"].width = 5
   # 1 행의 높이를 50으로 설정
@@ -798,7 +808,7 @@ c1 = ws["C1"] # 수학
 
 * font : 스타일 적용
 
-  ```
+  ```python
   a1.font = Font(color="FF0000", italic=True, bold=True) # 글자 색 빨강, 기울임, 진하게
   b1.font = Font(color="CC33FF", name="Arial", strike=True) # strike는 취소선
   c1.font = Font(color="0000FF", size=20, underline="single") # underline은 밑줄
@@ -806,7 +816,7 @@ c1 = ws["C1"] # 수학
 
 * border : 테두리 적용
 
-  ```
+  ```python
   thin_border = Border(left=Side(style="thin"), right=Side(style="thin"), top=Side(style="thin"), bottom=Side(style="thin"))
   a1.border = thin_border
   b1.border = thin_border
@@ -815,39 +825,39 @@ c1 = ws["C1"] # 수학
 
 * alignment : 정렬
 
-  ```
+  ```python
   # center, left, right, top, bottom
   a1.alignment = Alignment(horizontal="center", vertical="center") # 상하, 좌우
   ```
 
 * fill : 배경 설정
 
-  ```
+  ```python
   a1.fill = PatternFill(fgColor="00FF00", fill_type="solid") # 배경 설정
   ```
 
 * freeze_panes : 틀 고정
 
-  ```
+  ```python
   ws.freeze_panes = "B2" # B2 기준으로 틀 고정
   ```
 
 * merge : 병합하기
 
-  ```
+  ```python
   ws.merge_cells("B2:D2") # B2:D2 셀을 합침
   ws["B2"].value = "Merged Cell"
   ```
 
 * unmerge : 병합 해제하기
 
-  ```
+  ```python
   ws.unmerge_cells("B2:D2") # B2:D2 셀 병합을 해제함. => B2,C2,D2로 다시 나뉨.
   ```
 
 **예시**
 
-```
+```python
 for row in ws.rows:
     for cell in row:
         # 각 cell에 대해서 정렬
@@ -865,17 +875,17 @@ for row in ws.rows:
 
 
 
-## 12. formula(함수사용)
+### 12. formula(함수사용)
 
 * data_only=True 속성 : True로 지정해야 수식(함수형태)이 아닌 데이터를 가져옴.
 
-  ```
+  ```python
   wb = load_workbook("sam_formula.xlsx", data_only=True)
   ```
 
 **엑셀함수 사용하듯이 그대로 사용!!**
 
-```
+```python
 ws["A2"] = "=SUM(1, 2, 3)"
 ws["A3"] = "=AVERAGE(1, 2, 3)"
 
@@ -886,19 +896,19 @@ ws["A6"] = "=SUM(A4:A5)"
 
 
 
-## 13. image(이미지 삽입)
+### 13. image(이미지 삽입)
 
 * 만약 ImportError : You must install Pillow to ...이면 pip install Pillow 설치 할 것.
 
 #### 준비물
 
-```
+```python
 from openpyxl.drawing.image import Image
 ```
 
 #### 사용법
 
-```
+```python
 img = Image("img.png")
 
 # C3 위치에 이미지 삽입

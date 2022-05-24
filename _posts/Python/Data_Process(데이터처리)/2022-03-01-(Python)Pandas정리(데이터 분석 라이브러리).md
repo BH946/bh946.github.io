@@ -1,7 +1,7 @@
 ---
 layout: single
 title:  "[Python]Pandas정리(데이터 분석 라이브러리)"
-categories: test
+categories: Data_Process_PY
 tag: [python, pandas]
 toc: true
 toc_sticky: true

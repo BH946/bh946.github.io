@@ -1,8 +1,20 @@
-# 다양한 데이터 가공 방식
+---
+title:  "[Python]Data_Process(정규식,json,datetime 등)"
+categories : Data_Process_PY
+tag : [파이썬, pandas, re, json, datetime]
+toc: true
+toc_sticky: true
+author_profile: false
+sidebar:
+   nav: "docs"
+---
+
+
+## 다양한 데이터 가공 방식
 
 
 
-## 1. re(정규식) : 원하는 형태
+### 1. re(정규식) : 원하는 형태
 
 
 
@@ -10,7 +22,7 @@
 
 **기본 import**
 
-```
+```python
 import re
 ```
 
@@ -23,7 +35,7 @@ import re
   * ^ (^de) : 문자열의 시작 > desk, destiniation | fade X
   * $ (se$) : 문자열의 끝 > case, base | face X
 
-  ```
+  ```python
   # ca?e
   # care, cafe, case, cave ...
   # caae, cabe, cace, cade, ...
@@ -33,7 +45,7 @@ import re
 
 * m = p.match("비교할 문자열") \# match : 주어진 문자열의 처음부터 일치하는지 확인
 
-  ```
+  ```python
   m = p.match("careless")
   print(m)
   #### 출력화면
@@ -42,14 +54,14 @@ import re
 
 * m = p.search("비교할 문자열")  \# search : 주어진 문자열 중에 일치하는게 있는지 확인
 
-  ```
+  ```python
   m = p.search("careless")
   # 출력 동일
   ```
 
 * lst = p.findall("비교할 문자열") \# findall : 일치하는 모든 것을 리스트 형태로 반환
 
-  ```
+  ```python
   lst = p.findall("good care cafe")
   # 리스트로 출력 => ['care', 'cafe']
   ```
@@ -58,7 +70,7 @@ import re
 
 * 간단한 출력 함수 선언
 
-  ```
+  ```python
   def print_match(m):
       if m:
           print("m.group():", m.group()) # 일치하는 문자열 반환
@@ -72,7 +84,7 @@ import re
 
 * 출력
 
-  ```
+  ```python
   p = re.compile("ca.e") 
   m = p.match("careless")
   print_match(m)
@@ -91,7 +103,7 @@ import re
 
 
 
-## 2. datetime?
+### 2. datetime?
 
 - datetime이란 날짜 및 시간을 구하고 싶거나 날짜 및 시간 형식의 어떤 것을 만들고 싶을 때 사용하는 객체. 아래처럼 따로 모듈을 추가하여 사용함.
 
@@ -117,13 +129,13 @@ print(now)
 
 
 
-## 3. JSON
+### 3. JSON
 
 
 
 #### 기본 준비
 
-```
+```python
 import json
 # application/json 로 꼭 변경해야 합니다.
 print("Content-type:application/json;charset=utf-8\r\n")
@@ -137,7 +149,7 @@ print("Content-type:application/json;charset=utf-8\r\n")
 
 * 준비
 
-  ```
+  ```python
   ...
   notice = cur.fetchall() # 로 가져온 데이터를 (dict 형식으로 가져옴.)
   
@@ -153,7 +165,7 @@ print("Content-type:application/json;charset=utf-8\r\n")
 
   * 바로 위의 for문 내부
 
-    ```
+    ```python
     #### 바로 위의 for문 안에..
     # notice는 dict형식임.
     # for문으로 1개씩 접근해서 'key'값 입력해서 'value'값 가져올거임. (1개씩 데이터이름이 'i')
@@ -164,7 +176,7 @@ print("Content-type:application/json;charset=utf-8\r\n")
 
   * 전체 for문 내부 (elif page == 2: 와 elif page == 3: 는 생략)
 
-    ```
+    ```python
     json_Notice.append({page:json_Notice_Temp}) # page를 키값으로 가지고, 뒤에 데이터들 dict으로 저장
     json_Notice_Temp = [] # 다시 초기화 (다음 페이지를 위해)
     ```
@@ -183,7 +195,7 @@ print("Content-type:application/json;charset=utf-8\r\n")
 
 
 
-#### 공백 없애기
+### 공백 없애기
 
 ```python
 cal_Date = re.sub(r'\\s+', '', cal_Date)
@@ -194,13 +206,13 @@ print(cal_Date)
 
 
 
-#### 날짜의 형식을 변경해 가공하기
+### 날짜의 형식을 변경해 가공하기
 
 - 굳이 해당 날짜를 string → datetime → string 하는 이유:
 
   * table의 날짜를 보면 month 및 day가 한 자리인 경우 앞에 0 없이 적혀 있는데, 우리는 앞자리를 채워서 모두 같은 자리가 되도록 해 줄 것이기 때문. (즉, 2 => 02 로!!)
 
-    ```
+    ```python
     # string -> datetime 변환
     cal_First_Datetime = datetime.strptime(cal_First_Text, '%Y-%m-%d')
     print(cal_First_Datetime)
@@ -215,7 +227,7 @@ print(cal_Date)
 
   * 월: 0 화: 1 수: 2 ... 일: 6 순서.
 
-  ```
+  ```python
   # 요일 반환
   cal_Week1 = cal_First_Datetime.weekday()
   
