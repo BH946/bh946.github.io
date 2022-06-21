@@ -1,35 +1,35 @@
 ---
-title:  "VS_Code 정리(+Debug)"
-categories : VS_Code
-tag : [VS_Code, Debug, 디버그]
-toc: true
-toc_sticky: true
-author_profile: false
-sidebar:
-  nav: "docs"
+title:  "VS_Code 정리(+Debug)"  
+categories : VS_Code  
+tag : [VS_Code, Debug, 디버그]  
+toc: true  
+toc_sticky: true  
+author_profile: false  
+sidebar:  
+ nav: "docs"    
 ---
 
 ## VScode 상식..
 
 **F1 or Ctrl+shift+P**키 누를시 검색가능. -> interpreter검색해서 Select Interpreter접근 -> 깔려있는 python 버전 확인 및 선택가능. 
 
-**Ctrl+Shift+'~'** 누를시 터미널창 사용
+**Ctrl+Shift+'~'** 누를시 터미널창 사용 :blush:
 
-
+<br>
 
 ## 나의 VSCODE 환경,,
 
-python이 3.10.1이 기본적으로 깔려있고, 아나콘다(가상환경)으로 3.9.7이 깔려있음
+`python`이 3.10.1이 기본적으로 깔려있고, 아나콘다(가상환경)으로 3.9.7이 깔려있음
 
 interpreter는 가상환경으로 python 3.9.7버전을 선택해놨고, cmd창에서 run(실행)시 자동으로 3.9.7실행
 
-그러나, 생성된 python터미널창은 python 3.10.1로 접근이 되어있음
+그러나, 생성된 python터미널창은 python 3.10.1로 접근이 되어있음  
 또 여기서 그러나, 실행은 아까 3.9.7버전으로 실행이 되어있음. 실행은 원하는버전으로 잘되는데 python터미널창은 계속 3.10.1로 접근이 되어서 3.9.7버전의 터미널을 이용하고 싶다면 cmd로 반드시 들어갈것.
 
 원인을 계속 모르겠음. 애초부터 아나콘다 사용하기 전엔 python 3.10.1버전말고 다른버전은 interpreter로 선택해도 실행하면 3.10.1버전만 실행이 되었었는데, 아나콘다의 가상환경에서는 다른버전 잘 적용됨.
 그래서 아나콘다 가상환경을 사용중. 왜그런지 원인을 알고싶음,,
 
-
+<br>
 
 ## 중요! 디버그(Debug)
 
@@ -87,20 +87,6 @@ interpreter는 가상환경으로 python 3.9.7버전을 선택해놨고, cmd창�
 #### 호출스택(CALL STACK)
 
 * **함수들이 어디서 불려서 호출되는지 등의 정보를 알 수 있다**
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
