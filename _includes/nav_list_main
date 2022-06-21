@@ -11,7 +11,7 @@
             📂 <span style="font-family:'Cafe24Oneprettynight';">전체 글 수</style> <span style="font-family:'Coming Soon';">{{sum}}</style> <span style="font-family:'Cafe24Oneprettynight';">개</style> 
       </li>
       <li>
-        <span class="nav__sub-title">Revise</span>
+        <span class="nav__sub-title">REVISE</span>
             <ul>
                 {% for category in site.categories %}
                     {% if category[0] == "Revise" %}
@@ -20,7 +20,7 @@
                 {% endfor %}
             </ul>
         <!--span 태그로 카테고리들을 크게 분류 -->
-        <span class="nav__sub-title">Coding Test</span>
+        <span class="nav__sub-title">CODING TEST</span>
             <!--ul 태그로 같은 카테고리들 모아둔 페이지들 나열-->
             <ul>
                 <!--Cpp 카테고리 글들을 모아둔 페이지인 /categories/algo 주소의 글로 링크 연결-->
@@ -38,7 +38,7 @@
                     {% endif %}
                 {% endfor %}
             </ul>
-        <span class="nav__sub-title">Assembly</span>
+        <span class="nav__sub-title">ASSEMBLY</span>
             <ul>
                 {% for category in site.categories %}
                     {% if category[0] == "Assembly" %}
@@ -68,7 +68,7 @@
                     {% endif %}
                 {% endfor %}
             </ul>
-        <span class="nav__sub-title">Code Editor</span>
+        <span class="nav__sub-title">CODE EDITOR</span>
             <ul>
                 {% for category in site.categories %}
                     {% if category[0] == "Colab" %}
@@ -90,7 +90,7 @@
                     {% endif %}
                 {% endfor %}
             </ul>
-        <span class="nav__sub-title">Java&Kotlin</span>
+        <span class="nav__sub-title">JAVA&KOTLIN</span>
             <ul>
                 {% for category in site.categories %}
                     {% if category[0] == "Java" %}
@@ -98,15 +98,7 @@
                     {% endif %}
                 {% endfor %}
             </ul>
-        <span class="nav__sub-title">Difference</span>
-            <ul>
-                {% for category in site.categories %}
-                    {% if category[0] == "DifferenceLang" %}
-                        <li><a href="/categories/dilang" class="">언어들 차이점 ({{category[1].size}})</a></li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
-        <span class="nav__sub-title">Web</span>
+        <span class="nav__sub-title">WEB</span>
             <ul>
                 {% for category in site.categories %}
                     {% if category[0] == "WebProgramming" %}
@@ -121,7 +113,7 @@
                     {% endif %}
                 {% endfor %}
             </ul>
-        <span class="nav__sub-title">JavaScript</span>
+        <span class="nav__sub-title">JAVASCRIPT</span>
             <ul>
                 {% for category in site.categories %}
                     {% if category[0] == "Modern_JavaScript_Deep_Dive" %}
@@ -129,7 +121,7 @@
                     {% endif %}
                 {% endfor %}
             </ul>
-        <span class="nav__sub-title">Python</span>
+        <span class="nav__sub-title">PYTHON</span>
             <ul>
                 {% for category in site.categories %}
                     {% if category[0] == "Basic_Concept_PY" %}
@@ -151,10 +143,30 @@
                     {% endif %}
                 {% endfor %}
             </ul>
+        <span class="nav__sub-title">MAJOR</span>
+            <ul>
+                {% for category in site.categories %}
+                    {% if category[0] == "Programming_Language" %}
+                        <li><a href="/categories/pllang" class="">Programming_Language ({{category[1].size}})</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+            <ul>
+                {% for category in site.categories %}
+                    {% if category[0] == "Database" %}
+                        <li><a href="/categories/db" class="">Database ({{category[1].size}})</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+            <ul>
+                {% for category in site.categories %}
+                    {% if category[0] == "Computer_Network" %}
+                        <li><a href="/categories/network" class="">Computer_Network ({{category[1].size}})</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+
         <span class="nav__sub-title">STYLE SHEET</span>
-
-
-
       </li>
   </ul>
 </nav>
