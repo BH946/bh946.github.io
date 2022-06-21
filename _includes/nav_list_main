@@ -68,7 +68,7 @@
                     {% endif %}
                 {% endfor %}
             </ul>
-        <span class="nav__sub-title">Code_Editor</span>
+        <span class="nav__sub-title">Code Editor</span>
             <ul>
                 {% for category in site.categories %}
                     {% if category[0] == "Colab" %}
@@ -106,7 +106,7 @@
                     {% endif %}
                 {% endfor %}
             </ul>
-        <span class="nav__sub-title">Web(웹)</span>
+        <span class="nav__sub-title">Web</span>
             <ul>
                 {% for category in site.categories %}
                     {% if category[0] == "WebProgramming" %}
@@ -151,7 +151,7 @@
                     {% endif %}
                 {% endfor %}
             </ul>
-        
+        <span class="nav__sub-title">STYLE SHEET</span>
 
 
 
