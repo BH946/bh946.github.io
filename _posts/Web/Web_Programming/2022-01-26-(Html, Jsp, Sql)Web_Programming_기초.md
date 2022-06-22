@@ -21,100 +21,111 @@ sidebar:
     DBMS는 MySQL같은 시스템 => S/W 에 포함.
     참고 : MongoDB는 NoSQL(SQL언어가 아닌 새로운 언어 사용)
 
-
+<br>
 
 ## 1. HTML
 
 ### 특징
 
 * html은 컴파일 과정이없으므로 문법오류 있어도 무시하고 실행
-
 * 웹 브라우저(=크롬같은 브라우저를 의미)가 하는일 : html소스를 웹 화면으로 표시
-
-* 통신방식 : get, post
+* 통신방식(HTTP규약) : get, post
 
   * get은 보안X => 작은정보, 공개가능 정보가 어울림
 
   * post는 보안O => get의반대로 생각. 큰 정보, 비공개 정보가 어울림 
 
-  
-
-### 문법정리(매우 간략히)
-
-```html
-get방식 :  url입력란에 '?'뒤는 속성값, '='뒤는 value값, '&'뒤는 그 다음 데이터가 온다
-name="mf" value="male"이러면 => mf = "male" 서버로 정보전달
-=> name = "값" 이런형식으로 서버에 넘어가는것
-form 안에서 input태그의 type속성값을 hidden으로 해서 전송
-
-소스에 빈공백은 실제 웹에 스페이스 한번(줄이 바뀌든 간에 빈공백은 스페이스 한번을 의미)
-&nbsp; // no-break space의 약자 (1칸 띄움)
-
-큰따음표는 필수는 아님!!, 기본 " " , ' ' 단, 공백에는 큰따음표나 작은따음표 해줘야함.
-대소문자 상관없다. (소문자 권장일뿐) 단, 서버쪽에서는 대/소 다르다.
-html5에서는 태그에 ''/'' 빼는걸로 합의!! 조건은 솔로인 녀석만!!(짝지있는 html ~ /html이런건 해주고!!)
-
-<h1~h6>은 한줄을 포함한 진하게 큰 글자 이다(보통 제목에 사용)
-<hr> 가로로 한줄 선 생성.
-<br>은 한줄 띄움, <p>는 문단마다 띄우는 단위 즉, <br><br>과 비슷
-<strong>글자 진하게, 예전문법은 <b>
-
-<a href="">에 https(프로토콜) 꼭 쓰지만, 웹페이지에서 들어갈 땐 안써도됨
-=> 경로없이 파일이름 적으면 같은폴더에서 찾는다.
-=> a태그의 속성인 target="_blank" 해주면 새창을 띄운다.
-
-<select 안에 size속성 입력시 select선택하지 않아도 size=4면 4개 다 보이게 하라. 이런것.
-=> size속성은 <input type="text" 여기서도 사용합니다. (길이)
-
-<input type속성에서 "text"는 글자그대로 텍스트의미, "password"는 ***로 표시, "radio"는 O표시다. => name속성값이 동일한 radio는 오직 1개만 선택가능.
-=> O표시만 있으므로 value가없음. 즉, value는 꼭 따로 넣어줘야함.
-
-from태그에 method속성의 값은 get or post이고, action속성은 보내는위치.
-form안에 input태그를 이용해 만든 submit 버튼을 누르면! action수행, reset은 화면 초기화
-=> form안에 꼭 작성해야함.
-
-table태그의 속성border에 0이 기본값(투명라인!!)
-table(표)의 행은? => <tr> 한줄!!
-<th>나 <td>는 똑같지만 차이점은 th : 진하게 가운데정렬, td : 평범 왼쪽정렬
-
-style속성은 CSS와 관련, 문법 : style = "~~:~~"    예전엔 <body bgcolor=" ">
-=> #FFFFFF이런형태도 가능.
-
-<div align="center"> div 태그는 화면 구역 나눔. align속성은 정렬.
-<span style="color:blue"><%=a%></span> 글자색 파랑으로 바꿔줌.
-=> 구역 나누는것 div, sapn 2개이고, span은 한 문장 색변환 등 이럴때 사용한다 생각.
-<fieldset>
-<legend>로그인</legend>
-	아이디 : ~~
-</fieldset>
-=> 그룹화 해주는 태그
-
-<em> 기울여 쓰기, <mark> 형광펜 효과, <sup> 위첨자(예:x^2), <sub> 아래첨자
-<img src="~.jpg" alt="사진을 못찾"> img태그는 그림불러오기, alt속성은 그림X 때 글이 대신
-=> a태그는 속성 href=""였음.
-속성 width="200" height="300" 경우 그림 크기 조절
-<font color="blue">~</font> 글꼴 태그의미
-
-<ul>~</ul> 글머리 기호(동그란점), <ol>~</ol> 번호매기기
-=> 내부에 <li> 하나하나 나열해서 LIST 형성(순서X와 순서O)
-
-<td rowspan="3"> 테이블 셀 병합(아래 줄(rows)셀 합치기)
-<td colspan="3"> 테이블 셀 병합(옆 칸(cols)셀 합치기)
-
-<input type="checkbox"~>는 멀티선택 가능하며, 배열로 전송됨.(당연히 name은 같게!)
-=> 받을때 : String[] foods = request.getParameterValues("foods");
-
-<textarea name="~" rows="4" cols="40"> ...하고픈 말..</textarea> 는 rows,cols는 네모크기이고 글자 많이 입력때 사용
-=> <input type="text" 구문과 같이 기억!
-
-선호도 : 1 <input type="range" min="1" max="5" value="3" > 5
-=> range 속성이다. (막대바같은)
-<input type="text" name="id" required> 에서 required가 있으면 비울수 없고 반드시 입력해야하는 항목
-```
 
 
 
+### 문법정리(간략히)
 
+* 큰따음표는 필수는 아님.  기본 " " , ' '  
+  단, 공백에는 큰따음표나 작은따음표 해줘야함.
+* 대소문자도 상관없다. (소문자 권장일뿐)  
+  단, 서버쪽에서는 대/소 다르다.
+* html5에서는 태그에 ''/'' 빼는걸로 합의!! 조건은 솔로인 태그만  
+  단, 짝지있는 html ~ /html이런건 "/" 해줄것
+
+#### 1. 기본
+
+* &nbsp 는 no-break space의 약자 (1칸 띄움)  
+  소스에 빈공백은 실제 웹에 스페이스 한번(줄이 바뀌든 간에 빈공백은 스페이스 한번을 의미)
+
+* <h1~h6>은 한줄을 포함한 진하게 큰 글자 이다(보통 제목에 사용)
+
+* \<hr> 가로로 한줄 선 생성.
+
+* \<br>은 한줄 띄움, \<p>는 문단마다 띄우는 단위 즉, \<br>\<br>과 비슷
+
+* \<strong>글자 진하게, 예전문법은 \<b>
+
+* \<a href="">는 프로토콜 꼭 작성(예 : https://www.,,,,)  
+  target 속성이 “\_blank”라면 새창을 띄운다. “_self”는 새창을 띄우지 않는다.(기본값)
+
+* \<select>는 name속성이 기본적으로 있으며, size속성이 input태그와 구분 해야한다.  
+  size속성을 통해 해당 값만큼 item을 보여준다. \<input>에서는 길이를 의미.
+
+* \<option>은 \<select>의 내부에 item을 적는 것이다. value속성을 가진다.
+
+* \<input>의 속성은 type="자료형" name="변수 명" value="입력창에 띄워진 디폴트값"  
+  type속성에 넣어줄 "text"는 글자그대로 텍스트의미  
+  "password"는 ***로 표시, "radio"는 O표시다.   
+  “submit”은 form태그에서 정보를 제출할 수 있다.  
+  “button”,“reset”등 다양한 버튼 태그들이 있음.  
+  “checkbox”는 radio와 다르게 name속성을 같게 해도 멀티 선택이 가능함.  따라서 배열로 전송이 됨.  
+  “hidden”타입은 데이터 값만 서버쪽으로 보낼 때 사용 => name속성값이 동일한 radio는 오직 1개만 선택가능.  
+  required속성이 있으면 반드시 값을 입력해야함.
+
+* \<table>은 표이다.   
+  border속성은 0이 기본값(투명라인)  
+  한줄은 <tr>이고 데이터는 <th>, <td>이다. th : 진하게 가운데정렬, td : 평범 왼쪽정렬  
+  rowspan, colspan속성을 <td>에서 사용시 테이블 셀 병합을 함.
+
+* \<form>은 서버로 데이터를 보낼 수 있음.  
+  method속성은 get, post형식으로 데이터 전송방식을 정함.  
+  action속성은 보내는 위치를 정할수 있음.  
+  form안에 input태그의 타입이 submit인 버튼을 누르면 action을 수행한다.
+
+#### 2. id, class 정리
+
+* ID 는 스타일을 지정할 때 한 가지만 지정해서 쓰는 이름이다.(표기방식은 #이름)  
+  => 하나의 문서에 고유한 Id 하나 밖에 쓸 수 없습니다.  
+* class 는 그룹으로 묶어서 스타일을 지정할 때 쓰는 이름이다.(표기방식은 .이름)  
+  => 하나의 문서에 여러번 쓸수 있다. 고유값이 아님.  
+* id와 class를 html에서 속성처럼 지정해서 사용하면 된다. 
+  => \<div class="menu"> 라던지 \<p id="btn">라던지
+
+#### 3. 구역
+
+* \<div>는 화면 구역 나눔.   
+  align="center"같은 경우 align속성은 center정렬.
+
+* \<span style="color:blue"><%=a%>\</span> 글자색 파랑으로 바꿔줌.  
+  => 구역 나누는것 div, sapn 2개이고, span은 한 문장 색 변환 등 이럴 때 사용.  
+  style속성은 CSS와 관련, 문법 : style = "~~:~~"    예전엔 \<body bgcolor=" ">
+
+* \<fieldset>는 그룹화 해주는 태그  
+  \<legend>와 함께 사용
+
+#### 4. 텍스트, 그림
+
+* \<em> 기울여 쓰기, \<mark> 형광펜 효과, \<sup> 위첨자(예:x^2), \<sub> 아래첨자
+
+* \<img src="~.jpg" alt="사진을 못찾"> img태그는 그림불러오기, alt속성은 그림X 때 글이 대신함.  
+  속성 width="200" height="300" 경우 그림 크기 조절
+
+* \<font color="blue">~\</font> 글꼴 태그의미
+
+* \<textarea>는 텍스트 입력 태그이다.(input태그의 text타입과는 차이가 있음)  
+  속성: cols, rows => text area의 크기
+
+* \<ul>~\</ul> 글머리 기호(동그란점), \<ol>~\</ol> 번호매기기  
+  => 내부에 \<li> 하나하나 나열해서 LIST 형성(순서X와 순서O)
+* 선호도 : 1 \<input type="range" min="1" max="5" value="3" > 5  
+  => range 속성이다. (막대바같은)
+
+<br>
 
 ## 2. JSP
 
@@ -299,5 +310,4 @@ stmt.executeUpdate(); => sql여기 없음!!
 5. pre.setString(1,pw);관련 전부 삭제.
 => 끝이지만, 3C형식 쓰니까 변수명도 pre=>cre 로 바꾸는걸 추천.
 ```
-
 
