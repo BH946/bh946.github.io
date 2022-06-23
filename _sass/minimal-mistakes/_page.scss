@@ -90,7 +90,16 @@ body {
 .page__content {
   h2 {
     padding-bottom: 0.5em;
-    border-bottom: 2px solid $border-color;
+    padding-left: 0.5em;
+    color : black;
+    background-color: $little-white;
+    border-left: 6px solid $little-dark-gray;
+    border-bottom: 2px solid $little-dark-gray;
+  }
+  h3 {
+    background-color: $little-blue;
+    color : black;
+    padding : 0.3em;
   }
 
 	h1, h2, h3, h4, h5, h6 {
