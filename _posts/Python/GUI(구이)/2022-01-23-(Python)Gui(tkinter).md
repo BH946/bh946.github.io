@@ -1,4 +1,15 @@
-# GUI(구이)
+---
+title:  "[Python]GUI(tkinter)"
+categories : GUI_PY
+tag : [파이썬, tkinter, gui]
+toc: true
+toc_sticky: true
+author_profile: false
+sidebar:
+   nav: "docs"
+---
+
+## GUI(구이)
 
 * tkinter 라이브러리 사용
 
@@ -8,7 +19,7 @@
 
   * pack()은 그냥 중앙에 차례로 위치했다면, grid(row, column)을 통해 위치를 지정 가능
 
-    ```
+    ```python
     # side 위치, fill 가득채우기, expand 전체 채우기
     pack(side="top") # 이런식으로 속성넣어서 위치 지정도 가능하다는 점.
     frame_burger.pack(side="left", fill="both", expand=True)
@@ -18,23 +29,19 @@
 
   * root.quit로 간단히 종료
 
-
+<br>
 
 ## 1. create_frame
 
-
-
-#### 사용법
-
 **기본 import**
 
-```
+```python
 from tkinter import *
 ```
 
 **객체 생성**
 
-```
+```python
 root = Tk() # 이것만 입력시 빈 창 실행
 ```
 
@@ -42,13 +49,13 @@ root = Tk() # 이것만 입력시 빈 창 실행
 
 * title : 제목변경
 
-  ```
+  ```python
   root.title("Nado GUI") # 제목 변경
   ```
 
 * geometry, resizable(boolean,boolean) : 크키 조절, 크키 변경 불가 설정
 
-  ```
+  ```python
   root.geometry("640x480") # 가로 * 세로 크키조절
   # root.geometry("640x480+300+100") # 가로 * 세로 + x + y
   
@@ -57,11 +64,11 @@ root = Tk() # 이것만 입력시 빈 창 실행
 
 * mainloop : 이벤트 메시지 루프로서 키보드나 마우스 혹은 화면 Redraw와 같은 다양한 이벤트로부터 오는 메시지를 받고 전달하는 역활을 한다.
 
-  ```
+  ```python
   root.mainloop() # 마지막에 작성해주자.
   ```
 
-
+<br>
 
 ## 2. button(버튼)
 
@@ -69,7 +76,7 @@ root = Tk() # 이것만 입력시 빈 창 실행
 
 **기본방식**
 
-```
+```python
 btn1 = Button(root, text="버튼1")
 btn1.pack() # 그냥 중앙에 적용해줌.
 ```
@@ -78,7 +85,7 @@ btn1.pack() # 그냥 중앙에 적용해줌.
 
 * padx, pady, width, height
 
-  ```
+  ```python
   btn2 = Button(root, padx=5, pady=10, text="버튼2")
   btn2.pack()
   
@@ -91,14 +98,14 @@ btn1.pack() # 그냥 중앙에 적용해줌.
 
 * fg, bg : 글자, 배경 색상변경
 
-  ```
+  ```python
   btn5 = Button(root, fg="red", bg="yellow", text="버튼5") # fg:글자색, bg:배경색
   btn5.pack()
   ```
 
 * PhotoImage : 이미지 적용
 
-  ```
+  ```python
   photo = PhotoImage(file="gui_All/gui_basic/img.png")
   btn6 = Button(root, image=photo)
   btn6.pack()
@@ -106,7 +113,7 @@ btn1.pack() # 그냥 중앙에 적용해줌.
 
 * command : 함수 적용
 
-  ```
+  ```python
   def btncmd(): # 버튼 클릭시 함수 실행을 위한 선언
       print("버튼이 클릭되었어요")
   
@@ -114,7 +121,7 @@ btn1.pack() # 그냥 중앙에 적용해줌.
   btn7.pack()
   ```
 
-  
+<br>
 
 ## 3. label(라벨)
 
@@ -122,7 +129,7 @@ btn1.pack() # 그냥 중앙에 적용해줌.
 
 **기본방식**
 
-```
+```python
 label1 = Label(root, text="안녕하세요")
 label1.pack()
 ```
@@ -131,7 +138,7 @@ label1.pack()
 
 * 이미지, 함수 적용
 
-  ```
+  ```python
   photo = PhotoImage(file="gui_All/gui_basic/img.png")
   label2 = Label(root, image=photo)
   label2.pack()
@@ -146,7 +153,7 @@ label1.pack()
   btn.pack()
   ```
 
-  
+<br>
 
 ## 4. text, entry
 
@@ -154,7 +161,7 @@ label1.pack()
 
 **기본방식**
 
-```
+```python
 # TEXT는 여러줄 입력시 쓰고
 txt = Text(root, width=30, height=5)
 txt.pack()
@@ -167,7 +174,7 @@ e.insert(0, "한 줄만 입력해요") # 현재는 값이 비어있으므로 END
 
 **함수 이용한 텍스트 내용 출력 예시**
 
-```
+```python
 def btncmd():
     # 내용 출력
     print(txt.get("1.0", END)) # 라인 1부터 0컬럼 부터 END까지 가져와라
@@ -180,16 +187,14 @@ def btncmd():
 btn = Button(root, text="클릭", command=btncmd)
 btn.pack()
 ```
-
-
-
+<br>
 ## 5. listbox
 
 
 
 **기본 구성**
 
-```
+```python
 # single과 extended의 차이는 한개 클릭 또는 여러개 클릭 가능
 # height를 0으로 하면 전부 다보여줌. 1이면? 한줄만 보여주는것.
 listbox = Listbox(root, selectmode="extended", height=0)
@@ -203,7 +208,7 @@ listbox.pack()
 
 **함수이용한 예시**
 
-```
+```python
 def btncmd():
     # 삭제
     # listbox.delete(END) # 맨 뒤에 항목을 삭제
@@ -221,9 +226,7 @@ def btncmd():
 btn = Button(root, text="클릭", command=btncmd)
 btn.pack()
 ```
-
-
-
+<br>
 ## 6. checkbox
 
 * IntVar(), StringVar() ,,, 존재
@@ -231,7 +234,7 @@ btn.pack()
 
 **예시**
 
-```
+```python
 chkvar = IntVar() # chkvar 에 int 형으로 값을 저장한다
 chkbox = Checkbutton(root, text="오늘 하루 보지 않기", variable=chkvar)
 # chkbox.select() # 자동 선택 처리
@@ -243,7 +246,7 @@ chkbox2 = Checkbutton(root, text="일주일동안 보지 않기", variable=chkva
 chkbox2.pack()
 ```
 
-```
+```python
 def btncmd():
     print(chkvar.get()) # 0 : 체크 해제, 1 : 체크 => int형으로 나옴.
     print(chkvar2.get())
@@ -251,9 +254,7 @@ def btncmd():
 btn = Button(root, text="클릭", command=btncmd)
 btn.pack()
 ```
-
-
-
+<br>
 ## 7. radiobutton
 
 * checkbox와 다르게 한개만 선택하는것이 radiobutton이다.
@@ -261,7 +262,7 @@ btn.pack()
 
 **예시**
 
-```
+```python
 Label(root, text="메뉴를 선택하세요").pack()
 
 burger_var = IntVar() # 여기에 int 형으로 값을 저장한다.
@@ -285,7 +286,7 @@ btn_drink1.pack()
 btn_drink2.pack()
 ```
 
-```
+```python
 def btncmd():
     print(burger_var.get()) # 햄버거 중 선택된 라디오 항목의 값(value)을 출력
     print(drink_var.get()) # 음료 중 선택된 값을 출력
@@ -293,18 +294,16 @@ def btncmd():
 btn = Button(root, text="클릭", command=btncmd)
 btn.pack()
 ```
-
-
-
+<br>
 ## 8. combobox
 
-```
+```python
 import tkinter.ttk as ttk # 추가로 필요
 ```
 
 **예시**
 
-```
+```python
 values = [str(i) + "일" for i in range(1, 32)] # 1 ~ 31 까지의 숫자
 combobox = ttk.Combobox(root, height=5, values=values)
 combobox.pack()
@@ -315,7 +314,7 @@ readonly_combobox.current(0) # 0번째 인덱스 값 선택
 readonly_combobox.pack()
 ```
 
-```
+```python
 def btncmd():
     print(combobox.get()) # 선택된 값 표시
     print(readonly_combobox.get())
@@ -323,9 +322,7 @@ def btncmd():
 btn = Button(root, text="선택", command=btncmd)
 btn.pack()
 ```
-
-
-
+<br>
 ## 9. progressbar
 
 
@@ -334,7 +331,7 @@ btn.pack()
 
 * mode를 indeterminate 사용 => 차오르는 바가 아니라 좌우로 왕복하는 초록바가 움직임.
 
-  ```
+  ```python
   progressbar = ttk.Progressbar(root, maximum=100, mode="indeterminate")
   progressbar.start(10) # 10 ms 마다 움직임
   progressbar.pack()
@@ -342,7 +339,7 @@ btn.pack()
 
 * mode를 determinate 사용 => 처음부터 끝까지 초록바가 차오르는 움직임.
 
-  ```
+  ```python
   progressbar = ttk.Progressbar(root, maximum=100, mode="determinate")
   progressbar.start(10) # 10 ms 마다 움직임
   progressbar.pack()
@@ -354,7 +351,7 @@ btn.pack()
 
 * **variable 속성을 이용**
 
-  ```
+  ```python
   p_var2 = DoubleVar() # 실수형태(92.4% 등등)
   progressbar2 = ttk.Progressbar(root, maximum=100, length=150, variable=p_var2)
   progressbar2.pack()
@@ -362,7 +359,7 @@ btn.pack()
 
 * **로딩을 보이기 위한 함수 작성**
 
-  ```
+  ```python
   def btncmd2():
       for i in range(1, 101): # 1 ~ 100
           time.sleep(0.01) # 0.01 초 대기
@@ -375,21 +372,21 @@ btn.pack()
   btn.pack()
   ```
 
-
+<br>
 
 ## 10. menu(우리가 아는 메뉴탭)
 
 
 
-#### 객체생성
+### 객체생성
 
-```
+```python
 menu = Menu(root)
 ```
 
 **File 메뉴**
 
-```
+```python
 menu_file = Menu(menu, tearoff=0)
 menu_file.add_command(label="New File", command=create_new_file) # 함수는 있다고 가정
 menu_file.add_command(label="New Window")
@@ -405,13 +402,13 @@ menu.add_cascade(label="File", menu=menu_file)
 
 **Edit 메뉴 (빈 값)**
 
-```
+```python
 menu.add_cascade(label="Edit")
 ```
 
 **Language 메뉴 추가 (radio 버튼을 통해서 택1)**
 
-```
+```python
 menu_lang = Menu(menu, tearoff=0)
 menu_lang.add_radiobutton(label="Python")
 menu_lang.add_radiobutton(label="Java")
@@ -421,29 +418,27 @@ menu.add_cascade(label="Language", menu=menu_lang)
 
 **View 메뉴**
 
-```
+```python
 menu_view = Menu(menu, tearoff=0)
 menu_view.add_checkbutton(label="Show Minimap")
 menu.add_cascade(label="View", menu=menu_view)
 ```
 
-#### 적용
+### 적용
 
-```
+```python
 root.config(menu=menu)
 ```
-
-
-
+<br>
 ## 11. messagebox(메세지박스)
 
-```
+```python
 import tkinter.messagebox as msgbox # 추가로 필요
 ```
 
 **예시**
 
-```
+```python
 # 기차 예매 시스템이라고 가정
 def info():
     msgbox.showinfo("알림", "정상적으로 예매 완료되었습니다.")
@@ -488,16 +483,14 @@ Button(root, command=retrycancel, text="재시도 취소").pack()
 Button(root, command=yesno, text="예 아니오").pack()
 Button(root, command=yesnocancel, text="예 아니오 취소").pack()
 ```
-
-
-
+<br>
 ## 12. frame(레이아웃같은 느낌이라 생각)
 
 
 
 **예시**
 
-```
+```python
 Label(root, text="메뉴를 선택해 주세요").pack(side="top")
 Button(root, text="주문하기").pack(side="bottom")
 
@@ -514,16 +507,14 @@ frame_drink.pack(side="right", fill="both", expand=True)
 Button(frame_drink, text="콜라").pack()
 Button(frame_drink, text="사이다").pack()
 ```
-
-
-
+<br>
 ## 13. scrollbar(스크롤바)
 
 * scrollbar를 속성으로 적용 해주는 것임. 직접 위치도 지정해야함.
 
 **예시**
 
-```
+```python
 # 위젯에 스크롤바 넣기위해서는 frame이 필요
 frame = Frame(root)
 frame.pack()
@@ -540,9 +531,7 @@ listbox.pack(side="left")
 
 scrollbar.config(command=listbox.yview)
 ```
-
-
-
+<br>
 ## 14. grid(그리드)
 
 * 그리드는 계산기 생각하면 간단
@@ -550,7 +539,7 @@ scrollbar.config(command=listbox.yview)
 
 **예시(계산기 형태)**
 
-```
+```python
 # 맨 윗줄
 btn_f16=Button(root, text="F16", width=5, height=2) 
 btn_f17=Button(root, text="F17", width=5, height=2)
@@ -614,13 +603,13 @@ btn_0.grid(row=5, column=0, columnspan=2, sticky=N+E+W+S, padx=3, pady=3) # colu
 btn_point.grid(row=5, column=2, sticky=N+E+W+S, padx=3, pady=3)
 ```
 
-
+<br>
 
 ## 15. 간단한 메모장 만들기
 
 * 참고로 파일 탭만 구현
 
-```
+```python
 import os
 from tkinter import *
 
@@ -667,15 +656,15 @@ root.config(menu=menu)
 root.mainloop()
 ```
 
+<br>
 
-
-# GUI를 활용한 간단한 프로젝트
+## GUI를 활용한 간단한 프로젝트
 
 * 따로 따로 단계별로 보는것이다.
 
-## 1. create_layout
+### 1. create_layout
 
-```
+```python
 import tkinter.ttk as ttk
 from tkinter import *
 
@@ -772,9 +761,9 @@ root.mainloop()
 
 
 
-## 2. basic_function
+### 2. basic_function
 
-```
+```python
 import tkinter.ttk as ttk
 import tkinter.messagebox as msgbox
 from tkinter import * # __all__
@@ -831,9 +820,9 @@ def start():
 
 
 
-## 3. merge_images
+### 3. merge_images
 
-```
+```python
 # 이미지 통합
 def merge_image():
     # print(list_file.get(0, END))
@@ -870,9 +859,9 @@ def merge_image():
 
 
 
-## 4. apply_options
+### 4. apply_options
 
-```
+```python
 # 이미지 통합
 def merge_image():
     # print("간격 : ", cmb_space.get())
@@ -957,8 +946,4 @@ def merge_image():
     except Exception as err: # 예외처리
         msgbox.showerror("에러", err)
 ```
-
-
-
-**풀 소스 보기 :**
 

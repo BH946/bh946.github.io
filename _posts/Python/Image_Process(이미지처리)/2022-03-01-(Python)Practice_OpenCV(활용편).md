@@ -1,7 +1,7 @@
 ---
 layout: single
 title:  "[Python]Practice_OpenCV(활용편)"
-categories: test
+categories: Image_Process_PY
 tag: [python, opencv예제]
 toc: true
 toc_sticky: true

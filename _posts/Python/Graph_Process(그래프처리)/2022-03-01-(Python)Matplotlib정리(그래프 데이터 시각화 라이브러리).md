@@ -1,7 +1,7 @@
 ---
 layout: single
 title:  "[Python]Matplotlib정리(그래프 데이터 시각화 라이브러리)"
-categories: test
+categories: Graph_Process_PY
 tag: [python, Matplotlib]
 toc: true
 toc_sticky: true

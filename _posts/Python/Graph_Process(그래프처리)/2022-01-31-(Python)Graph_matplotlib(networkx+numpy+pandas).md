@@ -1,4 +1,16 @@
-# matplotilib, networkx, numpy, Pandas 라이브러리
+---
+title:  "[Python]Graph_matplotlib(networkx+numpy+pandas)"
+categories : Graph_Process_PY
+tag : [파이썬, 그래프]
+toc: true
+toc_sticky: true
+author_profile: false
+sidebar:
+   nav: "docs"
+---
+
+
+## matplotilib, networkx, numpy, Pandas 라이브러리
 
 * **matplotilib라이브러리를 통해 그래프를 시각화해서 보여줄 수 있다.**
   * 좀더 진보된 라이브러리를 원한다면, seaborn 등을 참고하면 좋다.
@@ -16,9 +28,9 @@
 
 
 
-#### 준비물
+**준비물**
 
-```
+```python
 pip install -U matplotlib
 pip install networkx
 pip install numpy
@@ -27,20 +39,18 @@ pip install pandas
 
 **기본 import**
 
-```
+```python
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 import pandas as pd # pandas의 경우 보통 pd로 이름변경해서 사용하는것이 관례임
 ```
-
-
-
+<br>
 ## 1. 사용법(matplotlib)
 
 **데이터프레임의 시각화는 plot()**
 
-```
+```python
 df.plot(figsize=(12,12)) # 그림 size가 12x12 크기이다.
 plt.show() # 그래프 보여줌(코랩에선 fig까지만)
 
@@ -52,7 +62,7 @@ plt.show()
 
 **여러 개의 그래프**
 
-```
+```python
 fig = plt.figure(figsize=(14,10))
 ax1 = fig.add_subplot(2,2,1)
 ax2 = fig.add_subplot(2,2,2)
@@ -62,7 +72,7 @@ plt.show() # 그래프에 데이터는 없는 상태
 
 **3번째 그래프 차트에 x,y 값을 추가**
 
-```
+```python
 x = np.arange(50)
 y = np.random.randn(50)
 ax3.plot(x, y, 'r--')
@@ -72,7 +82,7 @@ plt.show()
 
 **그래프 스타일 속성**
 
-```
+```python
 # 1. df_hadan_transpose 를 막대(bar) 그래프 차트를 사용하여 그리기
 # 2. 그래프에 대한 x축 레이블(label)은 '시간대'로 y축 레이블은 승하차 인원, 제목(title)은 '시간대별 승하차 인원'으로 작성
 
@@ -85,31 +95,29 @@ ax.set_title("시간대별 승하차 인원") # 그래프의 제목
 
 **이미지 파일로 내보내기**
 
-```
+```python
 plt.savefig("bar_chart.png")
 ```
-
-
-
+<br>
 ## 2. 사용법(networkx)
 
 **그래프 선언**
 
 * 기본 그래프 선언(Graph())
 
-  ```
+  ```python
   g=nx.Graph()
   ```
 
 * 방향 그래프 선언(DiGraph())
 
-  ```
+  ```python
   G = nx.DiGraph()
   ```
 
 * 가중치 그래프 선언(DiGraph()+weight)
 
-  ```
+  ```python
   G = nx.DiGraph()
   G.add_nodes_from(['A','B','C','D','E'])
   G.add_edge('A','C',weight=8)
@@ -118,7 +126,7 @@ plt.savefig("bar_chart.png")
 
 * 그래프 선언 함수들
 
-  ```
+  ```python
   # 랜덤으로 생성되는 방향을 가진 그래프 (directed graph)
   random_digraph = nx.fast_gnp_random_graph(10, 0.3, seed=None, directed=True)
   
@@ -144,7 +152,7 @@ plt.savefig("bar_chart.png")
 
   * 노드, 에지 추가(**add_node**, **add_edge**, **add_path**)
 
-    ```
+    ```python
     g.add_node("A")
     g.add_edge("A","C")
     nx.add_path(g1, [1,2,3,4,5,6,7,8,9,10]) # 노드와 경로 한번에 지정
@@ -153,35 +161,35 @@ plt.savefig("bar_chart.png")
 
   * 리스트 등으로부터 노드, 에지 추가(**add_nodes_from**, **add_edges_from**)
 
-    ```
+    ```python
     g.add_nodes_from(["D","E","F"]) # 리스트 등으로부터 여러 노드를 추가합니다
     g.add_edges_from([("B","B"),("B","C"),("B","D"),("B","F")])
     ```
 
 * **노드, 에지 삭제**
 
-  ```
+  ```python
   g.remove_node("G")
   g.remove_edge("C","D")
   ```
 
 * **노드, 에지의 수를 확인**
 
-  ```
+  ```python
   g.number_of_nodes()
   g.remove_edge("C","D")
   ```
 
 * **노드, 에지를 확인**
 
-  ```
+  ```python
   g.nodes
   g.edges
   ```
 
 **그래프 화면 출력 여러가지 방법들**
 
-```
+```python
 nx.draw(g, with_labels = True) # networkx 라이브러리
 plt.savefig("G.png") # matplotlib 라이브러리
 plt.show()
@@ -189,7 +197,7 @@ plt.show()
 
 **차수(Degree)**
 
-```
+```python
 # in/out degree 출력
 G.degree
 
@@ -206,23 +214,19 @@ G.out_degree()
 
   그리고 A를 기준으로 화살표를 받는 B,D가 Predecessor node가 된다.
 
-```
+```python
 # A의 successor nodes
 list(G.successors('A'))
 
 # A의 predecessors nodes
 list(G.predecessors('A'))
 ```
-
-
-
-
-
+<br>
 ## 3. 사용법(numpy)
 
 **numpy 데이터 선언하기**
 
-```
+```python
 data1 = [1,2,3,4,5] # 리스트로 봄
 arr1 = np.array(data1) # 배열로 보여줌.
 arr4 = np.array([[1,2,3],[4,5,6],[7,8,9],[10,11,12]]) # 2차원 배열로 보여줌
@@ -234,7 +238,7 @@ np.arange(0,30) # 0~29 배열
 
 **numpy 데이터간 연산하기**
 
-```
+```python
 arr1 = np.array([[True,True],[False, False]])
 arr2 = np.array([[True,True],[True, False]])
 
@@ -245,7 +249,7 @@ np.logical_and(arr1, arr2).astype(int) # 2개 배열 비교해서 and연산 결�
 
 **numpy와 random을 이용한 조합**
 
-```
+```python
 monthly_days = np.arange(0,30) # 0~29 배열
 base_date = np.datetime64('2021-03-01') # datetime64라는 numpy라이브러리에 잇는 클래스 사용
 random_date = base_date + np.random.choice(monthly_days) # 랜덤으로 날짜 반환
@@ -254,7 +258,7 @@ random_date = base_date + np.random.choice(monthly_days) # 랜덤으로 날짜 �
 
 **관계에 대한 이해**
 
-```
+```python
 def gen_rand_boolean_matrix(N): 
   arr = np.full((N,N), False) # 배열로 NxN 생성해줌, 전부 False로.
   idx = np.random.randint(N, size=N)
@@ -270,25 +274,21 @@ print(R_and_S) # 배열의 관계 즉, 논리합을 알 수 있다.
 print(R) # 배열 초기화 한값으로 나타냄(T/F)
 print(R.astype(int)) # 배열 int형으로 나타냄(1/0)
 ```
-
-
-
-
-
+<br>
 ## 4. 사용법(pandas)
 
 **함수들**
 
 * 상위, 하위 호출(**head, tail**)
 
-  ```
+  ```python
   print(df.head(10)) # 명령어를 호출하여 상위 10개의 데이터를 불러옵니다.
   print(df.tail(10)) # 하위 출력
   ```
 
 * 차원(486 rows × 29 column), 통계(**shape, describe**)
 
-  ```
+  ```python
   # 2차원 행렬로 구성된 데이터 프레임의 크기 출력 ( number_of_rows, number_of_columns )
   print(f"차원 수 : {df.shape}") # 행 x 열
   print(f"행의 수 : {df.shape[0]}") # 행
@@ -298,14 +298,14 @@ print(R.astype(int)) # 배열 int형으로 나타냄(1/0)
 
 * df에 원하는 필드와 원하는 레코드만 df_sub로 저장
 
-  ```
+  ```python
   df_sub = df[['역번호','역명','구분','08시-09시']]
   df_sub = df_sub[30000:40000]
   ```
 
 * '구분'에 따른 평균,최대,최소 구하기(= '구분'에 그룹화 후 평균,최대,최소)
 
-  ```
+  ```python
   print(df_sub.groupby(['구분'],as_index=True).mean()) # mean() 평균
   # print(df_sub.groupby(['구분'],as_index=True).min()) # min() 최소
   # print(df_sub.groupby(['구분'],as_index=True).max()) # max() 최대
@@ -313,7 +313,7 @@ print(R.astype(int)) # 배열 int형으로 나타냄(1/0)
 
 * 특정 컬럼값을 만족하는 데이터프레임을 출력하기(**loc, iloc**)
 
-  ```
+  ```python
   df.loc[df['column_name'] == some_value]
   # ex) 하단역(102)에 대한 승하차정보만 갖게 필터링
   df_hadan = df.loc[df['역번호'] == 102]
@@ -328,26 +328,26 @@ print(R.astype(int)) # 배열 int형으로 나타냄(1/0)
 
 * 행, 열 교환(**Transpose** 메소드)
 
-  ```
+  ```python
    df.T
   ```
 
 * 열 이름 바꾸기(**rename**)
 
-  ```
+  ```python
   usa_airports = ~~.loc[:,[1,4,6,7]] # df로 구성된 usa_airports
   usa_airports.rename(columns={1: 'name', 4: 'id', 6: 'latitude', 7: 'longitude'}, inplace=True)
   ```
   
 * **리스트로 변환**
 
-  ```
+  ```python
   listA = dfA.values.tolist() # 데이터프레임의 값들을 tolist()한다.
   ```
 
 * **해당 데이터에 원하는 값이 있는지 찾기**
 
-  ```
+  ```python
   src = usa_airports[usa_airports.name.str.contains('San Francisco International Airport')]
   # 더 나아가서 공항 이름 찾은 행 데이터 src를 공항코드로 접근하기
   src = src.iloc[:,1].values[0] # 공항코드 값으로 변경
@@ -359,13 +359,13 @@ print(R.astype(int)) # 배열 int형으로 나타냄(1/0)
 
 * **read_csv()**
 
-  ```
+  ```python
   md = pd.read_csv('부산교통공사_시간대별 승하차인원_20210801.csv', encoding='cp949')
   ```
 
   * 속성들 : header, encoding, low_memory... 등
 
-    ```
+    ```python
     header=None으로 속성을 줄 수 있다.
     encoding='cp949'
     low_memory=False
@@ -374,7 +374,7 @@ print(R.astype(int)) # 배열 int형으로 나타냄(1/0)
 * 우선 ExcelWriter메소드 사용을 위해 xlsx파트에서 import 따라하기.
 * Workbook + Pandas인 응용이라 생각하면 됨.
 
-```
+```python
 # encoding은 항상 고려해줘야함. (한글이 깨질 수 있기 때문)
 md = pd.read_csv('부산교통공사_시간대별 승하차인원_20210801.csv', encoding='cp949')
 writer = pd.ExcelWriter('product_jinnyhands.xlsx') # 이때 엑셀 만들어짐.
@@ -382,16 +382,14 @@ writer = pd.ExcelWriter('product_jinnyhands.xlsx') # 이때 엑셀 만들어짐.
 md.to_excel(writer, index = False) # 엑셀에 데이터 삽입
 writer.save() # 엑셀 데이터 저장
 ```
-
-
-
-#### 집합 연산
+<br>
+### 집합 연산
 
 **UNION(합집합)**
 
 * 두가지 방법 이상이 기대될수 있다. 1) pd.concat을 사용하여 데이터프레임을 유지하거나, 2) 각 데이터에 대해 list 형태로 변환한 뒤에 계산하는 방법
 
-```
+```python
 # pd.concat 사용
 
 union_commute = pd.concat([P, S], ignore_index = True) # pd.concat을 이용해 P, S를 합할수 있다. ignore_index를 통해 행 인덱스 번호도 재배열!
@@ -402,7 +400,7 @@ union_commute = union_commute.drop_duplicates() # drop_duplicates메소드를 �
 
 * pd.concat은 outer로 join이 기본값으로 되어있으므로 합집합이 나온다.(outer:합집합, inner:교집합) 따라서 join을 inner로 바꿔주거나, merge함수를 사용해주면 된다.(merge의 기본값은 inner)
 
-```
+```python
 # pd.merge 사용
 
 intersection_commute = pd.merge(P, S)
@@ -412,20 +410,8 @@ intersection_commute = pd.merge(P, S)
 
 * isin메소드 이용
 
-```
+```python
 P_only = P[P.index.isin(S.index) == False]
 S_only = S[S.index.isin(P.index) == False]
 ```
-
-
-
-
-
-
-
-
-
-
-
-
 

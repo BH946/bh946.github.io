@@ -1,7 +1,7 @@
 ---
 layout: single
 title:  "[Python]Practice_pandas_and_matplotlib(활용편)"
-categories: test
+categories: Graph_Process_PY
 tag: [python, 예제, pandas, matplotlib]
 toc: true
 toc_sticky: true

@@ -1,7 +1,7 @@
 ---
 layout: single
 title:  "[Python]OpenCV정리(이미지&영상 처리 라이브러리)"
-categories: test
+categories: Image_Process_PY
 tag: [python, OpenCV]
 toc: true
 toc_sticky: true

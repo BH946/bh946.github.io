@@ -143,6 +143,27 @@
                     {% endif %}
                 {% endfor %}
             </ul>
+            <ul>
+                {% for category in site.categories %}
+                    {% if category[0] == "Graph_Process_PY" %}
+                        <li><a href="/categories/gp_py" class="">Graph_Process(그래프처리) ({{category[1].size}})</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+            <ul>
+                {% for category in site.categories %}
+                    {% if category[0] == "GUI_PY" %}
+                        <li><a href="/categories/gui_py" class="">GUI(구이) ({{category[1].size}})</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+            <ul>
+                {% for category in site.categories %}
+                    {% if category[0] == "Image_Process_PY" %}
+                        <li><a href="/categories/ip_py" class="">Image_Process(이미지처리) ({{category[1].size}})</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
         <span class="nav__sub-title">MAJOR</span>
             <ul>
                 {% for category in site.categories %}
