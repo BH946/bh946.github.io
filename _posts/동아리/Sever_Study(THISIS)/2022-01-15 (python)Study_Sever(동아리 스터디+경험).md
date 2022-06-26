@@ -1,14 +1,25 @@
-# 서버 스터디 정리(디스이즈 동아리)
-
-
+---
+title : ,,,
+---
 
 ## 0. 디스이즈 서버 방식
 
 **html파싱 -> JSON변환 -> 어플리케이션 출력**
 
+* **첫번째 방식**
+  ~~\_parser.py로 오래 저장해둘 데이터는? DB에 저장  
+  ~~\_json.py으로 DB에서 불러와 출력
+* **두번째 방식**  
+  ~~_parser.py로 매번 접근할 데이터는? DB에 저장말고 바로 json으로 출력
+* **(앱)클라이언트에서는?** print(json)한 데이터를 가져와 사용!
+
+
+
 **정보의 지속적인 최신화 및 정확성 확인 : cron을 이용**
 
+* **예** : **실시간 버스 배차**는 매번 접근해야 하므로 cron사용중
 
+<br>
 
 ## 1. 서버 프로그램 정리
 
@@ -20,7 +31,7 @@
 
 **2. Bitnami WAMP Stack**
 
-* ? 용도를 잘 모르겠음.
+* 아직 용도를 잘 모르겠음.
 
 **3. PuTTY**
 
@@ -31,13 +42,13 @@
 
 * VS-code 사용하겠음.
 
-
+<br>
 
 ## 2. 로컬과 서버 차이
 
 
 
-#### 1. 로컬환경
+### 1. 로컬환경
 
 **내 컴퓨터 안에서만 실행하는 것 == localhost**
 
@@ -45,7 +56,7 @@
 
 
 
-#### 2. 서버환경
+### 2. 서버환경
 
 **FileZilla or Putty 사용해서 서버 컴퓨터에 원격으로 접속**
 
@@ -57,13 +68,13 @@
   3. 755로 설정
   4. VS-code의 경우 파일소스 들어가서 반드시 'LF'로 설정(동아리에서 사용하는 환경때문)
 
-
+<br>
 
 ## 3. Python
 
 **반드시 들여쓰기 확인!! 주의**
 
-#### 1. Python 사용 이유
+### 1. Python 사용 이유
 
 - 간단한 문법
 - 최근 가장 각광받는 언어
@@ -71,7 +82,7 @@
 - 많은 사람이 사용하는 만큼 자료가 많음
 - 등
 
-#### 2. 다른 언어와 Python이 다른 점
+### 2. 다른 언어와 Python이 다른 점
 
 - ; 안씀
 - 들여쓰기로 블럭 구분
@@ -83,7 +94,7 @@
 - 특정 변수 자료형 체크 시 type() 함수 사용
 - 배열은 보통 list 형식으로 주로 사용. 즉, [] or list() 사용도 편함.
 
-#### 3. 모든 .py 파일 맨 위에 들어가야 하는 코드
+### 3. 모든 .py 파일 맨 위에 들어가야 하는 코드
 
 ```python
 #!/usr/bin/python3 : 파이썬 설치 경로
@@ -127,7 +138,7 @@ cgitb.enable()
 # cgitb.enable(display=0, logdir='파일경로')는 파일에 출력함
 ```
 
-#### 4. 기초문법
+### 4. 기초문법
 
 ```
 # dict말고는 많이 보던것이여서 dict만 추가
@@ -150,24 +161,26 @@ for key, value in temp_Dict_Already.items(): # Dict key, value 모두 조회
 	print("<br>", key, ":", value)
 ```
 
-
+<br>
 
 ##  4. GET과 POST
 
 
 
-#### 1. GET?
+### 1. GET?
 
 - 웹으로 요청을 전송할 때 url 끝에 ? 나 & 문자를 사용해 데이터를 전송.
 - 데이터가 눈에 보이기 때문에 조회를 하는 행위에서 보통 사용.
 
-#### 2. POST?
+
+
+### 2. POST?
 
 - GET과 달리 url로 데이터를 전송하지 않음.
 - 데이터가 눈에 보이지 않아 '비교적' 안전.
 - 무조건적으로 안전한 것은 아니기 때문에 민감한 데이터는 따로 암호화 할 필요가 있다.
 
-
+<br>
 
 ## 5. HTML → .py로 GET, POST하기   [form.py]
 
@@ -195,13 +208,13 @@ print("선호하는 과목: ", subject, "<br>")
 print("선호하는 전자기기: ", elec, "<br>")
 ```
 
-
+<br>
 
 ## 6. py에서 mysql 사용하기
 
 
 
-#### 1. py에서 mysql 사용하기 - 연동
+### 1. py에서 mysql 사용하기 - 연동
 
 ```python
 import pymysql
@@ -212,7 +225,7 @@ from get_state_proc import GET_STATE
 
 
 
-#### 2. py에서 mysql 사용하기 - INSERT, UPDATE, DELETE
+### 2. py에서 mysql 사용하기 - INSERT, UPDATE, DELETE
 
 ```python
 cur = db.cursor()
@@ -226,7 +239,7 @@ db.close() # db와 연결을 끊는다.
 
 
 
-#### 3. py에서 mysql 사용하기 - SELECT
+### 3. py에서 mysql 사용하기 - SELECT
 
 ```python
 cur = db.cursor(pymysql.cursors.DictCursor)
@@ -254,15 +267,15 @@ db.commit()
 db.close()
 ```
 
-
+<br>
 
 ## 7. 파싱하기(requests + beautifulsoup 모듈 사용!)
 
 
 
-#### 파싱 코드
+### 파싱 코드
 
-```
+```python
 try:
 	response = requests.get('~url~', timeout = 15)
 	# get 방식으로 웹서비스를 호출한다. 지정한 시간(15)를 초과하면
@@ -280,7 +293,7 @@ else:
 	# 아래 find메소드 이용한 원하는 부분 파싱은 생략.
 ```
 
-
+<br>
 
 ## 8. datetime?
 
@@ -306,13 +319,13 @@ print(now)
 - 형식은 %Y-%m-%d 말고도 많음! 대문자인지 소문자인지에 따라 또 다른 점이 있음. 궁금한 사람은 따로 찾아보기.
 - datetime → string 의 경우 **str 'f' time**, string → datetime의 경우 **str 'p' time**임에 유의하기.
 
-
+<br>
 
 ## 9. data들을 DB에 넣기 위해 가공하기 (중요!)
 
 * 다양한 방법들을 알고있지만, re모듈(정규식)이용과 datetime모듈 이용하는 부분 정리하겠다.
 
-#### 공백 없애기
+### 공백 없애기
 
 ```python
 cal_Date = re.sub(r'\\s+', '', cal_Date)
@@ -323,13 +336,13 @@ print(cal_Date)
 
 
 
-#### 날짜의 형식을 변경해 가공하기
+### 날짜의 형식을 변경해 가공하기
 
 - 굳이 해당 날짜를 string → datetime → string 하는 이유:
 
   * table의 날짜를 보면 month 및 day가 한 자리인 경우 앞에 0 없이 적혀 있는데, 우리는 앞자리를 채워서 모두 같은 자리가 되도록 해 줄 것이기 때문. (즉, 2 => 02 로!!)
 
-    ```
+    ```python
     # string -> datetime 변환
     cal_First_Datetime = datetime.strptime(cal_First_Text, '%Y-%m-%d')
     print(cal_First_Datetime)
@@ -344,7 +357,7 @@ print(cal_Date)
 
   * 월: 0 화: 1 수: 2 ... 일: 6 순서.
 
-  ```
+  ```python
   # 요일 반환
   cal_Week1 = cal_First_Datetime.weekday()
   
@@ -353,15 +366,16 @@ print(cal_Date)
   cal_First_Text += week[cal_Week1]
   ```
 
-  
+
+<br>
 
 ## 10. JSON
 
 
 
-#### 기본 준비
+### 기본 준비
 
-```
+```python
 import json
 # application/json 로 꼭 변경해야 합니다.
 print("Content-type:application/json;charset=utf-8\r\n")
@@ -369,13 +383,13 @@ print("Content-type:application/json;charset=utf-8\r\n")
 
 
 
-#### 사용법
+### 사용법
 
 **예시**
 
 * 준비
 
-  ```
+  ```python
   ...
   notice = cur.fetchall() # 로 가져온 데이터를 (dict 형식으로 가져옴.)
   
@@ -391,7 +405,7 @@ print("Content-type:application/json;charset=utf-8\r\n")
 
   * 바로 위의 for문 내부
 
-    ```
+    ```python
     #### 바로 위의 for문 안에..
     # notice는 dict형식임.
     # for문으로 1개씩 접근해서 'key'값 입력해서 'value'값 가져올거임. (1개씩 데이터이름이 'i')
@@ -402,27 +416,27 @@ print("Content-type:application/json;charset=utf-8\r\n")
 
   * 전체 for문 내부 (elif page == 2: 와 elif page == 3: 는 생략)
 
-    ```
+    ```python
     json_Notice.append({page:json_Notice_Temp}) # page를 키값으로 가지고, 뒤에 데이터들 dict으로 저장
     json_Notice_Temp = [] # 다시 초기화 (다음 페이지를 위해)
     ```
 
   * for문 벗어나서 (json.dumps는 코드 정렬해주는 함수)
 
-    ```
+    ```python
     json_Notice = json.dumps(json_Notice, indent=4, ensure_ascii=False) 
     # True로하면 아스키코드로 출력, indent는 들여쓰기
     print(json_Notice)
     ```
 
-
+<br>
 
 ## 11. 마지막 로그인 필요한 사이트 requests로 접속
 
 * F12에서 네트워크 부분에서 확인할 수 있으며, 로그인시 필요한 정보가 복잡한 경우도 있는데 우리 사이트의 경우 GET_STATE()함수로 따로 만들어 놈.
   * 네트워크 부분에 header, body(login) 부분 다 있음. 여기 내용을 requests세션에 추가.
 
-```
+```python
 # 로그인 정보
 url='https://student.donga.ac.kr/Login.aspx'
 viewstate,viewstategenerator,eventvalidation=GET_STATE(url)
@@ -454,8 +468,5 @@ else:
     url = 'https://student.donga.ac.kr/Univ/SUH/SSUH0011.aspx?m=6&rbtn=1'
     response = session.get(url)
 ```
-
-
-
 
 
