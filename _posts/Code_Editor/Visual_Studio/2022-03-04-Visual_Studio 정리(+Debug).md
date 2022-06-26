@@ -30,7 +30,7 @@ sidebar:
 
 ## 중요! 디버그(Debug)
 
-![image_visual_studio_debug](/images/2022-03-04-Visual_Studio 정리(+Debug)/image_visual_studio_debug.png)
+![image_visual_studio_debug](https://bh946.github.io/images/2022-03-04-Visual_Studio 정리(+Debug)/image_visual_studio_debug.png)
 
 ### 환경설정 : 위의 스크린샷처럼 구성할것(디버그 환경)
 
