@@ -1,6 +1,6 @@
 ---
 title:  "재업할것) Kotlin 기능 정리 (프로젝트에서 이용한)"
-categories: [Kotlin, Revise]
+categories: [Revise]
 toc: true
 toc_sticky: true
 author_profile: false
@@ -35,7 +35,7 @@ onCreateView 오버로딩해서 binding 적용필요
         binding = FragmentHomeBinding.inflate(inflater, container,false)
         return binding.root
     }
-    
+
 또는 Activity에서 하는것과 마찬가지로
 
     class ....

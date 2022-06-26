@@ -11,11 +11,18 @@
             📂 <span style="font-family:'Cafe24Oneprettynight';">전체 글 수</style> <span style="font-family:'Coming Soon';">{{sum}}</style> <span style="font-family:'Cafe24Oneprettynight';">개</style> 
       </li>
       <li>
-        <span class="nav__sub-title">REVISE</span>
+        <span class="nav__sub-title">REVISE/KNOWLEDGE</span>
             <ul>
                 {% for category in site.categories %}
                     {% if category[0] == "Revise" %}
                         <li><a href="/categories/revise" class="">수정전 ({{category[1].size}})</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+            <ul>
+                {% for category in site.categories %}
+                    {% if category[0] == "Knowledge" %}
+                        <li><a href="/categories/knowledge" class="">Knowledge(지식) ({{category[1].size}})</a></li>
                     {% endif %}
                 {% endfor %}
             </ul>
@@ -98,6 +105,13 @@
                     {% endif %}
                 {% endfor %}
             </ul>
+            <ul>
+                {% for category in site.categories %}
+                    {% if category[0] == "Kotlin" %}
+                        <li><a href="/categories/kotlin" class="">Kotlin(코틀린) ({{category[1].size}})</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
         <span class="nav__sub-title">WEB</span>
             <ul>
                 {% for category in site.categories %}
@@ -118,6 +132,13 @@
                 {% for category in site.categories %}
                     {% if category[0] == "Modern_JavaScript_Deep_Dive" %}
                         <li><a href="/categories/jsdd" class="">모던 자바스크립트 Deep Dive ({{category[1].size}})</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+            <ul>
+                {% for category in site.categories %}
+                    {% if category[0] == "React_JS" %}
+                        <li><a href="/categories/react_js" class="">React(리액트) ({{category[1].size}})</a></li>
                     {% endif %}
                 {% endfor %}
             </ul>
@@ -194,6 +215,22 @@
                     {% endif %}
                 {% endfor %}
             </ul>
+        <span class="nav__sub-title">APP</span>
+            <ul>
+                {% for category in site.categories %}
+                    {% if category[0] == "Cross_Flatform_App" %}
+                        <li><a href="/categories/cf_app" class="">크로스플랫폼 앱 ({{category[1].size}})</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+            <ul>
+                {% for category in site.categories %}
+                    {% if category[0] == "Native_App" %}
+                        <li><a href="/categories/nt_app" class="">네이티브 앱 ({{category[1].size}})</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+
       </li>
   </ul>
 </nav>
