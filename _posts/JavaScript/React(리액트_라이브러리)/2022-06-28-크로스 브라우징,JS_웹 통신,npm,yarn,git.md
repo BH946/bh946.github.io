@@ -1,6 +1,6 @@
 ---
 title:  "(React들어가기전)크로스 브라우징,JS_웹 통신,npm,yarn,git"
-categories : Revise
+categories : React_JS
 tag : [JavaScript, 리액트, React, http]
 toc: true
 toc_sticky: true
