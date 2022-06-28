@@ -1,13 +1,13 @@
 ---
 title:  "(React들어가기전)크로스 브라우징,JS_웹 통신,npm,yarn,git"
-categories : ??
+categories : Revise
 tag : [JavaScript, 리액트, React, http]
 toc: true
 toc_sticky: true
 author_profile: false
 sidebar:
   nav: "docs"
-typora-root-url: ..\..\..
+typora-root-url: ../../..
 ---
 
 ## 크로스 브라우징
@@ -59,3 +59,4 @@ typora-root-url: ..\..\..
 ![res](/images/2022-06-28-크로스 브라우징,JS_웹 통신,npm,yarn,git/res.png)
 
 ![image-20220628173121958](/images/2022-06-28-크로스 브라우징,JS_웹 통신,npm,yarn,git/image-20220628173121958.png)
+
