@@ -1,7 +1,7 @@
 ---
 title:  "[JSX]React & Node.JS(npm, yarn, npx, jsx)"
 categories : React_JS
-tag : [JavaScript, 리액트, React, npm, yarn, npx, jsx 문법]
+tag : [JavaScript, 리액트, React특징, npm, yarn, npx, jsx 문법, 컴포넌트]
 toc: true
 toc_sticky: true
 author_profile: false
@@ -12,7 +12,7 @@ typora-root-url: ../../..
 
 
 
-## Node.js 사용 매커니즘(npm,yarn)
+## Node.js 사용 매커니즘(npm)
 
 **사용 방식을 설명. 그리고 Node.js는 런타임 환경이다(Node.js 특징 게시글 참고)**
 
@@ -74,7 +74,7 @@ typora-root-url: ../../..
 
 <br>
 
-## yarn
+## Node.js 사용 매커니즘(yarn)
 
 **페이스북에서 발표한 비공식 패키지 매니저**
 
