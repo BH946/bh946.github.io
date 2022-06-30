@@ -1,5 +1,5 @@
 ---
-title:  "[React]React & Node.JS(npm, yarn, npx, jsx)"
+title:  "[JSX]React & Node.JS(npm, yarn, npx, jsx)"
 categories : React_JS
 tag : [JavaScript, 리액트, React, npm, yarn, npx, jsx 문법]
 toc: true
