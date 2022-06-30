@@ -52,11 +52,11 @@ typora-root-url: ../../..
 * **npm 프로젝트에 대해 설정하는 명세서 / 의존 모듈 저장 폴더**
 * package.json에 의존성 설정하고, node_modules에 모듈들 실제 저장되는 것
 
-![image-20220628194040629](C:\Users\KoBongHun\Desktop\BH946_github_blog\BH946.github.io\images\2022-06-28-(JS)React & Node란\image-20220628194040629.png)
+![image-20220628194040629](/images\2022-06-28-(JS)React & Node.js란\image-20220628194040629.png)
 
 ### 3. npm install, uninstall : 모듈 추가/제거
 
-![image-20220628194300068](C:\Users\KoBongHun\Desktop\BH946_github_blog\BH946.github.io\images\2022-06-28-(JS)React & Node란\image-20220628194300068.png)
+![image-20220628194300068](/images\2022-06-28-(JS)React & Node.js란\image-20220628194300068.png)
 
 ### 4. npm run, npm start : 실행
 
@@ -66,11 +66,11 @@ typora-root-url: ../../..
 * **npm run** : scripts의 커스텀 명령어 실행  
   * **npm run start** : **node index.js** 실행  
 
-![image-20220628194454503](C:\Users\KoBongHun\Desktop\BH946_github_blog\BH946.github.io\images\2022-06-28-(JS)React & Node란\image-20220628194454503.png)
+![image-20220628194454503](/images\2022-06-28-(JS)React & Node.js란\image-20220628194454503.png)
 
 * **예: (npm run) start, async, sync, robot 이런식으로 실행 명령어를 커스텀해서 활용**
 
-![image-20220630145611137](C:\Users\KoBongHun\Desktop\BH946_github_blog\BH946.github.io\images\2022-06-28-(JS)React & Node란\image-20220630145611137.png)
+![image-20220630145611137](/images\2022-06-28-(JS)React & Node.js란\image-20220630145611137.png)
 
 <br>
 
@@ -82,9 +82,9 @@ typora-root-url: ../../..
 
 [npm과 yarn 비교](https://dongmin-jang.medium.com/npm-vs-yarn-7b699c5d6034)
 
-![image-20220628194957977](C:\Users\KoBongHun\Desktop\BH946_github_blog\BH946.github.io\images\2022-06-28-(JS)React & Node란\image-20220628194957977.png)
+![image-20220628194957977](/images\2022-06-28-(JS)React & Node.js란\image-20220628194957977.png)
 
-![image-20220628195011378](C:\Users\KoBongHun\Desktop\BH946_github_blog\BH946.github.io\images\2022-06-28-(JS)React & Node란\image-20220628195011378.png)
+![image-20220628195011378](/images\2022-06-28-(JS)React & Node.js란\image-20220628195011378.png)
 
 <br>
 
@@ -109,7 +109,7 @@ typora-root-url: ../../..
 * **/public :** React와 관련없는 추가 정적 파일은 여기에 추가
 * **/src :** 개발 소스 코드 JS가 포함되는 폴더이다. 해당 파일의 변화를 감지하여 새로고침하며, 후에 빌드/배포될 때 내부 파일이 하나의 파일로 묶여(번들링) ['index.html']에 주입하게 된다.
 
-![image-20220630163936325](/images/2022-06-28-(JS)React & Node란/image-20220630163936325.png)
+![image-20220630163936325](/images/2022-06-28-(JS)React & Node.js란/image-20220630163936325.png)
 
 
 
