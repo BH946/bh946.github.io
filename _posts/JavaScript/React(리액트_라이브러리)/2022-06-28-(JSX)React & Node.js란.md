@@ -1,14 +1,15 @@
 ---
 title:  "[JSX]React & Node.JS(npm, yarn, npx, jsx)"
 categories : React_JS
-tag : [JavaScript, 리액트, React특징, npm, yarn, npx, jsx 문법, 컴포넌트, ..., Spread, const {}, const [], Destructuring]
+tag : [Javascript, 리액트, node.js, cra, virtual DOM, state, lifecycle, 컴포넌트, 조건부 렌더링, spread, Destructuring]
 toc: true
 toc_sticky: true
 author_profile: false
 sidebar:
   nav: "docs"
 typora-root-url: ../../..
----
+tag : [JavaScript, 리액트, React특징, npm, yarn, npx, jsx 문법, 컴포넌트, ..., Spread, const {}, const [], Destructuring]
+
 
 
 
