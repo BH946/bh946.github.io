@@ -8,10 +8,8 @@ author_profile: false
 sidebar:
   nav: "docs"
 typora-root-url: ../../..
-tag : [JavaScript, 리액트, React특징, npm, yarn, npx, jsx 문법, 컴포넌트, ..., Spread, const {}, const [], Destructuring]
 
-
-
+---
 
 ## Node.js 사용 매커니즘(npm)
 
