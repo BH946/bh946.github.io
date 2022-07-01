@@ -1,7 +1,7 @@
 ---
 title:  "[JSX]React & Node.JS(npm, yarn, npx, jsx)"
 categories : React_JS
-tag : [JavaScript, 리액트, React특징, npm, yarn, npx, jsx 문법, 컴포넌트]
+tag : [JavaScript, 리액트, React특징, npm, yarn, npx, jsx 문법, 컴포넌트, ..., Spread, const {}, const [], Destructuring]
 toc: true
 toc_sticky: true
 author_profile: false
@@ -335,5 +335,92 @@ const ConditionRender = () => {
 };
 export default ConditionRender;
 // 현재의 컴포넌트를 바깥에서 사용할 수 있게 내보내기 함.
+```
+
+
+
+## 문법에서 괄호 등등 (추가 설명)
+
+### {() => 함수()} 형태
+
+**onChangeCheckbox**를 매개변수 id를 넘기기위해 **onChangeCheckbox(checkboxItem.id)**로 넘기면? 함수가 바로 실행이되며, 우리는 함수자체를 넘기고 싶기 때문에 **()=>{onChangeCheckbox(checkboxItem.id)}**이런 형태로 **화살표 함수로 한번 감싸는 것**이다.
+
+```jsx
+  return (
+    <>
+      <FunctionCheckbox
+        checked={AllCheck}
+        onChangeCheckbox={onChangeAllCheckbox}
+        label="전체 체크 여부"
+      />
+      {checkboxList.map((checkboxItem) => (
+        <FunctionCheckbox
+          key={checkboxItem.id}
+          isHide={checkboxItem.isHide}
+          checked={checkboxItem.checked}
+          onChangeCheckbox={() => onChangeCheckbox(checkboxItem.id)}
+          onClickChangeView={() => onClickChangeView(checkboxItem.id)}
+          // onChangeCheck 함수와 onClickChangeView 함수에는 id 매개변수를 넣어주어야 하는데,
+          // 클릭 이벤트로 넣을 때 id 매개변수를 전달하기 위해선 함수를 미리 만들어 놓아야 함
+        />
+      ))}
+      {/* 배열 내장 함수인 map으로 컴포넌트를 반환하게 되면 리스트로 출력 */}
+    </>
+  );
+```
+
+
+
+### `JavaScript`(`ES6`)의 `Spread` 연산자(전개 연산자)
+
+- [MDN 문서 - 전개 구문](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Operators/Spread_syntax)
+- [Velog - 전개 연산자](https://velog.io/@recordboy/%EC%A0%84%EA%B0%9C-%EC%97%B0%EC%82%B0%EC%9E%90Spread-Operator)
+- `...` 연산을 사용하면 배열이나 객체의 요소를 펼칠 수 있습니다.
+- 이를 사용하여 객체나 배열의 내용을 손 쉽게 복사할 수 있습니다.
+
+```jsx
+// checkboxItem은 {id:~, isHide:~, checked:~} 로 이루어진 객체임
+// ...을 통해 객체를 풀었고, 객체 내 요소인 checked로 쉽게 수정을 한것
+const onChangeAllCheckbox = useCallback(() => {
+    const newCheckboxList = checkboxList.map((checkboxItem) => ({
+        ...checkboxItem, 
+        checked: !AllCheck,
+    }));
+    setCheckboxList(newCheckboxList);
+}, [AllCheck, checkboxList]);
+```
+
+
+
+### `JavaScript`(`ES6`)의 `Destructuring` 연산자(구조 분해 할당, 비구조화 할당)
+
+- [MDN 문서 - 구조 분해 할당](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment)
+- [Guidebook - 비구조화 할당](https://learnjs.vlpt.us/useful/06-destructuring.html)
+- `const { }`, `const []` 연산을 사용하여 객체에서 특정 값만 가져올 수 있습니다.
+- 이를 사용하여 객체나 배열의 내용 중 일부를 손 쉽게 가져올 수 있습니다.
+- 객체의 경우 `const { property1, property2 }` 연산을 사용하면 전달받는 객체에 `property1`의 키를 가진 값과, `property2`의 키를 가진 값이 할당됩니다. 키의 이름이 객체에 존재하지 않으면 `undefined`가 할당됩니다.
+- 배열의 경우 `const [name1, name2]` 연산을 사용하면 `name1`에 첫 번째 요소, `name2`에 두 번째 요소가 할당되며, 그 이상도 가능합니다.
+
+```jsx
+// 함수형 컴포넌트 작성에서 props를 가져올 때
+const FunctionCheckbox = memo(
+  ({ isHide, checked, label, onChangeCheckbox, onClickChangeView }) => {
+    return (
+//      <StyleCheckboxWrapper>
+// ... 생략
+            
+// useState에서 setState 함수를 가져올 때
+const [checkboxList, setCheckboxList] = useState([
+    {
+        id: 1, // 해당 Checkbox의 id
+        isHide: true, // 자세히 보기 숨겨짐 여부
+        checked: false, // check 상태
+    },
+    {
+        id: 2,
+        isHide: true,
+        checked: false,
+    },
+]);
 ```
 

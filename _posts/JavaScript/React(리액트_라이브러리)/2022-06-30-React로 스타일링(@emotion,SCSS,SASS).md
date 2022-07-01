@@ -380,6 +380,39 @@ function CSSModuleApp() {
 
 ![image-20220701031902168](/images/2022-06-30-(JSX)React로 스타일링(@emotion,SCSS,SASS)/image-20220701031902168.png)
 
+**리스트를 렌더링할 때 요소간 간격을 주기 좋은 방식**
+
+```js
+import styled from "@emotion/styled/macro";
+
+export const StyleCheckboxWrapper = styled.div`
+  padding: 0 12px;
+
+  box-shadow: 0px 3px 15px #0001;
+  // 요소에 그림자 음영을 추가
+
+  & + & {
+    // SCSS 문법으로, 첫 번째 요소부터 margin이 적용되지 않고,
+    // 두 번째 요소부터 위 요소와 margin이 적용됨
+    // 리스트를 렌더링할 때 요소간 간격을 주기 좋음
+    margin-top: 20px;
+  }
+`;
+```
+
+**padding을 주는 다른 방법**
+
+```js
+export const StyleCheckboxDetail = styled.div`
+  width: 100%;
+
+  padding: 24px 0;
+  // 이렇게 입력하면 y축에만 padding이 적용됨
+  // 반대로 0 24px; 라면 x축에만 padding 적용
+`;
+
+```
+
 
 
 ### 4. 참고) html은 link 태그
