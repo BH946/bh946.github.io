@@ -248,7 +248,7 @@ const element = <div tabIndex = {0}></div>
 
 **2. 컴포넌트 파일의 확장자는 .js나 .jsx 아무거나 상관 없지만 리액트의 컴포넌트는 jsx 문법으로 표현하므로 .jsx가 가독성에 좋음**
 
-* **import**
+* **import보다 from먼저 작성시 원하는 메소드 얻기 쉬움**
 
 ```jsx
 import "./App.css";
