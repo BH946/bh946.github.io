@@ -113,7 +113,7 @@ export default RequestTest;
 #### 코드
 
 * [API 요청 사이트](https://reqres.in/)
-* **Promise**는 .then(콜백), .catch(콜백)과 같은 비동기 기능을 제공해주는 객체이다.
+* **Promise**는 .**then(콜백), .catch(콜백)**과 같은 비동기 기능을 제공해주는 객체이다.
 * fetch API는 콜백 지옥이 나타나기 쉬워서 **async/await** 까지 주로 사용한다.
 
 ```jsx
@@ -205,6 +205,10 @@ export default RequestTest;
 * URL에 GET형식으로 어벤져스 정보 요청하게 작성
 * fetch로 따로 객체 생성 없이 요청 하자마자, await으로 response 인자 반환한 형태
 * 요청 때 headers안에 API키도 같이 보내서 인증절차 통과
+* **await**이후 .then코드 내부라 생각하면됨. 따라서 중첩해서 사용한 .then은 콜백지옥인데 await으로 표현시 겉으로 보이는 콜백지옥이 사라진것처럼 보이는것
+  * **추가**로 **await**은 promise에 사용
+* **async**는 promise를 반환
+* **fetch**는 promise를 반환
 
 ```js
 const URL = "/api/v1/search/movie.json?query=어벤져스";
@@ -226,6 +230,68 @@ export const requestGetMovieList = async () => {
   return await response.json();
   // 응답 객체를 JSON으로 변환하는 작업 비동기로, 또한 Promise를 반환하므로 await 사용 가능
 };
+
+
+// Async 함수와 Promise의 관계
+export const requestAsync = async () => {
+  // async 함수는 자동으로 Promise를 반환하는 함수가 됨
+  const response = await fetch(URL, {
+    headers: {
+      "Content-Type": "plain/text",
+      "X-Naver-Client-Id": process.env.REACT_APP_NAVER_CLIENT_ID,
+      "X-Naver-Client-Secret": process.env.REACT_APP_NAVER_CLIENT_SECRET,
+    },
+  });
+  // await 키워드는 async 내에서만 사용할 수 있고, Promise에다가 사용하면 그 Promise가 끝날 때까지 기다림
+  // await 키워드를 사용하면 그 뒤에 코드들은 .then 메서드에 코드가 들어가는 것과 같음
+  console.log(response);
+  const a = 10;
+  // 여기까지 첫 번째 .then의 코드
+  const data = await response.json();
+  // 다시 await를 만났으므로 이 뒤에 코드들은 .then 메서드에 코드가 들어가는 것과 같아짐(중첩)
+  console.log(data);
+  const b = a * 2;
+  console.log(b);
+  // 여기까지 두 번째 .then의 코드
+  const secondResponse = await fetch("https://reqres.in/api/users");
+  // 세 번째 중첩
+  return await secondResponse.json();
+  // 네 번째 중첩 후 resolve 함수에 결과 값 넣어서 실행한 것과 같음
+};
+
+// 위 Async 함수와 같은 코드
+export const requestPromise = new Promise((resolve, reject) => {
+  fetch(URL, {
+    headers: {
+      "Content-Type": "plain/text",
+      "X-Naver-Client-Id": process.env.REACT_APP_NAVER_CLIENT_ID,
+      "X-Naver-Client-Secret": process.env.REACT_APP_NAVER_CLIENT_SECRET,
+    },
+  }).then((response) => {
+    console.log(response);
+    const a = 10;
+    response.json().then((data) => {
+      console.log(data);
+      const b = a * 2;
+      console.log(b);
+
+      fetch("https://reqres.in/api/users").then((secondResponse) => {
+        secondResponse.json().then((secondData) => {
+          resolve(secondData);
+        });
+        // 마지막 소스는
+        // secondResponse.json().then(resolve);
+        // 와 같이 작성할 수 있음
+      });
+    });
+  });
+});
+
+// 두 함수 모두 Promise를 반환하므로
+requestAsync.then(secondData => console.log(secondData));
+requestPromise.then(secondData => console.log(secondData));
+// 이렇게 then을 사용하여 반환 받을 수 있음
+// then 안에 들어가는 매개변수는 resolve를 내에 넣은 값이 전달
 ```
 
 
