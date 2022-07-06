@@ -244,7 +244,7 @@ const element = <div tabIndex = {0}></div>
 
 
 
-### 컴포넌트 표현
+### 컴포넌트 표현(import, export, 함수형)
 
 **1. 컴포넌트 명은 일반적으로 단어의 시작마다 대문자인 파스칼 케이스로 작성하며, 파일 이름과 동일하게 함.**
 
@@ -259,6 +259,7 @@ import ConditionRender from "./ConditionRender";
 import InputComponent from "./InputComponent";
 // 커스텀 컴포넌트를 작성함
 // .js(jsx) 파일이지만 경로 입력 시 .js를 제외하더라도 상관 없음
+// default로 export 했기 때문에 {} 없이 불러오는중
 ```
 
 * **코드내에서 커스텀 컴포넌트 작성(예시는 화살표함수)**
@@ -299,11 +300,25 @@ function App() {
 }
 ```
 
-* **내보내기**
+* **내보내기(export)**
 
 ```jsx
-export default App;
 // 현재의 컴포넌트를 바깥에서 사용할 수 있게 내보내기 함.
+
+// default는 1개만 가능하며 이 경우 import를 {}없이 가능함.
+export default App;
+
+// default없이 export 한다면 import {App} from... 이런식으로 {}가 필요함
+export {App};
+import {App} from ...
+
+// export를 함수 앞에서 바로 사용도 가능
+export const App = () => {} // 화살표 함수의 경우
+export function A() {}; // 일반 함수의 경우
+
+// export default를 함수 앞에서는 일반 함수만 바로 사용 가능
+export default function A() {}; // 일반 함수의 경우
+export default const App = () => {} // error
 ```
 
 
@@ -423,5 +438,109 @@ const [checkboxList, setCheckboxList] = useState([
         checked: false,
     },
 ]);
+```
+
+* 또다른 예시
+
+```js
+// 1. 함수의 파라미터에서도 비구조화 할당
+// 함수 print에서 파라미터의 이름이 전달받은 object 객체의 키 값과 같아야 해당 키 값을 얻을 수 있는것임. 동일 이름 없으면 undefined 값 가져오는것.
+const object = { a: 1, b: 2 };
+
+function print({ a, b }) { 
+  console.log(a);
+  console.log(b);
+}
+print(object);
+
+// 2. 객체 안에 있는 값을 추출해서 변수 혹은 상수로 바로 선언
+const object = { a: 1, b: 2 };
+
+const { a, b } = object;
+
+console.log(a); // 1
+console.log(b); // 2
+```
+
+* 또다른 예시
+
+```jsx
+// 1. 함수의 파라미터에서도 비구조화 할당의 예시인데 movieList로 이름이 동일하단걸 체크
+// 서로 다른 파일
+const MovieList = ({movieList}) => {
+    return (
+        <div>
+            {movieList.map((movieItem) => {
+                return(
+                    <Movie 
+                    key={movieItem.title} // key도 보내줘야 안전
+                    {...movieItem}>
+                    </Movie>
+                )
+            })}
+        </div>
+    )
+}
+
+// 다른 파일
+return (
+    <div>
+        <Movies movieList={movieList}></Movies>
+    </div>
+);
+```
+
+
+
+### [ES6] Spread와 Destructuring을 같이 사용한 예시
+
+* **Spread X 일때** : 할당될 객체 키 값과 동일한 이름 맞춰가기 위해 아래처럼 코드 작성했었음  
+  \<Movies **movieList1**={movieList}>\</Movies> // 다른 파일  
+  const MovieList = ({**movieList1**}) => {...}
+* **Spread와 Destructuring을 같이 활용한 경우**  
+  <Movie {**...movieItem**}/> 와  
+  const Movie = ({ **title, subtitle, image, link, director** }) => {...}  
+  이런식으로 넘기고 받아올 수 있다는 차이점
+* **결론** : **movieList같은 배열을 통째로 넘기**고 싶을땐 **Spread X** 인 방식을 활용,  
+  **movieList를 분해해서 넘기**고 싶을땐 **Spread와 함께**하는 방식을 활용
+
+```jsx
+const Movie = ({ title, subtitle, image, link, director}) => {
+    return (
+        <div>
+            <div>
+                <img src={image} alt="movie-thumbnail"></img>
+            </div>
+            <div>
+                <a href={link}>
+                    <h3>{title}</h3>
+                    <h4>{subtitle}</h4>
+                    <p>감독 : {director}</p>
+                </a>
+            </div>
+        </div>
+    );
+}
+
+const MovieList = ({movieList1}) => {
+    return (
+        <div>
+            {movieList1.map((movieItem) => {
+                return(
+                    <Movie 
+                    key={movieItem.title} // key도 보내줘야 안전
+                    {...movieItem}>
+                    </Movie>
+                )
+            })}
+        </div>
+    )
+}
+// 다른 파일
+return (
+    <div>
+        <Movies movieList={movieList}></Movies>
+    </div>
+);
 ```
 
