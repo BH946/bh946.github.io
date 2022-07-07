@@ -1,6 +1,6 @@
 ---
 title:  "React로 스타일링(@emotion,SCSS,SASS)"
-categories : React_JS
+categories : [React_JS, Css]
 tag : [JavaScript, 리액트, React, jsx, scss, sass, 스타일, emotion, export 키워드, emotion/styled/macro 라이브러리]
 toc: true
 toc_sticky: true

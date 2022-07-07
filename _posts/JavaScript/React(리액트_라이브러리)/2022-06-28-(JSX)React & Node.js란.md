@@ -481,13 +481,36 @@ const MovieList = ({movieList}) => {
         </div>
     )
 }
-
+export const Movies = memo(MovieList);
 // 다른 파일
 return (
     <div>
         <Movies movieList={movieList}></Movies>
     </div>
 );
+```
+
+* 또다른 예시 **{}가 아닌 (props)로 하나의 객체로 가져오는 예시**
+  * props로 가져오는 방법이고, {}로 했을때와 똑같이 값을 바로 가져오며, props는 배열로 이루어져 있어서 props[0] 이런식으로도 사용가능하다.
+
+```jsx
+// const Movie = ({ title, subtitle, image, link, director}) => {
+const Movie = ((props)) => {
+    return (
+        <div>
+            <div>
+                <img src={props.image} alt="movie-thumbnail"></img>
+            </div>
+            <div>
+                <a href={props.link}>
+                    <h3>{props.title}</h3>
+                    <h4>{props.subtitle}</h4>
+                    <p>감독 : {props.director}</p>
+                </a>
+            </div>
+        </div>
+    );
+}
 ```
 
 
@@ -536,11 +559,11 @@ const MovieList = ({movieList1}) => {
         </div>
     )
 }
+export const Movies = memo(MovieList);
 // 다른 파일
 return (
     <div>
-        <Movies movieList={movieList}></Movies>
+        <Movies movieList1={movieList}></Movies>
     </div>
 );
 ```
-
