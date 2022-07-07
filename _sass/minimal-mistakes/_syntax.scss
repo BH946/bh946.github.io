@@ -6,8 +6,8 @@ div.highlighter-rouge,
 figure.highlight {
   position: relative;
   margin-bottom: 1em;
-  background: $base00;
-  color: $base05;
+  background: $base00; // 코드블록 배경색
+  color: $base05; // 코드블록 내부 텍스트 기본색
   font-family: $monospace;
   font-size: $type-size-6;
   line-height: 1.8;
@@ -41,7 +41,7 @@ figure.highlight {
     }
 
     /* code */
-    &.code,
+    &.code ,
     &.rouge-code {
       padding-left: 1em;
     }

@@ -458,7 +458,6 @@ body {
 .comment {
   @include clearfix();
   margin: 1em 0;
-
   &:not(:last-child) {
     border-bottom: 1px solid $border-color;
   }
