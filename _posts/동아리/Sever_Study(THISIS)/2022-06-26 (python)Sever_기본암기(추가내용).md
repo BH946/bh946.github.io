@@ -102,3 +102,55 @@ else: # 코드 실행부분
 
 * 앱에서 서버에 데이터 요청 가정을 위해 post_test.html같이 테스트 html만들어서 form태그로 넘겨 테스트하자.
 * (서버)응답 받는 test.py에서 form = chi.FieldStorage()를 통해 form태그로 전송받은 데이터들 사용하면서 테스트 하면된다.
+
+<br>
+
+## form.action
+
+참고로 버튼 태그에서 onClick내부에 send함수이후 return false를 통해서 이벤트 끝낸것이다.  
+return true의 경우 내장되어있는 이벤트 함수 실행할 것이다.(form.action 실행하는 submit이벤트 함수 실행)   
+따라서 여기선 따로 함수로 submit 이벤트 함수역할로 대신 실행했기 때문에 마무리로 false를 리턴.
+
+* form 태그의 action속성을 ""으로 주고, submit때 원하는 경로로 action보내기 위해서
+* 아래코드처럼 구성하면 된다. (**각 버튼마다 함수로 나뉜 구조**)
+
+```html
+<script type="text/javascript">
+    function send(theForm){
+        theForm.action = './conference_test.py'
+        theForm.submit()
+    }
+
+    function attendConfirm(theForm){
+        theForm.action = './conference_confirm.py'
+        theForm.submit()
+    }
+</script>
+
+... form태그 내부...
+<button type="submit" value="제출하기" onClick="send(this.form); return false">제출하기</button>
+<button type="submit" value="불참확인" onClick="attendConfirm(this.form); return false">불참확인</button>
+```
+
+
+
+* 만약 **하나의 함수**로 action을 구분해서 보내고싶다면 함수 및 form태그 내부도 수정이 필요
+
+```html
+<script type="text/javascript">
+    function send(num){
+        if (num === 0) {
+        	theForm.action = './conference_test.py'
+            theForm.submit()
+        }
+        else {
+            theForm.action = './conference_confirm.py'
+       		theForm.submit()
+        }
+    }
+</script>
+
+... form태그 내부...
+<button type="submit" value="제출하기" onClick="send(1); return false">제출하기</button>
+<button type="submit" value="불참확인" onClick="send(2); return false">불참확인</button>
+```
