@@ -1,5 +1,5 @@
 ---
-title: "[JSX]React & Node.JS(npm, yarn, npx, jsx)"
+title: "[JSX]React & Node.JS(npm, yarn, npx, jsx) & 문법"
 categories : React_JS
 tag : [Javascript, 리액트, node.js, cra, virtual DOM, state, lifecycle, 컴포넌트, 조건부 렌더링, spread, Destructuring]
 toc: true

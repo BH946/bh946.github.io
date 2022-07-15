@@ -1,7 +1,7 @@
 ---
-title: "React로 외부API 호출(fetch API) & 비동기 통신"
+title: "React로 외부API 호출(fetch API) & 비동기 통신(Promise)"
 categories : React_JS
-tag : [Javascript, 리액트, AJAX, XMLHttpRequest, fetch API, API 키, env, 무한로딩, cros]
+tag : [Javascript, 리액트, AJAX, XMLHttpRequest, fetch API, API 키, env, 무한로딩, cros, then, catch, async, await, promise]
 toc: true
 toc_sticky: true
 author_profile: false
@@ -159,9 +159,11 @@ export default RequestTest;
 
 - `Promise`는 최신 문법으로 비동기를 사용하기 위해 정한 비동기 작성법
 - `async` / `await`는 `Promise` 사용 시 발생하는 콜백 지옥(중첩) 코드를 해결하기 위해 동기 코드인 것처럼 보이게 하는 키워드
-- `async` 함수는 `Promise`를 반환하는 함수로 바뀌게 됨
-- **async**는 **비동기** 객체인 Promise를 **동기처럼** 사용하는 키워드
+- `async` 함수는 `Promise`를 반환하는 함수로 바뀌게 됨, `await`은 `Promise `앞에 사용
+- `async`는 **비동기** 객체인 Promise를 **동기처럼** 사용하는 키워드
 - 비동기 객체인 Promise 앞에 **await를 붙이면 동기처럼** 동작
+
+만약 사용할수 없는 경우는 기존의 `.then`, `.catch` 를 다시 사용해주면 된다.
 
 ### 참고
 

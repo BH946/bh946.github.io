@@ -1,5 +1,5 @@
 ---
-title:  "React 컴포넌트 렌더링 최적화"
+title:  "React 컴포넌트 렌더링 최적화(useState 등등)"
 categories : React_JS
 tag : [Javascript, 리액트, Material, mui, checkbox, 컴포넌트 생명주기, useEffect, useState, 마운트, 언마운트, 재렌더, 반복 렌더링, useMemo, useCallback, memo]
 toc: true

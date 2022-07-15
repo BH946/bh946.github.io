@@ -1,5 +1,5 @@
 ---
-title: "외부 API 호출한 것 React.js로 디자인까지"
+title: "React_Project_Movie_외부 API 이용"
 categories : React_JS
 tag : [Javascript, 리액트, AJAX, fetch API, concat, filter, map]
 toc: true
