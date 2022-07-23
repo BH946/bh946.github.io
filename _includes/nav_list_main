@@ -230,7 +230,15 @@
                     {% endif %}
                 {% endfor %}
             </ul>
-
+        
+        <span class="nav__sub-title">BLOCKCHAIN</span>
+            <ul>
+                {% for category in site.categories %}
+                    {% if category[0] == "BlockChain" %}
+                        <li><a href="/categories/blch" class="">블록체인 특강정리 ({{category[1].size}})</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
       </li>
   </ul>
 </nav>
