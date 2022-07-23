@@ -122,20 +122,20 @@ besu --data-path=data --genesis-file=../genesis.json --bootnodes=enode://f9e20f0
 
 **아래는 윈도우10 기준이다.**
 
-![image-20220720113644585](images\2022-07-20-3일차\image-20220720113644585.png)
+![image-20220720113644585](/images\2022-07-20-3일차\image-20220720113644585.png)
 
 
 
 **보통 사용자 변수를 먼저 수정해보는걸 추천하고, 그래도 안된다면 시스템 변수를 건드린다.**
 
-![image-20220720113814879](images\2022-07-20-3일차\image-20220720113814879.png)
+![image-20220720113814879](/images\2022-07-20-3일차\image-20220720113814879.png)
 
 
 
 **이런식으로 besu 경로를 설정하면 된다.**  
 **예시는 현재 바탕화면(Desktop)에 있는 besu 경로를 설정한 것이다.**
 
-![image-20220720113912847](images\2022-07-20-3일차\image-20220720113912847.png)
+![image-20220720113912847](/images\2022-07-20-3일차\image-20220720113912847.png)
 
 
 
@@ -145,7 +145,7 @@ besu --data-path=data --genesis-file=../genesis.json --bootnodes=enode://f9e20f0
 
 ### 폴더 생성
 
-![image-20220720130736740](images\2022-07-20-3일차\image-20220720130736740.png)
+![image-20220720130736740](/images\2022-07-20-3일차\image-20220720130736740.png)
 
 
 
@@ -155,9 +155,9 @@ besu --data-path=data --genesis-file=../genesis.json --bootnodes=enode://f9e20f0
   (또다른 new account 하는 방법이다)
 * 나는 이전 포스팅 처럼 new account를 하겠다.
 
-![image-20220720130911882](images\2022-07-20-3일차\image-20220720130911882.png)
+![image-20220720130911882](/images\2022-07-20-3일차\image-20220720130911882.png)
 
-![image-20220720131111627](images\2022-07-20-3일차\image-20220720131111627.png)
+![image-20220720131111627](/images\2022-07-20-3일차\image-20220720131111627.png)
 
 
 
@@ -241,19 +241,19 @@ besu operator generate-blockchain-config --config-file=ibftConfigFile.json --to=
 
 `networkFiles` 폴더안에 생성된 `genesis.json` 파일을 아래 사진처럼 위치 옮길것.
 
-![image-20220720135246377](images\2022-07-20-3일차\image-20220720135246377.png)
+![image-20220720135246377](/images\2022-07-20-3일차\image-20220720135246377.png)
 
 
 
 `networkFiles` 폴더안에 `keys`폴더안에 있는 `key파일`들은 각각 `node`폴더안에 `data` 폴더에 이동
 
-![image-20220720135355399](images\2022-07-20-3일차\image-20220720135355399.png)
+![image-20220720135355399](/images\2022-07-20-3일차\image-20220720135355399.png)
 
 
 
 **파일구성된 모습**
 
-![image-20220720135456266](images\2022-07-20-3일차\image-20220720135456266.png)
+![image-20220720135456266](/images\2022-07-20-3일차\image-20220720135456266.png)
 
 
 
@@ -277,7 +277,7 @@ besu --data-path=data --genesis-file=../genesis.json --rpc-http-enabled --rpc-ht
 
 * 기억해두고 활용할것이다.
 
-![image-20220720143204929](images\2022-07-20-3일차\image-20220720143204929.png)
+![image-20220720143204929](/images\2022-07-20-3일차\image-20220720143204929.png)
 
 
 
@@ -288,7 +288,7 @@ besu --data-path=data --genesis-file=../genesis.json --rpc-http-enabled --rpc-ht
   * 참고로 port는 다 다르게 작성할것
   * bootnodes를 시작점이라고 해석해서 기억하면 된다.
 
-![image-20220720143827198](images\2022-07-20-3일차\image-20220720143827198.png)
+![image-20220720143827198](/images\2022-07-20-3일차\image-20220720143827198.png)
 
 
 
@@ -300,7 +300,7 @@ besu --data-path=data --genesis-file=../genesis.json --rpc-http-enabled --rpc-ht
   * 하나의 서버를 통해 탐색을 하는것이다.
   * 잘 보면 서버 역할이 node1인 것이다.
 
-![image-20220720144042127](images\2022-07-20-3일차\image-20220720144042127.png)
+![image-20220720144042127](/images\2022-07-20-3일차\image-20220720144042127.png)
 
 <br>
 
@@ -312,7 +312,7 @@ besu --data-path=data --genesis-file=../genesis.json --rpc-http-enabled --rpc-ht
 
 그리고 postman 실행해보면
 
-![image-20220720153922207](images\2022-07-20-3일차\image-20220720153922207.png)
+![image-20220720153922207](/images\2022-07-20-3일차\image-20220720153922207.png)
 
 
 
@@ -325,7 +325,7 @@ besu --data-path=data --genesis-file=../genesis.json --rpc-http-enabled --rpc-ht
 실제 테스트 해보면(8545로)  
 아래처럼 블록을 가져온것을 볼 수 있다.
 
-![image-20220720154955320](images\2022-07-20-3일차\image-20220720154955320.png)
+![image-20220720154955320](/images\2022-07-20-3일차\image-20220720154955320.png)
 
 <br>
 
@@ -337,7 +337,7 @@ besu --data-path=data --genesis-file=../genesis.json --rpc-http-enabled --rpc-ht
   (노드는 컴퓨터 한개라고 했음. 임의로 node4개를 돌리고 있는건데 컴퓨터 4개를 돌리고 있는것이다)
 * 체인ID는` genesis.json`에 만든 `chainId`를 의미한다.
 
-![image-20220720160444143](images\2022-07-20-3일차\image-20220720160444143.png)
+![image-20220720160444143](/images\2022-07-20-3일차\image-20220720160444143.png)
 
 
 
@@ -355,9 +355,9 @@ besu --data-path=data --genesis-file=../genesis.json --rpc-http-enabled --rpc-ht
 
 **처음 `200 SEO`와 `90000 SEO`가 아래처럼 잘 변경되었다.**
 
-![image-20220720161229430](images\2022-07-20-3일차\image-20220720161229430.png)
+![image-20220720161229430](/images\2022-07-20-3일차\image-20220720161229430.png)
 
-![image-20220720161453616](images\2022-07-20-3일차\image-20220720161453616.png)
+![image-20220720161453616](/images\2022-07-20-3일차\image-20220720161453616.png)
 
 <br>
 

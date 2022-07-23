@@ -134,7 +134,7 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 
 **실행시 이렇게 이더리움 서버를 구동하는 것이다.**
 
-![image-20220723195142323](images\2022-07-19-2일차-이더리움 private network 구축 + 테스트넷\image-20220723195142323.png)
+![image-20220723195142323](/images\2022-07-19-2일차-이더리움 private network 구축 + 테스트넷\image-20220723195142323.png)
 
 
 
@@ -142,13 +142,13 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 
 * **NEW WORKSPACE인 EHEREUM**으로 생성
 
-![image-20220723200044384](images\2022-07-19-2일차-이더리움 private network 구축 + 테스트넷\image-20220723200044384-16585740597561.png)
+![image-20220723200044384](/images\2022-07-19-2일차-이더리움 private network 구축 + 테스트넷\image-20220723200044384-16585740597561.png)
 
 
 
 **먼저, 프로젝트 명 설정**
 
-![image-20220719101215601](images\2022-07-19-2일차\image-20220719101215601.png)
+![image-20220719101215601](/images\2022-07-19-2일차\image-20220719101215601.png)
 
 **서버 설정**
 
@@ -157,7 +157,7 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
   만약 7545라면 URL을 http://localhost:7545 로 접근해야 하는 것이다.
 * **NETWORK ID**도 원하는것으로 하면되고 **체인 ID**라고도 부른다.
 
-![image-20220723195659219](images\2022-07-19-2일차-이더리움 private network 구축 + 테스트넷\image-20220723195659219.png)
+![image-20220723195659219](/images\2022-07-19-2일차-이더리움 private network 구축 + 테스트넷\image-20220723195659219.png)
 
 
 
@@ -169,7 +169,7 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 
 
 
-![image-20220719101145501](images\2022-07-19-2일차\image-20220719101145501.png)
+![image-20220719101145501](/images\2022-07-19-2일차\image-20220719101145501.png)
 
 
 
@@ -197,11 +197,11 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 
 
 
-<img src="images\2022-07-19-2일차-이더리움 private network 구축 + 테스트넷\image-20220723223054338.png" alt="image-20220723223054338" style="zoom:80%;" />
+<img src="/images\2022-07-19-2일차-이더리움 private network 구축 + 테스트넷\image-20220723223054338.png" alt="image-20220723223054338" style="zoom:80%;" />
 
 
 
-![image-20220723200353453](images\2022-07-19-2일차-이더리움 private network 구축 + 테스트넷\image-20220723200353453.png)
+![image-20220723200353453](/images\2022-07-19-2일차-이더리움 private network 구축 + 테스트넷\image-20220723200353453.png)
 
 
 
@@ -212,13 +212,13 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 * ADDRESS 아래가 Public Key => 거래할때 등등..  
   오른쪽 Key 모양 클릭시 Private Key => 지갑에 계정 가져올때 등등..
 
-![image-20220719101240923](images\2022-07-19-2일차\image-20220719101240923.png)
+![image-20220719101240923](/images\2022-07-19-2일차\image-20220719101240923.png)
 
 
 
 **트랜잭션이 해당 서버에 들어오면 아래화면에 블록이 생성이 될것이다.  **
 
-![image-20220719101529412](images\2022-07-19-2일차\image-20220719101529412.png)
+![image-20220719101529412](/images\2022-07-19-2일차\image-20220719101529412.png)
 
 <br>
 
@@ -236,17 +236,17 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 
 #### Ganache와 MetaMask를 네트워크를 서로 연동
 
-![image-20220719102931358](images\2022-07-19-2일차\image-20220719102931358.png)
+![image-20220719102931358](/images\2022-07-19-2일차\image-20220719102931358.png)
 
-![image-20220719102958932](images\2022-07-19-2일차\image-20220719102958932.png)
+![image-20220719102958932](/images\2022-07-19-2일차\image-20220719102958932.png)
 
-![image-20220719103028497](images\2022-07-19-2일차\image-20220719103028497.png)
+![image-20220719103028497](/images\2022-07-19-2일차\image-20220719103028497.png)
 
 
 
 **아래 네트워크 구성은 Ganache의 RPC SERVER, NETWORK ID 를 참고해 기입한다.**
 
-![image-20220719103445485](images\2022-07-19-2일차\image-20220719103445485.png)
+![image-20220719103445485](/images\2022-07-19-2일차\image-20220719103445485.png)
 
 
 
@@ -254,13 +254,13 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 
 * **계정 가져오기 클릭 후 비공개 키에 Ganache의 private key를 기입**
 
-![image-20220719104018972](images\2022-07-19-2일차\image-20220719104018972.png)
+![image-20220719104018972](/images\2022-07-19-2일차\image-20220719104018972.png)
 
 
 
 **Ganache private key 예시**
 
-![image-20220719103926870](images\2022-07-19-2일차\image-20220719103926870.png)
+![image-20220719103926870](/images\2022-07-19-2일차\image-20220719103926870.png)
 
 
 
@@ -270,7 +270,7 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 * 이때 Account 1의 주소는 Ganache에서 Public key이며  
   Metamask에 Account1 계정 메인에서 보이는 key도 동일한 Public key이며 이를 사용
 
-![image-20220719104349683](images\2022-07-19-2일차\image-20220719104349683.png)
+![image-20220719104349683](/images\2022-07-19-2일차\image-20220719104349683.png)
 
 <br>
 
@@ -292,7 +292,7 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 경로가 없다고 에러 뜬다면 **C:\Program Files\Geth** 에 **Geth**가 잘 다운되었는지 먼저 확인후 **환경변수에 해당경로를 추가**해야한다.  
 이때, 꼭 터미널은 다시 재접속을 권장한다.
 
-![image-20220719105428029](images\2022-07-19-2일차\image-20220719105428029.png)
+![image-20220719105428029](/images\2022-07-19-2일차\image-20220719105428029.png)
 
 
 
@@ -311,9 +311,9 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 
 **아래 사진은 구매를 통해 2 RopstenETH를 얻은 모습이다.**
 
-![image-20220719113304647](images\2022-07-19-2일차\image-20220719113304647.png)
+![image-20220719113304647](/images\2022-07-19-2일차\image-20220719113304647.png)
 
-![image-20220719113316863](images\2022-07-19-2일차\image-20220719113316863.png)
+![image-20220719113316863](/images\2022-07-19-2일차\image-20220719113316863.png)
 
 
 
@@ -343,7 +343,7 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 * 안되는 경우도 많은데 본인 컴퓨터의 라우터 문제일수도 있고, 명령어를 잘 못 입력했을수도 있기때문에 다양한문제가 있다.
 * 우선 나는 undefined라고 떳지만, 예전에 라우터 등을 건드린 문제라고 생각하기 때문에 pass하겠다.
 
-![image-20220719115250262](images\2022-07-19-2일차\image-20220719115250262.png)
+![image-20220719115250262](/images\2022-07-19-2일차\image-20220719115250262.png)
 
 <br>
 
@@ -355,7 +355,7 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 * 따라서 **4번** `geth account new`를 해서 해당 키를 정리해서 따로 기록해둘것.
 * 각각 node폴더마다 keystore 폴더도 만들고 만들어진 UTC들도 각각에 한개씩 넣어주기
 
-![image-20220719133327805](images\2022-07-19-2일차\image-20220719133327805.png)
+![image-20220719133327805](/images\2022-07-19-2일차\image-20220719133327805.png)
 
 
 
@@ -363,7 +363,7 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 
 * 첫줄은 `address`값, 2번째줄은 `ciphertext` 값이다. - 각각 Public key, private key
 
-![image-20220719133507886](images\2022-07-19-2일차\image-20220719133507886.png)
+![image-20220719133507886](/images\2022-07-19-2일차\image-20220719133507886.png)
 
 
 
@@ -375,7 +375,7 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
   * `chainId` 도 자주 사용하니까 기억해두기
   * 생성된 이 **json**파일도 **node의 각각 폴더마다 넣어주기**(keystore폴더와 동일한 경로)
 
-![image-20220719141716908](images\2022-07-19-2일차\image-20220719141716908.png)
+![image-20220719141716908](/images\2022-07-19-2일차\image-20220719141716908.png)
 
 
 
@@ -383,7 +383,7 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 
 * `geth --datadir 경로../node1 init genesis.json` 이런식으로 node4 까지 터미널에 입력
 
-![image-20220719141348379](images\2022-07-19-2일차\image-20220719141348379.png)
+![image-20220719141348379](/images\2022-07-19-2일차\image-20220719141348379.png)
 
 
 
@@ -402,9 +402,9 @@ geth --networkid 719 --datadir C:/Users/경로../node1 --ipcdisable --http.port 
 * 그후 아래 그림처럼 구성하기 위해 명령어를 아래처럼 구성
   * 명령어를 해석하면 그림과 동일
 
-![image-20220719153459628](images\2022-07-19-2일차\image-20220719153459628.png)
+![image-20220719153459628](/images\2022-07-19-2일차\image-20220719153459628.png)
 
-![image-20220719154916597](images\2022-07-19-2일차\image-20220719154916597.png)
+![image-20220719154916597](/images\2022-07-19-2일차\image-20220719154916597.png)
 
 => 명령어 입력후 **true**가 나오면 **정상**
 
@@ -418,7 +418,7 @@ geth --networkid 719 --datadir C:/Users/경로../node1 --ipcdisable --http.port 
   * 따라서 다른 터미널들도 블록을 받아 추가한다.
 * **miner.stop()** 입력시 멈춤
 
-![image-20220719163922867](images\2022-07-19-2일차\image-20220719163922867.png)
+![image-20220719163922867](/images\2022-07-19-2일차\image-20220719163922867.png)
 
 **참고 : 첫번째 터미널이 채굴했던 노드이고, number이 600대이다. 저만큼 채굴한것이고, 나머지를 보면 200대인데 동기화때문에 조금 천천히 채굴한 블록들을 받아오고 있는 중인 것이다.**
 
