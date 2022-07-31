@@ -61,7 +61,7 @@ typora-root-url: ../../..
 
 ## CSS 우선순위
 
-**인라인 -> #id -> .class -> 태그들**
+**!important -> 인라인 -> #id -> .class -> 태그들**
 
 #과 .은 각각 id와 class 의미
 
@@ -482,5 +482,4 @@ ReactDOM.render(
 ```
 
 **즉, 차이점은 { } 를 통해 getRenderApp() 함수 사용해서 원하는 태그 리턴받아 사용했다.**
-
 
