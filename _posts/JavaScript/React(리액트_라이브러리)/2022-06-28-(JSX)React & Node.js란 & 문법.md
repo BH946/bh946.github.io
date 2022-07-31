@@ -16,6 +16,25 @@ typora-root-url: ../../..
 **사용 방식을 설명. 그리고 Node.js는 런타임 환경이다(Node.js 특징 게시글 참고)**
 
 * **npm, yarn을 전역으로 설치 했기 때문에 어디서든 터미널에서 접근가능**
+  * **yarn이든 npm이든 아무거나 사용해도 전혀 상관없음**
+
+
+
+### npm, yarn, npx 명령어 한방 정리
+
+**실제 주로 사용하는 명령어들 정리**
+
+**React.js를 개발하기 위해서 아래 3가지 명령어 CRA를 원하는 것 아무거나 입력**
+
+* **npx create-react-app 폴더명**
+* **npm init react-app 폴더명**
+* **yarn create react-app 폴더명**
+
+`package.json` 없다면 **yarn init(npm init)**
+
+이후 필수 사용하는 명령어들 : **yarn(npm install), yarn start(npm run start), yarn add ~~(npm install ~~)**
+
+
 
 ### npm 명령어
 
