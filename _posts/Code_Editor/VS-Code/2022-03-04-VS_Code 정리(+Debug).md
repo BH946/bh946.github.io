@@ -9,11 +9,70 @@ sidebar:
  nav: "docs"    
 ---
 
-## VScode 상식..
+## VScode 유용한 기능(단축키)
+
+### 터미널
+
+**Ctrl+'~'** 누를시 기존 터미널창 오픈
+
+**Ctrl+Shift+'~'** 누를시 새로운 터미널창 오픈 :blush:
+
+
+
+
+
+### 기본 설정
 
 **F1 or Ctrl+shift+P**키 누를시 검색가능. -> interpreter검색해서 Select Interpreter접근 -> 깔려있는 python 버전 확인 및 선택가능. 
 
-**Ctrl+Shift+'~'** 누를시 터미널창 사용 :blush:
+**설정(톱니바퀴) + Keyboard Shortcuts** 에서 키보드를 통한 단축키들 모두 알 수 있고, 커스텀도 가능하다.
+
+**설정(톱니바퀴) + settings** 에서 font size, tab size 변경가능 -> 각각 16, 2 추천
+
+* **editor bracket pair** 입력을 한다.(대괄호 쌍을 찾는 기능)
+  * **Bracket Pair Colorization: Enabled** 를 체크하면,   
+    열린 대괄호에 맞는 닫힌 대괄호를 자동으로 인식해서 색깔별로 구분해주고 있다
+  * **Bracket Pairs** 를 true로 사용하면, tab의 공간을 세로줄로 표시해서 구분하기 쉽게 해준다.
+* **word wrap** 입력을 한다.(줄 바꿈 기능)
+  * **Word Wrap** 을 on으로 변경시 긴 글이 화면의 창을 벗어나지 않고, 다음줄로 자동으로 넘어간다.
+
+**설정(톱니바퀴) + Color Theme** 에서 테마 변경 가능
+
+* 추천 테마 5가지 : `night owl, cobalt2, shades of purple, coder coder dark, codestackr`
+
+
+
+
+
+### 빠른 파일 이동
+
+**Ctrl+Tab** 누를시 현재 오픈한 파일들에서 키보드로 간편히 파일 전환 가능
+
+**Ctrl+W** 누를시 현재 오픈한 해당 파일 종료
+
+**Ctrl+K+W** 누를시 현재 오픈한 모든 파일들 종료
+
+**Ctrl+P** 누를시 현재 프로젝트의 모든 파일들을 접근할 수 있으며, 간편히 검색해서 접근가능. 매우 유용
+
+
+
+
+
+### 빠른 코드 조작
+
+**Alt+Arrow** 누를시 해당 커서에 있는 코드가 이동할 수 있다.
+
+**Alt+Shift+Arrow** 누를시 해당 커서에 있는 코드를 복제해서 추가 할 수 있다.
+
+**Ctrl+D** 누를시 해당 커서에 있는 단어와 같은 단어가 선택되고, 계속 누를시 계속 선택이 추가된다.
+
+**Alt+마우스** 누를시 커서를 계속 계속 추가할 수 있다.
+
+html, jsx 에서 **.abc 또는 #abc**로 입력시 class와 id가 abc인 div태그를 자동완성 해준다.
+
+* 물론 다른 태그들 또한 바로 태그이름 입력시 자동완성 해준다.  
+  예로 input#user 입력시 input태그이며 id=user로 태그 자동완성이 된다.
+* 단지, div가 .으로 입력시 자동완성 해준다고 생각하면 된다.
 
 <br>
 
