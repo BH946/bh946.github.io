@@ -220,6 +220,8 @@ export default EmotionComponent;
 * **중요** : jsx로 바로 스타일 구성한게 아닌 한번더 나눠서 구성한다면?  
   **Circle.style.js** 이런 형태로 네임 지정할것**(보통 이렇게함)**
 * **중요** : **export default**가 아닌 **export 키워드**는 해당 이름 가진 변수명으로 외부로 내보내기 함
+* **중요 : styled의 장점**으로 `${props=>props.속성~~}` 처럼 JS 언어를 사용할 수 있다.
+  * [다양한-UI-스타일링](/css/다양한-UI-스타일링/#slider) 참고
 
 ```jsx
 // Circle.jsx
