@@ -14,18 +14,21 @@ typora-root-url: ../../..
 
 스타일링 방식을 크게 보자면, `styled(사용자 스타일 태그)` 사용과 `css` 사용 방식이 있다.  
 
-`styled(사용자 스타일 태그)`의 [emotion-2번째-방식](#"`@emotion`-2번째-코드-작성-방식") 을 사용하는걸 추천한다.
+`styled(사용자 스타일 태그)`의 [emotion-2번째-방식](#@emotion-2번째-코드-작성-방식) 을 사용하는걸 추천한다.
 
 `css`는 기본적으로 하는법은 꼭 알고 넘어가야하므로 [css 방식](#"3-css-scss-로드---import사용") 을 참고하는걸 추천한다.
+
+[11](#"html에서-스타일-적용")
+
+[11](#html에서-스타일-적용)
 
 <br>
 
 ## HTML에서 스타일 적용
 
-* css정리 포스팅글 확인
-* [CSS_기초](/_posts/Style_Sheet/CSS/CSS_기초)
+* css정리 포스팅글 참고 - [CSS_기초](/_posts/Style_Sheet/CSS/CSS_기초)
 
-
+ [CSS_기초](/css/CSS_기초)
 
 
 
