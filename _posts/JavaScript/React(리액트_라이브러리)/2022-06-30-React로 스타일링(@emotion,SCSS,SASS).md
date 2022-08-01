@@ -10,17 +10,32 @@ sidebar:
 typora-root-url: ../../..
 ---
 
+## 리액트의 스타일링 방식 결정
 
+스타일링 방식을 크게 보자면, `styled(사용자 스타일 태그)` 사용과 `css` 사용 방식이 있다.  
+
+`styled(사용자 스타일 태그)`의 [emotion-2번째-방식](#"`@emotion`-2번째-코드-작성-방식") 을 사용하는걸 추천한다.
+
+`css`는 기본적으로 하는법은 꼭 알고 넘어가야하므로 [css 방식](#"3-css-scss-로드---import사용") 을 참고하는걸 추천한다.
+
+<br>
 
 ## HTML에서 스타일 적용
 
 * css정리 포스팅글 확인
+* [CSS_기초](/_posts/Style_Sheet/CSS/CSS_기초)
+
+
+
+
 
 ### 인라인 스타일
 
-**HTML 문서의 스타일을 지정할 태그에 직접 적용**
+**HTML 문서의 스타일을 지정할 `태그에 직접` 적용**
 
 * 가장 높은 우선순위로 적용하므로 디버깅/테스트 용으로 좋음
+
+
 
 
 
@@ -28,7 +43,9 @@ typora-root-url: ../../..
 
 **HTML 문서의 스타일을 모아두어 관리**
 
-* \<style> 태그를 활용
+* `<style>` 태그를 활용
+
+
 
 
 
@@ -43,6 +60,10 @@ typora-root-url: ../../..
 ```html
 <link rel="stylesheet" href="%PUBLIC_URL%/expand_style.css"/>
 ```
+
+
+
+
 
 ### 자주 쓰는 CSS 요소
 
@@ -88,11 +109,15 @@ typora-root-url: ../../..
 - `HTML`에서 작성하는 것처럼 `style` 어트리뷰트를 사용하지만, 문자열이 아닌 `React`의 프로퍼티 네이밍 규칙을 준수하는 `JavaScript` 객체를 전달합니다.
 - 스타일에 알맞지 않은 프로퍼티는 **파싱하지 않음**
 
+
+
 **html**
 
 ```html
 <div style="속성: 속성값;"></div>
 ```
+
+
 
 **JSX**
 
@@ -123,15 +148,24 @@ export default StyleAttributeComponent;
 
 
 
+
+
 ### 2. CSS in JavaScript
 
 - `JavaScript`에서 `CSS` 코드 작성 사용하는 방법입니다
 - CSS 파일 로드 방식에 비해 느린 성능이지만, **하나의 컴포넌트** 작성하는 것처럼 JS에서 사용 가능합니다.
+  * `사용자 스타일 태그`를 활용하는 이유는   
+    `<div className='container'...`처럼 이름 주면서 css파일로 적용하다보면   
+    간단한 프로젝트는 상관없지만 큰 프로젝트의 경우 `className`의 이름을  
+    정말 길게 적어서 구분해야할 필요가 생긴다. 즉, 가독성이 좋지 않아진다.
 - `styled-components`와 `@emotion`이 가장 유명한 **라이브러리**입니다.
+  * `@emotion` 추천
 
 
 
 #### `@emotion` 설치
+
+* `사용자 스타일 태그`를 사용하기 위해선 `styled`가 필요해서 아래 설치작업이 꼭 필요한것
 
 ```shell
 npm install @emotion/react @emotion/styled
@@ -148,9 +182,9 @@ yarn add @emotion/react @emotion/styled
 
 
 
-#### `@emotion` 코드 작성 - 1
+#### `@emotion` 1번째 코드 작성 방식
 
-* **styled.div`** 처럼 작성하면 div 컴포넌트를 생성한것! S**tyleEmotionDiv태그가 div 커스텀한 태그**라고 생각하고 사용하면 됨
+* **styled.div`** 처럼 작성하면 div 컴포넌트를 생성한것! **StyleEmotionDiv태그가 div 커스텀한 태그**라고 생각하고 사용하면 됨
 
 ```jsx
 // EmotionComponent.jsx
@@ -182,10 +216,10 @@ export default EmotionComponent;
 
 
 
-#### `@emotion` 코드 작성 - 2(중요내용 : 네이밍과 export)
+#### `@emotion` 2번째 코드 작성 방식
 
 * **중요** : jsx로 바로 스타일 구성한게 아닌 한번더 나눠서 구성한다면?  
-  **Circle.style.js** 이런 형태로 네임 지정할것(보통 이렇게함)
+  **Circle.style.js** 이런 형태로 네임 지정할것**(보통 이렇게함)**
 * **중요** : **export default**가 아닌 **export 키워드**는 해당 이름 가진 변수명으로 외부로 내보내기 함
 
 ```jsx
@@ -295,12 +329,17 @@ export default CSSApp;
 
 
 
+
+
 ### 3. CSS, SCSS 로드 - import사용
 
 #### React.js의 CSS 파일로드
 
 - `import "<CSS 파일 경로>";`를 통해 `CSS` 파일을 불러올 수 있습니다.
+  
   - 이는 `CRA` 환경에서 암묵적으로 `webpack`이라는 도구를 통해 `css-loader`를 사용하기 때문입니다.
+  
+  
 
 **js**
 
@@ -311,9 +350,12 @@ import "./CSSApp.css";
 등등..
 ```
 
+
+
 **css**
 
 ```css
+// 위의 className의 App-header를 해당 css파일에서 스타일링 하는것이다.
 .App {
   text-align: center;
 }
@@ -334,6 +376,8 @@ import "./CSSApp.css";
 
 * 원래처럼 해석할게 아니라 **styles**라는 변수에 from뒤의 '~'안의 내용들을 **담아와서 사용**한다고 생각.
 * **파일명이 module.css** 이런식으로 지정하는게 일반적임
+
+
 
 **js** (css는 유사해서 생략)
 
@@ -380,6 +424,8 @@ function CSSModuleApp() {
 
 ![image-20220701031902168](/images/2022-06-30-(JSX)React로 스타일링(@emotion,SCSS,SASS)/image-20220701031902168.png)
 
+
+
 **리스트를 렌더링할 때 요소간 간격을 주기 좋은 방식**
 
 ```js
@@ -400,6 +446,8 @@ export const StyleCheckboxWrapper = styled.div`
 `;
 ```
 
+
+
 **padding을 주는 다른 방법**
 
 ```js
@@ -412,6 +460,8 @@ export const StyleCheckboxDetail = styled.div`
 `;
 
 ```
+
+
 
 
 
@@ -470,7 +520,9 @@ ReactDOM.render(<React.StrictMode>{getRenderApp(selector)}</React.StrictMode>, d
 reportWebVitals();
 ```
 
-보통의 기존 코드
+
+
+**보통의 기존 코드**
 
 ```js
 ReactDOM.render(
