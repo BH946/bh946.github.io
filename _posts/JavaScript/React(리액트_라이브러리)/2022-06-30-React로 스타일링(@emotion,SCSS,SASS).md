@@ -73,6 +73,8 @@ typora-root-url: ../../..
 - `color`, `font-weight`, `font-size`
 - `background-color`, `background-image`
 - `padding`, `margin`
+  * `padding` 은 세력을 확장해가는 느낌,   
+    `margin`은 세력은 그대로고 빈공간을 확장해가는 느낌
 - `border`, `border-radius`, `box-shadow`
 - `transform`
 - `transition`
