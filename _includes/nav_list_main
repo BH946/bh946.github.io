@@ -142,6 +142,13 @@
                     {% endif %}
                 {% endfor %}
             </ul>
+            <ul>
+              {% for category in site.categories %}
+                  {% if category[0] == "Node_JS" %}
+                      <li><a href="/categories/node_js" class="">NodeJS ({{category[1].size}})</a></li>
+                  {% endif %}
+              {% endfor %}
+            </ul>
         <span class="nav__sub-title">PYTHON</span>
             <ul>
                 {% for category in site.categories %}
