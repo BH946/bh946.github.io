@@ -16,6 +16,13 @@ sidebar:
 ### Live Server
 
 * 로컬에서 html 저장시 바로바로 웹에 반영이 되는것을 볼 수 있다.
+* 확장 플러그인은 아니지만, nodejs를 Live Server처럼 수행가능한 라이브러리인 `nodemon`이 있다.
+
+
+
+### Code Runner
+
+* 다양한 언어들을 지원하며(js 포함), VS-CODE에서 바로 화살표 버튼으로 파일을 실행할 수 있다.
 
 
 
