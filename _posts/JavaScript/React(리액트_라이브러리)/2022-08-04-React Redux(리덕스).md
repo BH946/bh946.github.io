@@ -352,7 +352,11 @@ export const { updateStart, updateSuccess, updateFailure } = userSlice.actions;
 export default userRedux.reducer;
 ```
 
+<br>
 
+## 참고
+
+[git_redux](https://github.com/safak/youtube/tree/redux)
 
 
 
