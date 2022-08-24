@@ -253,6 +253,22 @@
                     {% endif %}
                 {% endfor %}
             </ul>
+
+        <span class="nav__sub-title">GIT&GITHUB</span>
+            <ul>
+                {% for category in site.categories %}
+                    {% if category[0] == "Cli_Git" %}
+                        <li><a href="/categories/cli_git" class="">CLI 명령어 ({{category[1].size}})</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+            <ul>
+              {% for category in site.categories %}
+                  {% if category[0] == "Action_Git" %}
+                      <li><a href="/categories/action_git" class="">Github Actions ({{category[1].size}})</a></li>
+                  {% endif %}
+              {% endfor %}
+          </ul>
       </li>
   </ul>
 </nav>
