@@ -221,6 +221,13 @@
                     {% endif %}
                 {% endfor %}
             </ul>
+            <ul>
+              {% for category in site.categories %}
+                  {% if category[0] == "Numerical_Analysis" %}
+                      <li><a href="/categories/math_na" class="">Numerical_Analysis ({{category[1].size}})</a></li>
+                  {% endif %}
+              {% endfor %}
+            </ul>
         <span class="nav__sub-title">STYLE SHEET</span>
             <ul>
                 {% for category in site.categories %}
