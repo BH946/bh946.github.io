@@ -32,6 +32,7 @@
 }
 
 .archive__subtitle {
+  font-family: $sans-serif; // 수정후
   margin: 1.414em 0 0.5em;
   padding-bottom: 0.5em;
   font-size: $type-size-5;
@@ -45,7 +46,8 @@
 
 .archive__item-title {
   margin-bottom: 0.25em;
-  font-family: $sans-serif-narrow;
+  // font-family: $sans-serif-narrow; // 수정전
+  font-family: $monospace; // 수정후
   line-height: initial;
   overflow: hidden;
   text-overflow: ellipsis;
