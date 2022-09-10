@@ -14,14 +14,15 @@ $indent-var: 1.3em !default;
 
 /* system typefaces */
 // 이부분은 폰트를 전역변수로 불러오기위해 설정한 부분이다.
-$serif: Georgia, Times, serif !default;
-$sans-serif: "Coming Soon", -apple-system, BlinkMacSystemFont, "Roboto", "Segoe UI",
+$serif: "Coming Soon", Georgia, Times, serif !default;
+$sans-serif: "Iropke Batang", -apple-system, BlinkMacSystemFont, "Roboto", "Segoe UI",
   "Helvetica Neue", "Lucida Grande", Arial, sans-serif !default;
 $monospace: "Nanum Gothic Coding", Monaco, Consolas, "Lucida Console", monospace !default;
+$cute: "Cafe24Oneprettynight" !default;
 
 /* sans serif typefaces */
 $sans-serif-narrow: $sans-serif !default;
-$helvetica: Helvetica, "Helvetica Neue", Arial, sans-serif !default;
+$helvetica: "Cafe24Oneprettynight", Helvetica, "Helvetica Neue", Arial, sans-serif !default;
 
 /* serif typefaces */
 $georgia: Georgia, serif !default;
@@ -153,24 +154,25 @@ $base0f: #ff5370 !default;
 /*
    Breakpoints
    ========================================================================== */
-
+// 창 크기마다 화면 비율이 변하는데 그 기준들
 $small: 600px !default;
 $medium: 768px !default;
 $medium-wide: 900px !default;
 $large: 1024px !default;
-$x-large: 1280px !default;
+// $x-large: 1280px !default; // 수정전
+$x-large: 1400px !default;
 $max-width: $x-large !default;
 
 /*
    Grid
    ========================================================================== */
-
+// 창 크기마다 맞춰 변하는 사이드바 크기
 // $right-sidebar-width-narrow: 200px !default;
 // $right-sidebar-width: 300px !default;
 // $right-sidebar-width-wide: 400px !default;
-$right-sidebar-width-narrow: 150px !default;
-$right-sidebar-width: 200px !default;
-$right-sidebar-width-wide: 250px !default;
+$right-sidebar-width-narrow: 200px !default; // $large에서 설정됨
+$right-sidebar-width: 250px !default; // $x-large에서 설정됨
+$right-sidebar-width-wide: 350px !default; // $max-width인가? 적용된걸 못 봄
 
 /*
    Other
