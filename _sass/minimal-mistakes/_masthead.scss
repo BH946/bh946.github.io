@@ -23,7 +23,8 @@
     -webkit-box-pack: justify;
     -ms-flex-pack: justify;
     justify-content: space-between;
-    font-family: $sans-serif-narrow;
+    font-family: $serif; // 수정
+    font-weight: bold;
 
     @include breakpoint($x-large) {
       max-width: $max-width;
@@ -41,6 +42,7 @@
 
 .site-logo img {
   max-height: 2rem;
+  border-radius: 20%; // 추가
 }
 
 .site-title {
