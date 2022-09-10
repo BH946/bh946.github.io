@@ -20,7 +20,12 @@ layout: default
   <div class="archive">
     {% unless page.header.overlay_color or page.header.overlay_image %}
       <!-- <h1 id="page-title" class="page__title">{{ page.title }}</h1> 수정전 -->
-      <h3 class="archive__subtitle">{{ page.title | default: "Recent Posts" }}</h3>
+      {% if page.title != nil %}
+        <h3 class="archive__subtitle">{{ page.title }}</h3>
+      {% endif %}
+      {% if page.title == nil %}
+        <h3 class="archive__subtitle__default">{{ "Recent Posts" }}</h3>
+      {% endif %}
     {% endunless %}
     {{ content }}
   </div>

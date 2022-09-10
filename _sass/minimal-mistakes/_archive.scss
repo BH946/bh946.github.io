@@ -32,12 +32,30 @@
 }
 
 .archive__subtitle {
-  font-family: $sans-serif; // 수정후
-  margin: 1.414em 0 0.5em;
-  padding-bottom: 0.5em;
-  font-size: $type-size-5;
-  color: $muted-text-color;
+  // margin: 1.414em 0 0.5em; // 수정전
+  margin: 0.8em 0 0;
+  padding-bottom: 0.5em; // 추가
+  margin-bottom: 0.9em; // 추가
+  // font-size: $type-size-5; // 수정전
+  font-size: $type-size-3;
+  color: mix(rgb(84, 100, 173),$primary-color, 40%);
   border-bottom: 1px solid $border-color;
+  font-family: $cute; // 수정후
+
+  + .list__item .archive__item-title {
+    margin-top: 0.5em;
+  }
+}
+
+//추가
+.archive__subtitle__default{
+  margin: 0.8em 0 0;
+  padding-bottom: 0.5em; // 추가
+  margin-bottom: 0.9em; // 추가
+  font-size: $type-size-3;
+  color: mix(rgb(84, 100, 173),$primary-color, 40%);
+  border-bottom: 1px solid $border-color;
+  font-family: $serif; // 수정후
 
   + .list__item .archive__item-title {
     margin-top: 0.5em;
@@ -46,11 +64,11 @@
 
 .archive__item-title {
   margin-bottom: 0.25em;
-  // font-family: $sans-serif-narrow; // 수정전
-  font-family: $monospace; // 수정후
-  line-height: initial;
+  font-family: $cute;
+  line-height: 1.5;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: $type-size-4;
 
   a[rel="permalink"]::before {
     content: '';
@@ -127,6 +145,9 @@
    ========================================================================== */
 
 .list__item {
+  margin-bottom: 0.3em; // 추가
+  font-family: $cute; // 추가
+  font-size: $type-size-4; // 추가
   .page__meta {
     margin: 0 0 4px;
     font-size: 0.6em;
