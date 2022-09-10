@@ -18,7 +18,7 @@ minimal_mistakes_skin    : "mint" # "air", "aqua", "contrast", "dark", "dirt", "
 locale                   : "ko-KR"
 title                    : "BH_Note"
 title_separator          : "|"
-subtitle                 : small positive action
+subtitle                 : 
 name                     : "BH_Note"
 description              : "An amazing website."
 url                      : "https://BH946.github.io"
@@ -102,8 +102,8 @@ analytics:
 # Site Author
 author:
   name             : "BH946"
-  avatar           : # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
-  bio              : "BH946의 개발자 노트입니다."
+  avatar           : "/assets/images/BH_NOTE.png"
+  bio              : "small positive action"
   location         : "South Korea"
   email            : # "kobh2895@gmail.com"
   links:
