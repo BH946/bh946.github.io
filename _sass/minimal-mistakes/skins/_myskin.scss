@@ -1,0 +1,32 @@
+/* ==========================================================================
+   Myskin skin
+   ========================================================================== */
+
+/* Colors */
+$background-color: #ffffff !default;
+$text-color: #202020 !default;
+$primary-color: rgb(59, 100, 150) !default;
+$primary-color1: rgb(59, 59, 150) !default;
+$primary-color2: rgb(59, 150, 59) !default; // 기존
+$border-color: mix(#202020, $background-color, 20%) !default;
+$code-background-color: #b8b8b8 !default;
+$code-background-color-dark: #a7a7a7 !default;
+$form-background-color: mix(rgb(255, 255, 255), $background-color, 15%) !default;
+$footer-background-color: mix(rgb(155, 155, 155), $background-color, 20%) !default;
+$link-color: mix(rgb(0, 142, 181), $text-color, 40%) !default;
+$link-color2: mix(rgb(0, 181, 142), $text-color, 40%) !default; // 기존
+$link-color-hover: mix(rgb(44,44,44), $link-color, 25%) !default;
+$link-color-visited: mix(rgb(0, 142, 181), $text-color, 40%) !default;
+$link-color-visited2: mix(rgb(0, 181, 142), $text-color, 40%) !default; // 기존
+$masthead-link-color: $text-color !default;
+$masthead-link-color-hover: mix(#000, $text-color, 20%) !default;
+$navicon-link-color-hover: mix(#000, $background-color, 30%) !default;
+
+.author__urls.social-icons .svg-inline--fa,
+.page__footer-follow .social-icons .svg-inline--fa {
+  color: inherit;
+}
+
+.ais-search-box .ais-search-box--input {
+  background-color: $form-background-color;
+}
