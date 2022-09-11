@@ -88,17 +88,20 @@ body {
   margin-top: 20px; // 게시글 제목과 본문 거리를 벌리기 위함
 
   h2 {
-    padding-bottom: 0.5em;
-    padding-left: 0.5em;
-    color : black;
-    background-color: $little-white;
-    border-left: 6px solid $little-dark-gray;
-    border-bottom: 2px solid $little-dark-gray;
+    margin: 29px 0 22px;
+    color : #000;
+    border-bottom:2px solid #333333;
+	  border-left:10px solid #333333;
+	  padding: 5px 15px;
+    line-height: 1.5;
   }
   h3 {
-    background-color: $little-blue;
-    color : black;
-    padding : 0.3em;
+    margin: 29px 0 22px;
+    color : #000;
+    border-bottom:2px solid #333333;
+	  border-left:5px solid #333333;
+	  padding: 5px 15px;
+    line-height: 1.5;
   }
 
 	h1, h2, h3, h4, h5, h6 {
@@ -332,18 +335,22 @@ body {
   }
 }
 
-.page__taxonomy-item {
-  display: inline-block;
+.page__taxonomy-item-category {
+  display: inside;
+  margin-top: 5px;
   margin-right: 5px;
   margin-bottom: 8px;
-  padding: 5px 10px;
+  padding: 2px 6px;
   text-decoration: none;
-  border: 1px solid mix(#000, $border-color, 25%);
+  border: 1px solid $background-color;
   border-radius: $border-radius;
+  background-color: #d1d2d3;
+  font-family: $serif;
+  color: $primary-color;
 
   &:hover {
     text-decoration: none;
-    color: $link-color-hover;
+    color: mix(#0091b5, $text-color, 40%); /* 커서 댈 때 색깔 */
   }
 }
 
