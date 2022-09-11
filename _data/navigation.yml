@@ -1,7 +1,7 @@
 # main links
 main:
   - title: "Home"
-    url: /index.html/
+    url: /
   - title: "Category"
     url: /categories/
   - title: "Search"
@@ -11,7 +11,7 @@ docs:
   - title: "BH_NOTE" # 어차피 대문자 나옴(childern은 아님)
     children:
       - title: "Home"
-        url: /index.html/
+        url: /
       - title: "Category"
         url: /categories/
       - title: "Search"
