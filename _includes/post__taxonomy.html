@@ -39,8 +39,7 @@
                     <a href="{{ tag_word | slugify | prepend: path_type | prepend: site.tag_archive.path | relative_url }}" class="page__taxonomy-item-tag" rel="tag"></a>{% unless forloop.last %}<span class="sep"> </span>{% endunless %}
                     <!-- 원래 a태그 사이에 {{ tag_word }} 로 구성된걸 수정했음 -->
                     {% if check %} <!-- true면 -->
-                        ...
-                        {% assign check = false %} <!-- false로 다시 초기화해서 ...을 1번만 나오게 -->
+                        {% assign check = false %} <!-- false로 다시 초기화해서 빈 공백 나오게 -->
                     {% endif %}
                 {% endfor %}
             </span>
