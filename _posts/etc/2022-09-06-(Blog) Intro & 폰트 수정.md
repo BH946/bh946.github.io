@@ -28,7 +28,7 @@ typora-root-url: ../../..
 
 
 **아래 다시 언급하지만, 폰트 설정하는 흐름을 여기서는 잘 파악하고  
-나의 블로그처럼 설정하고 싶다면 "_variables.scss 재설정" 게시물을 잘 확인할것**
+나의 블로그처럼 설정하고 싶다면 ["_variables.scss 재설정"](https://bh946.github.io/blog/(Blog)-_variables.scss-재설정-&-전반적인-폰트-수정/) 게시물을 잘 확인할것**
 
 <br>
 
@@ -52,7 +52,7 @@ typora-root-url: ../../..
 ### 적용방법
 
 **중요!!!) 여기서는 사용법, 흐름만 익히고, 나의 블로그처럼 폰트를 적용하려면 아래처럼 적용하지말고   
-아래 "_variables.scss 재설정" 파트를 꼭꼭 참고해서 따라할것.**
+아래 ["_variables.scss 재설정"](https://bh946.github.io/blog/(Blog)-_variables.scss-재설정-&-전반적인-폰트-수정/) 파트를 꼭꼭 참고해서 따라할것.**
 
 
 
