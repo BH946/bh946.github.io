@@ -1,7 +1,7 @@
 ---
 title:  "[개념] Dynamic_Programming(동적계획법)"
 categories : Algorithm
-tag : [알고리즘]
+tag : [알고리즘, DP조건, 피보나치의 수, 이항계수, 격자경로, Coin Changing Using DP, 연쇄 행렬곱셈(Matrix-chain Multiplication), 최단거리(Floyd), LCS(Find a Longest Common Subsequence), OBST(Optimal Binary Search Tree), 0-1 Knapsack]
 toc: true
 toc_sticky: true
 author_profile: false
@@ -430,6 +430,38 @@ longest ... 란 이 공통된것 중에서 젤 긴것을 구하는 것.
 ![image-20230101205505752](/images/2022-12-30-(개념) Dynamic_Programming(동적계획법)/image-20230101205505752.png)
 
 * **최종 모습**
+
+
+
+### 0-1 Knapsack(DP)
+
+**0-1 Knapsack란 배낭을 빈틈없이 채우는데 품목(item)은 쪼갤 수 없는 알고리즘이다.   
+여러 품목(item)들 중에서 정해진 무게(W)만큼 채워서 최대한 많은 이득을 취할 수 있는 문제를 다룬다.**
+
+무게 큰거부터 차례로 넣어가고, 남은건 쪼개서 담으면 되기때문에 탐욕(그리디)방법으로 풀 수 있다.   
+**하지만 물건을 쪼갤수 없는 상태면?? `0-1 Knapsack`의 문제가 되는것이다.**    
+`Fractional Knapsack`과 `0-1 Knapsack`을 구별할 것
+
+* Greedy는 `Fractional Knapsack` 가능, `0-1 Knapsack` 불가
+* 따라서 `0-1 Knapsack`은 DP로 구현
+
+
+
+![image-20230103020741484](/images/2022-12-30-(개념) Dynamic_Programming(동적계획법)/image-20230103020741484-16726800286511.png)
+
+* `P[n][W]` = 최종 우리가 구할 값(n:전체 품목, W:주어진 전체 무게)
+* ![img](/images/2022-12-30-(개념) Dynamic_Programming(동적계획법)/DRW00000d985f75-16726800286512.gif)   : i번째 물건의 무게가 가방 여유 w무게 보다 큰 경우(즉, 물건 못 넣음)
+* ![img](/images/2022-12-30-(개념) Dynamic_Programming(동적계획법)/DRW00000d985f77-16726800286513.gif)   : i번째 물건의 무게가 가방 여유 w무게 보다 같거나 작은 경우(즉, 물건 넣을 수도 있음)
+
+* **위 공식으로 P배열을 채워나간다.**
+  * 중요한점은 너무 쓸데없는 값들도 배열에 연산해서 저장을한다는 점이다.
+  * 따라서 아래 그림을 보면 훨씬 연산량을 단축 시키는 방법이 있다.
+
+
+
+![image-20230103021630131](/images/2022-12-30-(개념) Dynamic_Programming(동적계획법)/image-20230103021630131-16726800286514.png)
+
+* 모든 배열 값을 구할필요가 없으니까 필요한것만 구하자는 의미
 
 <br>
 
