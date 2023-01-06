@@ -14,7 +14,7 @@ typora-root-url: ../../..
 
 ## 문제
 
-![screen captures](/images\2023-01-06-(수업)Spin And Slide\13615de6-76e5-4784-ac9f-ba56d54b4b16-16730061121091.png)
+![screen captures](/images/2023-01-06-(수업)Spin And Slide/13615de6-76e5-4784-ac9f-ba56d54b4b16-16730061121091.png)
 
 ![image-20230106210141300](/images/2023-01-06-(수업)Spin And Slide/image-20230106210141300.png)
 
