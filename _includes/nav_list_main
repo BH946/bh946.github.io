@@ -47,11 +47,18 @@
             </ul>
             <ul>
                 {% for category in site.categories %}
-                    {% if category[0] == "STL" %}
-                        <li><a href="/categories/stl" class="">C++ STL & 표준 ({{category[1].size}})</a></li>
+                    {% if category[0] == "Baekjoon" %}
+                        <li><a href="/categories/baekjoon" class="">Baekjoon(백준 개념) ({{category[1].size}})</a></li>
                     {% endif %}
                 {% endfor %}
             </ul>
+            <ul>
+              {% for category in site.categories %}
+                  {% if category[0] == "BaekjoonTest" %}
+                      <li><a href="/categories/baekjoontest" class="">Baekjoon(백준 문제) ({{category[1].size}})</a></li>
+                  {% endif %}
+              {% endfor %}
+          </ul>
         <span class="nav__sub-title">ASSEMBLY</span>
             <ul>
                 {% for category in site.categories %}
