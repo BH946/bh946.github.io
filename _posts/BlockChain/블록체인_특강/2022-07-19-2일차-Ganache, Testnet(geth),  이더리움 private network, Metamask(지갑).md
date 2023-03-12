@@ -9,8 +9,6 @@ sidebar:
   nav: "docs"
 typora-root-url: ../../..
 
-
-
 ---
 
 
@@ -21,7 +19,7 @@ typora-root-url: ../../..
 
 추가로 어디서든 다 사용하는 `Metamask`  또한 실습하겠다. (지갑 같은것)
 
-
+<br>
 
 **Testnet, private network 때 사용한 명령어 모음**
 
@@ -116,27 +114,27 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 명령어로 수행하면 metamask에서 rpc url (http://127.0.0.1), 체인 id (719), 통화기호 (ETH)로 생성 잘 됩니다.
 ```
 
-<br>
+<br><br>
 
 ## Ganache 가상 network 구축
 
 * Ganache는 이더리움 도구이며, 실행시 가상 머신으로서 자동으로 네트워크 구축을 해준다.
 * Metamask로 거래까지 테스트
 
-
+<br>
 
 ### Ganache 설치
 
 * [설치(이더리움 도구)](https://trufflesuite.com/ganache/)
 * 개발 테스트를 위한 **가상 머신 프로그램** - **네트워크 구축** 하는것이다.
 
-
+<br>
 
 **실행시 이렇게 이더리움 서버를 구동하는 것이다.**
 
 ![image-20220723195142323](/images\2022-07-19-2일차-이더리움 private network 구축 + 테스트넷\image-20220723195142323.png)
 
-
+<br>
 
 **이렇게 구동하기 위해선 프로젝트 생성을 해야한다.**  
 
@@ -144,11 +142,13 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 
 ![image-20220723200044384](/images\2022-07-19-2일차-이더리움 private network 구축 + 테스트넷\image-20220723200044384-16585740597561.png)
 
-
+<br>
 
 **먼저, 프로젝트 명 설정**
 
 ![image-20220719101215601](/images\2022-07-19-2일차\image-20220719101215601.png)
+
+<br>
 
 **서버 설정**
 
@@ -159,7 +159,7 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 
 ![image-20220723195659219](/images\2022-07-19-2일차-이더리움 private network 구축 + 테스트넷\image-20220723195659219.png)
 
-
+<br>
 
 **ACCOUNT 와 KEYS 설정**
 
@@ -171,7 +171,7 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 
 ![image-20220719101145501](/images\2022-07-19-2일차\image-20220719101145501.png)
 
-
+<br>
 
 **가스(=수수료) 설정**
 
@@ -179,7 +179,7 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
   예로 **0.000000001 이더 = 1gwei** 라고 말할 수 있다.
 * **GAS USED(사용한 가스, 가스 한도)**는 데이터 크기나 등등에 따라 다르며 보낼때 결정된다.
 
-
+<br>
 
 `첫번째 사진`은 가스(=수수료) 계산이 어떻게 되는지 이해가 안갈것 같아서 예시로 보여준 사진이다.
 
@@ -188,7 +188,7 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
   * **Total GAS = 0.000021 ETH x 20 ETH = 0.00042 ETH**
   * **총 합계 수수료 = GAS USED x GAS PRICE** 이다.
 
-
+<br>
 
 `두번째 사진`은 Ganache에 가스 설정하는 모습이다. (발신자가 정한 가격들이다)
 
@@ -203,7 +203,7 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 
 ![image-20220723200353453](/images\2022-07-19-2일차-이더리움 private network 구축 + 테스트넷\image-20220723200353453.png)
 
-
+<br>
 
 **저장후 실행화면**
 
@@ -214,7 +214,7 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 
 ![image-20220719101240923](/images\2022-07-19-2일차\image-20220719101240923.png)
 
-
+<br>
 
 **트랜잭션이 해당 서버에 들어오면 아래화면에 블록이 생성이 될것이다.  **
 
@@ -232,7 +232,7 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 
 **회원가입 하면 받을 것이니까 따로 메모장에 기억해 둘것**
 
-
+<br>
 
 #### Ganache와 MetaMask를 네트워크를 서로 연동
 
@@ -242,13 +242,13 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 
 ![image-20220719103028497](/images\2022-07-19-2일차\image-20220719103028497.png)
 
-
+<br>
 
 **아래 네트워크 구성은 Ganache의 RPC SERVER, NETWORK ID 를 참고해 기입한다.**
 
 ![image-20220719103445485](/images\2022-07-19-2일차\image-20220719103445485.png)
 
-
+<br>
 
 #### 계정 가져오기 테스트
 
@@ -256,13 +256,13 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 
 ![image-20220719104018972](/images\2022-07-19-2일차\image-20220719104018972.png)
 
-
+<br>
 
 **Ganache private key 예시**
 
 ![image-20220719103926870](/images\2022-07-19-2일차\image-20220719103926870.png)
 
-
+<br>
 
 #### 보내기 테스트
 
@@ -272,7 +272,7 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 
 ![image-20220719104349683](/images\2022-07-19-2일차\image-20220719104349683.png)
 
-<br>
+<br><br>
 
 ## Testnet 접속
 
@@ -285,7 +285,7 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 **메인넷**을 사용할건 아니기 때문에 종료하는 것이다.  
 **geth ==> mainnet(메인넷) 이며 실제로 사용되는 ethereum network 이다.**
 
-
+<br>
 
 ### ERROR
 
@@ -294,7 +294,7 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 
 ![image-20220719105428029](/images\2022-07-19-2일차\image-20220719105428029.png)
 
-
+<br>
 
 ### 이더스캔을 통해 이더리움 확인
 
@@ -307,7 +307,7 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 * 네트워크는 테스트를 위해 `Ropsten 테스트 네트워크로 변경`한다.
 * [이더스캔의 ropsten](https://ropsten.etherscan.io/address/0x91a11E6283c361e54D6b0d22199166131748BB03) 접속을 해서 이더리움 볼 수 있으며, 이것은 **테스트 넷**이며 메인넷은 당연히 아니다.
 
-
+<br>
 
 **아래 사진은 구매를 통해 2 RopstenETH를 얻은 모습이다.**
 
@@ -315,7 +315,7 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 
 ![image-20220719113316863](/images\2022-07-19-2일차\image-20220719113316863.png)
 
-
+<br>
 
 ### 테스트넷 동기화
 
@@ -335,7 +335,7 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 `Imported new block ...` 이런식으로 나오기 시작하면 동기화가 성공한것이다.   
 테스트넷 구동중인 노드(컴퓨터)와 연결하는 것이니 상당히 오래 걸린다.
 
-
+<br>
 
 **새로운 콘솔창 띄우고**
 
@@ -345,7 +345,7 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 
 ![image-20220719115250262](/images\2022-07-19-2일차\image-20220719115250262.png)
 
-<br>
+<br><br>
 
 ## 이더리움 Private Network 구축
 
@@ -357,7 +357,7 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 
 ![image-20220719133327805](/images\2022-07-19-2일차\image-20220719133327805.png)
 
-
+<br>
 
 **정리화면**
 
@@ -365,7 +365,7 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 
 ![image-20220719133507886](/images\2022-07-19-2일차\image-20220719133507886.png)
 
-
+<br>
 
 ### Atom 설치 및 JSON
 
@@ -377,7 +377,7 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 
 ![image-20220719141716908](/images\2022-07-19-2일차\image-20220719141716908.png)
 
-
+<br>
 
 **각 노드 폴더마다 터미널 접근(한개 터미널이 한개의 컴퓨터)**
 
@@ -385,7 +385,7 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 
 ![image-20220719141348379](/images\2022-07-19-2일차\image-20220719141348379.png)
 
-
+<br>
 
 ### 네트워크 실행(채굴)
 
@@ -395,7 +395,7 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 geth --networkid 719 --datadir C:/Users/경로../node1 --ipcdisable --http.port 8545 --ws.port 8546 --http.api admin,db,eth,debug,miner,net,shh,txpool,personal,web3 --ws.api admin,db,eth,debug,miner,net,shh,txpool,personal,web3 --mine --port 30304 --allow-insecure-unlock --nat=extip:127.0.0.1 console
 ```
 
-
+<br>
 
 * enter입력하면 계속 다른것 입력 가능, admin 입력후 **enode정보** 가져올것.  
   **enode는 노드의 주소**라고 생각
@@ -410,7 +410,7 @@ geth --networkid 719 --datadir C:/Users/경로../node1 --ipcdisable --http.port 
 
 이작업이 끝나면 그림처럼 노드끼리 서로 연결된것이다.
 
-
+<br>
 
 * **miner.start()** 입력시 **채굴 실행** - 하나에만 하면 된다.
   * null 이후 Successfuly.... 등등 빠르게 동기화시작
@@ -422,7 +422,7 @@ geth --networkid 719 --datadir C:/Users/경로../node1 --ipcdisable --http.port 
 
 **참고 : 첫번째 터미널이 채굴했던 노드이고, number이 600대이다. 저만큼 채굴한것이고, 나머지를 보면 200대인데 동기화때문에 조금 천천히 채굴한 블록들을 받아오고 있는 중인 것이다.**
 
-
+<br>
 
 ### METAMASK에서 확인
 

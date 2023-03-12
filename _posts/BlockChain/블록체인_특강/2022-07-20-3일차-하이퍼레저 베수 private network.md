@@ -9,8 +9,6 @@ sidebar:
   nav: "docs"
 typora-root-url: ../../..
 
-
-
 ---
 
 
@@ -28,11 +26,11 @@ typora-root-url: ../../..
 이전에 `이더리움`에서 구축한 private 네트워크는 메타마스크에서 확인까지는 안했지만,  
 이번 `베수` 로 구축한 private 네트워크는 메타마스크까지 전부 확인해 보겠다.
 
-
+<br>
 
 **사용 명령어**
 
-```
+```bash
 java -version
 
 ls
@@ -91,14 +89,14 @@ besu --data-path=data --genesis-file=../genesis.json --bootnodes=enode://f9e20f0
 
 이전에 한 `이더리움에서 private 네트워크 구축`과 `하이퍼레저 베수 private 네트워크 구축`의 흐름은 매우 유사하므로 전혀 어렵지 않다.
 
-
+<br>
 
 ### Java설치
 
 * [공식문서](https://www.oracle.com/java/technologies/downloads/#java18)
 * JDK 18버전으로 설치하겠다.
 
-
+<br>
 
 ### GIT
 
@@ -107,7 +105,7 @@ besu --data-path=data --genesis-file=../genesis.json --bootnodes=enode://f9e20f0
 * 다운받은 폴더에 `git bash`로 들어가서` ./gradlew installDist` 명령어 입력(설치시작)
   * 다운 시간이 좀 걸리며, 에러의 원인은 대부분 JDK문제
 
-
+<br>
 
 ### 환경변수 설정
 
@@ -118,36 +116,36 @@ besu --data-path=data --genesis-file=../genesis.json --bootnodes=enode://f9e20f0
   이를 항상 `cd`로 **접근**해서 하는건 귀찮기 때문에  
   `환경변수`로 경로를 설정해서 `besu 명령어`를 어**디서든 실행** 가능하게 하는것이다.
 
-
+<br>
 
 **아래는 윈도우10 기준이다.**
 
 ![image-20220720113644585](/images\2022-07-20-3일차\image-20220720113644585.png)
 
-
+<br>
 
 **보통 사용자 변수를 먼저 수정해보는걸 추천하고, 그래도 안된다면 시스템 변수를 건드린다.**
 
 ![image-20220720113814879](/images\2022-07-20-3일차\image-20220720113814879.png)
 
-
+<br>
 
 **이런식으로 besu 경로를 설정하면 된다.**  
 **예시는 현재 바탕화면(Desktop)에 있는 besu 경로를 설정한 것이다.**
 
 ![image-20220720113912847](/images\2022-07-20-3일차\image-20220720113912847.png)
 
-
+<br>
 
 **마지막으로 터미널에 besu 명령어 입력시 많은 문자들이 주르륵 나오면 성공이다.**
 
-
+<br>
 
 ### 폴더 생성
 
 ![image-20220720130736740](/images\2022-07-20-3일차\image-20220720130736740.png)
 
-
+<br>
 
 ### Account 생성
 
@@ -159,7 +157,7 @@ besu --data-path=data --genesis-file=../genesis.json --bootnodes=enode://f9e20f0
 
 ![image-20220720131111627](/images\2022-07-20-3일차\image-20220720131111627.png)
 
-
+<br>
 
 ### genesis.json
 
@@ -219,11 +217,13 @@ besu --data-path=data --genesis-file=../genesis.json --bootnodes=enode://f9e20f0
 }
 ```
 
-
+<br>
 
 ### ibftConfigFile.json 기반 Key 파일 생성
 
 * 해당 폴더에서 터미널로 아래 명령어 실행후 `networkFiles 폴더가 생성`된다.
+
+<br>
 
 **networkFiles 폴더 생성 - 환경변수 한 경우**
 
@@ -231,31 +231,33 @@ besu --data-path=data --genesis-file=../genesis.json --bootnodes=enode://f9e20f0
 besu operator generate-blockchain-config --config-file=ibftConfigFile.json --to=networkFiles --private-key-file-name=key
 ```
 
+<br>
+
 **networkFiles 폴더 생성 - 환경변수 안한 경우**
 
 ```
 ./besu operator generate-blockchain-config --config-file=~~경로~~~~/ibftConfigFile.json --to=~~~경로~~~~/networkFiles --private-key-file-name=key
 ```
 
-
+<br>
 
 `networkFiles` 폴더안에 생성된 `genesis.json` 파일을 아래 사진처럼 위치 옮길것.
 
 ![image-20220720135246377](/images\2022-07-20-3일차\image-20220720135246377.png)
 
-
+<br>
 
 `networkFiles` 폴더안에 `keys`폴더안에 있는 `key파일`들은 각각 `node`폴더안에 `data` 폴더에 이동
 
 ![image-20220720135355399](/images\2022-07-20-3일차\image-20220720135355399.png)
 
-
+<br>
 
 **파일구성된 모습**
 
 ![image-20220720135456266](/images\2022-07-20-3일차\image-20220720135456266.png)
 
-
+<br>
 
 ### enode
 
@@ -264,14 +266,14 @@ besu operator generate-blockchain-config --config-file=ibftConfigFile.json --to=
 
 **실행 명령어**
 
-```
+```bash
 besu --data-path=data --genesis-file=../genesis.json --rpc-http-enabled --rpc-http-api=ETH,NET,IBFT --host-allowlist="*" --rpc-http-cors-origins="all"
 
 만약 환경설정 아닌경우는? 아래코드
 ./besu --data-path=C:/Users/...경로/node1/data --genesis-file=C:/Users/...경로/genesis.json --rpc-http-enabled --rpc-http-api=ETH,NET,IBFT --host-allowlist="*" --rpc-http-cors-origins="all"
 ```
 
-
+<br>
 
 **node1 enode**
 
@@ -279,7 +281,7 @@ besu --data-path=data --genesis-file=../genesis.json --rpc-http-enabled --rpc-ht
 
 ![image-20220720143204929](/images\2022-07-20-3일차\image-20220720143204929.png)
 
-
+<br>
 
 ### 노드 실행 명령어 만들기1
 
@@ -290,7 +292,7 @@ besu --data-path=data --genesis-file=../genesis.json --rpc-http-enabled --rpc-ht
 
 ![image-20220720143827198](/images\2022-07-20-3일차\image-20220720143827198.png)
 
-
+<br>
 
 ### 참고사진
 
@@ -302,11 +304,13 @@ besu --data-path=data --genesis-file=../genesis.json --rpc-http-enabled --rpc-ht
 
 ![image-20220720144042127](/images\2022-07-20-3일차\image-20220720144042127.png)
 
-<br>
+<br><br>
 
 ## POSTMAN으로 데이터 확인
 
 * postman은 api 테스트할때 많이 사용해봤으니 무엇인지 설명은 생략
+
+<br>
 
 [postman fork](https://besu.hyperledger.org/en/stable/HowTo/Interact/APIs/Using-JSON-RPC-API/) 사이트에서 -> run postman -> fork
 
@@ -314,20 +318,20 @@ besu --data-path=data --genesis-file=../genesis.json --rpc-http-enabled --rpc-ht
 
 ![image-20220720153922207](/images\2022-07-20-3일차\image-20220720153922207.png)
 
-
+<br>
 
 이처럼 fork한것을 알 수 있고, 이를 통해 테스트 해볼 수 있다.
 
 어떻게 보면 node실행한 것들이 블록체인으로 서버 DB가 된거라 볼수 있다.
 
-
+<br>
 
 실제 테스트 해보면(8545로)  
 아래처럼 블록을 가져온것을 볼 수 있다.
 
 ![image-20220720154955320](/images\2022-07-20-3일차\image-20220720154955320.png)
 
-<br>
+<br><br>
 
 ## MetaMask로 테스트
 
@@ -339,19 +343,19 @@ besu --data-path=data --genesis-file=../genesis.json --rpc-http-enabled --rpc-ht
 
 ![image-20220720160444143](/images\2022-07-20-3일차\image-20220720160444143.png)
 
-
+<br>
 
 **그후 계정을 가져온다(지갑 가져오기)**
 
 * node1과, node2의 지갑을 가져오겠다(`Private Key`활용)
 
-
+<br>
 
 **그리고 node1의 블록을 node2로 `10 SEO`만큼 보내겠다(전송 테스트)**
 
 * 이때는 `Public Key`를 활용한다
 
-
+<br>
 
 **처음 `200 SEO`와 `90000 SEO`가 아래처럼 잘 변경되었다.**
 
@@ -359,7 +363,7 @@ besu --data-path=data --genesis-file=../genesis.json --rpc-http-enabled --rpc-ht
 
 ![image-20220720161453616](/images\2022-07-20-3일차\image-20220720161453616.png)
 
-<br>
+<br><br>
 
 ## 블록체인 기반의 DAPP 시스템
 
@@ -372,7 +376,7 @@ besu --data-path=data --genesis-file=../genesis.json --rpc-http-enabled --rpc-ht
 
 **세부사항 : BC <----> SC <---> SDK <---> Node.js <---> UI <---> 사용자**
 
-<br>
+<br><br>
 
 ## 후기
 
