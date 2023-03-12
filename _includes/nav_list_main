@@ -33,20 +33,6 @@
                 <!--Cpp 카테고리 글들을 모아둔 페이지인 /categories/algo 주소의 글로 링크 연결-->
                 <!--category[1].size 로 해당 카테고리를 가진 글의 개수 표시--> 
                 {% for category in site.categories %}
-                    {% if category[0] == "Algorithm" %}
-                        <li><a href="/categories/algo" class="">Algorithm(알고리즘 개념) ({{category[1].size}})</a></li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
-            <ul>
-                {% for category in site.categories %}
-                    {% if category[0] == "AlgorithmTest" %}
-                        <li><a href="/categories/algotest" class="">Algorithm(알고리즘 문제) ({{category[1].size}})</a></li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
-            <ul>
-                {% for category in site.categories %}
                     {% if category[0] == "Baekjoon" %}
                         <li><a href="/categories/baekjoon" class="">Baekjoon(백준 개념) ({{category[1].size}})</a></li>
                     {% endif %}
@@ -66,22 +52,7 @@
                 {% endif %}
             {% endfor %}
         </ul>
-        <span class="nav__sub-title">ASSEMBLY</span>
-            <ul>
-                {% for category in site.categories %}
-                    {% if category[0] == "Assembly" %}
-                        <li><a href="/categories/assembly" class="">Assembly(어셈블리) ({{category[1].size}})</a></li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
-            <ul>
-                {% for category in site.categories %}
-                    {% if category[0] == "Programmers" %}
-                        <li><a href="/categories/programmers" class="">프로그래머스 ({{category[1].size}})</a></li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
-        <span class="nav__sub-title">C&C++</span>
+        <span class="nav__sub-title">LANGUAGE</span>
             <ul>
                 {% for category in site.categories %}
                     {% if category[0] == "C" %}
@@ -96,6 +67,34 @@
                     {% endif %}
                 {% endfor %}
             </ul>
+            <ul>
+                {% for category in site.categories %}
+                    {% if category[0] == "Java" %}
+                        <li><a href="/categories/java" class="">Java(자바) ({{category[1].size}})</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+            <ul>
+                {% for category in site.categories %}
+                    {% if category[0] == "Kotlin" %}
+                        <li><a href="/categories/kotlin" class="">Kotlin(코틀린) ({{category[1].size}})</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+            <ul>
+              {% for category in site.categories %}
+                  {% if category[0] == "PY" %}
+                      <li><a href="/categories/py" class="">Python(파이썬) ({{category[1].size}})</a></li>
+                  {% endif %}
+              {% endfor %}
+            </ul>
+            <ul>
+              {% for category in site.categories %}
+                  {% if category[0] == "Assembly" %}
+                      <li><a href="/categories/assembly" class="">Assembly(어셈블리) ({{category[1].size}})</a></li>
+                  {% endif %}
+              {% endfor %}
+          </ul>
         <span class="nav__sub-title">CODE EDITOR</span>
             <ul>
                 {% for category in site.categories %}
@@ -118,22 +117,7 @@
                     {% endif %}
                 {% endfor %}
             </ul>
-        <span class="nav__sub-title">JAVA&KOTLIN</span>
-            <ul>
-                {% for category in site.categories %}
-                    {% if category[0] == "Java" %}
-                        <li><a href="/categories/java" class="">Java(자바) ({{category[1].size}})</a></li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
-            <ul>
-                {% for category in site.categories %}
-                    {% if category[0] == "Kotlin" %}
-                        <li><a href="/categories/kotlin" class="">Kotlin(코틀린) ({{category[1].size}})</a></li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
-        <span class="nav__sub-title">WEB</span>
+        <span class="nav__sub-title">WEB&JAVASCRIPT</span>
             <ul>
                 {% for category in site.categories %}
                     {% if category[0] == "WebProgramming" %}
@@ -141,14 +125,6 @@
                     {% endif %}
                 {% endfor %}
             </ul>
-            <ul>
-                {% for category in site.categories %}
-                    {% if category[0] == "WebScraping" %}
-                        <li><a href="/categories/webs" class="">웹 스크래핑(파싱) ({{category[1].size}})</a></li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
-        <span class="nav__sub-title">JAVASCRIPT</span>
             <ul>
                 {% for category in site.categories %}
                     {% if category[0] == "Modern_JavaScript_Deep_Dive" %}
@@ -170,53 +146,11 @@
                   {% endif %}
               {% endfor %}
             </ul>
-        <span class="nav__sub-title">PYTHON</span>
-            <ul>
-                {% for category in site.categories %}
-                    {% if category[0] == "Basic_Concept_PY" %}
-                        <li><a href="/categories/bc_py" class="">Basic_Concept(기초개념) ({{category[1].size}})</a></li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
-            <ul>
-                {% for category in site.categories %}
-                    {% if category[0] == "Data_Process_PY" %}
-                        <li><a href="/categories/dp_py" class="">Data_Process(기초개념) ({{category[1].size}})</a></li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
-            <ul>
-                {% for category in site.categories %}
-                    {% if category[0] == "File_IO_PY" %}
-                        <li><a href="/categories/io_py" class="">File_IO(파일입출력) ({{category[1].size}})</a></li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
-            <ul>
-                {% for category in site.categories %}
-                    {% if category[0] == "Graph_Process_PY" %}
-                        <li><a href="/categories/gp_py" class="">Graph_Process(그래프처리) ({{category[1].size}})</a></li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
-            <ul>
-                {% for category in site.categories %}
-                    {% if category[0] == "GUI_PY" %}
-                        <li><a href="/categories/gui_py" class="">GUI(구이) ({{category[1].size}})</a></li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
-            <ul>
-                {% for category in site.categories %}
-                    {% if category[0] == "Image_Process_PY" %}
-                        <li><a href="/categories/ip_py" class="">Image_Process(이미지처리) ({{category[1].size}})</a></li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
+        <span class="nav__sub-title">ML&DL</span>
             <ul>
               {% for category in site.categories %}
-                  {% if category[0] == "Machine_Learning_PY" %}
-                      <li><a href="/categories/ml_py" class="">Machine_Learning(머신러닝) ({{category[1].size}})</a></li>
+                  {% if category[0] == "Machine_Learning" %}
+                      <li><a href="/categories/ml" class="">Machine_Learning(머신러닝) ({{category[1].size}})</a></li>
                   {% endif %}
               {% endfor %}
             </ul>
@@ -249,6 +183,20 @@
                   {% endif %}
               {% endfor %}
             </ul>
+            <ul>
+              {% for category in site.categories %}
+                  {% if category[0] == "Algorithm" %}
+                      <li><a href="/categories/algo" class="">Algorithm(알고리즘 개념) ({{category[1].size}})</a></li>
+                  {% endif %}
+              {% endfor %}
+            </ul>
+            <ul>
+              {% for category in site.categories %}
+                  {% if category[0] == "AlgorithmTest" %}
+                      <li><a href="/categories/algotest" class="">Algorithm(알고리즘 문제) ({{category[1].size}})</a></li>
+                  {% endif %}
+              {% endfor %}
+            </ul>
         <span class="nav__sub-title">STYLE SHEET</span>
             <ul>
                 {% for category in site.categories %}
@@ -257,22 +205,6 @@
                     {% endif %}
                 {% endfor %}
             </ul>
-        <span class="nav__sub-title">APP</span>
-            <ul>
-                {% for category in site.categories %}
-                    {% if category[0] == "Cross_Flatform_App" %}
-                        <li><a href="/categories/cf_app" class="">크로스플랫폼 앱 ({{category[1].size}})</a></li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
-            <ul>
-                {% for category in site.categories %}
-                    {% if category[0] == "Native_App" %}
-                        <li><a href="/categories/nt_app" class="">네이티브 앱 ({{category[1].size}})</a></li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
-        
         <span class="nav__sub-title">BLOCKCHAIN</span>
             <ul>
                 {% for category in site.categories %}
@@ -305,6 +237,13 @@
                       <li><a href="/categories/blog" class="">Blog ({{category[1].size}})</a></li>
                   {% endif %}
               {% endfor %}
+          </ul>
+          <ul>
+            {% for category in site.categories %}
+                {% if category[0] == "StPr" %}
+                    <li><a href="/categories/stpr" class="">Study&Project ({{category[1].size}})</a></li>
+                {% endif %}
+            {% endfor %}
           </ul>
       </li>
   </ul>
