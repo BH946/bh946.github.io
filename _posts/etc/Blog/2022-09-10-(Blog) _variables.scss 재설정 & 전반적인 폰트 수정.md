@@ -14,8 +14,6 @@ typora-root-url: ../../..
 
 ## _variables.scss 재설정 & 전반적인 폰트 수정
 
-
-
 ### 적용 방법 추가
 
 **이전에 css방식으로 @import로 폰트 추가했는데, 이를 html의 head에서 불러오는 방식으로 변경**
@@ -38,7 +36,7 @@ typora-root-url: ../../..
     <link rel="preload" as="style" href="{{ '/assets/css/main.css' | relative_url }}">
 ```
 
-
+<br>
 
 **다만, 새로운 폰트 하나는 @import 방식으로 여전히 추가할것임**
 
@@ -54,9 +52,7 @@ typora-root-url: ../../..
 }
 ```
 
-
-
-
+<br>
 
 ### 전역변수 이름 추가 및 수정
 
@@ -74,13 +70,9 @@ $sans-serif-narrow: $sans-serif !default;
 $helvetica: "Cafe24Oneprettynight", Helvetica, "Helvetica Neue", Arial, sans-serif !default;
 ```
 
-
-
-
+<br>
 
 ### 폰트 재설정
-
-
 
 #### 왼쪽 사이드바 부분
 
@@ -132,7 +124,7 @@ $helvetica: "Cafe24Oneprettynight", Helvetica, "Helvetica Neue", Arial, sans-ser
 }
 ```
 
-
+<br>
 
 **왼쪽 사이드바 부분의 위쪽을 의미**
 
@@ -164,9 +156,7 @@ $helvetica: "Cafe24Oneprettynight", Helvetica, "Helvetica Neue", Arial, sans-ser
 }
 ```
 
-
-
-
+<br>
 
 #### breadcrumbs - 경로 보이는곳
 
@@ -181,9 +171,7 @@ $helvetica: "Cafe24Oneprettynight", Helvetica, "Helvetica Neue", Arial, sans-ser
 }
 ```
 
-
-
-
+<br>
 
 #### 제일 상위바 부분
 
@@ -199,9 +187,7 @@ $helvetica: "Cafe24Oneprettynight", Helvetica, "Helvetica Neue", Arial, sans-ser
 }
 ```
 
-
-
-
+<br>
 
 #### 게시글 제목들 모음 페이지
 
@@ -230,9 +216,7 @@ $helvetica: "Cafe24Oneprettynight", Helvetica, "Helvetica Neue", Arial, sans-ser
 }
 ```
 
-
-
-
+<br>
 
 #### 게시글 본문 설정
 
@@ -252,7 +236,7 @@ $helvetica: "Cafe24Oneprettynight", Helvetica, "Helvetica Neue", Arial, sans-ser
 }
 ```
 
-
+<br>
 
 본문 폰트를 안건들였으면 문제가없지만, 건들였다면 수정을 할 필요가 있다.
 

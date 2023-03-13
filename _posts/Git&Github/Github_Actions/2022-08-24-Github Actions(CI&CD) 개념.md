@@ -16,9 +16,9 @@ typora-root-url: ../../..
 
 **GitHub Actions**는 코드 저장소(repository)로 유명한 **GitHub**에서 제공하는 CI(Continuous Integration, 지속 통합)와 CD(Continuous Deployment, 지속 배포)를 위한 소프트웨어 개발 **Workflow**를 자동화 할 수 있는 서비스 이다.
 
-해외 기업이기 때문에 해외 IP를 사용하니 개발하면서 **해외서버로 접속**된다는것을 참고 해야한다.
+해외 기업이기 때문에 해외 IP를 사용하니 개발하면서 **해외 서버로 접속**된다는것을 참고 해야한다.
 
-
+<br>
 
 ### CI란?
 
@@ -27,7 +27,7 @@ CI 명칭은 `지속적인 통합(Continuous Integration)` 이라는 뜻을 가�
 여러 사람들이 같은 코드를 작업 할 경우 서로 충돌할 수 있는데,  
 **커밋할 때마다 빌드와 일련의 자동 테스트가 이루어져서 문제가 생기는 부분이 없도록 보장해주는 장점이 있다.**
 
-
+<br>
 
 ### CD란?
 
@@ -35,7 +35,7 @@ CD 명칭은 `지속적인 서비스 제공(Continuous Delivery)` 또는 `지속
 
 **코드 변경이 모두 성공적으로 통과하면 수동 개입 없이 자동으로 해당 변경사항이 배포되는 장점이 있다.**
 
-<br>
+<br><br>
 
 ## 깃허브 액션의 주요 개념
 
@@ -43,17 +43,17 @@ CD 명칭은 `지속적인 서비스 제공(Continuous Delivery)` 또는 `지속
 
 참고 사이트 : [URL](https://insight-bgh.tistory.com/m/473), [git-acion-smartstore](https://github.com/BH946/git-action-smartstore/blob/main/.github/workflows/python-package.yml)
 
-
+<br>
 
 ### Workflow
 
-* 전체적인 동작을 담당하며, 프로세스와 유사하다고 생각하면 된다.
+* 전체적인 동작을 담당하며, **프로세스와 유사**하다고 생각하면 된다.
 * 여러개의 Job으로 구성되어 event기반으로 동작한다.
-* Job은 최상위 개념이며 스레드와 유사하다고 생각하면 된다.
+* `Job`은 최상위 개념이며 **스레드와 유사**하다고 생각하면 된다.
 * Workflow file을 만들어 전달하면 깃허브 액션이 이를 실행한다.
-* Workflow file의 확장자는 YAML로 작성되며, Github Repository의 .github/workflows 폴더 아래에 저장.
+* Workflow file의 **확장자는 YAML**로 작성되며, Github Repository의 `.github/workflows` 폴더 아래에 저장.
 
-
+<br>
 
 ### Event
 
@@ -79,7 +79,7 @@ CD 명칭은 `지속적인 서비스 제공(Continuous Delivery)` 또는 `지속
         - cron: '00 19 * * *' # UST 가 default. UST 19:00는 한국시간 04:00(9H 차이)
     ```
 
-
+<br>
 
 ### Job
 
@@ -104,7 +104,7 @@ CD 명칭은 `지속적인 서비스 제공(Continuous Delivery)` 또는 `지속
             python-version: ["3.8"] # 파이썬 3.8 버전
     ```
 
-
+<br>
 
 ### Step
 
@@ -141,7 +141,7 @@ CD 명칭은 `지속적인 서비스 제공(Continuous Delivery)` 또는 `지속
     	  run: python src/main.py
     ```
 
-
+<br>
 
 ### Action
 
@@ -151,7 +151,7 @@ CD 명칭은 `지속적인 서비스 제공(Continuous Delivery)` 또는 `지속
 * 개인적으로 만든 Action을 사용할 수도 있고, Marketplace에 있는 공용 Action을 사용할 수도 있음
   - [Github Marketplace](https://github.com/marketplace?type=actions)와 [Github Actions Repository](https://github.com/actions/)에서 확인 가능하다.
 
-
+<br>
 
 ### Runner
 
@@ -159,7 +159,7 @@ CD 명칭은 `지속적인 서비스 제공(Continuous Delivery)` 또는 `지속
 * Github에서 호스팅해주는 Github-hosted runner와 직접 호스팅하는 Self-hosted runner로 나뉨
 * Github-hosted runner는 Azure의 Standard_DS2_v2로 vCPU 2, 메모리 7GB, 임시 스토리지 14GB
 
-<br>
+<br><br>
 
 ## Workflow file
 

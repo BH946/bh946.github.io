@@ -25,12 +25,12 @@ typora-root-url: ../../..
   * 다만, 여기선 `_layout/default.html` 에서 구글 폰트를 로드한다.
 - `_data`: 네비게이션 바 (navigation)에 대한 메뉴 추가 및 링크 설정을 한다.
 
-
+<br>
 
 **아래 다시 언급하지만, 폰트 설정하는 흐름을 여기서는 잘 파악하고  
-나의 블로그처럼 설정하고 싶다면 ["_variables.scss 재설정"](https://bh946.github.io/blog/(Blog)-_variables.scss-재설정-&-전반적인-폰트-수정/) 게시물을 잘 확인할것**
+필자의 블로그처럼 설정하고 싶다면 ["_variables.scss 재설정"](https://bh946.github.io/blog/(Blog)-_variables.scss-재설정-&-전반적인-폰트-수정/) 게시물을 잘 확인할것**
 
-<br>
+<br><br>
 
 ## Font 수정
 
@@ -38,27 +38,25 @@ typora-root-url: ../../..
 
 이 사이트에서 가져와 폰트를 사용할 것이다.
 
-
+<br>
 
 ### 사용 폰트
 
 * [Coming Soon](https://fonts.google.com/specimen/Coming+Soon?preview.text_type=custom&selection.family=Roboto:wght@100&query=com)
 * [나눔 고딕 코딩](https://fonts.google.com/specimen/Nanum+Gothic+Coding?preview.text_type=custom&selection.family=Roboto:wght@100&query=nanum)
 
-
-
-
+<br>
 
 ### 적용방법
 
-**중요!!!) 여기서는 사용법, 흐름만 익히고, 나의 블로그처럼 폰트를 적용하려면 아래처럼 적용하지말고   
+**중요!!!) 여기서는 사용법, 흐름만 익히고, 필자의 블로그처럼 폰트를 적용하려면 아래처럼 적용하지말고   
 아래 ["_variables.scss 재설정"](https://bh946.github.io/blog/(Blog)-_variables.scss-재설정-&-전반적인-폰트-수정/) 파트를 꼭꼭 참고해서 따라할것.**
 
-
+<br>
 
 **원하는곳에 폰트들을 설정하고 싶어서 이 방법을 설명한다.**
 
-`minimal-mistake 테마`는 `_sass/minimal-mistakes/variable.scss` 파일에 전체적인 css 파일들이 사용할 **“전역 변수”**를 한데 모아 선언하고 있다.  
+`minimal-mistake 테마`는 `_sass/minimal-mistakes/variable.scss` 파일에 전체적인 css 파일들이 사용할 **“전역 변수”**를 한곳에 모아 선언하고 있다.  
 따라서 여기에 원하는 폰트를 설정해주고, 생성한 **"전역 변수"**로 어디서든 폰트 적용을 할 것이다.  
 
 참고로 여기서 폰트 추가하자마자 적용이 되는 이유는 이 **"전역변수"**가 여기 저기서 이미 사용해서  
@@ -82,7 +80,7 @@ $sans-serif: "Coming Soon", -apple-system, BlinkMacSystemFont, "Roboto", "Segoe 
 $monospace: "Nanum Gothic Coding", Monaco, Consolas, "Lucida Console", monospace !default;
 ```
 
-
+<br>
 
 **원하는곳 2군데에 폰트 적용해보겠다.**
 
@@ -96,23 +94,21 @@ $monospace: "Nanum Gothic Coding", Monaco, Consolas, "Lucida Console", monospace
     우리는 여기에 우선순위로 `우리가 가져온 폰트` 를 먼저 적용되게 왼쪽에 적었을 뿐이다. 
   * 사용 폰트는 **"Coming Soon"** 이 되는것이다.
 
-
+<br>
 
 **2. 본문**
 
 * `_sass/minimal-mistakes/_base.scss` 파일 안에 있는 `body 블록`의 `font-family` 를 수정한다.
   * `monospace` 를 적용해서 **"나눔 고딕 코딩"** 을 적용한다.
 
-
-
-
+<br>
 
 ### 세부 적용
 
 폰트 적용 해보면 알겠지만, 세세하게 적용할 필요가 있다.  
 이곳 저곳 폰트가 조금 섞여서 그렇다.
 
-
+<br>
 
 1. `HOME / Etc / 작성중` 이런것처럼 게시물 본문 상단에 파일경로가 나오는데 이것이 `Coming Soon` 으로 
    폰트가 되어있어서 `나눔 고딕 코딩`으로 변경한다.
@@ -124,33 +120,35 @@ $monospace: "Nanum Gothic Coding", Monaco, Consolas, "Lucida Console", monospace
    <nav class="breadcrumbs" style="font-family: Nanum Gothic Coding;">
    ```
 
-   
+   <br>
 
    **Before**
 
-   ![image-20220907152303605](/BH946.github.io/images/2022-09-06-blog 디자인 커스텀/image-20220907152303605.png)
+   ![image-20220907152303605](/images/2022-09-06-blog 디자인 커스텀/image-20220907152303605.png)
 
-   
+   <br>
 
    **After**
 
-   ![image-20220907152353184](/BH946.github.io/images/2022-09-06-blog 디자인 커스텀/image-20220907152353184.png)
+   ![image-20220907152353184](/images/2022-09-06-blog 디자인 커스텀/image-20220907152353184.png)
 
-   
+   <br>
 
    **추가정보** 
 
    찾다보니, scss에서도 수정이 가능한것을 찾았고 이방식으로 바꿨다.
 
-   `_sass/minimal-mistakes/_navigation.scss` 에서 breadcrumbs를 검색해서 수정하면 된다.
+   * `html` 을 각각 수정하는것은 유지보수 측면에서 매우 비효율적이므로 바꾸게 되었다.
+
+   * `_sass/minimal-mistakes/_navigation.scss` 에서 breadcrumbs를 검색해서 수정하면 된다.
 
    ```scss
    .breadcrumbs {
      // font-family: $sans-serif; // 수정전
      font-family: $monospace; // 수정후
    ```
-   
-   
+
+   <br>
 
 2. 위에서 보다시피 본문의 게시글 제목도 고딕으로 지정되어있지않고, #인 h1~h6도 마찬가지!  
    따라서 이것을 **"나눔 고딕 코딩"** 을 적용한다.
@@ -172,7 +170,7 @@ $monospace: "Nanum Gothic Coding", Monaco, Consolas, "Lucida Console", monospace
    }
    ```
 
-   
+   <br>
 
 3. 목차도 마찬가지로 **"Coming Soon"**으로 되어있어서, **"나눔 고딕 코딩"** 을 적용한다.
 
@@ -184,7 +182,7 @@ $monospace: "Nanum Gothic Coding", Monaco, Consolas, "Lucida Console", monospace
      font-family: $monospace; // 수정후
    ```
 
-   
+   <br>
 
 4. `archive__subtitle` 은 **"Coming Soon"**으로, `page__title` 은 **"나눔 고딕 코딩"** 을 적용하려 한다.
 
@@ -192,38 +190,40 @@ $monospace: "Nanum Gothic Coding", Monaco, Consolas, "Lucida Console", monospace
    * `_sass/minimal-mistakes/_page.scss` 에서 page__title 파트를 수정한다.
    * 추가로 archive__item-title 파트 수정하면, 게시글들 제목들 수정가능
 
+   <br>
+
    **archive__subtitle** 
 
-   ![image-20220907163153081](/BH946.github.io/images/2022-09-06-blog 디자인 커스텀/image-20220907163153081.png)
+   ![image-20220907163153081](/images/2022-09-06-blog 디자인 커스텀/image-20220907163153081.png)
+
+   <br>
 
    **page__title** 
 
-   ![image-20220907163141449](/BH946.github.io/images/2022-09-06-blog 디자인 커스텀/image-20220907163141449.png)
+   ![image-20220907163141449](/images/2022-09-06-blog 디자인 커스텀/image-20220907163141449.png)
 
-
-
-
+<br>
 
 ### 적용
 
 **Before**
 
-![image-20220906201537429](/BH946.github.io/images/2022-09-06-blog 디자인 커스텀/image-20220906201537429.png)
+![image-20220906201537429](/images/2022-09-06-blog 디자인 커스텀/image-20220906201537429.png)
 
-
+<br>
 
 **After**
 
-![image-20220907163734111](/BH946.github.io/images/2022-09-06-blog 디자인 커스텀/image-20220907163734111.png)
+![image-20220907163734111](/images/2022-09-06-blog 디자인 커스텀/image-20220907163734111.png)
 
-<br>
+<br><br>
 
 ## 도움받은 사이트
 
 * [깃 블로그_지킬 Minimal-mistakes](https://ansohxxn.github.io/)
 * [공식 홈페이지](https://mmistakes.github.io/minimal-mistakes/docs/stylesheets/#font-stacks)
 
-
+<br>
 
 고맙게도 내가 사용하는 `Minimal-mistakes` 테마를 커스텀한 블로그를 찾게 되었고,  
 **public**으로 소스를 오픈해 주어서 많은 도움을 받은 사이트이다.

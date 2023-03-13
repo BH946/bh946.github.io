@@ -16,7 +16,7 @@ typora-root-url: ../../..
 
 * **[Base Conversion(백준11576)](https://www.acmicpc.net/problem/11576)**
 
-<br>
+<br><br>
 
 ## 풀이
 
@@ -36,7 +36,7 @@ typora-root-url: ../../..
 
 
 
-<br>
+<br><br>
 
 ## 코드
 
@@ -80,7 +80,7 @@ int main() {
 }
 ```
 
-<br>
+<br><br>
 
 ## 느낀점
 
