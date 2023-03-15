@@ -18,7 +18,7 @@ typora-root-url: ../../..
 
 `yarn add @mui/icons-material @mui/material` 로 먼저 라이브러리 설치해야 바로 사용 가능
 
-<br>
+<br><br>
 
 ## Font
 
@@ -29,7 +29,7 @@ typora-root-url: ../../..
 예시로 리액트에서 전역으로 해당 폰트를 사용하기 위해서는 index.html에   
 해당사이트의 link태그와 style태그 만들어서 내부에 css코드를 복붙 해주면 된다.
 
-<br>
+<br><br>
 
 ## Rechart
 
@@ -37,7 +37,7 @@ typora-root-url: ../../..
 
 차트를 직접 만들 필요없이 해당 라이브러리를 활용해서 차트를 만들수 있다.
 
-<br>
+<br><br>
 
 ## Box-Shadow
 
