@@ -10,6 +10,9 @@ sidebar:
 ---
 
 
+
+## TIP
+
 **pip 최신 업데이트 방법** : cmd창 관리자권한으로 실행후 **python -m pip install --upgrade pip** 입력
 
 **python version 별로 관리하기 좋은 방법** : **아나콘다** 설치 및 활용
@@ -21,11 +24,14 @@ sidebar:
 => 안될시 파이썬 버전을 낮춰보던지, pip다시 해보기
 ```
 
+<br>
+
 **내장, 외장함수 구글링법**
 
 * 구글에 list of python builtins 검색 : 내장함수
-
 * 구글에 list of python modules 검색 : 외장함수
+
+<br>
 
 **Jupyter, Colab은 인터넷으로 할 수 있는 파이썬 개발 환경**
 

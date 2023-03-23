@@ -10,15 +10,18 @@ sidebar:
 ---
 
 
+
 **=> 정적, 동적 인터넷 파싱 및 동작법을 설명한다.**
 
-
+<br>
 
 ## 0. User_agent
 
 **사용자가 접근하는 것처럼 보이게 하는 방법**
 
 * 예로 쿠팡의 경우 유저가아니면 접근 못함.
+
+<br>
 
 ### 가져오는 법
 
@@ -32,11 +35,13 @@ sidebar:
 
 **5. res = requests.get(url, headers=headers) 이렇게 3문장!**
 
-
+<br><br>
 
 ## 1. 셀레니움(Selenium), BeautifulSoup => 동적
 
 => 주관적인 내 경험들만 작성. (자세히는 관련 공식문서 참고)
+
+<br>
 
 ### Selenium, BeautifulSoup 준비물
 
@@ -46,6 +51,8 @@ sidebar:
 3. pip install bs4
 ```
 
+<br>
+
 ### Selenium, BeautifulSoup 사용법
 
 **기본 import**
@@ -54,6 +61,8 @@ sidebar:
 from selenium import webdriver # 셀레니움 모듈 import
 from bs4 import BeautifulSoup # bs4 모듈 import
 ```
+
+<br>
 
 **좀 더 다양한 import**
 
@@ -65,6 +74,8 @@ from selenium.webdriver.support import expected_conditions as EC # explicitly wa
 from selenium.webdriver.common.action_chains import ActionChains # 스크롤바 관련
 ```
 
+<br>
+
 **최초 실행 방법**
 
 ```python
@@ -73,6 +84,8 @@ browser.get("http://naver.com") # 홈페이지 접근
 browser.set_window_position(1, 1) # 위치 설정
 browser.set_window_size(1020, 800) # 창 크기 설정
 ```
+
+<br>
 
 **find_element(s).. 사용법(s는 복수형)**
 
@@ -100,6 +113,8 @@ browser.set_window_size(1020, 800) # 창 크기 설정
   browser.find_elements... # 리스트형태로 반환.
   ```
 
+<br>
+
 **Wait활용 (implicitly wait VS explicitly wait)**
 
 * implicitly wait란 웹페이지가 넘어올때까지 wait. 그렇다면 time.sleep()과 차이점은?
@@ -117,6 +132,8 @@ browser.set_window_size(1020, 800) # 창 크기 설정
     ```python
     WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, '#search_btn'))) # '#search_btn'이 10초안에 보이면 더 안기다리고 끝냄.
     ```
+
+<br>
 
 **send_keys()를 이용한 키입력 or 마우스 클릭**
 
@@ -137,6 +154,7 @@ browser.set_window_size(1020, 800) # 창 크기 설정
   browser.find_element_by_class_name("link_login").click()
   ```
 
+<br>
 
 **bs4 활용,,**
 
@@ -156,6 +174,8 @@ browser.set_window_size(1020, 800) # 창 크기 설정
   btn_primary = soup.find("button", attrs={"class":"btn btn-primary"}).text
   ```
 
+<br>
+
 **화면 스크롤 다루기**
 
 * 맨 아래 화면으로 이동
@@ -164,7 +184,7 @@ browser.set_window_size(1020, 800) # 창 크기 설정
   browser.execute_script("window.scrollTo(0, document.body.scrollHeight)")
   ```
 
-
+<br>
 
 **종료 방법**
 
@@ -173,7 +193,7 @@ browser.close() # 현재 탭만 종료
 browser.quit() # 전체 종료
 ```
 
-
+<br>
 
 **응용**
 
@@ -188,7 +208,8 @@ browser.quit() # 전체 종료
   search_Label[i].click()
   ```
 
-  
+
+<br>
 
 ### 부가정보) 1. 셀레니움_헤드리스(Selenium_Headless)
 
@@ -196,12 +217,17 @@ browser.quit() # 전체 종료
 
 * 네이버 로그인은 headless불가 : element.send_keys(Keys.CONTROL, 'v') 이게 안먹히기 때문.
   => 지금처럼 임의로 접근 할까봐 막아둠. (다른 방법으로 해야함)
+* 현재는 다른방식으로 headless 가능
+
+<br>
 
 #### Selenium_Headless 준비물
 
 ```python
 그냥 Selenium과 동일.
 ```
+
+<br>
 
 #### Selenium_Headless 사용법
 
@@ -218,7 +244,7 @@ browser.maximize_window() # 전체화면(추천)
 # => 기본적으로 여기까지는 코드 전부 작성추천
 ```
 
-
+<br>
 
 ### 부가정보) 2. 셀레니움_스크롤(ActionChains)
 
@@ -234,6 +260,8 @@ action = ActionChains(browser)
 action.move_to_element(some_tag).perform()
 ```
 
+<br>
+
 #### 사용법
 
 **초기화**
@@ -244,12 +272,16 @@ browser = webdriver.Chrome()
 browser.maximize_window()
 ```
 
+<br>
+
 **페이지 이동**
 
 ```python
 url = "https://play.google.com/store/movies/top"
 browser.get(url)
 ```
+
+<br>
 
 **지정한 위치로 스크롤 내리기**
 
@@ -258,17 +290,23 @@ browser.execute_script("window.scrollTo(0, 1080)") # 1920 x 1080
 browser.execute_script("window.scrollTo(0, 2080)")
 ```
 
+<br>
+
 **화면 가장 아래로 스크롤 내리기**
 
 ```python
 browser.execute_script("window.scrollTo(0, document.body.scrollHeight)")
 ```
 
+<br>
+
 **현재 문서 높이를 가져와서 저장**
 
 ```python
 prev_height = browser.execute_script("return document.body.scrollHeight")
 ```
+
+<br>
 
 **반복 수행**
 
@@ -296,27 +334,27 @@ while True:
 print("스크롤 완료")
 ```
 
+<br>
+
 **스크린샷**
 
 ```python
 browser.get_screenshot_as_file("google_movie.png")
 ```
 
-
-
-
+<br><br>
 
 ## 2. 리퀘스트(Requests), BeautifulSoup => 정적
 
 * raise_for_status() : 문제시 에러 후 종료
-
 * status_code : 에러숫자 확인
 
   * 200대 : 정상 => requests.codes.ok # ok=200
   * 300대 : 웹문제
-
   * 400대 : 코드문제
   * 500대 : 서버문제
+
+<br>
 
 ### Requests 준비물
 
@@ -325,7 +363,7 @@ browser.get_screenshot_as_file("google_movie.png")
 2. pip install bs4
 ```
 
-
+<br>
 
 ### Requests 사용법(나중에 합치고 수졍)
 
@@ -335,6 +373,8 @@ browser.get_screenshot_as_file("google_movie.png")
 import requests
 from bs4 import BeautifulSoup
 ```
+
+<br>
 
 **기본 사용방식**
 
@@ -357,6 +397,8 @@ from bs4 import BeautifulSoup
   => 이런건 나중에 자세히 설명
   ```
 
+<br>
+
 **기본적으로 dict형식{}으로 안에 내용들은 str형식으로 구성되었다 생각하면 됨.**
 
 ```python
@@ -365,6 +407,8 @@ url = a['href'] # str 형식으로 나옴(dict형식을 key값으로 접근한�
 # <a href='~~' ..../> 형식일텐데
 # a태그의 href라는 속성이 이녀석이 key역할. 즉, url값은 '~~' 이녀석으로 반환되는것.
 ```
+
+<br>
 
 **파싱에 주로 사용하기 때문에 데이터 가공방법이 많음. 정리는 따로 하겠다.(이부분도 수정하자) 간단히 여기선 사용한것들만 정리하겠다. + 따로 데이터 가공부분으로 해서 정리하는게 나을듯?**
 
@@ -408,9 +452,8 @@ url = a['href'] # str 형식으로 나옴(dict형식을 key값으로 접근한�
   search = search.replace('-', '') # '-'을 전부 없애줌.
   ```
 
-  
 
-
+<br><br>
 
 ## 3. Selenium(셀레니움) + Requests 같이 사용한 응용방식
 
@@ -418,13 +461,13 @@ url = a['href'] # str 형식으로 나옴(dict형식을 key값으로 접근한�
 
 * 셀레니움으로 로그인 => 로그인 기록을 Requests에 적용해서 응용하는 방식 사용하자.
 
-
+<br>
 
 ### 응용 준비물
 
 **Selenium, Requests 에서 필요했던 준비물들 import 똑같이 하기.**
 
-
+<br>
 
 ### 응용 방법
 
@@ -468,13 +511,13 @@ url = a['href'] # str 형식으로 나옴(dict형식을 key값으로 접근한�
 
 **3. 저장한 s를 이용해 s.get(url) 형식으로 접근하면 로그인 필요한 페이지 접근 가능.(끝)**
 
-
+<br><br>
 
 ## 4. bs4 (BeautifulSoup) - "lxml파서 사용"
 
 * 위에선 계속 html파서 사용했었음.
 
-
+<br>
 
 ### 파서의 종류
 
@@ -490,7 +533,7 @@ url = a['href'] # str 형식으로 나옴(dict형식을 key값으로 접근한�
   soup = BeautifulSoup(res.text, "lxml") # lxml파서 사용
   ```
 
-
+<br>
 
 **간단한 사용법**
 
@@ -547,11 +590,9 @@ url = a['href'] # str 형식으로 나옴(dict형식을 key값으로 접근한�
     print(rank2.a.get_text())
     ```
 
-
+<br>
 
 ### 1. 웹툰(예시)
-
-
 
 **네이버 웹툰 전체 목록 가져오기**
 
@@ -565,6 +606,8 @@ cartoons = soup.find_all("a", attrs={"class":"title"})
 for cartoon in cartoons:
     print(cartoon.get_text())
 ```
+
+<br>
 
 **만화 제목 구하기**
 
@@ -584,6 +627,8 @@ for cartoon in cartoons:
      print(title, link)
 ```
 
+<br>
+
 **평점 구하기**
 
 ```python
@@ -597,11 +642,9 @@ print("전체 점수 : ", total_rates)
 print("평균 점수 : ", total_rates / len(cartoons))
 ```
 
-
+<br>
 
 ### 2. 쿠팡(예시)
-
-
 
 **유저로 우회하기**
 
@@ -615,11 +658,15 @@ res.raise_for_status()
 soup = BeautifulSoup(res.text, "lxml")
 ```
 
+<br>
+
 **정규식 활용**
 
 ```python
 items = soup.find_all("li", attrs={"class":re.compile("^search-product")})
 ```
+
+<br>
 
 **데이터 가공**
 
@@ -668,6 +715,8 @@ for item in items:
         print("-"*100) # 줄긋기
 ```
 
+<br>
+
 **페이지 추가**
 
 ```python
@@ -685,11 +734,9 @@ for i in range(1, 6):
     ... 생략..
 ```
 
-
+<br>
 
 ### 3. 다음 - 영화
-
-
 
 **풀코딩**
 

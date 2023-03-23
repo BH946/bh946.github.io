@@ -9,9 +9,9 @@ sidebar:
    nav: "docs"
 ---
 
+
+
 # 다양한 모듈들
-
-
 
 ## 시간
 
@@ -20,7 +20,7 @@ import time
 time.sleep(1) # 1초 정지
 ```
 
-
+<br><br>
 
 ## 날짜
 
@@ -31,7 +31,7 @@ type(now) # => datetime.datetime 형식인 클래스로 타입나옴. str로 바
 str(now) # 까지 하길 추천.
 ```
 
-
+<br><br>
 
 ## 클립보드
 
@@ -41,7 +41,7 @@ pyperclip.copy("저장할 내용") # '저장할 내용' copy.
 # 붙혀넣는 방법은 매우 다양.(pyautogui이용 or selenium에서 send_keys()이용)
 ```
 
-
+<br><br>
 
 ## 단축기, 마우스 매크로 입력
 
@@ -58,6 +58,8 @@ pyautogui.keyUp('ctrl') # 키 업!
 pyautogui.press('left', 4, 0.2) # 0.2초 간격으로 4번 'left'키 press
 ```
 
+<br>
+
 **마우스**
 
 ```python
@@ -68,6 +70,8 @@ time.sleep(0.3)
 pyautogui.click() # 마우스 클릭
 ```
 
+<br>
+
 **핫키 입력**
 
 ```python
@@ -77,7 +81,7 @@ keyboard.add_hotkey("F9", screenshot) # F9를 핫키로 screenshot함수 실행
 keyboard.wait("esc") # 사용자가 esc를 누를때까지 프로그램 실행
 ```
 
-
+<br><br>
 
 ## 이미지
 
@@ -91,6 +95,8 @@ for i in range(1, 11): # 2초 간격으로 10개 이미지 저장
     img.save("image{}.png".format(i)) # 파일로 저장
     time.sleep(2)
 ```
+
+<br>
 
 #### advanced_screenshot
 
@@ -108,7 +114,7 @@ keyboard.add_hotkey("F9", screenshot)
 keyboard.wait("esc") # 사용자가 esc를 누를때까지 프로그램 실행
 ```
 
-
+<br><br>
 
 ## random, string
 

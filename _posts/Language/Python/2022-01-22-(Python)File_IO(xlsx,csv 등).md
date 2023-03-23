@@ -9,6 +9,8 @@ sidebar:
    nav: "docs"
 ---
 
+
+
 ## csv, xlsx등 파일 입출력(관리)
 
 
@@ -23,6 +25,8 @@ sidebar:
 ```python
 import os
 ```
+
+<br>
 
 **간단한 경로지정 방법(참고)**
 
@@ -61,6 +65,8 @@ import os
   print(path)
   ```
 
+<br>
+
 #### OS 사용법
 
 **파일 경로의 원하는 파일들 리스트로 반환**
@@ -75,6 +81,8 @@ file_list = os.listdir(path_dir) # 해당 경로 파일들 이름 리스트로 �
   [file for file in file_list if file.endswith('.csv')] # file_list의 경로의 '.csv'확장자 파일들 리스트로 반환
   ```
 
+<br>
+
 **경로존재 확인 및 폴더 추가**
 
 ```python
@@ -84,11 +92,15 @@ if not os.path.exists('경로 이름'): # 경로 없다면 그 경로(폴더)를
 	os.mkdir('경로 이름')
 ```
 
+<br>
+
 **파일 삭제**
 
 ```python
 os.remove(r"C:\Users\..경로...\product_jinnyhands.xlsx") # 삭제
 ```
+
+<br>
 
 **응용**
 
@@ -111,14 +123,10 @@ os.remove(r"C:\Users\..경로...\product_jinnyhands.xlsx") # 삭제
      print("product_jinnyhands.xlsx 없음.")
   ```
 
-
-
-
+<br>
 
 
 ### 2. Workbook(엑셀.Xlsx을 주로)
-
-
 
 #### Workbook 준비물
 
@@ -129,7 +137,7 @@ from openpyxl import Workbook # 데이터 쓰기에 사용
 from openpyxl import load_workbook # 데이터 읽기에 사용
 ```
 
-
+<br>
 
 #### Workbook 사용법
 
@@ -152,6 +160,8 @@ wb.save("product_jinnyhands.xlsx")
 # 종료
 wb.close()
 ```
+
+<br>
 
 **데이터 읽기(read)**
 
@@ -193,6 +203,8 @@ print(all_values)
 wb.close()
 ```
 
+<br>
+
 **부가정보**
 
 * 최대 행 구하기
@@ -202,13 +214,10 @@ wb.close()
   for i in range(1, ws.max_row+1): # 이런식으로 응용. (1행 부터 마지막행 접근 i)
   ```
 
-  
 
-
+<br>
 
 ### 3. CSV
-
-
 
 #### CSV 준비물
 
@@ -218,7 +227,7 @@ wb.close()
 import csv
 ```
 
-
+<br>
 
 #### CSV 사용법
 
@@ -292,6 +301,8 @@ import csv
     writer.writerow(datasList[0]) # 4. 2중[]임으로 요소접근해도 []접근!! 2번과 동일한 출력.(정상)
     ```
 
+<br>
+
 **응용(네이버 시가총액 기록,,)**
 
 * **새로보는 함수** : strip() : 불필요한 문자 삭제
@@ -327,9 +338,7 @@ for page in range(1,5):
         writer.writerow(data) # 데이터 쓰기
 ```
 
-
-
-
+<br>
 
 ### 4. Pandas(판다스) - xlsx(엑셀), csv 둘다 활용
 
@@ -347,7 +356,7 @@ pip install pandas
 import pandas as pd # pandas의 경우 보통 pd로 이름변경해서 사용하는것이 관례임.
 ```
 
-
+<br>
 
 #### pandas 사용법
 
@@ -428,7 +437,8 @@ import pandas as pd # pandas의 경우 보통 pd로 이름변경해서 사용하
   src = src.iloc[:,1].values[0] # 공항코드 값으로 변경
   ```
 
-  
+
+<br>
 
 **csv->xlsx (read_csv(), to_excel()) : csv읽기, 엑셀로 변환** 
 
@@ -458,7 +468,7 @@ md.to_excel(writer, index = False) # 엑셀에 데이터 삽입
 writer.save() # 엑셀 데이터 저장
 ```
 
-
+<br>
 
 #### 집합 연산
 
@@ -492,23 +502,19 @@ P_only = P[P.index.isin(S.index) == False]
 S_only = S[S.index.isin(P.index) == False]
 ```
 
-
-
-
+<br><br>
 
 ## Workbook() 이용한 엑셀파일 자세히 설명,,
 
-
-
 ### 1. create_file
-
-
 
 #### 준비물
 
 ```python
 from openpyxl import Workbook
 ```
+
+<br>
 
 #### 사용법
 
@@ -524,11 +530,9 @@ file = open("./hello.xlsx", "w+") # 엑셀로 만들어도 됨
 file.write("hello" + "\n") # 이런식으로도 엑셀,csv 저장가능! ! !
 ```
 
-
+<br>
 
 ### 2. sheet(시트)
-
-
 
 **sheet 생성방식**
 
@@ -548,6 +552,8 @@ file.write("hello" + "\n") # 이런식으로도 엑셀,csv 저장가능! ! !
   target = wb.copy_worksheet(new_ws)
   target.title = "Copied Sheet"
   ```
+
+<br>
 
 **sheet 이름변경, 이름확인, 색상적용**
 
@@ -575,11 +581,9 @@ file.write("hello" + "\n") # 이런식으로도 엑셀,csv 저장가능! ! !
 new_ws = wb["NewSheet"] # Dict 형태로 sheet 에 접근
 ```
 
-
+<br>
 
 ### 3. cell(셀)
-
-
 
 **셀에 값 입력**
 
@@ -591,6 +595,8 @@ ws.cell(1,1).value = 1 # ws.cell(row=1, column=1).value
 ws.cell(1,1,1) # ws.cell(column=1, row=1, value=1)
 ```
 
+<br>
+
 **셀 정보, 값 출력**
 
 ```python
@@ -600,17 +606,17 @@ ws.cell(1,1) # 정보출력(동일)
 ws.cell(1,1).value # 값 출력(동일)
 ```
 
-
+<br>
 
 ### 4. open_file(파일 load)
-
-
 
 #### 준비물
 
 ```python
 from openpyxl import load_workbook
 ```
+
+<br>
 
 #### 사용법
 
@@ -632,11 +638,9 @@ for x in range(1, ws.max_row + 1):
     print()
 ```
 
-
+<br>
 
 ### 5. cell_range(셀 주소)
-
-
 
 **1줄씩 데이터 넣기**
 
@@ -648,6 +652,8 @@ for i in range(1, 11):
 2	67	12
 ... 이런식으로 적용.
 ```
+
+<br>
 
 **다양한 데이터 가져오는 방식**
 
@@ -679,7 +685,7 @@ for row in ws.iter_rows(min_row=2, max_row=11, min_col=2, max_col=3):
 	print(row[index].value)
 ```
 
-
+<br>
 
 ### 6. search(검색)
 
@@ -697,11 +703,9 @@ for row in ws.iter_rows(max_row=1):
 # 물론 예시일뿐 이방법으로만 접근할 수 있다는 의미는 아니다. 다양한 방식으로 접근 가능하다.
 ```
 
-
+<br>
 
 ### 7. insert(추가)
-
-
 
 **행삽입, 열삽입**
 
@@ -713,11 +717,9 @@ ws.insert_cols(2) # 2번째 열
 ws.insert_cols(2, 3) # 2번째 열기준 3열 추가
 ```
 
-
+<br>
 
 ### 8. delete(삭제)
-
-
 
 **행삭제, 열삭제**
 
@@ -729,11 +731,9 @@ ws.delete_cols(2) # 2번째 열 데이터 삭제
 ws.delete_cols(2, 2) # 2번째 열부터 총 2열 삭제
 ```
 
-
+<br>
 
 ### 9. move(이동)
-
-
 
 **데이터 다른셀로 이동**
 
@@ -741,17 +741,17 @@ ws.delete_cols(2, 2) # 2번째 열부터 총 2열 삭제
 ws.move_range("B1:C11", rows=0, cols=1) # B1:C11이 0행 1열 간 것. (1열 옆으로 한칸 옮)
 ```
 
-
+<br>
 
 ### 10. chart(차트)
-
-
 
 #### 준비물
 
 ```python
 from openpyxl.chart import BarChart, Reference, LineChart
 ```
+
+<br>
 
 #### 사용법
 
@@ -773,17 +773,17 @@ line_chart.x_axis.title = "번호" # X축의 제목
 ws.add_chart(line_chart, "E1")
 ```
 
-
+<br>
 
 ### 11. cell_style(셀 스타일)
-
-
 
 #### 준비물
 
 ```python
 from openpyxl.styles import Font, Border, Side, PatternFill, Alignment
 ```
+
+<br>
 
 #### 사용법
 
@@ -794,6 +794,8 @@ a1 = ws["A1"] # 번호
 b1 = ws["B1"] # 영어
 c1 = ws["C1"] # 수학
 ```
+
+<br>
 
 **속성**
 
@@ -855,6 +857,8 @@ c1 = ws["C1"] # 수학
   ws.unmerge_cells("B2:D2") # B2:D2 셀 병합을 해제함. => B2,C2,D2로 다시 나뉨.
   ```
 
+<br>
+
 **예시**
 
 ```python
@@ -873,7 +877,7 @@ for row in ws.rows:
             cell.font = Font(color="FF0000") # 폰트 색상 변경
 ```
 
-
+<br>
 
 ### 12. formula(함수사용)
 
@@ -894,7 +898,7 @@ ws["A5"] = 20
 ws["A6"] = "=SUM(A4:A5)"
 ```
 
-
+<br>
 
 ### 13. image(이미지 삽입)
 
@@ -905,6 +909,8 @@ ws["A6"] = "=SUM(A4:A5)"
 ```python
 from openpyxl.drawing.image import Image
 ```
+
+<br>
 
 #### 사용법
 

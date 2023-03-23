@@ -10,13 +10,10 @@ sidebar:
 ---
 
 
+
 ## 다양한 데이터 가공 방식
 
-
-
 ### 1. re(정규식) : 원하는 형태
-
-
 
 #### re 사용법
 
@@ -25,6 +22,8 @@ sidebar:
 ```python
 import re
 ```
+
+<br>
 
 **다양한 사용법**
 
@@ -66,6 +65,8 @@ import re
   # 리스트로 출력 => ['care', 'cafe']
   ```
 
+<br>
+
 **사용 예시**
 
 * 간단한 출력 함수 선언
@@ -101,7 +102,7 @@ import re
   m.span(): (0, 4)
   ```
 
-
+<br>
 
 ### 2. datetime?
 
@@ -127,11 +128,9 @@ print(now)
 - 형식은 %Y-%m-%d 말고도 많음! 대문자인지 소문자인지에 따라 또 다른 점이 있음. 궁금한 사람은 따로 찾아보기.
 - datetime → string 의 경우 **str 'f' time**, string → datetime의 경우 **str 'p' time**임에 유의하기.
 
-
+<br>
 
 ### 3. JSON
-
-
 
 #### 기본 준비
 
@@ -141,7 +140,7 @@ import json
 print("Content-type:application/json;charset=utf-8\r\n")
 ```
 
-
+<br>
 
 #### 사용법
 
@@ -189,11 +188,9 @@ print("Content-type:application/json;charset=utf-8\r\n")
     print(json_Notice)
     ```
 
-
+<br><br>
 
 ## 응용
-
-
 
 ### 공백 없애기
 
@@ -204,7 +201,7 @@ cal_Date = re.sub(r'\\s+', '', cal_Date)
 print(cal_Date)
 ```
 
-
+<br>
 
 ### 날짜의 형식을 변경해 가공하기
 
