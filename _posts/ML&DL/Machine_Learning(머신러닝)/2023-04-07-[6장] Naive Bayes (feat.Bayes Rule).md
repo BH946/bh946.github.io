@@ -1,5 +1,5 @@
 ---
-title: "Naive Bayes (feat.Bayes Rule)"
+title: "[6장] Naive Bayes (feat.Bayes Rule)"
 categories: Machine_Learning
 tag: [python, machine_learning, concept]
 toc: true

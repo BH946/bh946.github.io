@@ -154,6 +154,13 @@
                   {% endif %}
               {% endfor %}
             </ul>
+            <ul>
+              {% for category in site.categories %}
+                  {% if category[0] == "MATH_ML" %}
+                      <li><a href="/categories/math_ml" class="">Math_ML ({{category[1].size}})</a></li>
+                  {% endif %}
+              {% endfor %}
+            </ul>
         <span class="nav__sub-title">MAJOR</span>
             <ul>
                 {% for category in site.categories %}
