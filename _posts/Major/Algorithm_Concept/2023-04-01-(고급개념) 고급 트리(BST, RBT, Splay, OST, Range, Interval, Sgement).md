@@ -156,11 +156,16 @@ typora-root-url: ../../..
         * 대칭적으로 다를 뿐 구조는 동일(4,5,6 설명은 생략)
     
     * `Case의 흐름`
+      
       * case 1 -> case 2 or case 3
         * case 1 : 삼촌이 RED인 경우
         
         * while 루프를 통하여 이중의 red 색을 가지는 노드를 계속 루트노드까지 올림
         
+          * **현재상태 : 할아버지 BLACK, z부모 RED, z삼촌 RED**
+          * **따라서 할아버지를 RED, Z부모 BLACK, z삼촌 BLACK으로 변환**
+          * **이후 할아버지를 새로운 z로 선언해서 다시 while문 반복**
+          
           ![image-20230421000342537](/images/2023-04-01-(고급개념) 고급 트리(BST, RBT, OST, Interval, Range, Sgement, Splay)/image-20230421000342537.png) 
       
       <br>
@@ -169,18 +174,20 @@ typora-root-url: ../../..
       
         * case 2 : 삼촌이 BLACK, 부모의 오른쪽 자식인 경우
       
-        * leftrotation 활용
+        * **leftrotation 활용**
       
           ![image-20230421000406101](/images/2023-04-01-(고급개념) 고급 트리(BST, RBT, OST, Interval, Range, Sgement, Splay)/image-20230421000406101.png) 
       
       <br>
       
       * case 3 -> 끝
-    
+      
         * case 3 : 삼촌이 BLACK, 부모의 왼쪽 자식인 경우
       
-        * rightrotation 활용
+        * **rightrotation 활용**
       
+        * **부모 RED->BLACK, 할아버지 BLACK->RED로 변경**
+        
           ![image-20230421000418173](/images/2023-04-01-(고급개념) 고급 트리(BST, RBT, OST, Interval, Range, Sgement, Splay)/image-20230421000418173.png) 
     
     <br>
