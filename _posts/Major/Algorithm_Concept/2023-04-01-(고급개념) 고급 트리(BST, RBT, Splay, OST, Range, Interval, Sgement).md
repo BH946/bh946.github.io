@@ -21,6 +21,7 @@ typora-root-url: ../../..
 **참고로 트리의 구조, 순회(검색) 방식, 삽입, 삭제를 중점으로 이해하고 넘어가는것을 권장한다.**
 
 * 해당 트리들은 직접 구현해볼 생각이고, 코드들은 "고급 트리 구현" 게시물에서 확인
+* **[고급 트리 구현](https://bh946.github.io/algorithmtest/(%EA%B5%AC%ED%98%84)-%EA%B3%A0%EA%B8%89-%ED%8A%B8%EB%A6%AC-%EA%B5%AC%ED%98%84(BST,-RBT,-Splay,-OST,-Range,-Interval,-Sgement)/)**
 
 <br><br>
 
@@ -275,7 +276,7 @@ typora-root-url: ../../..
 
 ## 2. 연산 과정
 
-**기본 동작 : 루트로 보낼 특정 노드를 회전을 통해서 루트로 올린다.**  
+**기본 동작 : 특정 노드를 회전을 통해서 루트로 올린다.**  
 
 **Splay 작업은 연산 수행후 매번 노드 적용**
 
@@ -341,6 +342,7 @@ RBT기반의 노드에 size 가 추가된 개념일 뿐이다.**
 
 * **OSselect(x,k)** -> 순위 k의 데이터를 검색 (데이터)
   * 이 함수는 OSselect(T.root, k)로 처음 호출된다.
+  * 즉, 루트부터 검색한다는 의미!!
 * **OSrank(T,x)** -> 데이터의 순위를 계산 (순위)
 
 * **insert, delete**는 RBT처럼 하되 size를 추가로 계산해줘야 한다.
@@ -410,15 +412,16 @@ RBT기반의 노드에 size 가 추가된 개념일 뿐이다.**
 **Interval Tree는 기본적으로 RBT와 같은 균형트리를 기반으로 만들어 진다.**
 
 **IntervalSearch(T,i) : 폐구간 i 와 서로 겹치는 모든 구간을 계산한다.(logn 복잡도)  
-필자는 이것이 Interval Tree를 사용한 목적이라고 생각한다.**
+필자는 이것이 Interval Tree를 사용하는 목적이라고 생각한다.**
 
 <br><br>
 
 ## 1. 트리 구조 (성질)
 
-**10개의 초기 구간으로 Interval Tree를 만들었다.**
-
+**아래 그림은 10개의 초기 구간으로 구성된 Interval Tree이다.**  
 **노드의 구조를 보면 RBT와 같은 구조에 추가로 interval, max 정보를 가지고 있다.**
+
+**트리를 구성할때 insert방식은 기존 RBT처럼 key값으로 하므로 구간의 low값을 key값으로 설정!!**
 
 ![image-20230421012703873](/images/2023-04-01-(고급개념) 고급 트리(BST, RBT, Splay, OST, Range, Interval, Sgement)/image-20230421012703873.png) 
 
@@ -427,6 +430,9 @@ RBT기반의 노드에 size 가 추가된 개념일 뿐이다.**
 ## 2. 연산 과정
 
 * **IntervalInsert(), IntervalDelete() 연산은 패스하고, Search를 설명하겠다.**
+
+  * 기존 RBT와 유사하기 때문에 insert, delete는 생략
+  * **max값만 Rotate연산 때랑 insert연산 때 추가로 구현해주면 됨**
 
 * **IntervalSearch : 구간 i 와 겹치는 어떤 구간을 찾는 연산**
 
