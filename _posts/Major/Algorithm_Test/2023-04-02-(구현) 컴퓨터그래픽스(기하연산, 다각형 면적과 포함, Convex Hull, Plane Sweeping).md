@@ -54,20 +54,22 @@ intersectProp 함수 : 교차여부를 구하는데, 선분의 끝점이 교차�
 intersect 함수 : 교차여부를 구하는데, 선분의 끝점이 교차점 허용하는 경우
 
 이 중에서 between, intersect 가 중요
+
+자료형 왠만하면 long long 쓰자
 */
 
 #include<iostream>
 using namespace std;
 
 struct point {
-	int x;
-	int y;
+	long long x;
+	long long y;
 };
 typedef point Point;
 
 // OP벡터, OQ벡터 (O는 원점)
 // det(행렬식) => q가 p에 어느 방향인지 출력
-int ccw2(Point p, Point q) {
+long long ccw2(Point p, Point q) {
 	return p.x * q.y - p.y * q.x;
 }
 
@@ -114,9 +116,27 @@ bool between(Point a, Point b, Point c) {
 }
 
 // 선분 교차 검사 (교차점 허용) => 선분 ab, cd
-bool intersect(Point a, Point b, Point c, Point d) {
-	return direction(a, b, c) * direction(a, b, d) <= 0 && direction(c, d, a) * direction(c, d, b) <= 0;
+int intersect(Point a, Point b, Point c, Point d) {
+	// (a,b,c)*(a,b,d) ==-1 && (c,d,a)*(c,d,b)==-1 성립하면 교차
+	// 추가조건 때문에 <=0로 판별
+	if (direction(a, b, c) * direction(a, b, d) <= 0 && direction(c, d, a) * direction(c, d, b) <= 0) {
+		// direction함수는 방향만을 나타내기 때문에 만약 0인 경우 일직선상인 건데,
+		// 두 직선이 서로 접하는지 범위제한을 줘서 판단할 필요가 있음(between 함수 활용)
+		if (direction(a, b, c) * direction(a, b, d) == 0 && direction(c, d, a) * direction(c, d, b) == 0) {
+			// 점 c또는 d가 a,b직선 상에 존재하나 판단
+			// 점 a또는 b가 c,d직선 상에 존재하나 판단
+			if (between(a, b, c) || between(a, b, d)|| between(c, d, a) || between(c, d, b)) {
+				return 1;
+			}
+			else
+				return 0;
+		}
+		return 1;
+	}
+	else
+		return 0;
 }
+
 
 // 선분 교차 검사 (교차점 제외) => 선분 ab, cd
 bool intersectProp(Point a, Point b, Point c, Point d) {
