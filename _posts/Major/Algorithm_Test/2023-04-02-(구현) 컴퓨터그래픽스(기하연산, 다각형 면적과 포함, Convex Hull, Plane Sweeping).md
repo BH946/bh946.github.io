@@ -585,7 +585,7 @@ int m2 = 8; // S size
 int UnionArea() {
 	int sweepLine = 0; int delta = 0; int area = 0; // 면적
 	for (int i = 0; i < m1; i++) {
-		sweepLine = i;
+		sweepLine = Q[i];
 		Rectangle R = { 0,0,0,0 };
         // 0. 사용할 사각형 선택(x값 겹칠때 마다 선택)
 		for (int j = 0; j < inArr.size(); j++) {
@@ -626,18 +626,19 @@ int UnionArea() {
 
 
 int main() {
-	inArr.push_back({ 0,2,5,7 });
-	inArr.push_back({ 1,0,3,4 });
-	inArr.push_back({ 2,1,6,5 });
-	inArr.push_back({ 4,3,7,6 });
-
-	// 정렬했다 가정하고 Q,S 만들겠다.
-	for (int i = 0; i < 8; i++) {
-		Q[i] = i;
-		S[i] = i;
+	cin >> N;
+	for (int i = 0; i < N; i++) {
+		cin >> inArr[i].x1 >> inArr[i].y1 >> inArr[i].x2 >> inArr[i].y2;
+		Q[i * 2] = inArr[i].x1; Q[i * 2 + 1] = inArr[i].x2;
+		S[i * 2] = inArr[i].y1; S[i * 2 + 1] = inArr[i].y2;
 	}
+	m1 = N * 2; // 총 x축 개수
+	m2 = N * 2; // 총 y축 개수
 
-	cout << "면적 " << UnionArea(); // 39 나오면 정상
+	sort(&Q[0], &Q[m1]);
+	sort(&S[0], &S[m2]);
+
+	cout << unionArea();
 
 	return 0;
 }
