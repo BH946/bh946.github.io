@@ -10,6 +10,7 @@ sidebar:
 ---
 
 
+
 ## matplotilib, networkx, numpy, Pandas 라이브러리
 
 * **matplotilib라이브러리를 통해 그래프를 시각화해서 보여줄 수 있다.**
@@ -26,7 +27,7 @@ sidebar:
   * 매우 방대하기 때문에, 자세히 알고 싶다면 책을 따로 사서 볼 것.
 * **pandas라이브러리는 우리가아는 데이터프레임을 의미(df)**
 
-
+<br>
 
 **준비물**
 
@@ -37,6 +38,8 @@ pip install numpy
 pip install pandas
 ```
 
+<br>
+
 **기본 import**
 
 ```python
@@ -45,7 +48,8 @@ import networkx as nx
 import numpy as np
 import pandas as pd # pandas의 경우 보통 pd로 이름변경해서 사용하는것이 관례임
 ```
-<br>
+<br><br>
+
 ## 1. 사용법(matplotlib)
 
 **데이터프레임의 시각화는 plot()**
@@ -60,6 +64,8 @@ fig
 plt.show()
 ```
 
+<br>
+
 **여러 개의 그래프**
 
 ```python
@@ -70,6 +76,8 @@ ax3 = fig.add_subplot(2,2,3)
 plt.show() # 그래프에 데이터는 없는 상태
 ```
 
+<br>
+
 **3번째 그래프 차트에 x,y 값을 추가**
 
 ```python
@@ -79,6 +87,8 @@ ax3.plot(x, y, 'r--')
 fig # 코랩에선 여기서 그래프 보여줌
 plt.show()
 ```
+
+<br>
 
 **그래프 스타일 속성**
 
@@ -93,12 +103,15 @@ ax.set_title("시간대별 승하차 인원") # 그래프의 제목
 # plt.show() # => 한글이 깨지는데 파이썬에서는 어째 해결하는지 모르겠다.(VS-CODE에서는 양호)
 ```
 
+<br>
+
 **이미지 파일로 내보내기**
 
 ```python
 plt.savefig("bar_chart.png")
 ```
-<br>
+<br><br>
+
 ## 2. 사용법(networkx)
 
 **그래프 선언**
@@ -144,7 +157,8 @@ plt.savefig("bar_chart.png")
   g = nx.from_pandas_edgelist(trips, source="src", target="dst", edge_attr=['distance'])
   ```
   
-  
+
+<br>
 
 **노드, 에지**
 
@@ -187,6 +201,8 @@ plt.savefig("bar_chart.png")
   g.edges
   ```
 
+<br>
+
 **그래프 화면 출력 여러가지 방법들**
 
 ```python
@@ -194,6 +210,8 @@ nx.draw(g, with_labels = True) # networkx 라이브러리
 plt.savefig("G.png") # matplotlib 라이브러리
 plt.show()
 ```
+
+<br>
 
 **차수(Degree)**
 
@@ -208,6 +226,8 @@ G.in_degree()
 G.out_degree()
 ```
 
+<br>
+
  **전임노드(Predecessor node)와 후임노드(Successor node)**
 
 * 예를 들어 A를 기준으로 치면 다음으로 가리키는 C, E가 Successor node가 된다.
@@ -221,7 +241,8 @@ list(G.successors('A'))
 # A의 predecessors nodes
 list(G.predecessors('A'))
 ```
-<br>
+<br><br>
+
 ## 3. 사용법(numpy)
 
 **numpy 데이터 선언하기**
@@ -236,6 +257,8 @@ np.ones((3,3)) # 3x3배열 1로 초기화
 np.arange(0,30) # 0~29 배열
 ```
 
+<br>
+
 **numpy 데이터간 연산하기**
 
 ```python
@@ -247,6 +270,8 @@ arr2 = np.array([[True,True],[True, False]])
 np.logical_and(arr1, arr2).astype(int) # 2개 배열 비교해서 and연산 결과.
 ```
 
+<br>
+
 **numpy와 random을 이용한 조합**
 
 ```python
@@ -255,6 +280,8 @@ base_date = np.datetime64('2021-03-01') # datetime64라는 numpy라이브러리�
 random_date = base_date + np.random.choice(monthly_days) # 랜덤으로 날짜 반환
 # 출력 : 2021-03-05, 2021-03-08 ... 일자는 랜덤으로
 ```
+
+<br>
 
 **관계에 대한 이해**
 
@@ -274,7 +301,8 @@ print(R_and_S) # 배열의 관계 즉, 논리합을 알 수 있다.
 print(R) # 배열 초기화 한값으로 나타냄(T/F)
 print(R.astype(int)) # 배열 int형으로 나타냄(1/0)
 ```
-<br>
+<br><br>
+
 ## 4. 사용법(pandas)
 
 **함수들**
@@ -353,7 +381,8 @@ print(R.astype(int)) # 배열 int형으로 나타냄(1/0)
   src = src.iloc[:,1].values[0] # 공항코드 값으로 변경
   ```
 
-  
+
+<br>
 
 **csv->xlsx (read_csv(), to_excel()) : csv읽기, 엑셀로 변환** 
 
@@ -383,6 +412,7 @@ md.to_excel(writer, index = False) # 엑셀에 데이터 삽입
 writer.save() # 엑셀 데이터 저장
 ```
 <br>
+
 ### 집합 연산
 
 **UNION(합집합)**
@@ -396,6 +426,8 @@ union_commute = pd.concat([P, S], ignore_index = True) # pd.concat을 이용해 
 union_commute = union_commute.drop_duplicates() # drop_duplicates메소드를 이용해 중복값 제거를 할 수 있다.
 ```
 
+<br>
+
 **INTERSECTION(교집합)**
 
 * pd.concat은 outer로 join이 기본값으로 되어있으므로 합집합이 나온다.(outer:합집합, inner:교집합) 따라서 join을 inner로 바꿔주거나, merge함수를 사용해주면 된다.(merge의 기본값은 inner)
@@ -405,6 +437,8 @@ union_commute = union_commute.drop_duplicates() # drop_duplicates메소드를 �
 
 intersection_commute = pd.merge(P, S)
 ```
+
+<br>
 
 **DIFFERENCE(차집합)**
 

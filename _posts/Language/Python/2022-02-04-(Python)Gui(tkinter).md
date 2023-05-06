@@ -9,6 +9,8 @@ sidebar:
    nav: "docs"
 ---
 
+
+
 ## GUI(구이)
 
 * tkinter 라이브러리 사용
@@ -29,7 +31,7 @@ sidebar:
 
   * root.quit로 간단히 종료
 
-<br>
+<br><br>
 
 ## 1. create_frame
 
@@ -39,11 +41,15 @@ sidebar:
 from tkinter import *
 ```
 
+<br>
+
 **객체 생성**
 
 ```python
 root = Tk() # 이것만 입력시 빈 창 실행
 ```
+
+<br>
 
 **기본 속성**
 
@@ -68,11 +74,9 @@ root = Tk() # 이것만 입력시 빈 창 실행
   root.mainloop() # 마지막에 작성해주자.
   ```
 
-<br>
+<br><br>
 
 ## 2. button(버튼)
-
-
 
 **기본방식**
 
@@ -80,6 +84,8 @@ root = Tk() # 이것만 입력시 빈 창 실행
 btn1 = Button(root, text="버튼1")
 btn1.pack() # 그냥 중앙에 적용해줌.
 ```
+
+<br>
 
 **다양한 속성 적용**
 
@@ -121,11 +127,9 @@ btn1.pack() # 그냥 중앙에 적용해줌.
   btn7.pack()
   ```
 
-<br>
+<br><br>
 
 ## 3. label(라벨)
-
-
 
 **기본방식**
 
@@ -133,6 +137,8 @@ btn1.pack() # 그냥 중앙에 적용해줌.
 label1 = Label(root, text="안녕하세요")
 label1.pack()
 ```
+
+<br>
 
 **다양한 속성적용**
 
@@ -153,11 +159,13 @@ label1.pack()
   btn.pack()
   ```
 
-<br>
+<br><br>
 
 ## 4. text, entry
 
 * text는 여러줄 입력시 사용, entry는 한줄만 입력시 사용 추천.
+
+<br>
 
 **기본방식**
 
@@ -171,6 +179,8 @@ e = Entry(root, width=30)
 e.pack()
 e.insert(0, "한 줄만 입력해요") # 현재는 값이 비어있으므로 END를 써도 동일
 ```
+
+<br>
 
 **함수 이용한 텍스트 내용 출력 예시**
 
@@ -187,10 +197,9 @@ def btncmd():
 btn = Button(root, text="클릭", command=btncmd)
 btn.pack()
 ```
-<br>
+<br><br>
+
 ## 5. listbox
-
-
 
 **기본 구성**
 
@@ -205,6 +214,8 @@ listbox.insert(END, "수박") # 데이터있는 마지막줄 다음부터 insert
 listbox.insert(END, "포도")
 listbox.pack()
 ```
+
+<br>
 
 **함수이용한 예시**
 
@@ -226,11 +237,14 @@ def btncmd():
 btn = Button(root, text="클릭", command=btncmd)
 btn.pack()
 ```
-<br>
+<br><br>
+
 ## 6. checkbox
 
 * IntVar(), StringVar() ,,, 존재
 * variable을 name이라고 생각하면 이해 간단. (html과 비교해서)
+
+<br>
 
 **예시**
 
@@ -254,11 +268,14 @@ def btncmd():
 btn = Button(root, text="클릭", command=btncmd)
 btn.pack()
 ```
-<br>
+<br><br>
+
 ## 7. radiobutton
 
 * checkbox와 다르게 한개만 선택하는것이 radiobutton이다.
   * 속성 variable에 동일한 변수 넣은곳이 radiobutton들의 한 세트로 구성된다. (즉, 같은name)
+
+<br>
 
 **예시**
 
@@ -294,12 +311,15 @@ def btncmd():
 btn = Button(root, text="클릭", command=btncmd)
 btn.pack()
 ```
-<br>
+<br><br>
+
 ## 8. combobox
 
 ```python
 import tkinter.ttk as ttk # 추가로 필요
 ```
+
+<br>
 
 **예시**
 
@@ -322,10 +342,9 @@ def btncmd():
 btn = Button(root, text="선택", command=btncmd)
 btn.pack()
 ```
-<br>
+<br><br>
+
 ## 9. progressbar
-
-
 
 **기본사용**
 
@@ -346,6 +365,8 @@ btn.pack()
   ```
 
 * progressbar.stop() : 작동 중지
+
+<br>
 
 **사용자가 원하는데로 로딩하는 방식**
 
@@ -372,17 +393,17 @@ btn.pack()
   btn.pack()
   ```
 
-<br>
+<br><br>
 
 ## 10. menu(우리가 아는 메뉴탭)
-
-
 
 ### 객체생성
 
 ```python
 menu = Menu(root)
 ```
+
+<br>
 
 **File 메뉴**
 
@@ -400,11 +421,15 @@ menu_file.add_command(label="Exit", command=root.quit)
 menu.add_cascade(label="File", menu=menu_file)
 ```
 
+<br>
+
 **Edit 메뉴 (빈 값)**
 
 ```python
 menu.add_cascade(label="Edit")
 ```
+
+<br>
 
 **Language 메뉴 추가 (radio 버튼을 통해서 택1)**
 
@@ -416,6 +441,8 @@ menu_lang.add_radiobutton(label="C++")
 menu.add_cascade(label="Language", menu=menu_lang)
 ```
 
+<br>
+
 **View 메뉴**
 
 ```python
@@ -424,17 +451,22 @@ menu_view.add_checkbutton(label="Show Minimap")
 menu.add_cascade(label="View", menu=menu_view)
 ```
 
+<br>
+
 ### 적용
 
 ```python
 root.config(menu=menu)
 ```
-<br>
+<br><br>
+
 ## 11. messagebox(메세지박스)
 
 ```python
 import tkinter.messagebox as msgbox # 추가로 필요
 ```
+
+<br>
 
 **예시**
 
@@ -483,10 +515,9 @@ Button(root, command=retrycancel, text="재시도 취소").pack()
 Button(root, command=yesno, text="예 아니오").pack()
 Button(root, command=yesnocancel, text="예 아니오 취소").pack()
 ```
-<br>
+<br><br>
+
 ## 12. frame(레이아웃같은 느낌이라 생각)
-
-
 
 **예시**
 
@@ -507,10 +538,13 @@ frame_drink.pack(side="right", fill="both", expand=True)
 Button(frame_drink, text="콜라").pack()
 Button(frame_drink, text="사이다").pack()
 ```
-<br>
+<br><br>
+
 ## 13. scrollbar(스크롤바)
 
 * scrollbar를 속성으로 적용 해주는 것임. 직접 위치도 지정해야함.
+
+<br>
 
 **예시**
 
@@ -531,11 +565,14 @@ listbox.pack(side="left")
 
 scrollbar.config(command=listbox.yview)
 ```
-<br>
+<br><br>
+
 ## 14. grid(그리드)
 
 * 그리드는 계산기 생각하면 간단
 * 그리드 형식으로 row, column을 지정해주는 특징
+
+<br>
 
 **예시(계산기 형태)**
 
@@ -603,7 +640,7 @@ btn_0.grid(row=5, column=0, columnspan=2, sticky=N+E+W+S, padx=3, pady=3) # colu
 btn_point.grid(row=5, column=2, sticky=N+E+W+S, padx=3, pady=3)
 ```
 
-<br>
+<br><br>
 
 ## 15. 간단한 메모장 만들기
 
@@ -656,11 +693,13 @@ root.config(menu=menu)
 root.mainloop()
 ```
 
-<br>
+<br><br>
 
 ## GUI를 활용한 간단한 프로젝트
 
 * 따로 따로 단계별로 보는것이다.
+
+<br>
 
 ### 1. create_layout
 
@@ -759,7 +798,7 @@ root.resizable(False, False) # 창 크기 고정
 root.mainloop()
 ```
 
-
+<br>
 
 ### 2. basic_function
 
@@ -818,7 +857,7 @@ def start():
         return
 ```
 
-
+<br>
 
 ### 3. merge_images
 
@@ -857,7 +896,7 @@ def merge_image():
     msgbox.showinfo("알림", "작업이 완료되었습니다.")
 ```
 
-
+<br>
 
 ### 4. apply_options
 

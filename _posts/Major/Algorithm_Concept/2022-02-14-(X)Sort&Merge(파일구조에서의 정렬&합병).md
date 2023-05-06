@@ -9,20 +9,22 @@ sidebar:
    nav: "docs"
 ---
 
+
+
 ## File구조에서의 정렬
 
 * 파일처리론에서 배운 내용을 배경으로 정리하겠다. (자세한건 책 확인)
-* 보통 Run생성후 합병함으로써 정렬을 끝냄(File) 
+* 보통 Run생성후 합병함으로써 정렬을 끝냄(File)   
   => 제한된 용량 안에서 정렬을 위해 보조 저장장치 개념의 Run이 필요한 것이다.
 
-
+<br>
 
 ### 1. Internal Sorting(내부정렬)
 
 * **데이터가 적어서 메인 메모리 내에 모두 저장시켜 정렬이 가능할 때**
 * Record Read, Write에 걸리는 시간이 문제되지 않는다.
 
-
+<br>
 
 ### 2. External Sorting(외부정렬)
 
@@ -32,7 +34,7 @@ sidebar:
   * Run : 하나의 파일을 여러 개로 분할하여 내부 정렬 기법으로 정렬시킨 서브파일(subfile)
   * Run들을 합병(merge)하여 원하는 하나의 정렬된 파일로 만든다.
 
-
+<br>
 
 #### 2-1. Sort Phase(정렬 단계)
 
@@ -43,7 +45,7 @@ sidebar:
 * 대체 선택 (replacement selection) -> 블로그에 코드 작성해서 올린 게시글 있으니 참고.
 * 자연 선택 (natural selection)
 
-
+<br>
 
 #### 2-2. Merge Phase(합병 단계)
 

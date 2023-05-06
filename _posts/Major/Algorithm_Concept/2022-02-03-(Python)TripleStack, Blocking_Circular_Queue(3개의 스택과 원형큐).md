@@ -9,11 +9,13 @@ sidebar:
    nav: "docs"
 ---
 
+
+
 ## TripleStack과 Blocking_Circular_Queue 활용
 
 * **3개의 스택과 원형큐를 이용한 데이터 관리 시스템**
 
-
+<br>
 
 ### 1. TripleStack class
 
@@ -61,7 +63,7 @@ class TripleStack:
         return no
 ```
 
-
+<br>
 
 ### 2. Blocking Circular Queue class
 
@@ -110,7 +112,7 @@ class CustomBCQ:
         return item
 ```
 
-
+<br>
 
 ### 3. 프로그램 테스트
 
@@ -146,7 +148,7 @@ The state of TripleStack: True
 '''
 ```
 
-
+<br>
 
 #### 3-2. Blocking Circular Queue
 
@@ -192,7 +194,7 @@ In stage (2), 100 items are enqueued.
 '''
 ```
 
-
+<br>
 
 ### 4. 복잡도
 

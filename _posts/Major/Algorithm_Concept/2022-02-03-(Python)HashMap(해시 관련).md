@@ -9,12 +9,14 @@ sidebar:
    nav: "docs"
 ---
 
+
+
 ## Hashing(해싱)
 
 * 아래 HashMap은 정말 기초부터 만든 class니까 잘 참고.
-* key space >> address space
-  => 모든 경우의 key 값 공간의 크기에 맞추어 Record 저장공간을 준비하는 것이 아닌, 실제 저장이(예측) 되는 Record수(=주소공간)에 맞추어 저장하는 것이 저장 공간 활용 측면에서 효과적.
-  이과정은 key값 공간에 존재하는 값을 주소 공간의 크기에 맞게 변형하는 매핑 함수가 있으면 가능.
+* key space >> address space  
+  => 모든 경우의 key 값 공간의 크기에 맞추어 Record 저장공간을 준비하는 것이 아닌, 실제 저장이(예측) 되는 Record수(=주소공간)에 맞추어 저장하는 것이 저장 공간 활용 측면에서 효과적.  
+  이과정은 key값 공간에 존재하는 값을 주소 공간의 크기에 맞게 변형하는 매핑 함수가 있으면 가능.  
   => 이것이 해시 함수(다양하게 있음)
 * Hashing(해싱) : 검색(search key)를 제한된 범위의 배열에 매핑(mapping)하는 과정
 * Hash Table : 키가 저장된 배열
@@ -28,8 +30,10 @@ sidebar:
 
 * Clustering(군집화)
   * Primary clustering(1차 군집화) : 원래 가야하는 hash위치가 근처임으로 인해 발생하는 문제
-  * Secondary clustering(2차 군집화) : 수식이 원래 hashslot에 기반해서 발생하는 문제
+  * Secondary clustering(2차 군집화) : 수식이 원래 hashslot에 기반해서 발생하는 문제  
     => 1차 군집화를 해결하고자 Quadratic Priboing(이차 조사) 즉, slot = (home+i<sup>2</sup>)%M 이런식으로 +i에서 다르게 바꿨다고 해도 떨어진 곳에서 군집화가 또 발생한다는 이야기이다.
+
+<br>
 
 ### 다양한 해시 함수
 
@@ -38,7 +42,7 @@ sidebar:
 * Hash function 3 : Folding(중첩) Hashing : 접어서 합을 구함
 * 기타 해시 함수 : 숫자 추출, 숫자 이동, 진수 변환... 등
 
-
+<br>
 
 ### Collision and overflow(충돌과 오버플로) 해결 방법
 * 선형조사 : 말그대로 선형조사함. **=> 블로그 게시글에 구현한 코드 올렸으니 참고**
@@ -52,13 +56,13 @@ sidebar:
 
 * 버킷 체인(이건왜 설명없냐?)
 
-
+<br><br>
 
 ## HashMap
 
 * 다양한 해시 방법들이 있는데 그중 제일 기초가 되는 방식
 
-
+<br>
 
 ### 1. MapEntry
 
@@ -74,7 +78,7 @@ UNUSED = None
 EMPTY = MapEntry(None, None)
 ```
 
-
+<br>
 
 ### 2. HashMap Class
 
@@ -163,7 +167,7 @@ class HashMap:
             print("리스트 번호 : {0}, key : {1}, value : {2}".format(i, self.table[i].key, self.table[i].value))
 ```
 
-
+<br>
 
 ### 3. 프로그램 테스트
 
@@ -210,7 +214,7 @@ map.printHashAll()
 '''
 ```
 
-
+<br>
 
 ### 4. 복잡도
 

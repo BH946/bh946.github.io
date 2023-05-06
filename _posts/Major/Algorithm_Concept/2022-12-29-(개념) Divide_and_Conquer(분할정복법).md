@@ -22,7 +22,7 @@ typora-root-url: ../../..
   * bottom-top : 상향식 접근법이며, for문을 보통 사용하고 흔히 DP(동적계획법)을 의미한다.
   * top-bottom(+Momoization) : top-bottom과 동일한데 추가로 DP처럼 리턴값을 따로 기억해서 재사용하는 구조를 가진다.
 
-<br>
+<br><br>
 
 ## 분할정복(Divide-and-Conquer)식 설계
 
@@ -34,7 +34,7 @@ typora-root-url: ../../..
 
 **=> 하향식(top-down) 접근 방법이라고 한다.**
 
-
+<br>
 
 ### 다양한 분할정복 방식들
 
@@ -55,9 +55,7 @@ typora-root-url: ../../..
 
 * **등등 다양한 알고리즘들이 존재**
 
-
-
-<br>
+<br><br>
 
 ## 분할정복 사용하지 말아야 할 경우들
 

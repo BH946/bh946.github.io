@@ -9,12 +9,14 @@ sidebar:
    nav: "docs"
 ---
 
+
+
 ## Recursion(재귀)
 
 * Recursion은 말 그대로 재귀하는 형태로 생각하면 된다. 스택구조를 가진다.
 * 활용 예시 : 팩토리얼, 등등,,,
 
-
+<br>
 
 ### 1. Factorials(팩토리얼)
 
@@ -30,6 +32,8 @@ def factorial(n):
 print(factorial(4))
 ```
 
+<br>
+
 #### 1-1. Factorials(For문으로 구현법)
 
 * 재귀를 하는게 아니라서, 메모리에 효율적이다.
@@ -42,7 +46,7 @@ for i in range(1, 5): # factorial(4)를 의미
 print(factorial)
 ```
 
-
+<br>
 
 ### 2. Fibonacci(피보나치)
 
@@ -64,7 +68,7 @@ def fib(n):
 print(fib(6)) # 6번째 피보나치 수열값은 : 8출력
 ```
 
-
+<br>
 
 ### 3. Towers of Hanoi(하노이 탑)
 
@@ -88,11 +92,9 @@ Move 2 -> 3
 Move 1 -> 3'''
 ```
 
-
+<br>
 
 ### 4. Exponential Operation(지수 함수) - O(N)
-
-
 
 ```python
 def exp(x, n):
@@ -103,6 +105,8 @@ def exp(x, n):
 
 print(exp(2, 5))
 ```
+
+<br>
 
 #### 4-4. Exponential Operation(For문으로 구현법) - O(logN)
 
@@ -120,14 +124,14 @@ def exp(x, n):
 print(exp(2, 5)) # 32
 ```
 
-
+<br>
 
 ### 5. Knapsack Problem - O(2<sup>2</sup>)
 
-* 도둑이 보석가게에 배낭을 메고 침입했다.
-  배낭의 최대 용량은 W이며, 이를 초과해서 보석을 담으면 배낭이 찢어질 것이다.
-  각 보석들의 무게와 가격은 알고 있다.
-  배낭이 찢어지지 않는 선에서 가격 합이 최대가 되도록 보석을 담는 방법은?
+* 도둑이 보석가게에 배낭을 메고 침입했다.  
+  배낭의 최대 용량은 W이며, 이를 초과해서 보석을 담으면 배낭이 찢어질 것이다.  
+  각 보석들의 무게와 가격은 알고 있다.  
+  배낭이 찢어지지 않는 선에서 가격 합이 최대가 되도록 보석을 담는 방법은?  
   => 아래 코드에서는 답이 19 값
 * **모든 경우의 수를 넣어본다 (Brute-Force)**
 
@@ -152,15 +156,19 @@ n = len(values)
 print(knapsack(W, weights, values, n)) # 19 출력
 ```
 
+<br>
+
 #### 5-1. Knapsack Problem(For문으로 구현법) - O(nw)
 
 * 이녀석이 더 성능이 좋다. 코드는 인터넷 검색바람.
 
-
+<br>
 
 ### 6. N Queen Problem
 
-* **백 트래킹(되돌아 간다)**을 활용했던것 같은데 이 또한 recursion형식이며, 코드는 인터넷 검색바람.
+* **백 트래킹(되돌아 간다)**를 활용, 이 또한 recursion형식이며, 코드는 인터넷 검색바람.
+
+<br>
 
 #### 6-1. N Queen Problem(For문인지? 동적으로 최적화 하는 방법)
 

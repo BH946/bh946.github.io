@@ -9,6 +9,8 @@ sidebar:
    nav: "docs"
 ---
 
+
+
 ## Search(검색)
 
 
@@ -38,7 +40,7 @@ def sortedLinearSearch(theValues, item):
     return False
 ```
 
-
+<br>
 
 ### 2. BinarySearch(바이너리 검색) - O(N), O(logN)
 
@@ -60,11 +62,9 @@ def binarySearch(theValues, target):
     return False
 ```
 
-
+<br><br>
 
 ## Sort(정렬)
-
-
 
 ### 1. Bubble Sort(버블 정렬) - O(N<sup>2</sup>)
 
@@ -94,7 +94,7 @@ orderedList = bubbleSort(unorderedList)
 print(orderedList)
 ```
 
-
+<br>
 
 ### 2. Selection Sort(선택 정렬) - O(N<sup>2</sup>)
 
@@ -116,7 +116,7 @@ def selectionSort(theSeq):
     return theSeq
 ```
 
-
+<br>
 
 ### 3. Insertion Sort(삽입 정렬) - O(N<sup>2</sup>)
 
@@ -135,7 +135,7 @@ def insertionSort(theSeq):
     return theSeq
 ```
 
-
+<br>
 
 ### 4. Merging Sorted Lists(정렬된 리스트 합병 정렬)
 
@@ -156,7 +156,7 @@ def MergeSortedLists(listA, listB) -> [int]:
     return newList # 반환
 ```
 
-
+<br>
 
 #### 방법2) 맨 위의 값을 비교해서 차례로 넣고 남는 값들 채워 넣기 - O(N)
 
@@ -183,11 +183,13 @@ def MergeSortedLists(listA, listB):
     return newList
 ```
 
-
+<br>
 
 ### 5. Merge Sort(합병 정렬)
 
 * 위의 4번은 정렬된 리스트를 받았을때의 합병정렬을 의미한거지 혼동X
+
+<br>
 
 #### Basic Merge sort in Python
 
@@ -209,6 +211,8 @@ fire = [2,4,1,53,5,4,63,63,45,346,35,342,3]
 print(fire) # [2,4,1,53,5,4,63,63,45,346,35,342,3]
 print(pythonMergeSort(fire)) # [1, 2, 3, 4, 4, 5, 35, 45, 53, 63, 63, 342, 346]
 ```
+
+<br>
 
 #### 향상된 Merge sort - O(NlogN)
 
@@ -261,7 +265,7 @@ mergeSort(fire)
 print(fire) # [1, 2, 3, 4, 4, 5, 35, 45, 53, 63, 63, 342, 346]
 ```
 
-
+<br>
 
 ### 6. Quick Sort(퀵 정렬) - O(N<sup>2</sup>)
 
@@ -306,7 +310,7 @@ quickSort(fire)
 print(fire) # [1, 2, 3, 4, 4, 5, 35, 45, 53, 63, 342, 63, 346]
 ```
 
-
+<br>
 
 ### 7. Radix Sort(기수 정렬) - O(nw) = O(N)
 
@@ -340,11 +344,13 @@ radixSort(intList, 3) # 3은 자리수를 의미
 print(intList) # [125, 212, 342, 346, 358, 390, 411, 413, 457, 522, 531, 632, 634]
 ```
 
-
+<br>
 
 ### 8. Heap Sort(힙 정렬) - O(NlogN)
 
-* Heaps : 완전 이진 트리, 보통 리스트로 구현, 
+* Heaps : 완전 이진 트리, 보통 리스트로 구현
+
+<br>
 
 #### Simple HeapSort
 
@@ -361,6 +367,8 @@ def simpleHeapSort(theSeq):
     for i in range(n, 0, -1): # 오름차순
         theSeq[i] = heap.extract() # 힙으로부터 데이터를 추출하면서 정렬
 ```
+
+<br>
 
 #### 향상된 힙 정렬
 

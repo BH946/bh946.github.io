@@ -9,6 +9,8 @@ sidebar:
    nav: "docs"
 ---
 
+
+
 ## 관계(Relation)
 
 * 행렬을 사용하기 좋게끔 **numpy**라이브러리를 기본적으로 사용할것이다.
@@ -17,7 +19,7 @@ sidebar:
 
 * 부울곱, 추이, 대칭, 반사, 동치, 플로이드 워셜 알고리즘
 
-
+<br>
 
 #### 부울곱(Boolean Product)
 
@@ -44,7 +46,7 @@ def my_boolean_product(R, S):
   return M # M은 관계행렬
 ```
 
-
+<br>
 
 #### 추이 관계(Transitive Relation)
 
@@ -75,7 +77,7 @@ def is_transitive_relation(M):
     return False
 ```
 
-
+<br>
 
 #### 대칭 관계(Symmetric Relation)
 
@@ -96,7 +98,7 @@ def is_symmetric_relation(M):
   return True
 ```
 
-
+<br>
 
 #### 반사 관계(Reflexive Relation)
 
@@ -117,7 +119,7 @@ def is_reflexive_relation(M):
   return True
 ```
 
-
+<br>
 
 #### 동치 관계(Equivalence Relation)
 
@@ -136,7 +138,7 @@ def is_equivalence_relation(M):
   return False
 ```
 
-
+<br>
 
 #### 플로이드 워셜 알고리즘(Floyd Washall Algorithm)
 

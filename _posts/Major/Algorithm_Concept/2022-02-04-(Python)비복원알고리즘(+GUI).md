@@ -9,6 +9,8 @@ sidebar:
    nav: "docs"
 ---
 
+
+
 ## 비복원 알고리즘
 
 * 복원알고리즘과 다르게 복원을 하지않는다는 큰 특징을 가진다.(이 또한 나눗셈의 알고리즘이다)
@@ -16,7 +18,7 @@ sidebar:
 * 출력화면을 보고 알고리즘을 이해
 * GUI는 tkiinter라이브러리 활용
 
-
+<br>
 
 #### 출력화면
 
@@ -40,7 +42,7 @@ sidebar:
 나머지 : 0000 십진수 : 0
 ```
 
-
+<br>
 
 ### 1. 2진수 -> 10진수
 
@@ -64,7 +66,7 @@ def convertDecimal(n):
     return convertN
 ```
 
-
+<br>
 
 ### 2. 10진수 -> 2진수
 
@@ -141,11 +143,9 @@ def convertBinaryOri(n, whatBit): # 후반 convert함수(그냥 앞에만 0)
         return str_2
 ```
 
-
+<br>
 
 ### 3. 종료, 시작 버튼
-
-
 
 ```python
 def btnExit():
@@ -296,11 +296,9 @@ def btnStart():
     txtResult.insert(END,initPrint)
 ```
 
-
+<br>
 
 ### 4. GUI
-
-
 
 ```python
 

@@ -20,7 +20,7 @@ typora-root-url: ../../..
 
 여기선 분기한정법을 알아보도록 하자.
 
-<br>
+<br><br>
 
 ## Branch-and-Bound(분기한정법)
 
@@ -29,7 +29,7 @@ typora-root-url: ../../..
 * **Bound** : 마디가 유망한지 여부를 결정하기 위해서 한계치(bound) 계산
 * **So far the best** : 현재까지 찾은 최적의 답
 
-
+<br>
 
 ### 0-1 배낭채우기(깊이, 너비, 최고)
 
@@ -44,15 +44,15 @@ typora-root-url: ../../..
 * **따라서 노드는 3가지 정보를 기록 : 현재까지 이익, 현재까지 무게, 앞으로 가능한 최대 이익**
 * **상태 공간트리는 단순히 1, 0 방식**
 
-
+<br>
 
 #### 깊이우선 방식
 
-참고할 코드는 Bactrack 게시물에서 확인
+참고할 코드는 Backtracking 게시물에서 확인
 
 ![screen captures](/images/2023-01-03-(개념) Branch-and-Bound(분기한정법)/66ad63ec-7ff6-478a-a916-0f0f321c9822-16727213310084.png)
 
-
+<br>
 
 #### 너비우선 방식
 
@@ -64,7 +64,7 @@ typora-root-url: ../../..
 
 * 참고 코드
 
-
+<br>
 
 #### 최고우선 방식
 
@@ -72,7 +72,7 @@ typora-root-url: ../../..
 
 ![screen captures](/images/2023-01-03-(개념) Branch-and-Bound(분기한정법)/1acd9ce1-f877-4d01-a085-64dd4b7ca9b7.png)
 
-
+<br>
 
 ### 외판원 문제(Traveling Saleswoman Problem)
 
@@ -80,7 +80,7 @@ TSP라고 매우 유명한 문제이고, 해밀토니안 사이클과 유사하�
 
 * DP방식과 분기한정법 방식 소개
 
-
+<br>
 
 #### DP
 
@@ -94,13 +94,13 @@ D의 목표는?   ![img](/images/2023-01-03-(개념) Branch-and-Bound(분기한�
 
 * 하나의 예시이며 풀이를 잘 참고
 
-
+<br>
 
 ![screen captures](/images/2023-01-03-(개념) Branch-and-Bound(분기한정법)/f29b89ca-a5ec-4304-8c47-da73810ae07a.png)
 
 * 코드 참고
 
-
+<br>
 
 #### 분기한정법
 
@@ -110,7 +110,7 @@ D의 목표는?   ![img](/images/2023-01-03-(개념) Branch-and-Bound(분기한�
 * 사이클 생성했을 때 젤 작은 Value가 the best!
 * 우선순위큐로 BOUND가 젤 작은 것들을 우선 dequeue
 
-
+<br>
 
 ![screen captures](/images/2023-01-03-(개념) Branch-and-Bound(분기한정법)/86652e30-33b3-4db0-a11a-93d27c310632.png)
 
@@ -119,7 +119,7 @@ D의 목표는?   ![img](/images/2023-01-03-(개념) Branch-and-Bound(분기한�
 * **나가는 에지들이 다 최소일경우? 젤 최적일것.(하지만 당연히 그 경우는 사이클이 형성 안될가능성이 높음)**
   * **그래도 이것을 Lower Bound로 사용할수가 있다는것**
 
-
+<br>
 
 ![screen captures](/images/2023-01-03-(개념) Branch-and-Bound(분기한정법)/26555c18-14a6-4c4c-a71d-1c936b971e88.png)
 
@@ -130,14 +130,14 @@ D의 목표는?   ![img](/images/2023-01-03-(개념) Branch-and-Bound(분기한�
     v3은 v2에서 온 상황일테니까 v2를 제외한 v1,v4,v5로 가는게 자명함.
   * 이런 형태로 갈 수 있는 경로들을 모두 따져서 Bound값을 구해줘야한다.
 
-
+<br>
 
 ![screen captures](/images/2023-01-03-(개념) Branch-and-Bound(분기한정법)/12c5748e-7e02-4c63-b481-68da2877dbce.png)
 
 * 최종 결과이며 best값 보다 큰 값들은 당연히 볼필요도 없다.
 * 또한 우선순위 방식을 사용한 상태이다.
 
-<br>
+<br><br>
 
 ## 최적화 문제의 SST 비교
 
@@ -146,9 +146,6 @@ D의 목표는?   ![img](/images/2023-01-03-(개념) Branch-and-Bound(분기한�
 
 * 최적화 문제의 SST 비교 최대화 문제(예: 0-1냅색)
   * 트리 깊어질수록 BOUND값이 절대 커질 수 없음(Upper Bound를 구함)
-
-
-
 
 
 

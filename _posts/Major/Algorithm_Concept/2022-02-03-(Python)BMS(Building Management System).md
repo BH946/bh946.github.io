@@ -10,13 +10,14 @@ sidebar:
 ---
 
 
-## BMS : 건물 관리 시스템
+
+# BMS : 건물 관리 시스템
 
 * 즉, 우리가 만드는건 데이터를 관리하기 위한 데이터 관리 시스템 느낌이라고 보면 된다.
 
+<br>
 
-
-### 1. Computer Class
+## 1. Computer Class
 
 * **아래에서 인스턴스 생성을 위함(데이터 생성을 이 클래스 형식으로 생성할거임.)**
 
@@ -37,9 +38,9 @@ C1 = Computer("삼성전자 플러스2 퓨어 화이트 노트북 NT550XDZ-AD2AW
     , 593000, 4.5, "2021-03-19", "https://www.coupang.com/np/search?component=&q=%EB%85%B8%ED%8A%B8%EB%B6%81&channel=user")
 ```
 
+<br><br>
 
-
-### 2. BMS Class
+## 2. BMS Class
 
 * BMS로 객체 생성시 generate_db() 함수를 통해 ItemDB, UserDB클래스의 객체도 생성하고, self로 가지는 흐름.
 * search(검색), sort(정렬), delete(삭제), print_...(출력)로 구성
@@ -156,9 +157,9 @@ class BMS:
         return results      
 ```
 
+<br><br>
 
-
-### 3. ItemDB 및 UserDB Class
+## 3. ItemDB 및 UserDB Class
 
 * **실제로 랜덤으로 데이터들을 생성할 부분**
 
@@ -222,9 +223,9 @@ class UserDB:
             self.size += 1
 ```
 
+<br><br>
 
-
-### 4. 프로그램 테스트
+## 4. 프로그램 테스트
 
 ```python
 # 요구사항 1, 2
@@ -251,6 +252,8 @@ Billie
 '''
 ```
 
+<br>
+
 ```python
 # 요구사항 3
 results = bms.search(keyword)
@@ -273,6 +276,8 @@ print("검색된 아이템의 수(item): {n_item} 검색된 아이템의 수(use
 '''
 ```
 
+<br>
+
 ```python
 # 요구사항 4
 # 사용자DB를 정렬하고 ASC 순으로 정렬되었는지를 확인
@@ -292,6 +297,8 @@ bms.print_user_db(10) # 사용자 DB 출력 10개
 '''
 ```
 
+<br>
+
 ```python
 # 요구사항 5 
 # 다시 검색하면 관련데이터는 삭제되었기 때문에 자료가 없어야함
@@ -306,24 +313,24 @@ Billie를 사용자, 아이템DB에서 다시 검색한 결과: 0
 '''
 ```
 
+<br><br>
 
-
-### 5. 복잡도
+## 5. 복잡도
 
 * 주관적이므로 틀릴 수 있음
 
 ```python
 # BMS 내 search, sort, delete 메소드
 """
-  T: O(N+M) = O(N) - Linear time
+  T: O(N+M) = O(N) -> Linear time
   search : 검색 메소드
 """  
 """
-  T: O(N^2) - Quadratic time
+  T: O(N^2) -> Quadratic time
   sort : 정렬 메소드
 """  
 """
-  T: O(N^2) - Quadratic time
+  T: O(N^2) -> Quadratic time
   delete : 삭제 메소드
   => 연결리스트는 O(N)이지만 2차원 리스트는 pop(i)때문에 O(N^2)이 나온다고 생각
 """  

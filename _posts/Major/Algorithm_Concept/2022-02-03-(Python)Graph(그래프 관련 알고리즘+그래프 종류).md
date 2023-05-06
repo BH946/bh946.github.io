@@ -9,20 +9,22 @@ sidebar:
    nav: "docs"
 ---
 
+
+
 ## Graph(그래프)
 
 * 그래프 : G=(V,E)=(N,E) => V정점, N노드, E간선
 
-
+<br>
 
 ### 1. Basic concept of graphs(여러 그래프들의 기본 개념)
 
-**다중 그래프(Multi Graph) : 두 정점에 2개 이상의 간선이 허용.(=다중 타입)**
-**수도 그래프(Pseudoudo Graph) : 두개 이상의 간선과 self-loop를 가진다.**
-**유향 그래프(Directed Graph) : 정점의 순서를 생각하는 그래프(E는 V에 이항관계)**
-**무향 그래프(Undirected Graph) : 정점의 순서를 무시하는 그래프(k-클리크)**
+**다중 그래프(Multi Graph) : 두 정점에 2개 이상의 간선이 허용.(=다중 타입)**  
+**수도 그래프(Pseudoudo Graph) : 두개 이상의 간선과 self-loop를 가진다. **   
+**유향 그래프(Directed Graph) : 정점의 순서를 생각하는 그래프(E는 V에 이항관계)**  
+**무향 그래프(Undirected Graph) : 정점의 순서를 무시하는 그래프(k-클리크)**  
 
-**정규 그래프(Regular Graph) : 모든 정점의 차수가 같다. (K와 C는 항상 정규 그래프이다.)**
+**정규 그래프(Regular Graph) : 모든 정점의 차수가 같다. (K와 C는 항상 정규 그래프이다.)**  
 => Kn, Cn, W<sub>3</sub>은 정규 그래프이다. (W는 n이 아닌이유가 W<sub>4</sub>는 정규 그래프X 라서)
 
 * **완전 그래프(Complete)** : 무향 그래프가 모든 정점의 쌍 사이에 간선이 존재.(Kn)
@@ -34,7 +36,7 @@ sidebar:
 * **휠 그래프(Wheel Graph)** : 허브가 존재하는(모두 연결해주는 노드) 그래프. n+1 노드가짐.(Wn)
   => EX) W<sub>6</sub>은 노드가 7개라는 뜻. Cycle그래프에 허브노드(모든노드 연결지점)를 추가한 그래프이다.
 
-**동형 그래프(Isomorphic Graph) : 1.노드수, 2.에지수가 동일하다.(=전단사함수) 3.인접노드와 정확히 일치.**
+**동형 그래프(Isomorphic Graph) : 1.노드수, 2.에지수가 동일하다.(=전단사함수) 3.인접노드와 정확히 일치.**  
 => 목적의 대부분은 Planer그래프 만들려고(평면). Why? 노드간 거리 등 간단히 볼수 있다.
 
 * **준동형 그래프(Homomorphism Graph)** : 그래프는 노드, 에지수가 달라도 그래프 뿌리 즉, 모양이 같다.
@@ -45,27 +47,27 @@ sidebar:
 * **진부분 그래프(Proper Subgraph)** : 부분그래프에서 E'!=E이다. (즉, 노드같고 에지다른데 이부분 특별히 이해안해도 됨)
 * **스패닝 그래프(Spanning Graph)** : 부분그래프에서 V'=V이고, E'가 부분집합이다. (노드같고 경로가 다르겠죠?)
 
-**이분 그래프(Bipartite Graph) : M과 N집합 사이에 간선으로 정점들을 연결.**
+**이분 그래프(Bipartite Graph) : M과 N집합 사이에 간선으로 정점들을 연결.**  
 => V=MUN, M∩N=∅(정점집합 V가 M과 N으로 분할)
 
-* **완전 이분그래프(Complete Bipartite Graph)** : M, N내의 모든 정점사이에 모두 간선이 존재.(K<sub>n,m</sub>)
+* **완전 이분그래프(Complete Bipartite Graph)** : M, N내의 모든 정점사이에 모두 간선이 존재.(K<sub>n,m</sub>)  
   => K<sub>m,n</sub>은 mxn간선개수 가짐.
 * 이분 그래프와 완전 이분그래프 둘다 각 집합M과N의 내부 노드끼린 에지가 없어야함.
 
-**Graph density : 에지 수에 의해 밀집, 희소가 결정된다고 볼 수 있다.**
-=> 1) Undirected simple graphs : D=2|E|/|V|(|V|-1)
+**Graph density : 에지 수에 의해 밀집, 희소가 결정된다고 볼 수 있다.**  
+=> 1) Undirected simple graphs : D=2|E|/|V|(|V|-1)  
 => 2) Directed simple graphs : D=|E|/|V|(|V|-1)
 
-* **희소 그래프(Sparse Graph)** : 간선의 개수가 |V|<sup>2</sup>보다 훨씬 작은 그래프.
+* **희소 그래프(Sparse Graph)** : 간선의 개수가 |V|<sup>2</sup>보다 훨씬 작은 그래프.   
   => 주로 인접리스트 사용
-* **밀집 그래프(Dense Graph)** : 간선의 개수가 |V|<sup>2</sup>과 비례하는 그래프.
+* **밀집 그래프(Dense Graph)** : 간선의 개수가 |V|<sup>2</sup>과 비례하는 그래프.  
   => 주로 인접행렬을 사용
-* **가중치 그래프(Weighted Graph)** : 간선에 음수가 아닌 가중치를 할당.
+* **가중치 그래프(Weighted Graph)** : 간선에 음수가 아닌 가중치를 할당.  
   => 최소 가중치로 가는 방법(알고리즘) 여러가지 존재함.
 
 **오일러 루프(Euler Loop) : 모든 간선(에지)를 딱 한번만 거쳐서 시작 정점으로 다시 돌아오는 루프.**
 
-* **오일러 그래프(Euler Graph)** : 오일러 루프를 가진 그래프.
+* **오일러 그래프(Euler Graph)** : 오일러 루프를 가진 그래프.  
   => 필요충분조건 : G의 모든 정점이 짝수의 차수를 가짐.
 * **추가설명** : 오일러 경로란? 모든 변을 꼭 한 번씩 지나는 경로. 그런데, 얘는 오일러 그래프의 필요충분조건이 아니라는점 기억!! 오일러 그래프는 오일러 루프이기만 하면 됨!!
 
@@ -73,31 +75,31 @@ sidebar:
 
 * **해밀턴 그래프(Hamilton Graph)** : 해밀턴순환을 가진 그래프.
 
-**평면 그래프(Planar Graph) : 어떤 교선도 갖지 않고 평면 위에 그릴 수 있는 그래프.**
+**평면 그래프(Planar Graph) : 어떤 교선도 갖지 않고 평면 위에 그릴 수 있는 그래프.**  
 => 이분, 완전 그래프는 Planar가 되기 힘들다.
 
-* **오일러의 정리** : v-e+f=2 암기. (Planar라면, 오일러식 성립) => e<=3(v-2) 로 계산
-  교점 : 교차되는 점
+* **오일러의 정리** : v-e+f=2 암기. (Planar라면, 오일러식 성립) => e<=3(v-2) 로 계산  
+  교점 : 교차되는 점  
   교선 : 교차되는 간선
-* **다각형 그래프(Polygon Graph)** : 하나의 순환으로 된 그래프를 다각형이라 한다.
+* **다각형 그래프(Polygon Graph)** : 하나의 순환으로 된 그래프를 다각형이라 한다.  
   => 내용보단 의미만 알기. 이 또한 평면 그래프이다.
-  * 면(face) : 다각형 그래프 G에 의해서 정의되는 영역들
-    G의 최대순환(maximal cycle) : G의 모든 면을 포함하고 있는 다각형.
+  * 면(face) : 다각형 그래프 G에 의해서 정의되는 영역들  
+    G의 최대순환(maximal cycle) : G의 모든 면을 포함하고 있는 다각형.  
     면 r의 차수 : r의 경계를 이루는 경로의 길이. deg(r) = 에지수.
-* **비평면 그래프(Nonplanar Graph)** : 평면 그래프가 아닌 그래프.
+* **비평면 그래프(Nonplanar Graph)** : 평면 그래프가 아닌 그래프.  
   => EX) 이분, 완전 그래프, 오일러식 만족X
 
-
+<br>
 
 ### 2. Graph Coloring
 
-**정점의 착색(=그래프 착색)**
+**정점의 착색(=그래프 착색) **  
 => 인접한 노드만 다른컬러이면 되는게 여기서 중요한 포인트.
 
-**n-색 가능(n-colorable) : n가지의 색으로 G의 착색이 가능**
-**착색수(chromatic number) : 착색하는데 필요한 최소의 색의 가지 수(x(G)로 표기)**
-**고유착색 : 인접 정점이 같은 색 갖지 않는 착색**
-=> 최대 colorable 의 경우 노드수 라는것
+**n-색 가능(n-colorable) : n가지의 색으로 G의 착색이 가능**  
+**착색수(chromatic number) : 착색하는데 필요한 최소의 색의 가지 수(x(G)로 표기)**  
+**고유착색 : 인접 정점이 같은 색 갖지 않는 착색**  
+=> 최대 colorable 의 경우 노드수 라는것  
 => chromatic은 최소 색 가지 수
 
 그래프 G를 착색할 때 **웰치-포웰의 알고리즘** 사용가능 => chromatic 찾는 알고리즘
@@ -115,7 +117,7 @@ Welch-Powell alogrithm consists of following steps:
 5) Repeat step 4 on all uncolored vertices with a new color, in descending order of degrees until all the vertices are colored
 ```
 
-
+<br>
 
 ### 3. Graph Alogrithm
 
@@ -123,7 +125,7 @@ Welch-Powell alogrithm consists of following steps:
 * DFS, BFS, 소셜 네트워크 분석, 그래프 판별법, 최단거리(다익스트라=Dijkstra's), 플로이드 워셜(Floyd Washall), 웰치-포웰(Welch Powell), Isomorphism graph, Dense graph, Euler graph
 * 그래프 판별법 종류 : Isomorphism graph, Sparse and Dense graphs, Euler and Hamiltonian graph
 
-
+<br>
 
 #### 깊이 우선 탐색(DFS)
 
@@ -144,7 +146,7 @@ int v;
 }
 ```
 
-
+<br>
 
 #### 넓이 우선 검색(BFS)
 
@@ -172,7 +174,7 @@ def bfs(graph, source):
 print(bfs(g, 0)) # g는 k-클리크 그래프라고 가정(완전 그래프)
 ```
 
-
+<br>
 
 #### 소셜네트워크 분석
 
@@ -181,6 +183,8 @@ print(bfs(g, 0)) # g는 k-클리크 그래프라고 가정(완전 그래프)
 * Watts-Strogatz 그래프 모델 : Small-World 그래프로 표현. Small-World 그래프는 많은 노드가 하나 이상의 이웃을 가지지 않는, 일부 노드에 많은 이웃을 가지게되는 그래프입니다. 예로, 우리가 알고있는 인플루언서 기반 소셜네트워크, 온라인 상점 내 인기상품 기반 상품 네트워크 등은 이러한 Small World 그래프 입니다. 또한, 실제 사람들의 커뮤니티에서도 많은 사람들은 적은 수의 사람들을 알고 있으며, 소수의 사람들이 많은 인맥을 가지는 구조로 보여주게 됩니다.
 
   참조링크: (Small-World 그래프)[https://en.wikipedia.org/wiki/Small-world_network]
+
+<br>
 
 **1. source 로부터 n-HOPS가 떨어진 노드들을 찾는 방법**
 
@@ -193,7 +197,7 @@ for d in nx.shortest_path_length(g, source=0).items(): # 2번 방법
     print(d)
 ```
 
-
+<br>
 
 **2. 주어진 노드가 50% 이상의 친구 노드를 가지는 최소 홉수찾는 방법**
 
@@ -227,13 +231,13 @@ def find_min_hops_with_above_50_friends(g, influencer=0, min_percent=50):
 print(find_min_hops_with_above_50_friends(g, 0, 50)) # g는 Watts-Strogatz그래프 모델
 ```
 
-
+<br>
 
 #### 동형 그래프(Isomorphism Graph)
 
 * **물론 nx.is_isomorphic이 존재한다.**
-* 알고리즘 : 
-  두 그래프가 노드수, 에지수 같은지 확인. 
+* 알고리즘 :   
+  두 그래프가 노드수, 에지수 같은지 확인.   
   G1의 이웃 노드의 수와 G2의 이웃 노드의 수가 동일한 흐름을 보이는지?(역순무시)
 
 ```python
@@ -265,7 +269,7 @@ def is_isomorphic(G1, G2):
   return True # 다 통과했으니 True
 ```
 
-
+<br>
 
 #### 그래프 밀집도(Graph Density)
 
@@ -286,7 +290,7 @@ def calculate_density(G):
   return D
 ```
 
-
+<br>
 
 #### 오일러 그래프(Euler Graph)
 
@@ -309,7 +313,7 @@ def is_Eulerian(g):
   return True # 홀수 차수가 없으면 여기까지 왔으니, True로 반환
 ```
 
-
+<br>
 
 #### 두 노드 사이에 경유하는 노드가 있는지 확인 함수
 
@@ -330,7 +334,7 @@ def has_nonstop_flight(graph, src, dst):
     return False
 ```
 
-
+<br>
 
 #### 다익스트라 알고리즘(Dijkstra's Alogrithm)
 
@@ -354,7 +358,7 @@ Dijkstra_shortestPath(G,v)
 end Dijkstra_shortestPath()
 ```
 
-
+<br>
 
 #### 원하는 경로를 지나는 노드의 최단경로 거리는?
 
@@ -380,7 +384,7 @@ def shortest_path_length_from_airports(graph, airport_seq):
 seq = ['Los Angeles International Airport','Hartsfield Jackson Atlanta International Airport','Miami International Airport','Washington Dulles International Airport']
 ```
 
-
+<br>
 
 #### 단일 출발지(직항) 최단거리 찾기
 
@@ -421,7 +425,7 @@ def get_farthest_or_shortest_airports_from(graph, src):
   return (farthest, shortest)
 ```
 
-
+<br>
 
 #### 플로이드 워셜 알고리즘 활용
 

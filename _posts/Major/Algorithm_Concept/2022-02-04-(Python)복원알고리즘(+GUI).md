@@ -9,13 +9,15 @@ sidebar:
    nav: "docs"
 ---
 
+
+
 ## 복원 알고리즘
 
 * 나눗셈 알고리즘이며, 2진수 양수(4bit)로 입력받는것만 구현.
 * 출력형태를 보고 알고리즘 이해(복원 한다는 점이 핵심)
 * GUI로 만듬(tkiinter 라이브러리 활용) -> import 생략하겠음
 
-
+<br>
 
 #### 출력형태
 
@@ -43,7 +45,7 @@ sidebar:
 몫 : 0001 => 1
 ```
 
-
+<br>
 
 ### 1. 2진수 -> 10진수
 
@@ -67,11 +69,9 @@ def convertDecimal(n):
     return convertN
 ```
 
-
+<br>
 
 ### 2. 10진수 -> 2진수
-
-
 
 ```python
 # 10진수 -> 2진수 변환
@@ -107,7 +107,7 @@ def convertBinaryOri(n, whatBit):
         return str_2
 ```
 
-
+<br>
 
 ### 3. 종료, 시작 버튼
 
@@ -177,11 +177,9 @@ def btnStart():
     txtResult.insert(END,initPrint)
 ```
 
-
+<br>
 
 ### 4. GUI
-
-
 
 ```python
 

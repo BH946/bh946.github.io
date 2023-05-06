@@ -9,6 +9,8 @@ sidebar:
    nav: "docs"
 ---
 
+
+
 ## Reservoir Sampling(저수지 샘플링)
 
 * zoom in, out 등등에서 활용 많이하는 알고리즘

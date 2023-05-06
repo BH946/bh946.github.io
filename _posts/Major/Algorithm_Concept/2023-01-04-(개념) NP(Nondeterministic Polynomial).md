@@ -24,7 +24,7 @@ typora-root-url: ../../..
     * 왜냐하면 브루트포스는 지수함수지만, DP로 풀면 n^3의 다차 함수로 복잡도 나오기 때문
 * 참고로 다차 함수는 로그도 당연 포함
 
-<br>
+<br><br>
 
 ## 문제의 일반적인 분류
 
@@ -32,7 +32,7 @@ typora-root-url: ../../..
 * **다루기 힘들다고 증명된 문제**
 * **다루기 힘들다고 증명되지 않았고, 다차시간 알고리즘도 찾지 못한 문제**
 
-
+<br>
 
 ### **다차시간 알고리즘을 찾은 문제**
 
@@ -49,7 +49,7 @@ typora-root-url: ../../..
 
   * 최소비용신장트리(MST) 문제
 
-
+<br>
 
 ### **다루기 힘들다고 증명된 문제**
 
@@ -76,7 +76,7 @@ typora-root-url: ../../..
       그런데, B코드에선 "예"니까 while문으로 무한루프에 빠짐(종료X)    
       => 이러니까 상반된다고하고 존재할 수 없다는것.
 
-
+<br>
 
 ### 다루기 힘들다고 증명되지 않았고, 다차시간 알고리즘도 찾지 못한 문제
 
@@ -98,7 +98,7 @@ typora-root-url: ../../..
 
 <img src="https://slid-users-assets-v1-seoul.s3.ap-northeast-2.amazonaws.com/public/image_upload/aac3ded48ac44d4e868e4e67b13b452a/b0ea4931-63e6-48db-8aeb-a061b9b76b24.png" alt="screen captures" style="zoom: 50%;" />
 
-<br>
+<br><br>
 
 ## 최적화 문제 vs 결정 문제
 
@@ -106,7 +106,7 @@ typora-root-url: ../../..
 
 * 결정 문제 : 대답이 "예" 또는 "아니오" 로 이루어지는 문제
 
-
+<br>
 
 **최적화 문제 알고리즘으로 결정문제 알고리즘 만드는 모습**
 
@@ -116,7 +116,7 @@ Alogorithm DecTSP(G, k)
  else return ‘No’
 ```
 
-
+<br>
 
 **결정 문제 알고리즘으로 최적화 알고리즘 만드는 모습**
 
@@ -131,5 +131,4 @@ Alogorithm OpTSP(G)
 Alogorithm OpTSP(G) // 개선된 version
  // 바이너리 서치를 활용
 ```
-
 

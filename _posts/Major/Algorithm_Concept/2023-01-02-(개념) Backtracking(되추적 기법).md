@@ -16,21 +16,20 @@ typora-root-url: ../../..
 
 백트래킹과 분기한정법을 같이 알아두면 좋다.
 
-백트래킹은 깊이우선검색을 기반으로 하지만, 분기한정법은 여러 검색 방법들을 지원하는 차이가 있다.
+**백트래킹은 깊이우선검색(DFS)을 기반으로 하지만, 분기한정법은 여러 검색 방법들을 지원하는 차이가 있다.**
 
 여기선 백트래킹을 알아보도록 하자.
 
-<br>
+<br><br>
 
 ## Backtracking(되추적)
 
-깊이우선검색을 기반으로 검색을 진행하며, 각 마디가 유망하지 않으면 그 마디의 부모 마디로 돌아가서 다시 검색을 계속하는 방식이다.
+**깊이우선검색**을 기반으로 검색을 진행하며, 각 마디가 유망하지 않으면 그 마디의 부모 마디로 돌아가서 다시 검색을 계속하는 방식이다.
 
 * `깊이우선검색 = 전위트리순회(preorder tree traversal)`
-
   * root부터 자식들을 왼쪽->오른쪽 으로 순회
   * 순수한 깊이우선검색은 당연히 되추적이 없으며, 언어 혼동하지 말 것.
-
+  
 * `상태공간트리(State Space Tree)` : 모든 가능한 경우의 수를 나타낸 트리
 
 * **동작방식**
@@ -41,7 +40,7 @@ typora-root-url: ../../..
 
   3) 만약 유망하지 않으면, 그 마디의 부모 마디로 돌아가서 검색을 계속
 
-
+<br>
 
 ### 4-Queens Problem
 
@@ -54,13 +53,13 @@ typora-root-url: ../../..
   * 되추적은 27 마디만에 첫 해답을 찾을 수 있다.
 * 아래에서 상태공간트리와 코드형태를 확인하자.
 
-
+<br>
 
 ![screen captures](/images/2023-01-02-(개념) Backtracking(되추적 기법)/57c2dd31-4008-4be8-8210-df4a9fbafa75.png)
 
 ![screen captures](/images/2023-01-02-(개념) Backtracking(되추적 기법)/fb686e6d-66f8-4e04-b814-563d57a46ba8.png)
 
-
+<br>
 
 ### Sum-of-Subsets Problem(부분합)
 
@@ -71,7 +70,7 @@ typora-root-url: ../../..
 * **역순 정렬 및 누적 합 이용하면 더 빠른** **Backtrack**
   * 따라서 이 방식으로 구하는 과정을 소개하겠다.
 
-
+<br>
 
 ![screen captures](/images/2023-01-02-(개념) Backtracking(되추적 기법)/dd5a603c-4ac7-4ce8-8ccc-5f3db4ae30c5.png)
 
@@ -85,7 +84,7 @@ typora-root-url: ../../..
     * 이부분 때문에 누적합을 이용하면 좀 더 성능을 향상시킬수 있다.
 * 정답이 가능한 모든경우를 구하는거기 때문에 위 방식을 통해서 끝까지 확인해서 최종 해들을 구함.
 
-
+<br>
 
 ### Graph Coloring(그래프 색칠 = 지도 색칠)
 
@@ -97,14 +96,14 @@ typora-root-url: ../../..
   * Complete Graph :   ![img](/images/2023-01-02-(개념) Backtracking(되추적 기법)/DRW00002a2c1bfe.gif)   =>   ![img](/images/2023-01-02-(개념) Backtracking(되추적 기법)/DRW00002a2c1c00.gif)  까지만 플라나 그래프
   * Complete Bipartite Graph :   ![img](/images/2023-01-02-(개념) Backtracking(되추적 기법)/DRW00002a2c1c02.gif)   =>   ![img](/images/2023-01-02-(개념) Backtracking(되추적 기법)/DRW00002a2c1c04.gif)  은 플라나,   ![img](/images/2023-01-02-(개념) Backtracking(되추적 기법)/DRW00002a2c1c06.gif)  은 아님
 
-
+<br>
 
 **지도 색칠하기** : 지도를 m가지 색으로 색칠 및 인접 영역은 서로 다른 색
 
 * 지도 경계선을 공유하는 노드 사이의 에지를 그어주면? 플라나, 플레인 그래프
   * **지도 색칠하기** **=** **그래프 색칠하기**
 
-
+<br>
 
 ![screen captures](/images/2023-01-02-(개념) Backtracking(되추적 기법)/ffa864db-6dc5-4588-a95f-52087ee7d658.png)
 
@@ -113,7 +112,7 @@ typora-root-url: ../../..
 * 인접 노드 색깔이 아닌 색을 택해 나가는 형태로 구하며, 현재 1개의 답을 구한 상황이다.
 * 모든 가능한 경우를 구하는 것이 목표이므로 나머지도 다 확인해서 해를 구하면 된다.
 
-
+<br>
 
 ### **Hamiltonian Circuits**(해밀토니안 회로)
 
@@ -121,7 +120,7 @@ typora-root-url: ../../..
 
 각 정점의 인접한 정점들을 가지고 **상태공간트리** **->** **깊이우선검색** **-> Backtrack**
 
-
+<br>
 
 ![screen captures](/images/2023-01-02-(개념) Backtracking(되추적 기법)/1ff405d2-0998-4892-bc5c-5e9a503aa791.png)
 

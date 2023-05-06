@@ -9,12 +9,12 @@ sidebar:
    nav: "docs"
 ---
 
+
+
 ## 에라토스테네스의 체
 
 * 모든 소수(Prime number)를 찾는 방법
 * 자기와 자기 자신만이 나눠질 수 있는 수
-
-
 
 ```python
 def SieveOfEratosthenes(n):

@@ -9,13 +9,15 @@ sidebar:
    nav: "docs"
 ---
 
+
+
 ## Linked Strucutures
 
 * 링크드 리스트 구조(Linked List)
 * Traversing(순회), Searching(검색), Inserting(삽입), Removing(삭제), Polynomials(다항식 계산)
 * Doubly Linked List(이중), Circular Linked List(순환 or 원형), Multi Linked List(다중 or 멀티)
 
-
+<br>
 
 ### 1. The Liked List
 
@@ -34,7 +36,7 @@ head.next.next.next = ListNode(36)
 head.next.next.next.next = ListNode(52)
 ```
 
-
+<br>
 
 #### Traversing(순회)
 
@@ -54,7 +56,7 @@ traversal(head)
 '''
 ```
 
-
+<br>
 
 #### Searching(찾기)
 
@@ -71,7 +73,7 @@ answer = unorderedSearch(head,36)
 print(answer) # True 출력
 ```
 
-
+<br>
 
 * 정렬된 링크드 리스트 구조
 
@@ -87,7 +89,7 @@ def sortedSearch( head, target):
     return False
 ```
 
-
+<br>
 
 #### Inserting(삽입)
 
@@ -102,7 +104,7 @@ head = newNode # 서로 값 바꾸기
 print(head.data) # 방금 넣은 데이터 1 출력
 ```
 
-
+<br>
 
 * tail로 넣게 되는것
 
@@ -115,7 +117,7 @@ tail = newNode # tail이 21로 바뀐다.
 print(tail.data) # 방금 넣은 21 출력
 ```
 
-
+<br>
 
 * head, tail 둘다 None일 경우(데이터가 없는 경우겠죠)
 
@@ -131,7 +133,7 @@ else:
 tail = newNode
 ```
 
-
+<br>
 
 * 정렬된 링크드 리스트구조에 INSERT하는법
 
@@ -154,7 +156,7 @@ else:
     # curNode(target보다 큰 값)의 값만 남는다. 따라서 연결이 되어 있지 않다.
 ```
 
-
+<br>
 
 #### Removing(삭제)
 
@@ -175,7 +177,7 @@ if curNode is not None:
         preNode.next = curNode.next # 값 없애기
 ```
 
-
+<br>
 
 * head, tail 둘다 고려할때
 
@@ -198,9 +200,7 @@ if curNode is not None:
         tail = preNode # tail 바꿔주기
 ```
 
-
-
-
+<br>
 
 ### 2. Polynomials(다항식 계산)
 
@@ -365,7 +365,7 @@ class Polynomial: # 다항식
     
 ```
 
-
+<br>
 
 #### 계산
 
@@ -401,7 +401,7 @@ psum = newpoly.evaluate(1) # 더한값에 x=1을 해서 계산해줍니다.
 print(psum) # 예상값 : 10x^2+6x^1 (x=1이면) = 10+6 = 16
 ```
 
-
+<br>
 
 ### 3. Doubly Linked List(이중 연결리스트)
 
@@ -478,7 +478,7 @@ DList.revTraversal() # 5,3,2
 print(DList.revSearching(2)) # True
 ```
 
-
+<br>
 
 ### 4. Circular Linked List(원형 연결리스트)
 
@@ -548,7 +548,7 @@ CList.traverse() # 4,,5,30
 print(CList.search(1)) # False
 ```
 
-
+<br>
 
 ### 5. Multi Linked List(멀티 연결리스트)
 

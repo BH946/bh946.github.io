@@ -19,7 +19,7 @@ sidebar:
 - `os.getcwd()` 는 현재 경로를 나타내고
 - `os.chdir('경로지정')` 은 지정한 경로로 os 경로를 이동한다.
 
-<br>
+<br><br>
 
 ## python-dotenv 라이브러리
 
@@ -35,7 +35,7 @@ sidebar:
   - **getter()** 방식 - `os.environ.get("pathDir")`
 - 참고 : git에 안올릴려면 `.gitignore` 파일에 `.env` 코드 한줄 추가!
 
-<br>
+<br><br>
 
 ## os+dotenv 활용
 

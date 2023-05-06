@@ -9,11 +9,13 @@ sidebar:
    nav: "docs"
 ---
 
+
+
 ## Stack(스택)
 
 * LIFO (Last in, first out)
 
-
+<br>
 
 ### 1. List - based Stack => 리스트 스택(ADT)
 
@@ -45,7 +47,7 @@ print(a.pop()) # 4
 print(a.isEmpty()) # False
 ```
 
-
+<br>
 
 ### 2. Linkde List - based Stack => 연결리스트 스택(ADT)
 
@@ -87,7 +89,7 @@ print(stack.pop()) # 4
 print(stack.pop()) # 2
 ```
 
-
+<br>
 
 ### 3. 다양한 알고리즘
 
@@ -119,25 +121,19 @@ a = '{A + (B * C) - (D / [E + F])}'
 print(isValidSource(a)) # True
 ```
 
-
-
-#### 백트래킹 VS 브루트포스(추후에 정리)
-
-
-
-
+<br><br>
 
 ## Queue(큐)
 
 * FIFO (First in, first out)
 
-
+<br>
 
 ### 1. List-based Queue => 리스트 큐(ADT)
 
 * 생략(아래 다양한 큐나 확인(어차피 List로 구성))
 
-
+<br>
 
 #### Code of Circular Queue(원형 큐)
 
@@ -194,7 +190,7 @@ print(a.count) # 5(크기)
 print(a.front) # 2(index)
 ```
 
-
+<br>
 
 #### Priority Queue(우선순위 큐) - Unbounded
 
@@ -257,9 +253,7 @@ for i in range(priorityQ.len()):
 '''
 ```
 
-
-
-
+<br>
 
 ### 2. Linkded List-based Queue => 연결리스트 큐(ADT)
 

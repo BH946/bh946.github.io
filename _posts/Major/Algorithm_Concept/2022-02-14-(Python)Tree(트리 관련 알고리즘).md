@@ -9,17 +9,19 @@ sidebar:
    nav: "docs"
 ---
 
+
+
 ## Tree(트리구조)
 
 * 순환 X, 무방향 그래프
 * 루트노드 유일 = root Node, 터미널 노드 = Leaf node
 * 루트노드 내차수 0, 나머지 노드들의 내차수 1 (내차수 : indegree)
-* 트리의 루트노드 구하는법
-  1)루트노드는 indegree=0인것(정석 방법)
-  2)그림그려서 확인.
+* 트리의 루트노드 구하는법  
+  1)루트노드는 indegree=0인것(정석 방법)  
+  2)그림그려서 확인.  
   3)[(v2,v3),(v2,v1),(v4,v5),(v4,v6),,,]이런식이라면, 요소의 앞부분만 나열 v2,v4... 그리고 요소의 뒷부분만  나열한것에 앞부분 나열한 요소가 나오는건 전부 앞부분 나열한것에서 제거 => 마지막남은 노드가 루트노드(알고리즘 짤때 이런식으로 할 것 같음)
 
-
+<br>
 
 ### 1. Tree의 종류
 
@@ -68,7 +70,7 @@ sidebar:
 * Min-heap : Max-heap과 반대 개념.
 * 힙 응용 : 허프만 코드(Huffman Codes) 알고리즘
 
-
+<br>
 
 ### 2. Tree Alogrithm
 
@@ -79,7 +81,7 @@ sidebar:
 
 * Tree Traversal : 전위 순회(preorder), 중위 순회(inorder), 후위 순회(postorder)
 
-
+<br>
 
 #### DFS(Spanning Tree) : 그래프 입력 -> spanning tree 반환
 
@@ -95,7 +97,7 @@ visit(v: vertex of G):
         visit(w) # 재귀
 ```
 
-
+<br>
 
 #### BFS(Spanning Tree) : 그래프 입력 -> spanning tree 반환
 
@@ -113,7 +115,7 @@ while L is not empyt:
             add w and edge (v,w) to T # T에 w노드, 에지 추가
 ```
 
-
+<br>
 
 #### MST(Minimal Spanning Tree)_Prim's Algorithm : 가중치 그래프 -> spanning tree
 
@@ -127,7 +129,7 @@ for i = 1 to n-2 :
 return T (T is a minimum spanning tree of G)
 ```
 
-
+<br>
 
 #### MST(Minimal Spanning Tree)_Kruskal's Algorithm : 가중치 그래프 -> spanning tree
 
@@ -141,7 +143,7 @@ for i = 1 to n-1 : # prim's에선 에지한개 이미 초기화 해서 n-2 한�
 return T (T is a minimum spanning tree of G)
 ```
 
-
+<br>
 
 #### Preorder Traversal(전위 순회)
 
@@ -154,7 +156,7 @@ preorder(T):
         preorder(T.right)
 ```
 
-
+<br>
 
 #### Inorder Traversal(중위 순회)
 
@@ -167,7 +169,7 @@ preorder(T):
         preorder(T.right)
 ```
 
-
+<br>
 
 #### Postorder Traversal(후위 순회)
 
@@ -180,7 +182,7 @@ preorder(T):
         visit T.data # 현재 데이터 처리
 ```
 
-
+<br>
 
 #### 전위, 중위, 후위 순회 예시
 

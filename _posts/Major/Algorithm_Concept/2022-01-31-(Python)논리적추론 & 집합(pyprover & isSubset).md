@@ -10,11 +10,12 @@ sidebar:
 ---
 
 
+
 ## 1.논리식(Logic expression)
 
 * \|은 합집합, &는 곱집합, >>는 ->, ~는 not기호 그리고 given은 조건, conclu는 결론
 
-
+<br>
 
 ### pyprover 준비물
 
@@ -22,13 +23,15 @@ sidebar:
 pip install pyprover
 ```
 
+<br>
+
 **기본 import**
 
 ```python
 from pyprover import *
 ```
 
-
+<br>
 
 ### pyprover 사용법
 
@@ -40,6 +43,8 @@ given = (P&Q)
 conclu = P
 print("true") if proves( given, conclu ) else print("false")
 ```
+
+<br>
 
 **다양한 논법**
 
@@ -97,11 +102,13 @@ print("true") if proves( given, conclu ) else print("false")
   print("true") if proves( given, conclu ) else print("false")
   ```
 
-
+<br><br>
 
 ## 2.부분집합(isSubset)
 
 * 데이터프레임의 경우 예시..(즉, pandas 기본적으로 import)
+
+<br>
 
 ### 예시로 만들어보는 함수
 
@@ -153,8 +160,9 @@ def isSubset(dfA, dfB):
 # 출력문 생략
 ```
 
+<br>
 
-* 아래는 기본 데이터가 같다고 가정하고 크기만 비교한 방법임.(부정확 대신 빠름)
+아래는 기본 데이터가 같다고 가정하고 크기만 비교한 방법임.(부정확 대신 빠름)
 
 ```python
 """## ■ isSubset 함수 만들기
