@@ -1,6 +1,6 @@
 ---
 layout: single
-title:  "[5장] Nearest Neighbor Method (feat.Bayes Rule)"
+title:  "[5차] Nearest Neighbor Method (feat.Bayes Rule)"
 categories: Machine_Learning
 tag: [python, machine_learning, concept]
 toc: true

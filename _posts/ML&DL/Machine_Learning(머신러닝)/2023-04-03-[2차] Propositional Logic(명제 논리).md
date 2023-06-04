@@ -1,6 +1,6 @@
 ---
 layout: single
-title:  "[2장] Propositional Logic(명제 논리)"
+title:  "[2차] Propositional Logic(명제 논리)"
 categories: Machine_Learning
 tag: [python, machine_learning, concept]
 toc: true

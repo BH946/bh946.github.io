@@ -1,6 +1,6 @@
 ---
 layout: single
-title:  "[4장] Perceptron (feat.Bayes Rule)"
+title:  "[4차] Perceptron (feat.Bayes Rule)"
 categories: Machine_Learning
 tag: [python, machine_learning, concept]
 toc: true

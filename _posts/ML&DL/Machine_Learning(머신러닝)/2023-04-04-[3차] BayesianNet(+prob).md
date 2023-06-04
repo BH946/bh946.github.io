@@ -1,6 +1,6 @@
 ---
 layout: single
-title:  "[3장] BayesianNet(+prob)"
+title:  "[3차] BayesianNet(+prob)"
 categories: Machine_Learning
 tag: [python, machine_learning, concept]
 toc: true
