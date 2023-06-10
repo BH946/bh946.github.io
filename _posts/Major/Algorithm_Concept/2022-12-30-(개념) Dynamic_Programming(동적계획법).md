@@ -474,10 +474,6 @@ longest ... 란 이 공통된것 중에서 젤 긴것을 구하는 것.
 
 
 
-<br>
-
-### 숫자판 놀이
-
 
 
 <br>
@@ -494,7 +490,7 @@ longest ... 란 이 공통된것 중에서 젤 긴것을 구하는 것.
 
 <br>
 
-### 최대 공백 정사각형9Largest Empty Square)
+### 최대 공백 정사각형(Largest Empty Square)
 
 
 
