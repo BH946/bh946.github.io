@@ -472,13 +472,13 @@ longest ... 란 이 공통된것 중에서 젤 긴것을 구하는 것.
 
 ### 프리랜서의 일정 정하기
 
-* 참고 : [프리랜서 일정 정하기]()
+* **참고 : [프리랜서 일정 정하기](https://bh946.github.io/algorithmtest/(SWEA)%ED%94%84%EB%A6%AC%EB%9E%9C%EC%84%9C%EC%9D%98-%EC%9D%BC%EC%A0%95-%EC%A0%95%ED%95%98%EA%B8%B0-SWEA4052/)**
 
 <br>
 
 ### 완전정보 게임(=NIM게임)
 
-* 참고 : [바둑돌 가져가기](https://bh946.github.io/algorithm/(%EA%B0%9C%EB%85%90)-NIM_GAME(%ED%95%84%EC%8A%B9%EA%B2%8C%EC%9E%84)/)
+* **참고 : [바둑돌 가져가기](https://bh946.github.io/algorithm/(%EA%B0%9C%EB%85%90)-NIM_GAME(%ED%95%84%EC%8A%B9%EA%B2%8C%EC%9E%84)/)**
 
 <br>
 
@@ -496,7 +496,7 @@ longest ... 란 이 공통된것 중에서 젤 긴것을 구하는 것.
 
 ### 최대 공백 정사각형(Largest Empty Square)
 
-* 참고 : [최대 공백 정사각형]()
+* **참고 : [최대 공백 정사각형](https://bh946.github.io/algorithmtest/(SWEA)%EC%B5%9C%EB%8C%80-%EA%B3%B5%EB%B0%B1-%EC%A0%95%EC%82%AC%EA%B0%81%ED%98%95-SWEA4062/)**
 
 <br><br>
 
