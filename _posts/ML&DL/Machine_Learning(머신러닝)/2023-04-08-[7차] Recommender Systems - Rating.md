@@ -16,7 +16,7 @@ typora-root-url: ../../..
 
 **Recommender System : 사용자 (user) 개인의 취향에 맞춘 온라인 상의 아이템(Item, 상품 등)을 추천하는 시스템**
 
-* **추천 시스템의 방법중에서 Rating Prediction(=평점 예측) 방식을 공부해보려고 한다.**
+* **추천 시스템의 방법중에서 "Rating Prediction(=평점 예측)" 방식을 공부해보려고 한다.**
 
 * **대표적 알고리즘 2개인 `Similarity Based Collaborative Filtering` 과 `Matrix Factorization` 에 대해서 알아보겠다.**
 
@@ -48,13 +48,24 @@ typora-root-url: ../../..
 
 <br>
 
-**유사도(sim)는 정확히 말하자면 `코사인 유사도` 이다. 따라서 `코사인 유사도 공식` 을 사용**
+**Normalization은 말그대로 `정규화` 때문에 사용하는 것이며, 여기선 0~1로 정규화를 하는게 아니라 실제score(점수)가 0~5이기 때문에 0~5범위로 만들어준다.**
+
+**유사도(sim)는 정확히 말하자면 `코사인 유사도` 이다. 따라서 `코사인 유사도 공식` 을 사용한다.**
+
+* `Cosine Similarity(코사인 유사도)` 는 **각도의 유사도**를 측정하는 동작을 한다. 그래서 **벡터(크기, 방향)**를 사용한다.
+
+<br>
 
 **아래부터는 user1의 Titanic 의 평점을 예측하는 과정을 나타내보겠다.**
 
 **1. 예측에 필요한 sim 들을 구한다.**
 
-![image-20230604150855980](/images/2023-04-08-[7차] Recommender Systems - Rating/image-20230604150855980.png)
+* **이때, user1은 Batman, Ironman만 실제 평점(=r)을 가지기** 때문에 해당 2개의 영화랑만 유사도를 측정
+  * **WHY??** -> **Spiderman**처럼 값이 없는 경우 **r=0**이기 때문(r은 실제 user1의 Spiderman 평점)
+* 또한, **두 영화(=i)가 겹치는게 없다면 유사도(sim)이 0**이 나온다. 
+  * 실제로 sim(ironman, titanic) 을 보면 0이 나옴을 알 수 있다.
+
+![image-20230613215502177](/images/2023-04-08-[7차] Recommender Systems - Rating/image-20230613215502177.png)
 
 <br>
 
@@ -91,13 +102,13 @@ typora-root-url: ../../..
 * **참고 링크 : [경사하강법](https://bh946.github.io/machine_learning/02.-MLP(%EB%8B%A4%EC%B8%B5-%ED%8D%BC%EC%85%89%ED%8A%B8%EB%A1%A0)/#4-optimizationexgd-method)**
   * **우린 W가 아닌 P, Q를 Update 하게 된다.**
 
-![image-20230604154827038](/images/2023-04-08-[7차] Recommender Systems - Rating/image-20230604154827038.png)
+![image-20230604154827038](/images/2023-04-08-[7차] Recommender Systems - Rating/image-20230604154827038.png) 
 
 <br>
 
 **Objective Function 의 공식**
 
-![image-20230604154400310](/images/2023-04-08-[7차] Recommender Systems - Rating/image-20230604154400310.png)
+![image-20230604154400310](/images/2023-04-08-[7차] Recommender Systems - Rating/image-20230604154400310.png) 
 
 <br>
 
@@ -115,6 +126,22 @@ typora-root-url: ../../..
 
 ![image-20230604155157694](/images/2023-04-08-[7차] Recommender Systems - Rating/image-20230604155157694.png) 
 
+<br>
+
+**추가로 여기서 사용한 Regularization(규제)를 좀 더 설명해보겠다.**
+
+**아래 빨간글자가 "규제" 부분인데 이 값이 당연히 클수록 "l(목적함수) 값"은 커지니까 오차가 크다고 해석할 수 있으며, "학습"의 목적은 이 오차를 줄이는것이기 때문에 이에따라 "가중치"가 줄어들게 된다.**
+
+![image-20230613220427967](/images/2023-04-08-[7차] Recommender Systems - Rating/image-20230613220427967.png) 
+
+<br>
+
+**해당 "규제"를 하는 이유는 아래의 내용처럼 Overfitting(과적합)을 방지하기 위해서이다.** 
+
+![image-20230613220751259](/images/2023-04-08-[7차] Recommender Systems - Rating/image-20230613220751259.png) 
+
+![image-20230613220834073](/images/2023-04-08-[7차] Recommender Systems - Rating/image-20230613220834073.png)  
+
 <br><br>
 
 ## 구현 예시
@@ -124,5 +151,5 @@ typora-root-url: ../../..
 * **자세한것은 아래 링크 참고**
   * [실습](https://bh946.github.io/machine_learning/HW2-MatrixFactorization(%ED%96%89%EB%A0%AC%EB%B6%84%ED%95%B4)-Python/)
 
-![image-20230604155224192](/images/2023-04-08-[7차] Recommender Systems - Rating/image-20230604155224192.png)
+![image-20230613221025063](/images/2023-04-08-[7차] Recommender Systems - Rating/image-20230613221025063.png) 
 
