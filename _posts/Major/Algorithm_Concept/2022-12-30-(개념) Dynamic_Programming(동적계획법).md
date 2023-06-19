@@ -498,6 +498,16 @@ longest ... 란 이 공통된것 중에서 젤 긴것을 구하는 것.
 
 * **참고 : [최대 공백 정사각형](https://bh946.github.io/algorithmtest/(SWEA)%EC%B5%9C%EB%8C%80-%EA%B3%B5%EB%B0%B1-%EC%A0%95%EC%82%AC%EA%B0%81%ED%98%95-SWEA4062/)**
 
+<br>
+
+### 위상정렬 + DP
+
+**관련 문제로 [BOJ2056 작업](https://www.acmicpc.net/problem/2056) 해당 문제를 풀어보면, 아래의 그림의 개념을 조금 이해가 될 것이다.**
+
+* 참고하기 좋은 풀이 : [작업 풀이](https://zoosso.tistory.com/361)
+
+![image-20230619230152019](/images/2022-12-30-(개념) Dynamic_Programming(동적계획법)/image-20230619230152019.png) 
+
 <br><br>
 
 ## DP가 불가능한 경우는?
