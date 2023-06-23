@@ -212,6 +212,14 @@
                     {% endif %}
                 {% endfor %}
             </ul>
+        <span class="nav__sub-title">GCP</span>
+            <ul>
+                {% for category in site.categories %}
+                    {% if category[0] == "Kubernetes" %}
+                        <li><a href="/categories/gcp_kuber" class="">쿠버네티스 ({{category[1].size}})</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
         <span class="nav__sub-title">BLOCKCHAIN</span>
             <ul>
                 {% for category in site.categories %}
