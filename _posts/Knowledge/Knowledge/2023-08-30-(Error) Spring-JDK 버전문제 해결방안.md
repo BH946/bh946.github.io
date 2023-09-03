@@ -19,6 +19,8 @@ typora-root-url: ../../..
 
 **자바의 버전 문제로 인한 에러를 자주 접할 수 있는데, 이를 해결하려면 정확한 동작 과정의 이해가 필요**
 
+**사실 이 메시지는 오류 메시지는 아니고 "프로필" 설정이 안되어있어서 기본값을 쓰겠다는 내용일 뿐이다.**
+
 <br>
 
 **`No active profile set, falling back to 1 default profile: "default"` 가 발생한 경우**
