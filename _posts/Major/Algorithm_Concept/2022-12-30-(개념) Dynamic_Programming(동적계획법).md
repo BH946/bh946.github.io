@@ -190,6 +190,8 @@ typora-root-url: ../../..
 
 ### **연쇄 행렬곱셈(Matrix-chain Multiplication)**
 
+* **추천 문제 : [파일 합치기_BOJ11066](https://www.acmicpc.net/problem/11066)**
+
 어떤 행렬곱셈을 먼저 수행하느냐에 따라 `곱셈 횟수`가 달라짐  
 
 4개의 행렬곱셈만 해도 5가지 곱셈 방법이 존재 및 각각 값이 다름
