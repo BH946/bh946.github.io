@@ -1,5 +1,5 @@
 ---
-title:  "[실습04]Creating Google Kubernetes Engine Deployments"
+title:  "[실습-중급04]Creating Google Kubernetes Engine Deployments"
 categories : [Kubernetes]
 tag : [구글 클라우드, GCP, GCC, 구글 클라우드 콘솔, 클라우드 쉘, 쿠버네티스, Kubernetes, 구글 클라우드 스터디 잼, 스터디 잼 중급, Docker, 도커, 이미지, GKE, Clusters]
 toc: true
