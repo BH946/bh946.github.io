@@ -14,7 +14,7 @@ typora-root-url: ../../..
 
 # Kubernetes Engine-Qwik Start
 
-**두번째 실습은 `GKE(Google Kubernetes Engine)로 컨테이너 생성 및 앱 배포` 를 배워 봅니다.**
+**두번째 실습은 `GKE(Google Kubernetes Engine)로 쿠버네티스 클러스터 생성 및 클러스터에서 앱 배포` 를 배워 봅니다.**
 
 **아래 5개의 Task를 해결하면서 간접적으로 경험해 봅시다.**
 
@@ -29,7 +29,17 @@ typora-root-url: ../../..
 
 ## Task 1. Set a default compute zone
 
+* **Node(컴퓨팅리소스-VM) -> Pod(컨테이너 실행시킴), Container(어플리케이션)**
+* **쿠버네티스 클러스터(=아래그림 전체)**
+
+![image](https://github.com/BH946/bh946.github.io/assets/80165014/c68de552-2acf-429e-a82a-22f8c56fdff1) 
+
+<br>
+
 **`compute zone` 을 세팅합니다.**
+
+* **참고) region은 지역, compute zone은 지역의 데이터센터**
+* 왜 사용?? CDN처럼 가까운 지역일수록 속도가 빠른장점
 
 <br>
 
@@ -56,8 +66,12 @@ typora-root-url: ../../..
 
 **GKE 클러스터 생성을 합니다.**
 
-* **클러스터**는 하나 이상의 **"클러스터 마스터 머신"과 "노드"**라고 불리는 여러 작업자 머신으로 구성됩니다.
-* **노드**는 노드를 클러스터의 일부로 만드는 데 필요한 Kubernetes 프로세스를 실행하는 Compute Engine **"가상 머신(VM) 인스턴스"**입니다.
+* **클러스터**는 하나 이상의 **"클러스터 Master 머신"과 "Worker 머신"**으로 구성됩니다.
+  * "머신 = Node"로 보면 됩니다.
+
+* **노드**를 만들기 위해서는 컴퓨팅리소스가 필요한데, GCP에서는 가상머신(VM)으로 컴퓨팅리소스를 만듭니다.
+  * GKE로 클러스터 생성시 자동으로 만들어주기 때문에 직접 VM을 구축할 필요없다!!(편리)
+
 
 <br>
 
@@ -66,6 +80,7 @@ typora-root-url: ../../..
 **`gcloud container clusters create --machine-type=e2-medium --zone=us-east4-c lab-cluster`**
 
 * lab-cluster 이름으로 생성
+* 5분 정도 소요
 
 ![image](https://github.com/BH946/bh946.github.io/assets/80165014/ef6d343f-ff73-4853-bffd-26a99daf53d0)  
 
@@ -74,6 +89,10 @@ typora-root-url: ../../..
 ## Task 3. Get authentication credentials the cluster
 
 **클러스터 사용에는 사용자 인증이 필수입니다.**
+
+* **쿠버네티스 클러스터와 Cloud Shell은 따로이기 때문입니다.**
+  * Cloud Shell은 우리가 일반적으로 사용하는 cmd로 생각할 수 있습니다.
+  * 단, Cloud Shell에서 쿠버네티스 클러스터 생성했을 경우 해당 Shell에서는 자동으로 인증을 해놓기 때문에 바로 클러스터 정보를 조회하거나 사용이 가능합니다.
 
 <br>
 

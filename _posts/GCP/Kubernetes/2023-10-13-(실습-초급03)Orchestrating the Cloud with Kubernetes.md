@@ -421,15 +421,21 @@ typora-root-url: ../../..
 
 <br>
 
-**Pod 생성은? 배포**
+**배포, 서비스 방법 2가지**
 
-* Kubernetes의 Deployment로 Pod 생성이 가능 - 방법1
+* Kubernetes의 Deployment or Service 를 명령어로 생성 - 방법1
+* configuration files(구성 파일).yaml로 생성이 가능 - 방법2
 
-* pod configuration files(포드 구성 파일)로 Pod 생성이 가능 - 방법2
+<br>
+
+**배포때 Pod 생성??**
+
+* Pod만 따로 생성(이자체가 "배포"를 의미) 하고, 서비스 생성하는 방법 - 방법1
+* Kubernetes의 Deployment를 생성할때 yaml파일에 Replica의 숫자만큼 Pod 자동생성 - 방법2
 
 <br>
 
 **배포를 한 상태는 내부IP만 가지며, 접속을 위해선 외부IP가 필요 - 서비스**
 
-* 따라서 서비스 생성도 필수!
+* 따라서 서비스도 생성을 하는것!
 * 서비스 생성 방법 3가지 타입 기억!
