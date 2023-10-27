@@ -1,6 +1,6 @@
 ---
 title:  "[VS_Code]Prettier-Code formatter 유틸 추천"
-categories : VS_Code
+categories : Code_Editor
 tag : [VS_Code, Debug, 디버그] 
 toc: true
 toc_sticky: true

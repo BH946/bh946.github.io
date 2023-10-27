@@ -95,28 +95,6 @@
                   {% endif %}
               {% endfor %}
           </ul>
-        <span class="nav__sub-title">CODE EDITOR</span>
-            <ul>
-                {% for category in site.categories %}
-                    {% if category[0] == "Colab" %}
-                        <li><a href="/categories/colab" class="">Colab(코랩) ({{category[1].size}})</a></li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
-            <ul>
-                {% for category in site.categories %}
-                    {% if category[0] == "Visual_Studio" %}
-                        <li><a href="/categories/vs" class="">Visual_Studio ({{category[1].size}})</a></li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
-            <ul>
-                {% for category in site.categories %}
-                    {% if category[0] == "VS_Code" %}
-                        <li><a href="/categories/vs_c" class="">VS_Code ({{category[1].size}})</a></li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
         <span class="nav__sub-title">WEB&JAVASCRIPT</span>
             <ul>
                 {% for category in site.categories %}
@@ -260,6 +238,13 @@
                 {% endif %}
             {% endfor %}
           </ul>
+          <ul>
+            {% for category in site.categories %}
+                {% if category[0] == "Code_Editor" %}
+                    <li><a href="/categories/cded" class="">Code Editor ({{category[1].size}})</a></li>
+                {% endif %}
+            {% endfor %}
+        </ul>
       </li>
   </ul>
 </nav>

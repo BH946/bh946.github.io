@@ -1,10 +1,10 @@
 ---
-title: "Visual_Studio(비주얼 스튜디오)"
+title: "Code_Editor(코드에디터)"
 layout: archive
-permalink: categories/vs
+permalink: categories/cded
 author_profile: true
 sidebar_main: true
 ---
 
-{% assign posts = site.categories.Visual_Studio %}
+{% assign posts = site.categories.Code_Editor %}
 {% for post in posts %} {% include archive-single2.html type=page.entries_layout %} {% endfor %}

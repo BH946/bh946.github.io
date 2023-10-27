@@ -1,6 +1,6 @@
 ---
 title:  "Visual_Studio 정리(+Debug)"
-categories : Visual_Studio
+categories : Code_Editor
 tag : [Visual_Studio, Debug, 디버그, ERROR, 에러]
 toc: true
 toc_sticky: true
@@ -14,6 +14,8 @@ sidebar:
 ## Visual Studio..
 
  **대부분의 IDE가 제공하는 표준 편집기 및 디버거로서 뿐만 아니라, 컴파일러와 코드 완성 도구, 그래픽 디자이너를 비롯해 소프트웨어 개발 프로세스를 향상시키는 많은 기능을 포함**
+
+**참고) Visual Studio 와 Visual Studio Code 는 다른겁니다.**
 
 <br>
 

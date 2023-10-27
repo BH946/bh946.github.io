@@ -1,6 +1,6 @@
 ---
 title:  "[VS_Code] Web관련 확장 파일 추천"  
-categories : [VS_Code, React_JS, WebProgramming]
+categories : [Code_Editor, React_JS, WebProgramming]
 tag : [VS_Code, Debug, 디버그]  
 toc: true  
 toc_sticky: true  
@@ -51,5 +51,4 @@ sidebar:
 * 왼쪽의 아이콘들이 변경된것을 볼 수 있다.
 * 이 또한 F1에서 icon검색해서 기존으로 설정하면 되돌릴 수 있다.
   * 해당 설정의 이름은 `Product Icon Theme`
-
 

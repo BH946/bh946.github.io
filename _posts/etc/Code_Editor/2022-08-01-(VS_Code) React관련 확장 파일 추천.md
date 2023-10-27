@@ -1,6 +1,6 @@
 ---
 title:  "[VS_Code] React관련 확장 파일 추천"  
-categories : [VS_Code, React_JS]
+categories : [Code_Editor, React_JS]
 tag : [VS_Code, Debug, 디버그]  
 toc: true  
 toc_sticky: true  
