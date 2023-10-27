@@ -193,11 +193,18 @@
         <span class="nav__sub-title">GCP</span>
             <ul>
                 {% for category in site.categories %}
-                    {% if category[0] == "Kubernetes" %}
-                        <li><a href="/categories/gcp_kuber" class="">쿠버네티스 ({{category[1].size}})</a></li>
+                    {% if category[0] == "Kubernetes_Bas" %}
+                        <li><a href="/categories/gcp_kuber_bas" class="">쿠버네티스 초급 ({{category[1].size}})</a></li>
                     {% endif %}
                 {% endfor %}
             </ul>
+            <ul>
+              {% for category in site.categories %}
+                  {% if category[0] == "Kubernetes_Mid" %}
+                      <li><a href="/categories/gcp_kuber_mid" class="">쿠버네티스 중급 ({{category[1].size}})</a></li>
+                  {% endif %}
+              {% endfor %}
+          </ul>
         <span class="nav__sub-title">BLOCKCHAIN</span>
             <ul>
                 {% for category in site.categories %}

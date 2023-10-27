@@ -1,6 +1,6 @@
 ---
 title:  "[실습-중급01]Use Google Cloud Console & Cloud Shell"
-categories : [Kubernetes]
+categories : [Kubernetes_Mid]
 tag : [구글 클라우드, GCP, GCC, 구글 클라우드 콘솔, 클라우드 쉘, 쿠버네티스, Kubernetes, 구글 클라우드 스터디 잼, 스터디 잼 중급]
 toc: true
 toc_sticky: true
