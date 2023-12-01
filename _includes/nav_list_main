@@ -258,7 +258,7 @@
                       <li><a href="/categories/wwc" class="">WoowaCourse ({{category[1].size}})</a></li>
                   {% endif %}
               {% endfor %}
-          </ul>
+            </ul>
       </li>
   </ul>
 </nav>
