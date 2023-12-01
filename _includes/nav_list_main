@@ -252,6 +252,13 @@
                 {% endif %}
             {% endfor %}
         </ul>
+        <ul>
+          {% for category in site.categories %}
+              {% if category[0] == "WoowaCourse" %}
+                  <li><a href="/categories/wwc" class="">WoowaCourse ({{category[1].size}})</a></li>
+              {% endif %}
+          {% endfor %}
+      </ul>
       </li>
   </ul>
 </nav>
