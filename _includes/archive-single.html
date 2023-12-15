@@ -10,7 +10,8 @@
   {% assign title = post.title %}
 {% endif %}
 
-<h2 class="{{ include.type | default: 'list' }}__item" style="margin-top: 10px;">
+<!-- 20231215 overflow: hidden 추가 -->
+<h2 class="{{ include.type | default: 'list' }}__item" style="margin-top: 10px; overflow: hidden;">
   <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork" style="margin-bottom: 40px;">
     {% if include.type == "grid" and teaser %}
       <div class="archive__item-teaser">
@@ -24,7 +25,12 @@
         <a href="{{ post.link }}">{{ title }}</a> <a href="{{ post.url | relative_url }}" rel="permalink"><i class="fas fa-link" aria-hidden="true" title="permalink"></i><span class="sr-only">Permalink</span></a>
       {% else %}
       <div style="margin-bottom: 20px;">
-        <a href="{{ post.url | relative_url }}" rel="permalink">{{ title }}</a>
+        <!-- 20231215 현재 페이지는 disabled + 색상변경 추가 -->
+        {% if post.id == page.id %}
+          <a href="#" style="pointer-events: none; text-decoration: none; color: #89A2C0;" rel="permalink">{{ title }}</a>
+        {% else %}
+          <a href="{{ post.url | relative_url }}" rel="permalink">{{ title }}</a>
+        {% endif %}
       </div>
       {% endif %}
     <div style="font-size: 0.8em; font-style: normal; font-weight: 1;">

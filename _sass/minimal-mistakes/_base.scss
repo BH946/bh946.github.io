@@ -169,11 +169,17 @@ figcaption > code,
 td > code {
   padding-top: 0.1rem;
   padding-bottom: 0.1rem;
-  font-size: 0.8em;
   border-radius: $border-radius;
+  
+  // custom
+  color: #C72542;
+  background-color: #F9F2F4;
+  font-size: 1.0em;
+
+  // font-size: 0.8em;
   // background: $code-background-color;
-  color: $little-pink;
-  background-color: $little-gray;
+  // color: $little-pink;
+  // background-color: $little-gray;
 
   &:before,
   &:after {

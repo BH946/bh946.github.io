@@ -56,6 +56,7 @@ layout: default
 
       {% if page.share %}{% include social-share.html %}{% endif %}
 
+      <!-- "이전, 이후" 버튼 -->
       {% include post_pagination.html %}
     </div>
 
@@ -64,6 +65,31 @@ layout: default
     {% endif %}
   </article>
 
+  <!-- "참고" 부분 게시물 -->
+  {% if next_post or prev_post %}
+    <div class="page__related">
+      <h2 class="page__related-title">{{ site.data.ui-text[site.locale].related_label | default: "You May Also Enjoy" }}</h2>
+      <div class="grid__wrapper">
+        <!-- 이전, 현재, 이후 순서로 게시물 출력 -->
+        {% if prev_post %}
+          {% assign post = prev_post %}
+          {% include archive-single.html type="grid" %}
+        {% endif %}
+        {% assign post = page %}
+        {% include archive-single.html type="grid" %}
+        {% if next_post %}
+          {% assign post = next_post %}
+          {% include archive-single.html type="grid" %}
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+
+
+<!-- "참고" 부분 "기존" 지킬 코드 -->
+{% comment %}
   {% comment %}<!-- only show related on a post page when `related: true` -->{% endcomment %}
   {% if page.id and page.related and site.related_posts.size > 0 %}
     <div class="page__related">
@@ -88,4 +114,4 @@ layout: default
       </div>
     </div>
   {% endif %}
-</div>
+{% endcomment %}

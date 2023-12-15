@@ -1,3 +1,39 @@
+<!-- 커스텀 : 카테고리 기준으로 제공 -->
+{% if page.categories %}
+  {% assign category = page.categories[0] %} {{! 현재 페이지의 카테고리를 category 변수에 기록 }}
+  {% assign posts = site.categories[category] %} {{! 카테고리가 Blog라면 site.categories.Blog 이런식으로 접근한 것 }}
+  {% for post in posts %}
+    {% if post.url == page.url %}
+      {% assign post_index0 = forloop.index0 %}
+      {% assign post_index1 = forloop.index %}
+    {% endif %}
+  {% endfor %}
+  {% for post in posts %}
+    {% if post_index0 == forloop.index %}
+      {% assign next_post = post %}
+    {% endif %}
+    {% if post_index1 == forloop.index0 %}
+      {% assign prev_post = post %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+<!-- {{! 이전글과 이후의 글(Post)을 next_post, prev_post 변수에 저장 }} -->
+
+{% if next_post or prev_post %}
+<nav class="pagination">
+  {% if prev_post %}
+    <a href="{{ prev_post.url }}" class="pagination--pager" title="{{ prev_post.title }}">{{ site.data.ui-text[site.locale].pagination_previous | default: "Previous" }}</a>
+  {% endif %}
+  {% if next_post %}
+    <a href="{{ next_post.url }}" class="pagination--pager" title="{{ next_post.title }}">{{ site.data.ui-text[site.locale].pagination_next | default: "Next" }}</a>
+  {% endif %}
+</nav>
+{% endif %}
+
+
+
+<!-- 지킬의 기본제공 코드 : 최신글 기준으로 제공 -->
+{% comment %}
 {% if page.previous or page.next %}
   <nav class="pagination">
     {% if page.previous %}
@@ -12,3 +48,4 @@
     {% endif %}
   </nav>
 {% endif %}
+{% endcomment %}
