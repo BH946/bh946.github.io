@@ -14,7 +14,7 @@ typora-root-url: ../../..
 
 ## Intro.. 
 
-**테마 다운 전 기본적으로 파악해야 하는 폴더들**
+**테마 다운 전 기본적으로 파악해야 하는 폴더들** t
 
 - `asset` : font, css, images (사이트 로고 및 사진 파일 등) 등이 담겨 있다.
   * `asset/css/_main.scss` 에서 구글 폰트 **@import** 할 수 있으므로 참고
