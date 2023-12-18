@@ -7,15 +7,16 @@ main:
   - title: "Search"
     url: /search/
 
+# 게시물 들어갔을때 왼쪽 편에 프로필 부분에 위치
 docs:
   - title: "BH_NOTE" # 어차피 대문자 나옴(childern은 아님)
     children:
-      - title: "Home"
+      - title: "Homes"
         url: /
       - title: "Category"
         url: /categories/
       - title: "Search"
-        url: /Search/
+        url: /search/
   # - title: "About"
   #   url: https://mmistakes.github.io/minimal-mistakes/about/
   # - title: "Sample Posts"
