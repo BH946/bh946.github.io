@@ -1,5 +1,5 @@
 ---
-title:  "[Blog] 지킬 테마 skin 수정(색상 적용) - 깃 블로그 TIP 123123"
+title:  "[Blog] 지킬 테마 skin 수정(색상 적용) - 깃 블로그 TIP 11"
 categories : Blog
 tag : [블로그, Git, git blog, 깃허브 블로그, Minimal-mistakes, 지킬, jekyll]
 toc: true
