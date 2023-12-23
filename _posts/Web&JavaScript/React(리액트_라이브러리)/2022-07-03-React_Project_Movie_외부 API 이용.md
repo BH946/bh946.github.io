@@ -169,7 +169,7 @@ module.exports = function (app) {
 단순히 API 호출 테스트를 위해서 지원하는 여러가지 **Tool(도구)**를 이용해도 되지만 여기선 **간단히 코드 작성**해서 요청에 응답을 받아 보겠다.
 
 * **테스트 방법** : 단순히 App.js에서 RequestTest태그를 추가해서 test하면 된다.
-  * 테스트 중 **index.js**에 **<React.StrictMode>**를 사용해서 useEffect를 써도 console 두 번 찍히는 문제 발견했으며, 해당 태그 지우면 해결된다.
+  * 테스트 중 **index.js**에 **\<React.StrictMode>**를 사용해서 useEffect를 써도 console 두 번 찍히는 문제 발견했으며, 해당 태그 지우면 해결된다.
 
 ```jsx
 // RequestTest.jsx

@@ -1,5 +1,5 @@
 ---
-title:  "[Python]Basic(기초문법) - 추가정리"
+title:  "[Python]Basic(기초문법) - 추가정리(최신1)"
 categories : PY
 tag : [파이썬, 문법]
 toc: true
@@ -140,7 +140,7 @@ sidebar:
 
 **set1 & set2 -> 교집합**
 
-**set1 | set2 -> 합집합**
+**set1 \| set2 -> 합집합**
 
 **set(list)로 값들의 종류같은것을 구할때 유용**
 

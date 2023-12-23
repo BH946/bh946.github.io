@@ -40,7 +40,7 @@ typora-root-url: ../../..
 
 **npm init**은 현재 폴더를 **npm**으로 관리하는 프로젝트 폴더로 설정해줌  
 **npm install, uninstall** 경우 **npm**서버로부터 패키지 받아오거나 삭제해줌   
-**npm run <커스텀 명령어>**를 사용해 **package.json**의 **scripts** 영역 안의 명령어를 실행할 수 있음.
+**npm run \<커스텀 명령어>**를 사용해 **package.json**의 **scripts** 영역 안의 명령어를 실행할 수 있음.
 
 
 
@@ -122,7 +122,7 @@ typora-root-url: ../../..
 
 * **yarn으로 설치시? package-lock.json이 아닌 yarn.lock으로 파일 구성**
 * **index.js가 시작 소스파일, App.js가 App컴포넌트 파일**
-* **index.html의 id가 "root"와 index.js의 getElementById('root')가 동일해야 실행이 됨.  **
+* **index.html의 id가 "root"와 index.js의 getElementById('root')가 동일해야 실행이 됨.**  
   **=> 당연한거지만 확인 잘 할것**
 * **/public :** React와 관련없는 추가 정적 파일은 여기에 추가
 * **/src :** 개발 소스 코드 JS가 포함되는 폴더이다. 해당 파일의 변화를 감지하여 새로고침하며, 후에 빌드/배포될 때 내부 파일이 하나의 파일로 묶여(번들링) ['index.html']에 주입하게 된다.
@@ -142,7 +142,7 @@ typora-root-url: ../../..
 
 ## CRA환경을 npm, yarn로 개발 서버 실행
 
-- **cd <프로젝트 명>**을 통해 프로젝트 폴더로 이동한 후, **npm start** 혹은 **yarn start**를 입력하면 **localhost:3000**으로 브라우저가 열리면서 **CRA** 프로젝트의 개발 환경이 실행됩니다.
+- **cd \<프로젝트 명>**을 통해 프로젝트 폴더로 이동한 후, **npm start** 혹은 **yarn start**를 입력하면 **localhost:3000**으로 브라우저가 열리면서 **CRA** 프로젝트의 개발 환경이 실행됩니다.
 - 개발 환경은 **localhost:3000**에 개발 서버를 열고, **react-hot-loader**를 통해 프로젝트 [**/src**](./src) 폴더 내의 파일이 수정되면 새로고침합니다.
 - **localhost:3000**에서 응답 받는 **HTML** 파일은(브라우저로 접속하는 행위는 **GET** 방식으로 요청하는 행위와 같으므로) [**/public**](./public) 폴더 내의 [**index.html**](./public/index.html)에, [**/src**](./src) 폴더 내의 있는 [**index.js**](./src/index.js) 파일을 임시 빌드한 **JavaScript** 코드를 주입한 **HTML** 파일입니다.
 

@@ -1,5 +1,5 @@
 ---
-title:  "Colab 정리"
+title:  "[Python]Colab 정리"
 categories : PY
 tag : [코랩, Colab, ipynb, python가상환경]
 toc: true

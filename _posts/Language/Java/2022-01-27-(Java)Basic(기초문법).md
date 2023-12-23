@@ -222,7 +222,7 @@ print에 print를 사용한다? 오류! printStackTrace()는 바로 출력 해�
 
 <img src="/images/2022-01-27-(Java)Basic(기초문법)/clip_image008-16464640727424.gif" />
 
-<img src="/images/2022-01-27-(Java)Basic(기초문법)/clip_image010.jpg)
+<img src="/images/2022-01-27-(Java)Basic(기초문법)/clip_image010.jpg"/> 
 
 <img src="/images/2022-01-27-(Java)Basic(기초문법)/clip_image012-16464640727425.gif" />
 
@@ -232,7 +232,7 @@ print에 print를 사용한다? 오류! printStackTrace()는 바로 출력 해�
 
 <br>
 
-<img src="/images/2022-01-27-(Java)Basic(기초문법)/clip_image014.jpg)
+<img src="/images/2022-01-27-(Java)Basic(기초문법)/clip_image014.jpg"/> 
 
  <br>
 
@@ -700,7 +700,7 @@ sc.next(); 이것을 안해주면 문자 입력했었던 경우라면 입력 스
 
 과제!
 
-<img src="/images/2022-01-27-(Java)Basic(기초문법)/clip_image178.jpg)
+<img src="/images/2022-01-27-(Java)Basic(기초문법)/clip_image178.jpg"/> 
 
 먼저 1차원 배열과 똑같이 a 배열의 아이템을 하나씩 꺼낸다. 
 

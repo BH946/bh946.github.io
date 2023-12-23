@@ -102,26 +102,26 @@ module.exports = router
 
 **New Project에서 프로젝트 새로 생성한다**
 
-![image-20220804171010947](C:\Users\KoBongHun\Desktop\Git\BH946.github.io\images\2022-08-03-Rest API 만들기 & MERN\image-20220804171010947.png)
+![image-20220804171010947](/images\2022-08-03-Rest API 만들기 & MERN\image-20220804171010947.png)  
 
 
 
 **Database Deployments에서 Create 한다**
 
-![image-20220804171025874](C:\Users\KoBongHun\Desktop\Git\BH946.github.io\images\2022-08-03-Rest API 만들기 & MERN\image-20220804171025874.png)
+![image-20220804171025874](/images\2022-08-03-Rest API 만들기 & MERN\image-20220804171025874.png)
 
 
 
 **Database Access에서 DB접근 할 때 사용할 아이디를 만든다.**
 
-![image-20220804171108740](C:\Users\KoBongHun\Desktop\Git\BH946.github.io\images\2022-08-03-Rest API 만들기 & MERN\image-20220804171108740.png)
+![image-20220804171108740](/images\2022-08-03-Rest API 만들기 & MERN\image-20220804171108740.png)
 
 
 
 **Network Access에서 네트워크 접은 방식 만드는데 개발할때는 0.0.0.0(=localhost)으로 할것**
 **=> 다만, 실제 배포할땐 그 서버 ip를 기준으로 해야 함**
 
-![image-20220804171227054](C:\Users\KoBongHun\Desktop\Git\BH946.github.io\images\2022-08-03-Rest API 만들기 & MERN\image-20220804171227054.png)
+![image-20220804171227054](/images\2022-08-03-Rest API 만들기 & MERN\image-20220804171227054.png)
 
 
 
@@ -129,7 +129,7 @@ module.exports = router
 
 **참고로 그림에 Browse Collections 를 클릭하면, 우리가 생성한 Schema 데이터들을 볼 수 있다.**
 
-![image-20220804171431949](C:\Users\KoBongHun\Desktop\Git\BH946.github.io\images\2022-08-03-Rest API 만들기 & MERN\image-20220804171431949.png)
+![image-20220804171431949](/images\2022-08-03-Rest API 만들기 & MERN\image-20220804171431949.png)
 
 
 

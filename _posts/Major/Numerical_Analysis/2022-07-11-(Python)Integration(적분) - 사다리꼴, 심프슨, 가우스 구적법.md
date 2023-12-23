@@ -92,39 +92,28 @@ typora-root-url: ../../..
 
 ## 공식
 
-사다리꼴 공식 : $(b-a)\frac{f(a) + f(b)}{2}$
+사다리꼴 공식 : \\( (b-a)\frac{f(a) + f(b)}{2} \\)
 
-* $h = \frac{b - a}{n}$
+* \\( h = \frac{b - a}{n} \\)
 
 
 
 뉴턴-코츠 적분
 
 * 1차
-
-  * 복합 사다리꼴 공식 : $T(f;P) = \frac{h}{2}\sum^{n-1}_{i=0}[f(x_i)+f(x_{i+1})]$
-
-  * $h = \frac{b - a}{n}$
-
-  * 재귀 사다리꼴 공식 : $R(n,0) = h\sum^{2^{n-1}}_{i=1}[f(a+ih)+\frac{h}{2}[f(a)+f(b)]$
-
-  * $h = \frac{b - a}{2^n}$
-
-  * 롬베르크 알고리즘  
-
-    $R(n,0) = \frac{1}{2}R(n-1,0) + h\sum^{2^{n-1}}_{k=1}f[a+(2k-1)h]$  
-
-    $R(n,m) = R(n,m-1) + \frac{1}{4^m-1}[R(n,m-1) - R(n-1,m-1)]$
-
-  * $h = \frac{b - a}{2^n}$
-
+  * 복합 사다리꼴 공식 : <img src="https://github.com/BH946/bh946.github.io/assets/80165014/f64ef8c9-6ddc-43b0-b5ea-22dcc42a1f31" alt="image" style="zoom:50%;" /> 
+  * \\( h = \frac{b - a}{n} \\)
+  * 재귀 사다리꼴 공식 : \\(R(n,0) = h\sum^{2^{n-1}}_{i=1}[f(a+ih)+\frac{h}{2}[f(a)+f(b)]\\)
+  * \\(h = \frac{b - a}{2^n}\\)
+  * 롬베르크 알고리즘   
+    \\(R(n,0) = \frac{1}{2}R(n-1,0) + h\sum^{2^{n-1}}_{k=1}f[a+(2k-1)h]\\)  
+    \\(R(n,m) = R(n,m-1) + \frac{1}{4^m-1}[R(n,m-1) - R(n-1,m-1)]\\)
+  * \\(h = \frac{b - a}{2^n}\\)
 * 2차
 
-  * 심프슨 1/3 공식 : $\frac{h}{3}[f(a)+4f(a+h)+f(a+2h)]$
-
+  * 심프슨 1/3 공식 : \\(\frac{h}{3}[f(a)+4f(a+h)+f(a+2h)]\\)
 * 3차
-
-  * 심프슨 3/8 공식 : $\frac{3}{8}h[f(x_0) + 3f(x_1) + 3f(x_2) + f(x_3)]$
+* 심프슨 3/8 공식 : \\(\frac{3}{8}h[f(x_0) + 3f(x_1) + 3f(x_2) + f(x_3)]\\)
 
 
 

@@ -124,6 +124,13 @@
                   {% endif %}
               {% endfor %}
             </ul>
+            <ul>
+              {% for category in site.categories %}
+                  {% if category[0] == "Css" %}
+                      <li><a href="/categories/css" class="">CSS ({{category[1].size}})</a></li>
+                  {% endif %}
+              {% endfor %}
+            </ul>
         <span class="nav__sub-title">ML&DL</span>
             <ul>
               {% for category in site.categories %}
@@ -181,14 +188,6 @@
                       <li><a href="/categories/algotest" class="">Algorithm(알고리즘 문제) ({{category[1].size}})</a></li>
                   {% endif %}
               {% endfor %}
-            </ul>
-        <span class="nav__sub-title">STYLE SHEET</span>
-            <ul>
-                {% for category in site.categories %}
-                    {% if category[0] == "Css" %}
-                        <li><a href="/categories/css" class="">CSS ({{category[1].size}})</a></li>
-                    {% endif %}
-                {% endfor %}
             </ul>
         <span class="nav__sub-title">GCP</span>
             <ul>
