@@ -1,7 +1,7 @@
 ---
 title:  "[java]택배 배달과 수거하기 - 2023 KAKAO BLIND(2)"
 categories : [ProgrammersTest]
-tag : [백준, 프로그래머스, 알고리즘 문제풀이]
+tag : [백준, 프로그래머스, 알고리즘 문제풀이, 다시풀기]
 toc: true
 toc_sticky: true
 author_profile: false
