@@ -262,6 +262,12 @@ typora-root-url: ../../..
 
 <br>
 
+참고 사진
+
+![image](https://github.com/BH946/bh946.github.io/assets/80165014/10481218-de5c-43b7-afac-32eb7b1aff68) 
+
+<br>
+
 ### **최단거리(Floyd)**
 
 식도 중요하겠지만 아래 3개인 `Floyd, LCS, OBST` 는 그림 위주로 보면 동작을 이해하기가 편했다.
