@@ -1,6 +1,6 @@
 ---
-title:  "[Python]Stack & Queue(스택&큐) => 백트래킹 VS 브루트포스(추후에 정리)"
-categories : [Algorithm, Revise]
+title:  "[Python]Stack & Queue(스택&큐)"
+categories : [Algorithm]
 tag : [Stack(스택, LIFO), List - based Stack, 리스트 스택(ADT), Linkde List - based Stack, 연결리스트 스택(ADT), Balanced delimiters, 백트래킹 VS 브루트포스, Queue(큐, FIFO), List-based Queue, 리스트 큐(ADT), Circular Queue(원형 큐), Priority Queue(우선순위 큐) - Unbounded, Linkded List-based Queue, 연결리스트 큐(ADT)]
 toc: true
 toc_sticky: true
