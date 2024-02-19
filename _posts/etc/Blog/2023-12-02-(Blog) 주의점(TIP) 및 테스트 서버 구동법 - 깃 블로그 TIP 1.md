@@ -339,3 +339,18 @@ typora-root-url: ..\..\.. // 이미지 경로를 위해 root 경로를 직접 �
 
 - 빌드에 `--unpublished` 추가
 - ex : `bundler exec jekyll serve --unpublished`
+
+<br><br>
+
+## Liquid Syntax Error?? 그게뭔데??
+
+md 파일 열심히 작성하고 포스팅을 했는데 이런 에러가 발생한다. 리퀴드 문법에러??
+
+앞서 언급한 Ruby언어 문법 얘기한거랑 정말 같은 맥락이다. 
+
+**예를들어** {%raw%} {{ }} {%endraw%} 를 사용하면 리퀴드에서는 탈출문으로 알고있다.
+
+**따라서** 이를 방지하기 위해서는 아래 문법을 사용해줘야 한다.
+
+- ![image](https://github.com/BH946/bh946.github.io/assets/80165014/6a83e2f5-0ad5-4871-8096-a624a50e56f1) 
+
