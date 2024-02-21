@@ -1,7 +1,7 @@
 ---
 title:  "[개념] Dynamic_Programming(동적계획법)"
 categories : Algorithm
-tag : [알고리즘, DP조건, 피보나치의 수, 이항계수, 격자경로, Coin Changing Using DP, 연쇄 행렬곱셈(Matrix-chain Multiplication), 최단거리(Floyd), LCS(Find a Longest Common Subsequence), OBST(Optimal Binary Search Tree), 0-1 Knapsack]
+tag : [알고리즘, DP조건, 피보나치의 수, 이항계수, 격자경로, Coin Changing Using DP, 연쇄 행렬곱셈(Matrix-chain Multiplication), 최단거리(Floyd), LCS(Find a Longest Common Subsequence), LIS, OBST(Optimal Binary Search Tree), 0-1 Knapsack]
 toc: true
 toc_sticky: true
 author_profile: false
@@ -391,6 +391,38 @@ longest ... 란 이 공통된것 중에서 젤 긴것을 구하는 것.
 * **총 2개의 정답이 나온다.**
 * 여기서 키 값이 같은, IQ가 같은 이런 경우들도 있는데 잘 처리해야한다.
   * 동일 키의 경우 IQ가 상승(감소가 아닌)으로 정렬을 해야만 정확한 값을 얻을 수 있음
+
+<br>
+
+### LIS(Longest Increasing Subsequence)
+
+**최장증가수열(LIS) : 각 원소가 이전 원소보다 큰 최장 증가 부분 수열을 의미**
+
+**예를들어** 
+
+- input: -**60 -41** -100 8 -8 -52 -62 **-61** -76 **-52** -52 14 **-11 -2** -54 **46**  가 있다면
+- output: -60 -41 -61 -52 -11 -2 46 가 정답이다.
+
+```java
+// length[]의 각 요소값은 최장 증가 부분 수열의 개수
+for (int k = 0; k < n; k++) {
+    length[k] = 1;
+    for (int i = 0; i < k; i++) {
+        if(arr[i] < arr[k]) {
+            length[k] = max(length[k], length[i] + 1);
+        }
+    }
+}
+```
+
+<br>
+
+참고할 응용 문제는 [전깃줄BOJ2565](https://www.acmicpc.net/problem/2565) 가 있다.
+
+- A, B 건물에 있는 전깃줄이 교차하지 않게 하는 문제이다. 
+- 최소 몇개의 전깃줄을 제거해야 하는가? **LIS 응용문제**
+
+![image](https://github.com/BH946/bh946.github.io/assets/80165014/683d07c6-16e1-4c9f-9bc1-d8700d6abcc8) 
 
 <br>
 
