@@ -548,6 +548,83 @@ for (int k = 0; k < n; k++) {
 
 ![image-20230619230152019](/images/2022-12-30-(개념) Dynamic_Programming(동적계획법)/image-20230619230152019.png) 
 
+<br>
+
+### TSP(외판원 순회)
+
+**[백준2098_외판원 순회](https://www.acmicpc.net/problem/2098) -> 모든 마을을 단 한번씩만 방문하고 0번 마을로 돌아왔을 때의 최저 비용 구하라!**
+
+**아래와 같은 상태를 정의하자**
+
+```java
+now_pos = 0; //시작 마을
+visited_array = [1, 0, 0, 0, 0, 0];
+total_cost = 0;
+```
+
+<br>
+
+**이때, 두가지 이점이 존재한다**
+
+1. 여러 경로에 의한 결과를 **중첩**해서 표현할 수 있게 됩니다.
+2. **종료 시점**을 명확하게 알 수 있습니다.
+
+```java
+// [0→2→3→4] 의 경로로 이동한 상태와 [0→3→2→4]의 경로로 이동한 상태 "중첩 표현"
+now_pos = 4;
+visited_array = [1, 0, 1, 1, 1, 0];
+total_cost = min(cost[0][2] + cost[2][3] + cost[3][4], cost[0][3] + cost[3][2] + cost[2][4]);
+
+// 종료 시점 : now_pos 로부터 0번으로 돌아오는 비용만 추가로 더해주자
+int result = Integer.INT_MAX;
+for(int i = 1; i < N; i++){
+	//now_pos = i, visited_array = [1, 1, 1, 1, 1, 1], 인 모든 state에 대해
+	result = Math.min(result, MyClass[(some state)].total_cost + cost[i][0]);
+}
+```
+
+<br>
+
+`MyClass[(some state)].total_cost` 를 `dp[i][j]` 로 표현하자. 추가로 비트마스킹 적용하겠다.
+
+- 사용 비트마스킹 예시 : **[1, 0, 1, 1, 0, 0] → 001101(2) = 13**
+- i 는 2^N 가지, j 는 N가지 -> 비트마스킹 참고하면 범위가 이해하기 쉽다.
+
+```java
+int dp[i][j];
+//i-> 내가 지금까지 방문한 마을을 수로 표현
+//j-> 현재 내가 있는 마을
+//dp[i][j]-> 이런 상태가 완성되었을 때의 최솟값 (a.k.a total_cost) 
+
+int dp[][] = new int[(1 << N)][N];
+/* fill dp to Integer.INT_MAX; */
+dp[1][0] = 0; //0번 마을을 방문했고(1), 현재 0번 마을에 있음(0)
+```
+
+<br>
+
+**최종 코드**
+
+```java
+for(int i = 1; i < (1 << N); i++){ //현재 내가 방문한 마을의 비트 값, visited_array
+	for(int j = 0; j < N; j++){ //현재 내가 서 있는 마을, now_pos
+		if(dp[i][j] == Integer.INT_MAX) continue; //불가능한 상태를 보려고 함
+		for(int k = 0; k < N; k++){ //내가 다음으로 방문하려는 마을, next_pos
+			if((i & (1 << k)) > 0) continue;
+			//i는 방문했던 마을의 비트 값이었음. 그런데 지금 가려는
+			//k번 마을이 이미 이 비트에 있으면 갈 수 없으므로 continue 처리
+			dp[i | (1 << k)][k] = Math.min(dp[i | (1 << k)][k], dp[i][j] + cost[j][k]);
+			//k번 마을의 비트를 채우면서 k번으로 이동해야 하므로 [i | (1 << k)][k]
+			//현재 나의 최소값 (dp[i][j]) + 이동 비용(cost[j][k])을 다음 상태로 전달
+		}
+	}
+}
+int result = Integer.INT_MAX;
+for(int i = 1; i < N; i++){
+	result = Math.min(result, dp[(1 << N) - 1][i] + cost[i][0]);
+} //N개의 비트를 모두 채운 상태 = (1 << N) - 1 로 표현 가능.
+```
+
 <br><br>
 
 ## DP가 불가능한 경우는?
