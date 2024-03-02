@@ -744,6 +744,8 @@ typora-root-url: ../../..
   * **이후 @Test** 를 메소드마다 선언하여 테스트!! - 메소드 단에
     * @RunWith(SpringRunner.class) : 스프링과 테스트 통합 -> **Junit4 이하만 사용**
     * @SpringBootTest :  스프링 컨테이너와 테스트를 함께 실행 (이게 없으면 @Autowired 다 실패)
+      * 즉, 스프링 빈 사용하고 싶으면 반드시 필수
+      * @TestConfiguration : 테스트에서 **스프링 빈 등록을 지원**하는 어노테이션
 
 * **@Transactional** : 반복가능한 테스트지원, 각각의 테스트를 실행할 때 마다 트랜잭션을 시작하고 테스트가 끝나면 트랜잭션을 강제로 롤백 (이 어노테이션은 테스트 케이스에서 사용될때만 기본값으로 롤백)
 
@@ -760,6 +762,8 @@ typora-root-url: ../../..
 * `@BeforeEach` 는 테스트 시작전 실행되는 것인데, 이것도 활용할 수 있다.
 
   * **단!! 이 2개는 @Test 마다 수행된다는점을 꼭 인지!!**
+
+* `@DisplayName` 는 간단히 테스트 출력때 항목 이름을 설정해서 출력 가능
 
 * **print대신 assert비교 테스트**
 
@@ -790,11 +794,19 @@ typora-root-url: ../../..
       });
       Assertions.assertEquals("이미 팔로우 요청을 하셨습니다.", exception.getMessage());
       log.info("exception.getMessage() : {}", exception.getMessage());
+      // 프록시 체크? -> 서비스에 @Transactinal 은 프록시 사용
+      Assertions.assertThat(AopUtils.isAopProxy(memberService)).isTrue();
+      Assertions.assertThat(AopUtils.isAopProxy(memberRepository)).isFalse();
       ```
 
   * **AssertJ -> Junit5에서 파생된것**
 
-    * 
+    * ```java
+      assertThat(connection).isNotNull();
+      assertThat(findMember).isEqualTo(member);
+      assertThatThrownBy(() -> repository.findById(member.getMemberId()))
+          .isInstanceOf(NoSuchElementException.class); // 예외 터지는거 확인
+      ```
 
 <br>
 
@@ -805,8 +817,9 @@ typora-root-url: ../../..
   * 보통 debug를 "개발서버용", info를 "운영서버용" 으로 사용
   * 기본값이 info라서 debug로 개발서버 프로필에 따로 설정 해주자
 * @NotEmpty("에러 메세지 관련")
-* @Data -> 롬복
+* @Data -> 롬복 -> **toString과 Equals오버라이딩도 자동**
   * @Getter, @Setter, @ToString, @EqualsAndHashCode, @RequiredArgsConstructor 적용
+  * `member.equals(findMember)` 바로 사용 가능
 * @SpringBootApplication : 톰캣 내장(서버)
 * @Valid + @NotEmpty(message="회원 정보필수") 이런식으로 같이 사용
   * 예전꺼라서 의존성 추가 필수
@@ -1556,3 +1569,28 @@ public class OrderRunner implements ApplicationRunner {
   * 등록 : `sudo iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 8080`
   * 조회 : `iptables -nL PREROUTING -t nat --line-numbers`
   * 삭제 : `iptables -t nat -D PREROUTING {number}`
+
+<br><br>
+
+## 그외
+
+**리소스 정리(close)** 는 필수고 **"역순"**으로 할 것
+
+**레퍼지토리** 계층은 **인터페이스**를 사용 권장 -> JDBC, JPA, 오라클 등 다양한 구현체 생성위해(이미 스프링에서 제공)
+
+**서비스** 계층은 **인터페이스**를 잘 사용하지는 않음 -> 물론, 사용하는 경우도 있음
+
+**커넥션 풀**은 **실무**에서 무조건 사용, **성능테스트**를 통해 결정하는편, `hikariCP` 를 **기본으로 스프링 부트가 사용중**(커넥션풀 오픈소스)
+
+- hikariCP 는 DataSource 인터페이스의 구현체이고, **DataSource**는 자동으로 **application.yml** 같은 설정파일의 DB정보(URL,ID,PW 등)을 읽기 때문에 해당 설정파일을 잘 작성하면 된다.
+
+앱에서 DB 접근시 **커넥션**뿐만 아니라 DB 내부에서는 **"세션"** 생성 -> **세션이 SQL 실행**
+
+기본적으로 **언체크(런타임) 예외를 사용**하자(**문서화 필수!**) 
+
+- 예외변환은 `throw new 커스텀예외(e);` 처럼 현재 error를 담는 e를 꼭 생성자 매개변수에 넘겨줘야 하위의 에러내용들을 다 기록하므로 이부분 주의! 
+- JDBC 사용하는경우 **JdbcTemplate** 를 사용한다면, 이런 예외랑 커넥션 동기화 등등 다양한것을 한번에 제공
+
+트랜잭션 -> @Transactional 을 계속 사용
+
+[스프링 DB 1편 - 데이터 접근 핵심 원리](https://github.com/BH946/spring-first-roadmap/tree/main/spring_study_6/jdbc)
