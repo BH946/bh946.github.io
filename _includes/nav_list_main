@@ -33,6 +33,13 @@
                   {% endif %}
               {% endfor %}
             </ul>
+            <ul>
+              {% for category in site.categories %}
+                  {% if category[0] == "Err" %}
+                      <li><a href="/categories/err" class="">Error(에러해결) ({{category[1].size}})</a></li>
+                  {% endif %}
+              {% endfor %}
+            </ul>
         <!--span 태그로 카테고리들을 크게 분류 -->
         <span class="nav__sub-title">CODING TEST</span>
             <!--ul 태그로 같은 카테고리들 모아둔 페이지들 나열-->
