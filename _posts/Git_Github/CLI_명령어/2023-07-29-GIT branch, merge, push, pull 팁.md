@@ -1,6 +1,6 @@
 ---
 title:  "GIT branch, merge, push, pull 팁"
-categories : [Knowledge, Cli_Git]
+categories : [Cli_Git]
 tag : [깃헙, 깃허브, git, github]
 toc: true
 toc_sticky: true

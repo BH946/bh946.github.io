@@ -15,7 +15,7 @@ typora-root-url: ../../..
 
 # Error
 
-**`java.lang.IllegalStateException : No primary or single unique constructor found for class [xxx]`**
+`java.lang.IllegalStateException : No primary or single unique constructor found for class [xxx]`
 
 **말 그대로 생성자 에러!!, 생성자를 고치거나 기본 생성자 추가하자!**
 

@@ -15,7 +15,7 @@ typora-root-url: ../../..
 
 # Error
 
-**`org.thymeleaf.exceptions.TemplateInputException: Error resolving template [/spring/swagger/swagger], template might not exist or might not be accessible by any of the configured Template Resolvers`**
+`org.thymeleaf.exceptions.TemplateInputException: Error resolving template [/spring/swagger/swagger], template might not exist or might not be accessible by any of the configured Template Resolvers`
 
 리눅스의 경로문제!!  
 html 리턴할때 **return /studio;** 형태가 아닌 **return studio;**   

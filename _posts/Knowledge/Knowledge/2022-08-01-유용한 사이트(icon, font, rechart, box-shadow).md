@@ -1,6 +1,6 @@
 ---
 title:  "유용한 사이트(icon, font, rechart, box-shadow)"
-categories : Knowledge
+categories : [Knowledge, Node_JS, React_JS]
 tag : [mui, Icon, google, font]
 toc: true
 toc_sticky: true

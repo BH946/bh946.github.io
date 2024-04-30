@@ -15,7 +15,7 @@ typora-root-url: ../../..
 
 # Error
 
-**`InvalidDataAccessApiUsageException org.hibernate.TransientPropertyValueException`**
+`InvalidDataAccessApiUsageException org.hibernate.TransientPropertyValueException`
 
 보통 FK 오류이다.. FK를 줘야할 객체의 id가 null이라서 이런 문제가 발생!!
 

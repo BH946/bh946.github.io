@@ -15,7 +15,7 @@ typora-root-url: ../../..
 
 # Error
 
-**`org.h2.jdbc.JdbcSQLNonTransientConnectionException: Connection is broken: "java.net.ConnectException: Connection refused: connect: localhost" [90067-214]`**
+`org.h2.jdbc.JdbcSQLNonTransientConnectionException: Connection is broken: "java.net.ConnectException: Connection refused: connect: localhost" [90067-214]`
 
 **이런 에러의 경우 DB와 Connect(연결)이 제대로 안되었다는 것**
 

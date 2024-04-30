@@ -15,7 +15,7 @@ typora-root-url: ../../..
 
 # Error
 
-**`xmlParseEntityRef no name`**
+`xmlParseEntityRef no name`
 
 XML에서는 특수문자 `&,<,>,;` 등은 다르게 치환해서 사용해야한다.
 

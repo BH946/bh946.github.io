@@ -15,7 +15,7 @@ typora-root-url: ../../..
 
 # Error
 
-**`org.hibernate.query.IllegalQueryOperatioinException: Result type given for a non-SELECT Query...`**
+`org.hibernate.query.IllegalQueryOperatioinException: Result type given for a non-SELECT Query...`
 
 **관련 에러는 쿼리문의 문제이므로 작성한 쿼리문을 추적해서 해결해줘야 한다.**
 

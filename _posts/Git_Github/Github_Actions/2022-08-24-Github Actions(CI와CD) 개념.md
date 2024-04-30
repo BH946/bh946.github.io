@@ -1,6 +1,6 @@
 ---
 title:  "Github Actions(CI/CD) 개념"
-categories : Action_Git
+categories : [Action_Git, Knowledge]
 tag : [깃헙, 깃허브, git, github, CI/CD, cron, 깃허브 액션, Github action]
 toc: true
 toc_sticky: true
