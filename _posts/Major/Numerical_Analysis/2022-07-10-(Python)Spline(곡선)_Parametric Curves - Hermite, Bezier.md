@@ -255,12 +255,10 @@ plt.ylim(0.8,1.3)
 ![image-20220901013128661](/images/2022-07-10-(Python)Spline(곡선)_Parametric Curves - Hermite, Bezier/image-20220901013128661-16619668964821.png)
 
 * n(n>=2)개의 조절점(Control Point)로 정의되는 매개변수 곡선
-
 * n개의 점으로 (n-1)차 베지에 곡선 생성 가능
-
 * n차 베지에 곡선은 (n-1)차 베지에 곡선의 선형보간으로 표현
-
 * 공식은 `tmp` 부분이다
+* **[애니메이션 참고하기](https://blog.coderifleman.com/2016/12/30/bezier-curves/)**
 
 
 
