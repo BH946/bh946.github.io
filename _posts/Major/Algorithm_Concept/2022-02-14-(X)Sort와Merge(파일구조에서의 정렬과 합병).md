@@ -42,7 +42,7 @@ sidebar:
 
 * 내부 정렬 (internal sort) 
   * 내부 정렬 또한 Run을 생성하고 merge를 하는것임!! 1번에서 말한 내부정렬의 의미는 그냥 메인 메모리 내에 데이터가 모두 저장이 된다면, merge이런게 필요없이 바로 정렬되고 끝날거라는 의미.
-* 대체 선택 (replacement selection) -> 블로그에 코드 작성해서 올린 게시글 있으니 참고.
+* 대체 선택 (replacement selection) -> [참고 게시물](https://bh946.github.io/algorithm/(C++)Replacement_Selection(%EB%8C%80%EC%B2%B4%EC%84%A0%ED%83%9D-%EA%B5%AC%ED%98%84=%EC%A0%95%EB%A0%AC)/)
 * 자연 선택 (natural selection)
 
 <br>

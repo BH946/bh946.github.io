@@ -14,7 +14,7 @@ sidebar:
 ## Recursion(재귀)
 
 * Recursion은 말 그대로 재귀하는 형태로 생각하면 된다. 스택구조를 가진다.
-* 활용 예시 : 팩토리얼, 등등,,,
+* 활용 예시 : 팩토리얼 등
 
 <br>
 
@@ -52,8 +52,8 @@ print(factorial)
 
 * 피보나치 수열 : 1,1,2,3,4,5,13,21,,,
 * 조건
-  * fib(n-1) + fib(n-2), if n > 1
-  * n,                            if n = 1 or n = 0
+  * fib(n-1) + fib(n-2), **if n > 1**
+  * n, **if n = 1 or n = 0**
 
 ```python
 def fib(n):
@@ -166,7 +166,9 @@ print(knapsack(W, weights, values, n)) # 19 출력
 
 ### 6. N Queen Problem
 
-* **백 트래킹(되돌아 간다)**를 활용, 이 또한 recursion형식이며, 코드는 인터넷 검색바람.
+N-Queen 문제는 `N x N` 체스판 위에 `N`개의 퀸을 서로 공격하지 않도록 배치하는 문제. 즉, 어떤 두 퀸도 같은 행, 열, 또는 대각선에 위치할 수 없음.
+
+* 안전한 위치가 없다면 **백 트래킹(되돌아 간다)**를 활용, 이 또한 recursion형식이며, 코드는 인터넷 검색바람.
 
 <br>
 

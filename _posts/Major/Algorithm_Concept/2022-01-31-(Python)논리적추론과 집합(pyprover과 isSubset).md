@@ -48,15 +48,28 @@ print("true") if proves( given, conclu ) else print("false")
 
 **다양한 논법**
 
-* 후건 부정(부정 논법) modus tollen
+* **후건 부정(부정 논법) modus tollen** : 가언 명제와 그 결론의 부정으로부터 그 전제의 부정을 유도하는 추론 규칙
+
+* 예시
+
+  * 만약 오늘 비가 온다면, 밖이 젖을 것이다. (만약 P이면 Q이다.)
+  * 밖이 젖지 않았다. (Q가 아니다.)
+  * **따라서(conclu)**, 오늘 비가 오지 않았다. (따라서, P가 아니다.)
 
   ```python
-  given = (~Q&(P>>Q))
+  given = ((P>>Q)&~Q) # (P->Q) ^ ~Q
   conclu = ~P
   print("true") if proves( given, conclu ) else print("false")
   ```
 
-* 구성적 양도 논법 constructive dilemma
+* **구성적 양도 논법 constructive dilemma** : 두 가언 명제와 그 두 전제의 논리합으로부터 두 결론의 논리합을 유도하는 양도 논법
+
+* 예시
+
+  * 만약 비가 오면 길이 젖는다. (만약 P이면 Q이다.)
+  * 만약 눈이 온다면 길이 미끄러워진다. (만약 R이면 S이다.)
+  * 비가 오거나 눈이 온다. (P또는 R이 true이다.)
+  * **따라서(conclu)**, 길이 젖거나 길이 미끄러워진다. (Q또는 S가 true이다.)
 
   ```python
   given = ((P>>Q)&(R>>S)&(P|R))
@@ -64,7 +77,7 @@ print("true") if proves( given, conclu ) else print("false")
   print("true") if proves( given, conclu ) else print("false")
   ```
 
-* 파괴적 양도 논법 destructive dilemma
+* **파괴적 양도 논법 destructive dilemma** : [논리학](https://ko.wikipedia.org/wiki/논리학)에서 대전제가 두 개의 [가언적 명제](https://ko.wikipedia.org/wiki/가언_명제)의 연언(連言) 명제로 되어 있고, 소전제가 대전제의 두 전건을 긍정하든가 혹은 두 후건을 부정하는 [선언적 명제](https://ko.wikipedia.org/wiki/선언_명제)의 형태로 되어 있는 [삼단 논법](https://ko.wikipedia.org/wiki/삼단_논법)이다.
 
   ```python
   given = (((P>>Q) & (R>>S)) & (~Q|~S))
@@ -72,7 +85,7 @@ print("true") if proves( given, conclu ) else print("false")
   print("true") if proves( given, conclu ) else print("false")
   ```
 
-* 전건 긍정 modus ponens
+* **전건 긍정 modus ponens** : 가언 명제와 그 전제로부터 그 결론을 유도해내는 추론 규칙이다.
 
   ```python
   given = (P & (P>>Q))
@@ -80,7 +93,7 @@ print("true") if proves( given, conclu ) else print("false")
   print("true") if proves( given, conclu ) else print("false")
   ```
 
-* 가언 삼단 논법 hypothetical syllogism
+* **가언 삼단 논법 hypothetical syllogism** : 두 개의 가언 명제로부터 추이성을 통해 새로운 가언 명제를 유도하는 삼단 논법이다.
 
   ```python
   given = ((P>>Q) & (Q>>R))
@@ -88,7 +101,7 @@ print("true") if proves( given, conclu ) else print("false")
   print("true") if proves( given, conclu ) else print("false")
   ```
 
-* 술어 논리 predicate logic
+* **술어 논리 predicate logic**
 
   * TE는 Exist(**∃x**)를 의미하고 FA는 ForAll(**∀x**)를 의미하는 한정자이다.
 
@@ -106,18 +119,18 @@ print("true") if proves( given, conclu ) else print("false")
 
 ## 2.부분집합(isSubset)
 
-* 데이터프레임의 경우 예시..(즉, pandas 기본적으로 import)
+* 데이터프레임의 경우 예시 (pandas 기본적으로 import)
 
 <br>
 
-### 예시로 만들어보는 함수
+### 예시로 만들어보는 부분집합 함수 2개
 
-* 데이터 한개한개 전부 비교.(정확 대신 매우느림)
+**데이터 한개한개 전부 비교.(정확 대신 매우느림)**
 
 ```python
 """## ■ isSubset 함수 만들기
 만약 데이터프레임 dfA, dfB가 주어질 때,
-dfA가 dfB의 서브셋이고, dfA가 dfB의 서브셋이라면(동치=equivalence) return True
+dfA가 dfB의 서브셋이고, dfB가 dfA의 서브셋이라면(동치=equivalence) return True
 만약 dfA가 dfB의 서브셋이고 그 반대는 성립하지 않는 경우에도 return True
 그 외(서로의 서브셋이 아닌 경우, dfB가 dfA의 서브셋이지만 그 반대는 성립하지 않는 경우)는 return False
 """
@@ -162,12 +175,12 @@ def isSubset(dfA, dfB):
 
 <br>
 
-아래는 기본 데이터가 같다고 가정하고 크기만 비교한 방법임.(부정확 대신 빠름)
+**아래는 기본 데이터가 같다고 가정하고 크기만 비교한 방법임.(부정확 대신 빠름)**
 
 ```python
 """## ■ isSubset 함수 만들기
 만약 데이터프레임 dfA, dfB가 주어질 때,
-dfA가 dfB의 서브셋이고, dfA가 dfB의 서브셋이라면(동치=equivalence) return True
+dfA가 dfB의 서브셋이고, dfB가 dfA의 서브셋이라면(동치=equivalence) return True
 만약 dfA가 dfB의 서브셋이고 그 반대는 성립하지 않는 경우에도 return True
 그 외(서로의 서브셋이 아닌 경우, dfB가 dfA의 서브셋이지만 그 반대는 성립하지 않는 경우)는 return False
 """

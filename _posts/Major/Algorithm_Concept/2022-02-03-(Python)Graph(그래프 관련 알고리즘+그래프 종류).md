@@ -20,32 +20,32 @@ sidebar:
 ### 1. Basic concept of graphs(여러 그래프들의 기본 개념)
 
 **다중 그래프(Multi Graph) : 두 정점에 2개 이상의 간선이 허용.(=다중 타입)**  
-**수도 그래프(Pseudoudo Graph) : 두개 이상의 간선과 self-loop를 가진다. **   
+**수도 그래프(Pseudoudo Graph) : 두개 이상의 간선과 self-loop를 가진다.**   
 **유향 그래프(Directed Graph) : 정점의 순서를 생각하는 그래프(E는 V에 이항관계)**  
 **무향 그래프(Undirected Graph) : 정점의 순서를 무시하는 그래프(k-클리크)**  
 
-**정규 그래프(Regular Graph) : 모든 정점의 차수가 같다. (K와 C는 항상 정규 그래프이다.)**  
+**정규 그래프(Regular Graph) : 모든 정점의 차수가 같다. 즉, 모든 꼭짓점이 동일한 수의 이웃을 가지는 그래프. (K와 C는 항상 정규 그래프이다.)**  
 => Kn, Cn, W<sub>3</sub>은 정규 그래프이다. (W는 n이 아닌이유가 W<sub>4</sub>는 정규 그래프X 라서)
 
-* **완전 그래프(Complete)** : 무향 그래프가 모든 정점의 쌍 사이에 간선이 존재.(Kn)
+* **완전 그래프(Complete)** : 무향 그래프가 모든 정점의 쌍 사이에 간선이 존재.**(Kn)**  
   => n(n-1)/2개의 간선
 
-* **사이클 그래프(Cycle Graph)** : {v<sub>1</sub>,v<sub>2</sub>,..v<sub>n</sub>} and {e<sub>1</sub>,e<sub>2</sub>,..e<sub>n</sub>} 가지고 mod로 표현가능.(Cn)
+* **사이클 그래프(Cycle Graph)** : {v<sub>1</sub>,v<sub>2</sub>,..v<sub>n</sub>} and {e<sub>1</sub>,e<sub>2</sub>,..e<sub>n</sub>} 가지고 mod로 표현가능.**(Cn)**  
   => {V<sub>k</sub>,V<sub>k+1</sub>}의 조건은 V<sub>k+1</sub> mod n. 			EX) n=6일시 0~5 존재.
 
-* **휠 그래프(Wheel Graph)** : 허브가 존재하는(모두 연결해주는 노드) 그래프. n+1 노드가짐.(Wn)
+* **휠 그래프(Wheel Graph)** : 허브가 존재하는(모두 연결해주는 노드) 그래프. n+1 노드가짐.**(Wn)**  
   => EX) W<sub>6</sub>은 노드가 7개라는 뜻. Cycle그래프에 허브노드(모든노드 연결지점)를 추가한 그래프이다.
 
-**동형 그래프(Isomorphic Graph) : 1.노드수, 2.에지수가 동일하다.(=전단사함수) 3.인접노드와 정확히 일치.**  
-=> 목적의 대부분은 Planer그래프 만들려고(평면). Why? 노드간 거리 등 간단히 볼수 있다.
+**동형 그래프(Isomorphic Graph) : "두 그래프의" 1.노드수, 2.에지수가 동일하다.(=전단사함수) 3.인접노드와 정확히 일치 한다면 "동형"이라 한다.**  
+=> 목적의 대부분은 Planer그래프 만들려고(평면). Why? 노드간 거리 등 간단히 볼수 있다.  
 
-* **준동형 그래프(Homomorphism Graph)** : 그래프는 노드, 에지수가 달라도 그래프 뿌리 즉, 모양이 같다.
-  => zoom in,out 활용
+* **준동형 그래프(Homomorphism Graph)** : 그래프는 노드, 에지수가 달라도 그래프 뿌리 즉, 모양이 같다.  
+  => zoom in,out 에 실제로 활용
 
 **부분 그래프(Sub Graph) : G=(V,E)있을 때 V'와 E'가 부분집합이다.**
 
-* **진부분 그래프(Proper Subgraph)** : 부분그래프에서 E'!=E이다. (즉, 노드같고 에지다른데 이부분 특별히 이해안해도 됨)
-* **스패닝 그래프(Spanning Graph)** : 부분그래프에서 V'=V이고, E'가 부분집합이다. (노드같고 경로가 다르겠죠?)
+* **진부분 그래프(Proper Subgraph)** : 부분그래프에서 E'!=E이다. (즉, 노드같고 에지다름)
+* **스패닝 그래프(Spanning Graph)** : 부분그래프에서 V'=V이고, E'가 부분집합이다. (노드같고 경로가 다름)
 
 **이분 그래프(Bipartite Graph) : M과 N집합 사이에 간선으로 정점들을 연결.**  
 => V=MUN, M∩N=∅(정점집합 V가 M과 N으로 분할)
@@ -65,13 +65,13 @@ sidebar:
 * **가중치 그래프(Weighted Graph)** : 간선에 음수가 아닌 가중치를 할당.  
   => 최소 가중치로 가는 방법(알고리즘) 여러가지 존재함.
 
-**오일러 루프(Euler Loop) : 모든 간선(에지)를 딱 한번만 거쳐서 시작 정점으로 다시 돌아오는 루프.**
+**오일러 루프(Euler Loop) : 모든 "간선(에지)"를 딱 한번만 거쳐서 시작 정점으로 다시 돌아오는 루프.**
 
 * **오일러 그래프(Euler Graph)** : 오일러 루프를 가진 그래프.  
   => 필요충분조건 : G의 모든 정점이 짝수의 차수를 가짐.
 * **추가설명** : 오일러 경로란? 모든 변을 꼭 한 번씩 지나는 경로. 그런데, 얘는 오일러 그래프의 필요충분조건이 아니라는점 기억!! 오일러 그래프는 오일러 루프이기만 하면 됨!!
 
-**해밀턴 순환(Hamilton Cycle) : 모든 정점들을 단 한번만 거쳐서 다시 시작 정점으로 돌아오는 순환.**
+**해밀턴 순환(Hamilton Cycle) : 모든 "정점"들을 단 한번만 거쳐서 다시 시작 정점으로 돌아오는 순환.**
 
 * **해밀턴 그래프(Hamilton Graph)** : 해밀턴순환을 가진 그래프.
 
@@ -91,9 +91,64 @@ sidebar:
 
 <br>
 
+**그림** -> 출처 : [wolfram](https://mathworld.wolfram.com/), [gs](https://www.geeksforgeeks.org/)
+
+- **다중, 수도 그래프**
+  - ![GraphsSimple](https://mathworld.wolfram.com/images/eps-svg/GraphsSimple_800.svg)  
+
+- **방향, 무방향 그래프**
+  - ![GraphsDirected](https://mathworld.wolfram.com/images/eps-svg/GraphsDirected_750.svg) 
+
+- **정규 그래프** -> 이웃 3개 예시
+  - ![CubicGraphs](https://mathworld.wolfram.com/images/eps-svg/CubicGraphs_800.svg)  
+
+- **완전 그래프 (Complete Graph):**
+  - ![CompleteGraphs](https://mathworld.wolfram.com/images/eps-svg/CompleteGraphs_801.svg) 
+
+- **사이클 그래프 (Cycle Graph):**
+  - ![CycleGraphs](https://mathworld.wolfram.com/images/eps-svg/CycleGraphs_850.svg) 
+
+- **휠 그래프 (Wheel Graph):**
+  - ![WheelGraphs](https://mathworld.wolfram.com/images/eps-svg/WheelGraphs_1001.svg) 
+
+- **동형 그래프 (Isomorphic Graph):**
+  - <img src="https://github.com/BH946/bh946.github.io/assets/80165014/a586b401-524c-4855-82dd-0ffde971a5b0" alt="Isomorphic" style="zoom:67%;" />  
+
+- **준동형 그래프 (Homomorphism Graph):**
+  - <img src="https://github.com/BH946/bh946.github.io/assets/80165014/623bd1e2-5a7f-4e12-b547-9b5084415294" alt="Homomorphism" style="zoom: 67%;" /> 
+
+- **부분 그래프 (Sub Graph):**
+  - <img src="https://github.com/BH946/bh946.github.io/assets/80165014/00046f47-e3d2-4a75-8dd3-0cfdbf9cc8d2" alt="sub" style="zoom: 25%;" />  
+
+- **진부분 그래프 (Proper Subgraph):**
+  - <img src="https://media.geeksforgeeks.org/wp-content/uploads/isomorphism-question.jpg" alt="Proper" style="zoom:50%;" />  
+
+- **스패닝 그래프 (Spanning Graph):**
+  - ![SpanningTrees](https://mathworld.wolfram.com/images/eps-svg/SpanningTrees_1000.svg) 
+
+- **이분 그래프 (Bipartite Graph):**
+  - ![BipartiteGraph](https://mathworld.wolfram.com/images/eps-svg/BipartiteGraph_1000.svg) 
+
+- **완전 이분 그래프 (Complete Bipartite Graph):**
+  - ![CompleteBipartiteGraph](https://mathworld.wolfram.com/images/eps-svg/CompleteBipartiteGraph_1000.svg) 
+
+- **오일러 그래프 (Euler Graph):**
+  - ![EulerianGraphsConnected](https://mathworld.wolfram.com/images/eps-svg/EulerianGraphsConnected_800.svg)  
+
+- **해밀턴 그래프 (Hamilton Graph):**
+  - ![HamiltonianGraphs](https://mathworld.wolfram.com/images/eps-svg/HamiltonianGraphs_800.svg) 
+
+- **평면 그래프 (Planar Graph):**
+  - ![PlanarGraphs](https://mathworld.wolfram.com/images/eps-svg/PlanarGraphs_800.svg) 
+
+- **비평면 그래프 (Nonplanar Graph):**
+  - <img src="https://mathworld.wolfram.com/images/eps-svg/PentatopeGraph_800.svg" alt="PentatopeGraph" style="zoom:67%;" /> 
+
+<br>
+
 ### 2. Graph Coloring
 
-**정점의 착색(=그래프 착색) **  
+**정점의 착색(=그래프 착색)**  
 => 인접한 노드만 다른컬러이면 되는게 여기서 중요한 포인트.
 
 **n-색 가능(n-colorable) : n가지의 색으로 G의 착색이 가능**  
