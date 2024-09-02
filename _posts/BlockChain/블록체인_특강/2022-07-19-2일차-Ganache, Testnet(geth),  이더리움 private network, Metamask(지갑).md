@@ -1,7 +1,7 @@
 ---
-title: "2일차-Ganache, Testnet(geth)"
+title: "2일차-Ganache 네트워크와 이더리움 Private 네트워크 구축"
 categories : BlockChain
-tag : [블록체인]
+tag : [블록체인, Ganache 네트워크, Testnest 접속, geth 접속, 이더리움 private 네트워크, Metamask]
 toc: true
 toc_sticky: true
 author_profile: false
@@ -13,13 +13,15 @@ typora-root-url: ../../..
 
 
 
-`Ganache 가상 머신` 과 `Testnet(geth) 네트워크` 와 `이더리움 private network 구축` 을 실습하겠다. 추가로 어디서든 다 사용하는 `Metamask`  또한 실습하겠다. (지갑 같은것)
+`Ganache 가상 머신` 과 `Testnet(geth) 네트워크`와 `이더리움 private network 구축`을 실습하겠다. 추가로 어디서든 다 사용하는 `Metamask` 를 실습하겠다. (지갑 같은 것)
 
-<br>
+<br><br>
+
+## 사용 명령어
 
 **Testnet, private network 때 사용한 명령어 모음**
 
-* 네트워크 구축할 때 필요한 정보들이 많아서 메모장에 따로 저장해두는걸 추천
+* 네트워크 구축할 때 필요한 정보들이 많아서 메모장에 따로 저장해두는 걸 추천
 
 ```bash
 ===========================================
@@ -114,109 +116,112 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 
 ## Ganache 가상 network 구축
 
-* Ganache는 이더리움 도구이며, 실행시 가상 머신으로서 자동으로 네트워크 구축을 해준다.
+* **Ganache는 이더리움 도구**이며, 실행 시 가상 머신으로서 자동으로 네트워크 구축을 해준다.
 * Metamask로 거래까지 테스트
 
 <br>
 
 ### Ganache 설치
 
-* [설치(이더리움 도구)](https://trufflesuite.com/ganache/)
-* 개발 테스트를 위한 **가상 머신 프로그램** - **네트워크 구축** 하는것이다.
+* [Ganache 설치(이더리움 도구)](https://trufflesuite.com/ganache/)
+* 개발 테스트를 위한 **가상 머신 프로그램** - **네트워크 구축** 하는 것이다.
 
 <br>
 
-**실행시 이렇게 이더리움 서버를 구동하는 것이다.**
+**실행 시 이렇게 이더리움 서버를 구동하는 것이다.**
 
-![image-20220723195142323](/images/2022-07-19-2일차-이더리움 private network 구축 + 테스트넷/image-20220723195142323.png)
+![Ganache 구동](/images/2022-07-19-2일차-이더리움 private network 구축 + 테스트넷/image-20220723195142323.png)
 
 <br>
 
-**이렇게 구동하기 위해선 프로젝트 생성을 해야한다.**  
+**이렇게 구동하기 위해선 프로젝트 생성을 해야 한다.**  
 
 * **NEW WORKSPACE인 EHEREUM**으로 생성
 
-![image-20220723200044384](/images/2022-07-19-2일차-이더리움 private network 구축 + 테스트넷/image-20220723200044384-16585740597561.png)
+![Ganache 프로젝트 생성1](/images/2022-07-19-2일차-이더리움 private network 구축 + 테스트넷/image-20220723200044384-16585740597561.png)
 
 <br>
 
 **먼저, 프로젝트 명 설정**
 
-![image-20220719101215601](/images/2022-07-19-2일차/image-20220719101215601.png)
+![Ganache 프로젝트 생성2](/images/2022-07-19-2일차/image-20220719101215601.png)
 
 <br>
 
 **서버 설정**
 
 * **HOSTNAME**에 0.0.0.0이나 현재 사진처럼 선택하면 localhost로 접근할 수 있다.
-* **PORT**는 하고싶은것 하면된다.  
+* **PORT**는 하고 싶은 것 하면 된다.  
   만약 7545라면 URL을 http://localhost:7545 로 접근해야 하는 것이다.
-* **NETWORK ID**도 원하는것으로 하면되고 **체인 ID**라고도 부른다.
+* **NETWORK ID**도 원하는 것으로 하면 되고 **체인 ID**라고도 부른다.
 
-![image-20220723195659219](/images/2022-07-19-2일차-이더리움 private network 구축 + 테스트넷/image-20220723195659219.png)
+![Ganache 프로젝트 생성3](/images/2022-07-19-2일차-이더리움 private network 구축 + 테스트넷/image-20220723195659219.png)
 
 <br>
 
-**ACCOUNT 와 KEYS 설정**
+**ACCOUNT와 KEYS 설정**
 
 * **ACCOUNT DEFAULT BALANCE** 에는 각 블록이 기본값으로 보유하는 ETH의 개수(잔고) 설정
 
-* **TOTAL ACCOUNTS TO GENERATE** 는 총 생성할 **노드(컴퓨터) = ADDRESS(계정)** 개수
+* **TOTAL ACCOUNTS TO GENERATE** 는 총생성할 **노드(컴퓨터) = ADDRESS(계정)** 개수
 
 
 
-![image-20220719101145501](/images/2022-07-19-2일차/image-20220719101145501.png)
+![Ganache 프로젝트 생성4](/images/2022-07-19-2일차/image-20220719101145501.png)
 
 <br>
 
 **가스(=수수료) 설정**
 
 * 이더리움에 `GAS 단위`는 **gwei**이다. 이것은 **0^9 wei**이다.  
-  예로 **0.000000001 이더 = 1gwei** 라고 말할 수 있다.
-* **GAS USED(사용한 가스, 가스 한도)**는 데이터 크기나 등등에 따라 다르며 보낼때 결정된다.
+  * 예로 **0.000000001 이더 = 1gwei** 라고 말할 수 있다.
+  
+* **GAS USED(사용한 가스, 가스 한도)**는 데이터 크기나 등등에 따라 다르며 보낼 때 결정된다.
 
 <br>
 
-`첫번째 사진`은 가스(=수수료) 계산이 어떻게 되는지 이해가 안갈것 같아서 예시로 보여준 사진이다.
+`첫 번째 사진`은 가스(=수수료) 계산이 어떻게 되는지 이해가 안 갈 것 같아서 예시로 보여준 사진이다.
 
 * **GAS USED = 21000 gwei = 0.000021 ETH**
 * **GAS PRICE = 20000000000 gwei = 20 ETH**
   * **Total GAS = 0.000021 ETH x 20 ETH = 0.00042 ETH**
-  * **총 합계 수수료 = GAS USED x GAS PRICE** 이다.
+  * **총합계 수수료 = GAS USED x GAS PRICE** 이다.
 
 <br>
 
-`두번째 사진`은 Ganache에 가스 설정하는 모습이다. (발신자가 정한 가격들이다)
+`두 번째 사진`은 Ganache에 가스 설정하는 모습이다. (발신자가 정한 가격들이다)
 
 * **GAS LIMIT(최대 가스 제한)**이 **6721975 gwei = 0.006721975 ETH**
 * **GAS PRICE(가스 가격)**은 **20000000000 gwei = 20 ETH**
 
 
 
-<img src="/images/2022-07-19-2일차-이더리움 private network 구축 + 테스트넷/image-20220723223054338.png" alt="image-20220723223054338" style="zoom:80%;" />
+<img src="/images/2022-07-19-2일차-이더리움 private network 구축 + 테스트넷/image-20220723223054338.png" alt="Ganache 프로젝트 생성5" style="zoom:80%;" />
 
 
 
-![image-20220723200353453](/images/2022-07-19-2일차-이더리움 private network 구축 + 테스트넷/image-20220723200353453.png)
+![Ganache 프로젝트 생성6](/images/2022-07-19-2일차-이더리움 private network 구축 + 테스트넷/image-20220723200353453.png)
 
 <br>
 
-**저장후 실행화면**
+**저장 후 실행화면**
 
 * **노드(컴퓨터) = ADDRESS(계정)** 들이 지정한 20개가 나타난다.
 * Metamask 처럼 거래는 여기서 불가하고, 네트워크 및 지갑 정도의 역할을 한다고 보면 된다.
-* ADDRESS 아래가 Public Key => 거래할때 등등..  
-  오른쪽 Key 모양 클릭시 Private Key => 지갑에 계정 가져올때 등등..
+* Public, Private Key
+  * ADDRESS 아래가 Public Key => 거래할 때 주로 사용  
+  * 오른쪽 Key 모양 클릭 시 Private Key => 지갑에 계정 가져올 때 주로 사용
 
-![image-20220719101240923](/images/2022-07-19-2일차/image-20220719101240923.png)
 
-<br>
-
-**트랜잭션이 해당 서버에 들어오면 아래화면에 블록이 생성이 될것이다.  **
-
-![image-20220719101529412](/images/2022-07-19-2일차/image-20220719101529412.png)
+![Ganache 구이 Account](/images/2022-07-19-2일차/image-20220719101240923.png)
 
 <br>
+
+**트랜잭션이 해당 서버에 들어오면 아래 화면에 블록이 생성될 것이다.  **
+
+![Ganache 구이 Block](/images/2022-07-19-2일차/image-20220719101529412.png)
+
+<br><br>
 
 ### MetaMask 설치
 
