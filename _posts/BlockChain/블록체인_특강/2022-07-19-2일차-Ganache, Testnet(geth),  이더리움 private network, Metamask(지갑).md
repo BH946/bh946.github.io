@@ -15,7 +15,9 @@ typora-root-url: ../../..
 
 `Ganache 가상 머신` 과 `Testnet(geth) 네트워크`와 `이더리움 private network 구축`을 실습하겠다. 추가로 어디서든 다 사용하는 `Metamask` 를 실습하겠다. (지갑 같은 것)
 
-<br><br>
+<br>
+
+<br>
 
 ## 사용 명령어
 
@@ -112,14 +114,16 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 명령어로 수행하면 metamask에서 rpc url (http://127.0.0.1), 체인 id (719), 통화기호 (ETH)로 생성 잘 됩니다.
 ```
 
-<br><br>
+<br>
+
+<br>
 
 ## Ganache 가상 network 구축
 
 * **Ganache는 이더리움 도구**이며, 실행 시 가상 머신으로서 자동으로 네트워크 구축을 해준다.
 * Metamask로 거래까지 테스트
 
-<br>
+<br><br>
 
 ### Ganache 설치
 
@@ -229,25 +233,25 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 
 **지갑 생성을 하면 된다.**
 
-**지갑 복구 구문은 꼭 따로 기억해둬야 비밀번호를 잊어버려도 찾을 수 있다.**
+**지갑 복구 구문은 꼭 따로 기억해 둬야 비밀번호를 잊어버려도 찾을 수 있다.**
 
-**회원가입 하면 받을 것이니까 따로 메모장에 기억해 둘것**
+**회원가입 하면 받을 것이니까 따로 메모장에 기억해 둘 것**
 
 <br>
 
 #### Ganache와 MetaMask를 네트워크를 서로 연동
 
-![image-20220719102931358](/images/2022-07-19-2일차/image-20220719102931358.png)
+![Matamask 세팅](/images/2022-07-19-2일차/image-20220719102931358.png)
 
-![image-20220719102958932](/images/2022-07-19-2일차/image-20220719102958932.png)
+![Matamask 세팅2](/images/2022-07-19-2일차/image-20220719102958932.png)
 
-![image-20220719103028497](/images/2022-07-19-2일차/image-20220719103028497.png)
+![Matamask 세팅3](/images/2022-07-19-2일차/image-20220719103028497.png)
 
 <br>
 
 **아래 네트워크 구성은 Ganache의 RPC SERVER, NETWORK ID 를 참고해 기입한다.**
 
-![image-20220719103445485](/images/2022-07-19-2일차/image-20220719103445485.png)
+![Matamask 세팅4](/images/2022-07-19-2일차/image-20220719103445485.png)
 
 <br>
 
@@ -255,13 +259,13 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 
 * **계정 가져오기 클릭 후 비공개 키에 Ganache의 private key를 기입**
 
-![image-20220719104018972](/images/2022-07-19-2일차/image-20220719104018972.png)
+![Matamask 세팅5](/images/2022-07-19-2일차/image-20220719104018972.png)
 
 <br>
 
 **Ganache private key 예시**
 
-![image-20220719103926870](/images/2022-07-19-2일차/image-20220719103926870.png)
+![Ganache private key](/images/2022-07-19-2일차/image-20220719103926870.png)
 
 <br>
 
@@ -271,112 +275,116 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 * 이때 Account 1의 주소는 Ganache에서 Public key이며  
   Metamask에 Account1 계정 메인에서 보이는 key도 동일한 Public key이며 이를 사용
 
-![image-20220719104349683](/images/2022-07-19-2일차/image-20220719104349683.png)
+![Matamask 세팅6](/images/2022-07-19-2일차/image-20220719104349683.png)
 
-<br><br>
+<br>
+
+<br>
 
 ## Testnet 접속
 
 * [geth 설치](https://geth.ethereum.org/downloads/)
 * 경로, 설정은 웬만하면 **default**로
-* **백신** 등에 의해 다운이 안될 수 있으니 꼭 잠시 **꺼두기**
+* **백신** 등에 의해 다운이 안 될 수 있으니 꼭 잠시 **꺼두기**
 
-설치가 끝나고 나면 관지라 권한으로 **powershell**이든 **터미널**이든 실행시켜서  
+설치가 끝나고 나면 관리자 권한으로 **powershell**이든 **터미널**이든 실행시켜서  
 **geth 명령어 입력** 후 실행이 잘되면 반드시 꺼주기. Ctrl+C로 종료할 수 있다.  
-**메인넷**을 사용할건 아니기 때문에 종료하는 것이다.  
-**geth ==> mainnet(메인넷) 이며 실제로 사용되는 ethereum network 이다.**
+**메인넷**을 사용할 건 아니기 때문에 종료하는 것이다.  
+**geth ==> mainnet(메인넷) 이며 실제로 사용되는 ethereum network이다.**
 
-<br>
+<br><br>
 
 ### ERROR
 
-경로가 없다고 에러 뜬다면 **C:\Program Files\Geth** 에 **Geth**가 잘 다운되었는지 먼저 확인후 **환경변수에 해당경로를 추가**해야한다.  
+경로가 없다고 에러 뜬다면 **C:\Program Files\Geth** 에 **Geth**가 잘 다운되었는지 먼저 확인 후 **환경변수에 해당경로를 추가**해야 한다.  
 이때, 꼭 터미널은 다시 재접속을 권장한다.
 
-![image-20220719105428029](/images/2022-07-19-2일차/image-20220719105428029.png)
+![Testnet 세팅](/images/2022-07-19-2일차/image-20220719105428029.png)
 
-<br>
+<br><br>
 
 ### 이더스캔을 통해 이더리움 확인
 
 * 터미널에` geth --datadir ./datadir/ account new` 입력  
-  경로는 아무곳이나 상관없으며 git bash 사용을 추천
-* `account`를 만든것이고, 해당 폴더에 파일하나 있는데 메모장으로 들어가서  
+  경로는 아무 곳이나 상관없으며 git bash 사용을 추천
+* `account`를 만든 것이고, 해당 폴더에 파일 하나 있는데 메모장으로 들어가서  
   `ciphertext부분 값`을 가져와 사용(`private key이다`)
 * `MetaMask`에서 계정 가져오기를 이용해 위에서 구한 키를 사용해 `account`를 가져오면 된다.
-  * 참고로 이더리움 테스트용으로 받아오는건 Metamask에서 구매에도 테스트가 있어서 구매를 하면 된다.
+  * 참고로 이더리움 테스트용으로 받아오는 건 Metamask에서 구매에도 테스트가 있어서 구매하면 된다.
 * 네트워크는 테스트를 위해 `Ropsten 테스트 네트워크로 변경`한다.
-* [이더스캔의 ropsten](https://ropsten.etherscan.io/address/0x91a11E6283c361e54D6b0d22199166131748BB03) 접속을 해서 이더리움 볼 수 있으며, 이것은 **테스트 넷**이며 메인넷은 당연히 아니다.
+* [이더스캔의 ropsten](https://ropsten.etherscan.io/address/0x91a11E6283c361e54D6b0d22199166131748BB03) 접속해서 이더리움 볼 수 있으며, 이것은 **테스트 넷**이며 메인넷은 당연히 아니다.
 
 <br>
 
 **아래 사진은 구매를 통해 2 RopstenETH를 얻은 모습이다.**
 
-![image-20220719113304647](/images/2022-07-19-2일차/image-20220719113304647.png)
+![실습 테스트](/images/2022-07-19-2일차/image-20220719113304647.png)
 
-![image-20220719113316863](/images/2022-07-19-2일차/image-20220719113316863.png)
+![실습 테스트2](/images/2022-07-19-2일차/image-20220719113316863.png)
 
-<br>
+<br><br>
 
 ### 테스트넷 동기화
 
 * `이더 스캔`을 통해 UI로 보았다면, 개발자 모드처럼 개발자들이 보는 형태인 `터미널을 통해` 볼 수 있다.
 
-* 터미널에 다음 명령어를 실행한다. 경로문제는 항상 조심!!
+* 터미널에 다음 명령어를 실행한다. 경로 문제는 항상 조심!!
 
   ```bash
   geth --ropsten --datadir C:\Users\KoBongHun\Desktop\eth_testnet\datadir\ --http --http.addr 0.0.0.0 --http.corsdomain * --allow-insecure-unlock --http.api eth,net,web3,personal
   ```
 
 * 에러가 발생한다면, 명령어 문제 확인.  
-  명령어는 바뀔수 있기 때문에 geth help입력해서 명령어 바뀐게 있나 확인 추천.  
+  명령어는 바뀔 수 있기 때문에 `geth help` 입력해서 명령어 바뀐게 있나 확인 추천.  
   또는 [공식문서](https://geth.ethereum.org) 에서 명령어 확인 추천.
 
-`Looking for peers`를 보면 어디 위치에서 찾고있는지 알 수 있고,  
-`Imported new block ...` 이런식으로 나오기 시작하면 동기화가 성공한것이다.   
-테스트넷 구동중인 노드(컴퓨터)와 연결하는 것이니 상당히 오래 걸린다.
+`Looking for peers`를 보면 어디 위치에서 찾고 있는지 알 수 있고,  
+`Imported new block ...` 이런 식으로 나오기 시작하면 동기화가 성공한 것이다.   
+테스트넷 구동 중인 노드(컴퓨터)와 연결하는 것이니 상당히 오래 걸린다.
 
 <br>
 
 **새로운 콘솔창 띄우고**
 
-* `geth attach http://localhost:8888` 입력시 블록 현황 볼 수 있다.
-* 안되는 경우도 많은데 본인 컴퓨터의 라우터 문제일수도 있고, 명령어를 잘 못 입력했을수도 있기때문에 다양한문제가 있다.
-* 우선 나는 undefined라고 떳지만, 예전에 라우터 등을 건드린 문제라고 생각하기 때문에 pass하겠다.
+* `geth attach http://localhost:8888` 입력 시 블록 현황 볼 수 있다.
+* 안되는 경우도 많은데 본인 컴퓨터의 라우터 문제일 수도 있고, 명령어를 잘못 입력했을 수도 있기 때문에 다양한 문제가 있다.
+* 우선 나는 undefined라고 떴지만, 예전에 라우터 등을 건드린 문제라고 생각하기 때문에 pass 하겠다.
 
-![image-20220719115250262](/images/2022-07-19-2일차/image-20220719115250262.png)
+![테스트넷 동기화 콘솔](/images/2022-07-19-2일차/image-20220719115250262.png)
 
-<br><br>
+<br>
+
+<br>
 
 ## 이더리움 Private Network 구축
 
-* 아래처럼 폴더구성  
-  node1, 2, ... 는 각 컴퓨터마다 가진 노드라고 생각하면되고, 우리는 임의로   
-  **한개의 컴퓨터에 4개를 다 생성한것.**
-* 따라서 **4번** `geth account new`를 해서 해당 키를 정리해서 따로 기록해둘것.
-* 각각 node폴더마다 keystore 폴더도 만들고 만들어진 UTC들도 각각에 한개씩 넣어주기
+* 아래처럼 폴더 구성  
+  node1, 2, ... 는 각 컴퓨터마다 가진 노드라고 생각하면 되고, 우리는 임의로   
+  **한 개의 컴퓨터에 4개를 다 생성한 것.**
+* 따라서 **4번** `geth account new`를 해서 해당 키를 정리해서 따로 기록해 둘 것.
+* 각각 node폴더마다 keystore 폴더도 만들고 만들어진 UTC들도 각각에 한 개씩 넣어주기
 
-![image-20220719133327805](/images/2022-07-19-2일차/image-20220719133327805.png)
-
-<br>
-
-**정리화면**
-
-* 첫줄은 `address`값, 2번째줄은 `ciphertext` 값이다. - 각각 Public key, private key
-
-![image-20220719133507886](/images/2022-07-19-2일차/image-20220719133507886.png)
+![이더리움 네트워크](/images/2022-07-19-2일차/image-20220719133327805.png)
 
 <br>
+
+**정리 화면**
+
+* 첫 줄은 `address`값, 2번째 줄은 `ciphertext` 값이다. -> 각각 Public key, private key
+
+![이더리움 네트워크2](/images/2022-07-19-2일차/image-20220719133507886.png)
+
+<br><br>
 
 ### Atom 설치 및 JSON
 
-* [Atom](https://atom.io/) 에서 설치 및 실행(단순히 JSON파일 작성하기 편하려고 사용하는것 뿐임)
+* [Atom](https://atom.io/) 에서 설치 및 실행(단순히 JSON파일 작성하기 편하려고 사용하는 것 뿐임)
 * `genesis.json` 하나 생성 하고 코드 작성
   * `alloc`는 `address`값 - public key
-  * `chainId` 도 자주 사용하니까 기억해두기
+  * `chainId` 도 자주 사용하니까 기억해 두기
   * 생성된 이 **json**파일도 **node의 각각 폴더마다 넣어주기**(keystore폴더와 동일한 경로)
 
-![image-20220719141716908](/images/2022-07-19-2일차/image-20220719141716908.png)
+![atom에서 json 열기](/images/2022-07-19-2일차/image-20220719141716908.png)
 
 <br>
 
@@ -384,9 +392,9 @@ geth --networkid 719 --datadir /Users/a10403/Desktop/eth_private/node1/ --port 3
 
 * `geth --datadir 경로../node1 init genesis.json` 이런식으로 node4 까지 터미널에 입력
 
-![image-20220719141348379](/images/2022-07-19-2일차/image-20220719141348379.png)
+![이더리움 네트워크2](/images/2022-07-19-2일차/image-20220719141348379.png)
 
-<br>
+<br><br>
 
 ### 네트워크 실행(채굴)
 
@@ -398,40 +406,40 @@ geth --networkid 719 --datadir C:/Users/경로../node1 --ipcdisable --http.port 
 
 <br>
 
-* enter입력하면 계속 다른것 입력 가능, admin 입력후 **enode정보** 가져올것.  
+* enter입력하면 계속 다른 것 입력 가능, admin 입력 후 **enode정보** 가져올 것.  
   **enode는 노드의 주소**라고 생각
-* 그후 아래 그림처럼 구성하기 위해 명령어를 아래처럼 구성
+* 그 후 아래 그림처럼 구성하기 위해 명령어를 아래처럼 구성
   * 명령어를 해석하면 그림과 동일
 
-![image-20220719153459628](/images/2022-07-19-2일차/image-20220719153459628.png)
+![이더리움 네트워크 구조](/images/2022-07-19-2일차/image-20220719153459628.png)
 
-![image-20220719154916597](/images/2022-07-19-2일차/image-20220719154916597.png)
+![이더리움 네트워크 노드 정보](/images/2022-07-19-2일차/image-20220719154916597.png)
 
-=> 명령어 입력후 **true**가 나오면 **정상**
+=> 명령어 입력 후 **true**가 나오면 **정상**
 
-이작업이 끝나면 그림처럼 노드끼리 서로 연결된것이다.
+이 작업이 끝나면 그림처럼 노드끼리 서로 연결된 것이다.
 
 <br>
 
-* **miner.start()** 입력시 **채굴 실행** - 하나에만 하면 된다.
+* **miner.start()** 입력 시 **채굴 실행** - 하나에만 하면 된다.
   * null 이후 Successfuly.... 등등 빠르게 동기화시작
-  * 그러고 나면 블록 생성이되고, 이것을 다른 컴퓨터들에게도 전파를 시작한다.
+  * 그러고 나면 블록 생성이 되고, 이것을 다른 컴퓨터들에 전파를 시작한다.
   * 따라서 다른 터미널들도 블록을 받아 추가한다.
-* **miner.stop()** 입력시 멈춤
+* **miner.stop()** 입력 시 멈춤
 
-![image-20220719163922867](/images/2022-07-19-2일차/image-20220719163922867.png)
+![이더리움 private network 구축 모습](/images/2022-07-19-2일차/image-20220719163922867.png)
 
-**참고 : 첫번째 터미널이 채굴했던 노드이고, number이 600대이다. 저만큼 채굴한것이고, 나머지를 보면 200대인데 동기화때문에 조금 천천히 채굴한 블록들을 받아오고 있는 중인 것이다.**
+**참고 : 첫번째 터미널이 채굴했던 노드이고, number이 600대이다. 저만큼 채굴한것이고, 나머지를 보면 200대인데 동기화 때문에 조금 천천히 채굴한 블록들을 받아오고 있는 중인 것이다.**
 
-<br>
+<br><br>
 
 ### METAMASK에서 확인
 
-* 앞에서 **Ganche**랑 했던것처럼 여기서도 **네트워크 추가** 및 **계정 가져온 후** 확인해볼 수 있다.
+* 앞에서 **Ganche**랑 했던 것처럼 여기서도 **네트워크 추가** 및 **계정 가져온 후** 확인해 볼 수 있다.
 * **chainId**는 json에서 입력한 값
-* **RPC URL**은 http://Localhost:8545 즉, 노드 4개중에 확인하고싶은 노드 한개 url 찾아 적으면 됨
-* Ganache와 했던것과 동일하기 때문에 이부분은 생략하겠음.  
-  대신 besu 구축할때는 다시 정리하겠다.
+* **RPC URL**은 http://Localhost:8545 즉, 노드 4개 중에 확인하고싶은 노드 한개 url 찾아 적으면 됨
+* Ganache와 했던 것과 동일하기 때문에 이 부분은 생략하겠음.  
+  대신 besu 구축할 때는 다시 정리하겠다.
 
 
 
