@@ -1,5 +1,5 @@
 ---
-title: "2일차-Ganache, Testnet(geth), 이더리움 private network, Metamask(지갑)"
+title: "2일차-Ganache, Testnet(geth)"
 categories : BlockChain
 tag : [블록체인]
 toc: true
@@ -13,9 +13,7 @@ typora-root-url: ../../..
 
 
 
-`Ganache 가상 머신` 과 `Testnet(geth) 네트워크` 와 `이더리움 private network 구축` 을 실습하겠다.
-
-추가로 어디서든 다 사용하는 `Metamask`  또한 실습하겠다. (지갑 같은것)
+`Ganache 가상 머신` 과 `Testnet(geth) 네트워크` 와 `이더리움 private network 구축` 을 실습하겠다. 추가로 어디서든 다 사용하는 `Metamask`  또한 실습하겠다. (지갑 같은것)
 
 <br>
 
