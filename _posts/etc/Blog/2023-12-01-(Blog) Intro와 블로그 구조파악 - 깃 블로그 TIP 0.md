@@ -1,5 +1,5 @@
 ---
-title:  "[Blog] 깃 블로그 구조파악 - 깃 블로그 TIP 0"
+title:  "[Blog] 깃 블로그 구조파악"
 categories : Blog
 tag : [블로그, Git, git blog, 깃허브 블로그, Minimal-mistakes, 지킬, jekyll, _config, _data, navigatioin, ui-text, _includes, archive-single, breadcrumbs, footer, head, page__meta, post__taxonomy, post_pagination, scripts, nav_list, _layouts, _pages, _posts, _sass, assets, index]
 toc: true
