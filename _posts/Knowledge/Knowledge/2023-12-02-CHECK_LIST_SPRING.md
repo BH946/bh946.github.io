@@ -679,6 +679,8 @@ typora-root-url: ../../..
 
 **테스트 코드(TDD) -> 졸작에 테스트코드 반드시 참고!!**
 
+- [코드 커버리지 내용 추가하자](https://amaran-th.github.io/%EC%86%8C%ED%94%84%ED%8A%B8%EC%9B%A8%EC%96%B4%20%EC%84%A4%EA%B3%84/[IntelliJ]%20%EC%BD%94%EB%93%9C%20%EC%BB%A4%EB%B2%84%EB%A6%AC%EC%A7%80%20%ED%99%95%EC%9D%B8%ED%95%98%EA%B8%B0/)
+
 * 참고) 졸작은 JUnit5, 우테코는 AssertJ 사용했음, **TDD는 테스트 주도 개발 방법론**
 
 * **중요!! 컨트롤러 테스트할 때? -> MockMvc 활용 (perfom())**
