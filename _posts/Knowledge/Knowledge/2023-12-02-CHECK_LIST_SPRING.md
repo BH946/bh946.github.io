@@ -12,7 +12,7 @@ typora-root-url: ../../..
 
 
 
-**`Spring + Spring Boot + JPA + Spring Data JPA + MyBatis + Thymeleaf + DB(H2, MySQL, Oracle) 등` 활용한 개발 규칙**
+**Spring + Spring Boot + JPA + Spring Data JPA + MyBatis + Thymeleaf + DB(H2, MySQL, Oracle) 등 활용한 개발 규칙**
 
 <br>
 
@@ -41,7 +41,7 @@ typora-root-url: ../../..
   }
   ```
   </details>
-
+  
   
 
   <details>
@@ -77,12 +77,73 @@ testImplementation("org.junit.vintage:junit-vintage-engine") {
 </details>
 
 
+<details>
+<summary>접기/펼치기 테스트</summary>
+<div markdown="1">
+```java   
+// JUnit4 추가(junit5로 자동실행 되기 때문) - 의존성 추가
+testImplementation("org.junit.vintage:junit-vintage-engine") {
+    exclude group: "org.hamcrest", module: "hamcrest-core"
+}
+```
+**스프링 트랜잭션 전파**
+- 트랜잭션이 이미 진행중인데 추가로 수행한다면?? -> 이 경우 어떻게 동작할지 결정하는 것을 **"트랜잭션 전파(propagation)"**
+- 여러 트랜잭션들이 중복되어 사용된다면 이들을 구분짓기 위해 "물리,논리 트랜잭션" 개념 사용
+  - **모든 트랜잭션 매니저(물리,논리=외부,내부)를 커밋해야 물리 트랜잭션이 커밋된다. 하나의 트랜잭션 매니저라도 롤백하면 물리 트랜잭션은 롤백된다.**
+  - **트랜잭션 참여 : 외부 트랜잭션과 내부 트랜잭션이 하나의 물리 트랜잭션으로 묶이는 것**
+  - **같은 물리 트랜잭션 사용 == 같은 동기화 커넥션 사용**
+  - <img src="https://github.com/BH946/bh946.github.io/assets/80165014/1bd94b66-7022-47a1-a4a3-eaa68bfb6e90" alt="image" style="zoom: 80%;" />  
+**스프링 트랜잭션 전파 - 트랜잭션 두 번 사용**
+`code test`
+</div>
+</details>
 
 
 
+<details>
+<summary>접기/펼치기 테스트</summary>
+<div markdown="1">
+```java   
+// JUnit4 추가(junit5로 자동실행 되기 때문) - 의존성 추가
+testImplementation("org.junit.vintage:junit-vintage-engine") {
+    exclude group: "org.hamcrest", module: "hamcrest-core"
+}
+```
+**스프링 트랜잭션 전파**
+
+- 트랜잭션이 이미 진행중인데 추가로 수행한다면?? -> 이 경우 어떻게 동작할지 결정하는 것을 **"트랜잭션 전파(propagation)"**
+- 여러 트랜잭션들이 중복되어 사용된다면 이들을 구분짓기 위해 "물리,논리 트랜잭션" 개념 사용
+  - **모든 트랜잭션 매니저(물리,논리=외부,내부)를 커밋해야 물리 트랜잭션이 커밋된다. 하나의 트랜잭션 매니저라도 롤백하면 물리 트랜잭션은 롤백된다.**
+  - **트랜잭션 참여 : 외부 트랜잭션과 내부 트랜잭션이 하나의 물리 트랜잭션으로 묶이는 것**
+  - **같은 물리 트랜잭션 사용 == 같은 동기화 커넥션 사용**
+  - <img src="https://github.com/BH946/bh946.github.io/assets/80165014/1bd94b66-7022-47a1-a4a3-eaa68bfb6e90" alt="image" style="zoom: 80%;" />  
+
+**스프링 트랜잭션 전파 - 트랜잭션 두 번 사용**
+`code test`
+</div>
+</details>
 
 
-
+<details>
+<summary>접기/펼치기 테스트</summary>
+<div markdown="1">
+```java   
+// JUnit4 추가(junit5로 자동실행 되기 때문) - 의존성 추가
+testImplementation("org.junit.vintage:junit-vintage-engine") {
+    exclude group: "org.hamcrest", module: "hamcrest-core"
+}
+```
+**스프링 트랜잭션 전파**<br>
+- 트랜잭션이 이미 진행중인데 추가로 수행한다면?? -> 이 경우 어떻게 동작할지 결정하는 것을 **"트랜잭션 전파(propagation)"**
+- 여러 트랜잭션들이 중복되어 사용된다면 이들을 구분짓기 위해 "물리,논리 트랜잭션" 개념 사용
+  - **모든 트랜잭션 매니저(물리,논리=외부,내부)를 커밋해야 물리 트랜잭션이 커밋된다. 하나의 트랜잭션 매니저라도 롤백하면 물리 트랜잭션은 롤백된다.**
+  - **트랜잭션 참여 : 외부 트랜잭션과 내부 트랜잭션이 하나의 물리 트랜잭션으로 묶이는 것**
+  - **같은 물리 트랜잭션 사용 == 같은 동기화 커넥션 사용**
+  - <img src="https://github.com/BH946/bh946.github.io/assets/80165014/1bd94b66-7022-47a1-a4a3-eaa68bfb6e90" alt="image" style="zoom: 80%;" />  
+**스프링 트랜잭션 전파 - 트랜잭션 두 번 사용**<br>
+`code test`
+</div>
+</details>
 
 
 
