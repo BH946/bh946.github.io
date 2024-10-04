@@ -12,12 +12,81 @@ typora-root-url: ../../..
 
 
 
-# Intro
+**`Spring + Spring Boot + JPA + Spring Data JPA + MyBatis + Thymeleaf + DB(H2, MySQL, Oracle) 등` 활용한 개발 규칙**
 
-**`Spring + Spring Boot + JPA + Thymeleaf` 를 활용한 개발 규칙**
+<br>
 
-* 현재 공부한 범위에서 **최선의 개발 방향**을 기록
-* **단축키**
+`IDE: IntelliJ & Eclipse + Build Tool: Gradle - Groovy & Maven - Pom.xml`
+
+> 주로 IntelliJ + Gradle 사용 중
+
+<details><summary><b>실제 빌드와 실행 둘 다 IntelliJ 로 설정 (실행 속도가 더 빠름) + "코드 컨벤션"</b></summary><br>
+<b>Settings → gradle 검색 → IntelliJ IDEA로 설정 (빌드툴, 실제 실행 설정)</b>
+<img src="https://github.com/user-attachments/assets/9f087f29-4dba-4d9e-9c33-42b15a449a03"/><br><br>
+<b>Settings → Editor → Code Style → 구글 컨밴션 적용 (Ctrl+I, Ctrl+L 로 빠르게 정렬)</b><img src="https://github.com/user-attachments/assets/ddd01a9d-5c01-4ab0-9435-dc15a697e63f"/>
+</details>
+
+<details><summary>툴 마다 외부 라이브러리 적용법?</summary>
+<ul>
+    <li>Maven(빌드 툴)은 <b>pom.xml</b>에서 라이브러리 설정</li>
+    <li>Gradle(빌드 툴)은 <b>build.gradle</b>에서 라이브러리 설정</li>
+    <li><b/>이클립스(IDE)에서 빌드 툴 사용안했을 때는 직접 jar파일 집어 넣었었음.(전통)</li>
+</ul>
+</details>
+- <details>
+  ```java   
+  // JUnit4 추가(junit5로 자동실행 되기 때문) - 의존성 추가
+  testImplementation("org.junit.vintage:junit-vintage-engine") {
+      exclude group: "org.hamcrest", module: "hamcrest-core"
+  }
+  ```
+  </details>
+
+  
+
+  <details>
+      <div markdown="1">
+  ```java   
+  // JUnit4 추가(junit5로 자동실행 되기 때문) - 의존성 추가
+  testImplementation("org.junit.vintage:junit-vintage-engine") {
+      exclude group: "org.hamcrest", module: "hamcrest-core"
+  }
+  ```
+      </div>
+  </details>
+
+<details><summary><b>build.gradle 라이브러리</b></summary><br>
+    <ul>
+        <li>java11 사용(nGrinder랑 상관없디!). 이후에 `스프링 3.x` 사용 위해 `java17` 마이그레이션. (jakarta 등 라이브러리 많이 변경 고생ㅜ)</li>
+        <ul>
+            <li>java17로 변경 필수 → 앞에서 언급한 <b>Settings → Gradle에서 설정 + Project Structure에서 설정 변경</b></li>
+        </ul>
+        <li>`lombok` 써서 @Getter 등 사용, `h2 db` 쓰고, `data-jpa` 니까 jpa와 spring data jpa 사용 가능</li>
+        <li>`starter-test`, `test lombok` 도 사용</li>
+            <ul>
+                <li><b>JUnit(사용)</b>, Spring Test, Mockito, <b>AssertJ</b> 사용 가능하게 되고, 롬복을 테스트에서 사용 허용!</li>
+            </ul>
+        <li>`starter-validation` 으로 valid 사용 가능, `starter-cache`, caffeine 로 캐시!!</li>
+        <li>`actuator`, prometheus 로 모니터링</li>
+    </ul>
+    <pre><code> // JUnit4 추가(junit5로 자동실행 되기 때문) - 의존성 추가
+testImplementation("org.junit.vintage:junit-vintage-engine") {
+    exclude group: "org.hamcrest", module: "hamcrest-core"
+}
+    </code></pre>
+</details>
+
+
+
+
+
+
+
+
+
+
+
+* **IntelliJ 단축키**
   * `Alt + Insert` : getter, setter, constructor 등 자동 생성
   * **`Ctrl + Alt + O` : 사용안하는 import 자동 정리(제거 등)**
     * **`Ctrl + Alt + L` : 자동 정렬 -> Google Java Convention이나 Default 로 사용중**
@@ -38,6 +107,8 @@ typora-root-url: ../../..
 
 
 ## 개발과정, 네이밍 TIP
+
+**참고: [깃, 구글 자바 컨벤션과 기능개발 흐름](https://bh946.github.io/knowledge/CHECK_LIST_JAVA_CONVENTION/)**
 
 **개발과정**
 
