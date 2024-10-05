@@ -16,158 +16,159 @@ typora-root-url: ../../..
 
 <br>
 
+- <details><summary><b><b/></summary>
+  <div markdown=”1”>
+  </div>
+  <details/>
+
+<details><summary><b><b/></summary>
+<div markdown=”1”>
+</div>
+<details/>
+<br>
+
 `IDE: IntelliJ & Eclipse + Build Tool: Gradle - Groovy & Maven - Pom.xml`
+
 
 > 주로 IntelliJ + Gradle 사용 중
 
-<details><summary><b>실제 빌드와 실행 둘 다 IntelliJ 로 설정 (실행 속도가 더 빠름) + "코드 컨벤션"</b></summary><br>
+<details><summary><b>실제 빌드와 실행 둘 다 IntelliJ 로 설정 (실행 속도가 더 빠름) + "코드 컨벤션" + "자바 버전 설정"</b></summary><br>
 <b>Settings → gradle 검색 → IntelliJ IDEA로 설정 (빌드툴, 실제 실행 설정)</b>
 <img src="https://github.com/user-attachments/assets/9f087f29-4dba-4d9e-9c33-42b15a449a03"/><br><br>
-<b>Settings → Editor → Code Style → 구글 컨밴션 적용 (Ctrl+I, Ctrl+L 로 빠르게 정렬)</b><img src="https://github.com/user-attachments/assets/ddd01a9d-5c01-4ab0-9435-dc15a697e63f"/>
+<b>Settings → Editor → Code Style → 구글 컨밴션 적용 (Ctrl+I, Ctrl+L 로 빠르게 정렬)</b><img src="https://github.com/user-attachments/assets/ddd01a9d-5c01-4ab0-9435-dc15a697e63f"/><br><br>
+<b>Settings -> gradle 검색 -> 빌드 툴(Gradle) 자바버전 설정(위 사진참고)</b><br>
+<b>Project Strucutre -> Project -> 프로젝트의 자바버전 설정</b>
+<img src="https://github.com/user-attachments/assets/4ffc05a9-0ac2-40f6-83b4-1bf6929937fc"/>
 </details>
-
-<details><summary>툴 마다 외부 라이브러리 적용법?</summary>
+<details><summary><b>툴 마다 외부 라이브러리 적용법</b></summary>
 <ul>
     <li>Maven(빌드 툴)은 <b>pom.xml</b>에서 라이브러리 설정</li>
     <li>Gradle(빌드 툴)은 <b>build.gradle</b>에서 라이브러리 설정</li>
     <li><b/>이클립스(IDE)에서 빌드 툴 사용안했을 때는 직접 jar파일 집어 넣었었음.(전통)</li>
 </ul>
 </details>
-- <details>
-  ```java   
-  // JUnit4 추가(junit5로 자동실행 되기 때문) - 의존성 추가
-  testImplementation("org.junit.vintage:junit-vintage-engine") {
-      exclude group: "org.hamcrest", module: "hamcrest-core"
+
+- <details><summary><b>build.gradle 설정 예시 (+플러그인)</b></summary>
+  <div markdown="1">
+  **스프링부트 플러그인 사용 시 "라이브러리 버전관리 자동화" -> 지원 안되는건 "직접 버전 등록 필수!"**<br>
+  `spring 3.x` 사용은 `java17` 필수!<br>
+  ```java
+  plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.1.2'
+    id 'io.spring.dependency-management' version '1.1.0'
+  }
+  group = 'com'
+	version = '0.0.1-SNAPSHOT'
+	sourceCompatibility = '17'
+	configurations {
+    compileOnly {
+      extendsFrom annotationProcessor
+    }
+  }
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    // data-jpa(jpa, spring data jpa), web(http), lombok, db(h2, oracle)
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    compileOnly 'org.projectlombok:lombok'
+    runtimeOnly 'com.h2database:h2'
+    // https://mvnrepository.com/artifact/com.oracle.database.jdbc/ojdbc10
+    implementation group: 'com.oracle.database.jdbc', name: 'ojdbc10',     version: '19.21.0.0'
+    annotationProcessor 'org.projectlombok:lombok'
+    // test(JUnit, AsserJ 등), lombok 을 test 에서 사용
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+    //valid(NotEmpty 등) 사용위해 추가
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-devtools'
+    // 캐시(caffeine 로 캐시매니저 간단 등록)
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'com.github.ben-manes.caffeine:caffeine:3.1.1' 
+    // 모니터링(actuator, prometheus)
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+  }
+  tasks.named('test') {
+    useJUnitPlatform()
   }
   ```
+  </div>
   </details>
   
-  
-
-  <details>
-      <div markdown="1">
-  ```java   
-  // JUnit4 추가(junit5로 자동실행 되기 때문) - 의존성 추가
+- <details><summary><b>Spring+JUnit 버전별로 라이브러리 추가 주의(Spring2+JUnit4, Srping3+JUnit5)</b></summary>
+  <div markdown="1">
+  * **(1) Spring 2.xx + JUnit4(Test Code)**<br>
+  * `build.gradle`<br>
+  ```groovy
+  //JUnit4 추가(junit5로 자동실행 되기 때문) - 의존성 추가
   testImplementation("org.junit.vintage:junit-vintage-engine") {
-      exclude group: "org.hamcrest", module: "hamcrest-core"
+    exclude group: "org.hamcrest", module: "hamcrest-core"
   }
   ```
-      </div>
+  * `TestCode.java`
+  ```java
+  @RunWith(SpringRunner.class) // SpringRunner : Junit4
+  @SpringBootTest // 스프링과 통합 테스트 - "빈" 등 스프링 사용시 필수
+  public class ItemServiceTest { 
+    @Test // 기본 테스트(필수)
+    public void 조회() {} 
+  }
+  ```
+  * **(2) Spring 3.xx + JUni5(Test Code)**
+  * H2 사용시 반드시 버전 업그레이드 + 자바 17이상
+  * RunWith, JUnit4 등록이 없어졌다고 보면 됨.
+  * `build.gradle`
+  ```groovy
+  // JUnit5 자동 사용!
+  // 테스트 코드에서 lombok 사용하는 꿀 팁! -> 아래 의존성 추가
+  testCompileOnly 'org.projectlombok:lombok'
+  testAnnotationProcessor 'org.projectlombok:lombok'
+  ```
+  * `TestCode.java`
+  * 참고 : 왜 @Transactional 이런건 바로 사용 가능한가?
+    * @Transactional 은 "빈에 반드시 TransactionManager 가 필요" 
+    * 스프링 부트는 자동으로 TransactionManager 등등 을 "빈에 등록" -> "자동 구성"
+  ```java
+  @SpringBootTest // 스프링과 통합 테스트 - "빈" 등 스프링 사용시 필수
+  public class ItemServiceTest { 
+    @Test // 기본 테스트(필수)
+    public void 조회() {} 
+  }
+  ```
+  <div/>
   </details>
 
-<details><summary><b>build.gradle 라이브러리</b></summary><br>
-    <ul>
-        <li>java11 사용(nGrinder랑 상관없디!). 이후에 `스프링 3.x` 사용 위해 `java17` 마이그레이션. (jakarta 등 라이브러리 많이 변경 고생ㅜ)</li>
-        <ul>
-            <li>java17로 변경 필수 → 앞에서 언급한 <b>Settings → Gradle에서 설정 + Project Structure에서 설정 변경</b></li>
-        </ul>
-        <li>`lombok` 써서 @Getter 등 사용, `h2 db` 쓰고, `data-jpa` 니까 jpa와 spring data jpa 사용 가능</li>
-        <li>`starter-test`, `test lombok` 도 사용</li>
-            <ul>
-                <li><b>JUnit(사용)</b>, Spring Test, Mockito, <b>AssertJ</b> 사용 가능하게 되고, 롬복을 테스트에서 사용 허용!</li>
-            </ul>
-        <li>`starter-validation` 으로 valid 사용 가능, `starter-cache`, caffeine 로 캐시!!</li>
-        <li>`actuator`, prometheus 로 모니터링</li>
-    </ul>
-    <pre><code> // JUnit4 추가(junit5로 자동실행 되기 때문) - 의존성 추가
-testImplementation("org.junit.vintage:junit-vintage-engine") {
-    exclude group: "org.hamcrest", module: "hamcrest-core"
-}
-    </code></pre>
-</details>
+<br>
 
+**IntelliJ 단축키**
 
-<details>
-<summary>접기/펼치기 테스트</summary>
-<div markdown="1">
-```java   
-// JUnit4 추가(junit5로 자동실행 되기 때문) - 의존성 추가
-testImplementation("org.junit.vintage:junit-vintage-engine") {
-    exclude group: "org.hamcrest", module: "hamcrest-core"
-}
-```
-**스프링 트랜잭션 전파**
-- 트랜잭션이 이미 진행중인데 추가로 수행한다면?? -> 이 경우 어떻게 동작할지 결정하는 것을 **"트랜잭션 전파(propagation)"**
-- 여러 트랜잭션들이 중복되어 사용된다면 이들을 구분짓기 위해 "물리,논리 트랜잭션" 개념 사용
-  - **모든 트랜잭션 매니저(물리,논리=외부,내부)를 커밋해야 물리 트랜잭션이 커밋된다. 하나의 트랜잭션 매니저라도 롤백하면 물리 트랜잭션은 롤백된다.**
-  - **트랜잭션 참여 : 외부 트랜잭션과 내부 트랜잭션이 하나의 물리 트랜잭션으로 묶이는 것**
-  - **같은 물리 트랜잭션 사용 == 같은 동기화 커넥션 사용**
-  - <img src="https://github.com/BH946/bh946.github.io/assets/80165014/1bd94b66-7022-47a1-a4a3-eaa68bfb6e90" alt="image" style="zoom: 80%;" />  
-**스프링 트랜잭션 전파 - 트랜잭션 두 번 사용**
-`code test`
-</div>
-</details>
+* `Alt + Insert` : getter, setter, constructor 등 자동 생성
+* **`Ctrl + Alt + O` : 사용안하는 import 자동 정리(제거 등)**
+  * **`Ctrl + Alt + L` : 자동 정렬 -> Google Java Convention이나 Default 로 사용중**
+* `Ctrl + Alt + V` : 변수 선언부를 자동 작성
+* `Ctrl + Alt + M` : 코드 리팩토링하기 쉽게끔 함수 자동 생성
+* `Ctrl+T->extra method` : 코드 리팩토링하기 쉽게끔 드래그한 코드를 하나의 함수로 자동 생성
+* `Alt + Shift + Down/Up` : 코드 한줄을 위, 아래 자리 이동 가능
+* `Ctrl + D` : 코드 한줄 바로 아래에 복제
+* `Ctrl + Alt + Shift` : 멀티 커서 가능
+* `Shift + F6` : 변수명을 한번에 바꿀 때 사용
+* `Alt + 1 ` : 왼쪽 프로젝트 폴더 구조 열기
+* `Alt + F12` : 터미널 창 열기
 
+<br>
 
+<br>
 
-<details>
-<summary>접기/펼치기 테스트</summary>
-<div markdown="1">
-```java   
-// JUnit4 추가(junit5로 자동실행 되기 때문) - 의존성 추가
-testImplementation("org.junit.vintage:junit-vintage-engine") {
-    exclude group: "org.hamcrest", module: "hamcrest-core"
-}
-```
-**스프링 트랜잭션 전파**
-
-- 트랜잭션이 이미 진행중인데 추가로 수행한다면?? -> 이 경우 어떻게 동작할지 결정하는 것을 **"트랜잭션 전파(propagation)"**
-- 여러 트랜잭션들이 중복되어 사용된다면 이들을 구분짓기 위해 "물리,논리 트랜잭션" 개념 사용
-  - **모든 트랜잭션 매니저(물리,논리=외부,내부)를 커밋해야 물리 트랜잭션이 커밋된다. 하나의 트랜잭션 매니저라도 롤백하면 물리 트랜잭션은 롤백된다.**
-  - **트랜잭션 참여 : 외부 트랜잭션과 내부 트랜잭션이 하나의 물리 트랜잭션으로 묶이는 것**
-  - **같은 물리 트랜잭션 사용 == 같은 동기화 커넥션 사용**
-  - <img src="https://github.com/BH946/bh946.github.io/assets/80165014/1bd94b66-7022-47a1-a4a3-eaa68bfb6e90" alt="image" style="zoom: 80%;" />  
-
-**스프링 트랜잭션 전파 - 트랜잭션 두 번 사용**
-`code test`
-</div>
-</details>
-
-
-<details>
-<summary>접기/펼치기 테스트</summary>
-<div markdown="1">
-```java   
-// JUnit4 추가(junit5로 자동실행 되기 때문) - 의존성 추가
-testImplementation("org.junit.vintage:junit-vintage-engine") {
-    exclude group: "org.hamcrest", module: "hamcrest-core"
-}
-```
-**스프링 트랜잭션 전파**<br>
-- 트랜잭션이 이미 진행중인데 추가로 수행한다면?? -> 이 경우 어떻게 동작할지 결정하는 것을 **"트랜잭션 전파(propagation)"**
-- 여러 트랜잭션들이 중복되어 사용된다면 이들을 구분짓기 위해 "물리,논리 트랜잭션" 개념 사용
-  - **모든 트랜잭션 매니저(물리,논리=외부,내부)를 커밋해야 물리 트랜잭션이 커밋된다. 하나의 트랜잭션 매니저라도 롤백하면 물리 트랜잭션은 롤백된다.**
-  - **트랜잭션 참여 : 외부 트랜잭션과 내부 트랜잭션이 하나의 물리 트랜잭션으로 묶이는 것**
-  - **같은 물리 트랜잭션 사용 == 같은 동기화 커넥션 사용**
-  - <img src="https://github.com/BH946/bh946.github.io/assets/80165014/1bd94b66-7022-47a1-a4a3-eaa68bfb6e90" alt="image" style="zoom: 80%;" />  
-**스프링 트랜잭션 전파 - 트랜잭션 두 번 사용**<br>
-`code test`
-</div>
-</details>
-
-
-
-* **IntelliJ 단축키**
-  * `Alt + Insert` : getter, setter, constructor 등 자동 생성
-  * **`Ctrl + Alt + O` : 사용안하는 import 자동 정리(제거 등)**
-    * **`Ctrl + Alt + L` : 자동 정렬 -> Google Java Convention이나 Default 로 사용중**
-  * `Ctrl + Alt + V` : 변수 선언부를 자동 작성
-  * `Ctrl + Alt + M` : 코드 리팩토링하기 쉽게끔 함수 자동 생성
-  * `Ctrl+T->extra method` : 코드 리팩토링하기 쉽게끔 드래그한 코드를 하나의 함수로 자동 생성
-  * `Alt + Shift + Down/Up` : 코드 한줄을 위, 아래 자리 이동 가능
-  * `Ctrl + D` : 코드 한줄 바로 아래에 복제
-  * `Ctrl + Alt + Shift` : 멀티 커서 가능
-  * `Shift + F6` : 변수명을 한번에 바꿀 때 사용
-  * `Alt + 1 ` : 왼쪽 프로젝트 폴더 구조 열기
-  * `Alt + F12` : 터미널 창 열기
+## 개발흐름, 네이밍 TIP
 
 <br><br>
 
-# CHECK LIST
-
-
-
-## 개발과정, 네이밍 TIP
+### 개발흐름
 
 **참고: [깃, 구글 자바 컨벤션과 기능개발 흐름](https://bh946.github.io/knowledge/CHECK_LIST_JAVA_CONVENTION/)**
 
@@ -189,203 +190,508 @@ testImplementation("org.junit.vintage:junit-vintage-engine") {
 
   * 컨트롤러 구현 -> 웹 계층과 상호작용 (API 포함)
 
+<br><br>
+
+### 네이밍 TIP
+
+**Database**
+
+- 테이블명 형식으로 `ORDER 또는 order` 사용 **=> 대문자** or 소문자
+- 컬럼명 형식으로 `order_id` 사용 **=> 스네이크 케이스**
+  - 보통 **PK**인 컬럼명을 `테이블명_id` 형태로 쓰지만, 나머지 컬럼명들은 `테이블명` **을 안붙이는 편** (ex:member_id, name)
+- 스프링에서 테이블 매핑 마지막에 전부 **"대문자"**로 자동
+  - 실제로 스프링 부트로 DB 테이블 자동 생성시 **"대문자" 이름 확인**
+
 <br>
 
-**네이밍 TIP**
+**JPA -> ORM(객체 관계 매핑)**
 
-- **Database**
-  - 테이블명 형식으로 `ORDER 또는 order` 사용 **=> 대문자** or 소문자
-  - 컬럼명 형식으로 `order_id` 사용 **=> 스네이크 케이스**
-  - 스프링에서 테이블 매핑 마지막에 전부 **"대문자"**로 자동
-    - 실제로 스프링 부트로 DB 테이블 자동 생성시 **"대문자" 이름 확인**
-- **JPA -> ORM(객체 관계 매핑)**
-  - 엔티티명 형식으로 `OrderItem` 사용 **=> 파스칼 케이스**
-    - **스프링 부트는 엔티티명을 `OrderItem -> ORDERITEM` 처럼 "대문자"로 바꿔서 매핑**
-  - 필드명 형식으로 `orderId` 사용 **=> 카멜 케이스**  
-    - **스프링 부트는 필드명을 `orderId -> order_id` 로 컬럼명 찾아서 매핑**
+- 엔티티명 형식으로 `OrderItem` 사용 **=> 파스칼 케이스**
+  - **스프링 부트는 엔티티명을 `OrderItem -> ORDERITEM` 처럼 "대문자"로 바꿔서 매핑**
+- 필드명 형식으로 `orderId` 사용 **=> 카멜 케이스**  
+  - **스프링 부트는 필드명을 `orderId -> order_id` 로 컬럼명 찾아서 매핑**
+
+<br>
+
+<br>
+
+## (도메인) 테이블 설계와 엔티티 구현
 
 <br><br>
 
-## 테이블과 엔티티 설계&구현
+### 테이블 설계
 
-**테이블 설계**
+**N:M** 관계는 **1:N, N:1** 로 풀기
 
-* **데이터(테이블) 중심** 설계
-  * 보통 **PK**인 컬럼명을 **`테이블명_id`** 형태로 쓰지만, 나머지 컬럼명들은 **`테이블명` 을 안붙이는 편**
+* N:M 관계를 두 테이블로 구성하는건 데이터 중복 야기. 외래키를 2개 써서 해결하려 해도 애초에 외래키 2개 사용 자체가 너무 비효율. 가능은 한지도 모르겠고.
 
-* **N:N** 관계는 **1:N, N:1** 로 풀기
-  * N:N은 무한루프 때문 => [다른분 그림참고](https://siyoon210.tistory.com/26)
-
-* **외래키가 있어야할 위치**
-  *  **1:N, N:1** 의 경우 **N**에 사용
-    * 성능 저하 때문(많은 JOIN문 발생) => [다른분 그림참고](https://siyoon210.tistory.com/26)
-
-  * **1:1**의 경우 **상황에 따라** 사용 - 보통은 **주 테이블에 외래키** 사용
-    * 주 테이블 외래키 단방향 - 단점 : 값 없으면 외래 키에 null 허용
-    * 대상 테이블에 외래키 양방향 - 단점 : 무조건 즉시로딩
-
-* **상속**의 경우 JOINED, SINGLE_TABLE 전략 중에서 **JOINED 전략**을 많이 사용
-  * 부모 자식간에 join을 하므로 똑같이 테이블 생성
-  * Index 덕분에 빠르게 join이 가능 (본인생각 검색해봐야함)
+* <details><summary><b>테이블 관계 TIP<b/></summary>
+  <div markdown=”1”>
+  1. 관계를 생각 할 때 테이블로 생각하지 말고, '한 행'을 기준으로 생각. 테이블 명도 마찬가지.<br>
+     - '학생', '수업'<br>
+  2. 논리적으로 생각할 땐, 연결(매핑) 테이블은 생각하지 않는다.<br>
+     - 철수의 학생 코드는 학생_수업 테이블에 여러개 존재한다. **(X)**<br>
+     - 철수는 국어, 영어, 수학 수업을 수강한다.**(O)**<br>
+  3. 항상 일대다(1:N) 기준으로 생각하자. 다대일(N:1)보다 직관적<br>
+     - 철수가 여러 수업을 수강한다.**(O)**<br>
+     - 국어, 영어, 수학은 철수를 수용 한다**.(X)**<br>
+  <img src="https://github.com/user-attachments/assets/21355a21-4a11-460e-879d-1685387e1a57" alt="N:M관계" style="zoom:80%;" /><br>
+  <img src="https://github.com/user-attachments/assets/5f9f899c-86e8-4f51-ab52-e872fba9863a" alt="1:N:1관계"/>
+  </div>
+  <details/>
 
 <br>
 
-**엔티티 설계&구현**
+**외래키가 있어야할 위치**
 
-* **객체 중심** 설계
-  * 보통 **PK**인 필드명을 **`id`** 로 쓰고 **직접** 테이블의 컬럼명과 **매핑**을 선언함 - @Column(...)
-  * 개발과정에선 **Getter, Setter**를 열어두고 나중에 리팩토링으로 **Setter** 들은 제거
-    * 엔티티에서의 **비지니스 메서드** 구현은 **Setter** 제거 효과
-    * **setter를 최대한 사용하지 않게끔 DTO 방식 권장**
-* 엔티티 설계 때 **연관관계는 단방향 우선 개발(테스트)** 후 양방향 관계 추가
-  * 양방향은 코드만으로 해결 가능해서 DB 설계에 아무런 영향을 끼치지 않음
+*  **1:N, N:1** 의 경우 **N**에 사용 -> **1**은 양방향 필요시 연결(엔티티)
+  
+  * <details><summary><b>1쪽에 FK 놓으면 2가지 단점<b/></summary>
+    <div markdown=”1”>
+    플레이어(N) 2명 등록 후 첫 팀(1)에 모두 등록 시??<br>
+    - Team 테이블에 pk 중복 문제<br>
+    - Player 테이블 업뎃 시 Team 테이블도 같이 업뎃 문제<br>
+    ```sql
+    insert into Player (id, name) values (1, '철수');
+    insert into Player (id, name) values (2, '훈이');
+    insert into Team (id, name, player_id) values (1, '떡잎팀', 1); -- 철수 추가
+    insert into Team (id, name, player_id) values (1, '떡잎팀', 2); -- 훈이 추가
+    ```
+    </div>
+    <details/>
+  
+* **1:1**의 경우 **상황에 따라** 사용 - 보통은 **주 테이블에 외래키** 사용
+  
+  * **주 테이블 외래키 단방향** - 단점 : 값 없으면 외래 키에 null 허용
+  * **대상 테이블에 외래키 양방향** - 단점 : 무조건 즉시로딩
+
+<br>
+
+**상속 매핑**은 `일반적인 전략, Mapped Superclass` 을 사용
+
+* **일반적인 전략** : JOINED, SINGLE_TABLE 방식이 유명한데 보통 **JOINED 방식을** 선호
+  * **부모 자식간에 join**을 하게 됨
+    * 참고로 join 열에 Index 추가하면 빠르게 join이 가능
+  * 혹시나 테이블이 너무 단순하다면 SINGLE_TABLE 을 사용 -> 조인이 없어서 속도 빠름!
+
+* **Mapped Superclass 전략**
+  * 상속 매핑으로 선언된 클래스를 상속받게 되면 해당 상속 내용을 전부 테이블에 넣을 수 있다.
+
+<br><br>
+
+### 엔티티 구현
+
+**객체 중심** 설계!
+
+* ```java
+  @Table(name = "MEMBER", indexes = @Index(name = "IDX_MEMBER_ID", columnList = "member_id desc")) // 인덱스 추가 법
+  public class Member {...}
+      
+  @Id // pk
+  @GeneratedValue
+  @Column(name = "member_id") // db컬럼명 매핑, 참고로 nullable = false 속성은 not null
+  private Long id; // 엔티티에선 id 에도 보통 "테이블명 생략"
+  ```
+
+* 보통 **PK**인 필드명을 `id` 로 쓰고 **직접** 테이블의 컬럼명과 **매핑**을 선언함 - @Column(...)
+
+* 개발과정에선 **@Getter, @Setter**를 열어두고 나중에 **리팩토링으로 @Setter 제거**
+  * 엔티티에서의 **비지니스 메서드** 구현은 **Setter 제거 효과**
+  * **setter를 최대한 사용하지 않게끔 DTO 방식 권장**
+  * **Setter 제거** 위해 **생성자 Protected 패턴 (생성 편의 메서드 static으로 선언)** -> protected는 동일 패키지 까지만 허용
+    - `@NoArgsConstructor(access = AccessLevel.PROTECTED)` 활용
+    - 코드 의미대로 No Args(매개변수x) 생성자를 생성하는 코드!! (범위는 Protected)
+
+* `GenerationType.AUTO` 옵션이 기본값 (확실한 건 직접 택을 권장)
+
+  * 자동으로 IDENTITY, SEQUENCE, TABLE 중 택1
+
+<br>
+
+엔티티 설계 때 **연관관계는 단방향 우선 개발(테스트)** 후 양방향 관계 추가
+
+* ```java
+  @OneToMany(mappedBy = "member") // 양방향 (member:lists = 1:N)
+  private List<Lists> lists = new ArrayList<>(); // 컬렉션은 필드에서 바로 초기화
+  
+  @OneToOne(fetch = FetchType.LAZY) // 단방향(=원래방향), 지연로딩 설정
+  @JoinColumn(name = "profile_id") // FK
+  private Profile profile;
+  
+  // CascadeType.REMOVE 를 해줘야 고아객체가 안생기게 되며, Lists 삭제도 정상
+  @OneToMany(mappedBy = "lists", cascade = CascadeType.REMOVE) // 양방향
+  private List<Task> tasks = new ArrayList<>();
+  ```
+
+* 양방향은 코드만으로 해결 가능해서 **DB 설계에 아무런 영향을 끼치지 않음**
+
+* **양방향TIP: 연관관계 편의 메서드 + mappedBy** 를 세트로 항상 같이 작성 (개인적인 생각)
+
+<br>
+
+즉시 or 지연 로딩 중에서 무조건 **"지연 로딩"** 으로 개발 => **즉시 로딩의 N+1 문제** 때문
 
 
-- 즉시 or 지연 로딩 중에서 무조건 **"지연 로딩"** 으로 개발 => **N+1 문제** 때문
+  - <details><summary><b>즉시 로딩, 지연로딩에서 N+1 왜 발생??<b/></summary>
+    <div markdown=”1”>
+    User:Article = 1:N 가정<br>
+    **(1)즉시로딩 예시**<br>
+    <img src="https://github.com/user-attachments/assets/1dfa20b9-817c-4e6b-8e50-f5fdf9d1a424" alt="image" style="zoom:80%;" /><br>
+    <img src="https://github.com/user-attachments/assets/7f266527-92a0-4669-adb6-ae6aecf17b38" alt="image" style="zoom:50%;" /><br>
+    <img src="https://github.com/user-attachments/assets/d7b0aab1-7246-4363-b6fc-ce79e97cd194" alt="image" style="zoom:80%;" /><br>
+    <br>
+    - 모든 User 검색(findAll) 요청(1번) 시 User의 컬럼에 Article 때문에(N번) 추가 쿼리<br>
+    - 즉시 로딩임을 보고 바로 추가 쿼리 날렸음<br>
+    **(2)지연로딩 예시**<br>
+    <img src="https://github.com/user-attachments/assets/05bada9d-a33d-4479-a403-e42d1ca41ff8" alt="image" style="zoom:80%;" /><br>
+    <img src="https://github.com/user-attachments/assets/10c39d5f-87aa-475e-b895-4bb0e4e53669" alt="image" style="zoom: 80%;" /><br>
+    <img src="https://github.com/user-attachments/assets/8b65009f-09f4-4ead-aabc-e30b046c8bb5" alt="image" style="zoom:80%;" /><br>
+    <br>
+    - 모든 User 검색(findAll) 요청(1번) 후 나중에 User의 컬럼에 Article 조회할 때(N번) 추가 쿼리<br>
+    - 지연 로딩임을 보고 처음에 추가 쿼리를 날리지는 않음. 단, 이후에 User.article 접근할 때 이미 User는 select했어서 join을 사용하지 못하고 N번 Article을 추가 select 쿼리 발생
+    </div>
+    <details/>
+    
+    - [정말 잘 정리하신 분! 참고 N+1](https://velog.io/@jinyoungchoi95/JPA-%EB%AA%A8%EB%93%A0-N1-%EB%B0%9C%EC%83%9D-%EC%BC%80%EC%9D%B4%EC%8A%A4%EA%B3%BC-%ED%95%B4%EA%B2%B0%EC%B1%85)
 
   - 코드상에서 `@XToOne` 은 기본이 **즉시 로딩**이므로 반드시 **지연로딩**으로 전부 변경
-  - 단, **"즉시 로딩"**도 **N+1 문제** 발생시킬 수 있다는점을 알고가자
+
+  - 단, **"지연 로딩"**도 **N+1 문제** 발생시킬 수 있다는 점을 알고가자 -> **fetch join**으로 해결
+
   - **"지연 로딩"**이 가능한 이유 : "프록시(가짜객체)"를 사용하기 때문
 
-- 옵션 중에서 **cascade** 사용 유무는 관계가 **완전 종속일때만** 사용 (연관된 데이터 연쇄적 변경 효과)
+<br>
 
-  - cascade는 영속성 전이를 하므로, 연관관계 매핑과는 전혀 관계 없음 
-  - 단지 이를 사용하면 **생명주기를 같이** 하는것
+옵션 중에서 **cascade** 사용 유무는 관계가 **완전 종속일때만** 사용 (연관된 데이터 연쇄적 변경 효과)
 
-- **다양한 구현 TIP**
+- cascade는 영속성 전이를 하므로, 연관관계 매핑과는 전혀 관계 없음 
 
-  - **ENUM** 데이터 사용 시 `@Enumerated(EnumType.STRING)` 로 꼭 `STRING` 으로 옵션 (이유 생략)
-  - **중복 코드**를 줄이는 효과적인 방법들
-    - **`임베디드 타입(값 타입)` 과 `상속-Mapped Superclass`** 이것 두개를 잘 활용 - 중복 코드를 많이 줄임
-      - `값 타입` 은 조금 적은 중복 때,`상속` 부분은 거의 모든 엔티티에 속하는 중복 때 사용하면 괜찮겠다고 판단 (본인 생각임)
-      
-    - **설계할때 부터 "값 타입"으로 활용될거는 따로 빼서 설계**
-      - `값 타입` 은 엔티티 클래스에 `private Long id;` 와 같은 필드라고 생각
-      - 값 타입은 정말 값 타입이라 판단될 때만 사용 (엔티티와 혼동이되면 안되므로)
-      - 식별자가 필요하면 "엔티티"를 의미하며, "임베디드 객체" 같은건 값 비교할때 equals 메소드 반드시 오버라이드 필요
-      
-      - "임베디드 객체" 는 값 타입 하나. `@Embed...` 로
-      - "값 타입 컬렉션" 은 값 타입 하나 이상. 이건 그냥 `"일대다 고아+cascade" 엔티티` 로
-  - **컬렉션(List같은,,,)은 필드**에서 초기화 하자
-    - 코드간결, **null 문제에서 안전**
-  - 의존성 주입(DI)은 필드 주입대신에 **생성자 주입을 사용**하자.
-    - 해석하자면 DI 중 @Autowired를 이용한 Field Injection보다는 **@RequiredArgsConstructor와 final**을 이용한 Constructor Injection을 사용하자라는 의미
-  - **엔티티 매핑**
-    * 연관관계에서 권장하는것은??
+- 단지 이를 사용하면 **생명주기를 같이** 하는것
 
-      * **N:1,1:N** 의 경우 "일대다 관계" 보다는 **"다대일 단(or양)방향"** 권장
-        * **"다"** 쪽이 주인이 되는건 객체 지향보단 테이블 지향이 강하지만 그래도 이것을 권장
-      * **1:1** 의 경우 **"주 테이블 외래키 단방향"** 권장
-        * 주 테이블 외래키 단방향 - 단점 : 값 없으면 외래 키에 null 허용
-        * 대상 테이블에 외래키 양방향 - 단점 : 무조건 즉시로딩
-    * **"다대다" 사용금지** => **"일대다", "다대일"**로 풀어서 사용
-      * 중간 테이블도 "엔티티"로 만드는걸 권장
-    * **"양방향" 연관관계 코드로 작성시 TIP**
-      * **연관관계 편의 메서드 + mappedBy** 를 세트로 항상 같이 작성 (개인적인 생각)
-    * **상속 매핑**은 **`일반적인 전략, Mapped Superclass`** 을 사용
-      * **일반적인 전략** : JOINED, SINGLE_TABLE 방식이 유명한데 보통 **JOINED 방식을** 선호
-        * 혹시나 테이블이 너무 단순하다면 SINGLE_TABLE 을 사용 -> 조인이 없어서 속도 빠름
+- <details><summary><b>두 가지 예시 코드<b/></summary>
+  <div markdown="1">
+  ```java
+  //Task.java
+  @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL) // 1:1관계며 같이 존재함. (생명주기 같아야함)
+  @JoinColumn(name = "task_status_id")
+  private TaskStatus taskStatus;
+  //
+  //Lists.java
+  // CascadeType.REMOVE 를 해줘야 고아객체가 안생기게 되며, Lists 삭제도 정상적으로 가능
+  @OneToMany(mappedBy = "lists", cascade = CascadeType.REMOVE) // 양방향
+  private List<Task> tasks = new ArrayList<>();
+  ```
+  </div>
+  <details/>
 
-      * **Mapped Superclass 전략**
-        * 상속 매핑으로 선언된 클래스를 상속받게 되면 해당 상속 내용을 전부 테이블에 넣을 수 있다.
+<br>
 
-- **엔티티의 메서드 TIP : 연관관계, 비지니스, 생성, 조회 메서드 권장**
+**중복 코드**를 줄이는 효과적인 방법들
 
-  - **연관관계 메서드** 사용 권장(양방향에 적극권장!!)
+- **`임베디드 타입(값 타입)` 과 `상속-Mapped Superclass`** 이것 두개를 잘 활용 + 간단한 건 `Enum` 도 좋음 -> 중복 코드를 많이 줄임
 
-    - **양방향**의 관계에 주로 사용되는 형태(아래는 예시)
+  - `값 타입` 은 좁은 범위 중복 때, `상속` 부분은 넓은 범위 중복 때 사용하자  
+    -> 상속은 필드 뿐만아니라 메소드까지 상속 되니까!
 
-      - (가정) Order와 OrderItem는 1:N이고 외래키 가진 주인은 OrderItem 인 상태이다.
-      - (1) 주인인 OrderItem가 Order를 접근하는건 **단방향**이므로 **바로** 접근 가능
-      - (2) Order가 OrderItem를 접근하는건 **양방향**이므로 **조금 돌아가서** 접근 가능
-      - **(3) Member->Order를 Order->Member 접근처럼 간단히 사용하기 위해 연관관계 메서드를 사용**
+    - `값 타입` 은 엔티티 클래스에 `private Long id;` 와 같은 필드라고 생각!
+    - 그리고 식별자가 없으므로 "엔티티와 혼동X"
+    - 또한, 값 비교에 equlas 오버라이드는 필수
 
-      ```java
-      // (1) OrderItem->Order 접근 예시 => 단반향
-      orderItem.getOrder(); // orderItem에서 order정보 접근 모습
-      
-      // (2) Order->OrderItem 접근 예시 => 반대방향 (양방향)
-      order.getOrderItems().add(orderItem); // order에 orderItem추가 목적
-      orderItem.setOrder(order); // 두줄 필요 (중요!!)
-      
-      // (3) 연관관계 편의 메서드
-      // 즉, Order->OrderItem 접근(양방향)을 편의 메서드 만들어서 활용!
-      // Order 클래스 내부
-      public void addOrderItem(OrderItem orderItem) {
-          orderItems.add(orderItem);
-          orderItem.setOrder(this);
+  - **설계할때 부터 "값 타입"으로 활용될거는 따로 빼서 설계 + 상속은 중복 보고 리팩토링 하던지**
+
+  - <details><summary><b>임베디드 타입(값 타입)+컬렉션 엔티티 예시<b/></summary>
+    <div markdown="1">
+    - "임베디드 객체" 는 값 타입 하나. @Embedded 로<br>
+    - "값 타입 컬렉션" 은 값 타입 하나 이상. 일대다 고아+cascade 로<br>
+    <br>**임베디드 객체**<br>
+    ```java
+    @Embeddable //임베디드 타입(값 타입) 생성
+    public class Address {
+      private String street;
+      private String city;
+      private String zipCode;
+      //
+      // 반드시 equals(), hashCode()를 오버라이드 해야 합니다.
+      @Override
+      public boolean equals(Object o) {
+        if (this==o) return true;
+        if (o == null || this.getClass() != o.getClass()) return false;
+        Address address = (Address) o;
+        return Objects.equals(street, address.street) &&
+            Objects.equals(city, address.city) &&
+            Objects.equals(zipCode, address.zipCode);
       }
-      // main 함수 내부
-      public void main~~(){
-      	order.addOrderItem(orderItem); // 한줄로 order에 orderItem정보 추가
+      //
+      @Override
+      public int hashCode() {
+        return Objects.hash(street, city, zipCode);
       }
-      ```
-      
+    }
+    ```<br>
+    ```java
+    @Entity
+    public class User {
+      @Id @GeneratedValue
+      private Long id;
+      private String name;
+      @Embedded //임베디드 타입(값 타입) 사용
+      private Address address;
+      //...
+    }
+    //
+    //테이블 구조
+    +-----------------+
+    |      User       |
+    +-----------------+
+    | id (PK)        |
+    | name           |
+    | street         |
+    | city           |
+    | zipCode        |
+    +-----------------+
+    ```<br>
+    <br>**값 타입 컬렉션 대안 -> "영속성 전이 + 고아 객체 제거" 1:N 엔티티**<br>
+    `@ElementCollection` 로 값 타입 컬렉션이 가능하지만 별로 추천하진 않고 "영속성 전이 + 고아 객체 제거" 1:N 엔티티를 추천!<br>
+    ```java
+    //임베디드로 만든 Address가 아닌 엔티티로 만들기
+    @Entity
+    public class Address {
+      @Id @GeneratedValue
+      private Long id;
+      private String street;
+      private String city;
+      private String zipCode;
+      //...
+    }
+    ```<br>
+    ```java
+    //Member.java
+    //    @ElementCollection
+    //    @CollectionTable(name = "ADDRESS", joinColumns = @JoinColumn(name = "MEMBER_ID"))
+    //    private List<Address> addressHistory = new ArrayList<>();
+    //
+    @OneToMany(cascade = ALL, orphanRemoval = true)
+    @JoinColumn(name = "MEMBER_ID")
+    private List<Address> addresses = new ArrayList<>();
+    ```
+    </div>
+    <details/>
+
+  - <details><summary><b>상속-@MappedSuperclass<b/></summary>
+    <div markdown="1">
+    특징: 필드+메소드까지 상속<br>
+    ```java
+    @MappedSuperclass //생성
+    public abstract class BaseEntity {
+      @Id
+      @GeneratedValue
+      private Long id;
+      private LocalDate createdAt;  // 날짜만
+      private LocalDate updatedAt;
+      //
+      @PrePersist
+      public void onPrePersist() {
+        this.createdAt = LocalDate.now();  // 현재 날짜로 설정
+        this.updatedAt = LocalDate.now();
+      }
+      @PreUpdate
+      public void onPreUpdate() {
+        this.updatedAt = LocalDate.now();  // 수정 날짜 갱신
+      }
+    }
+    ```<br>
+    ```java
+    @Entity
+    public class Product extends BaseEntity {
+      private String name;
+      private double price;
+      // 다른 필드들...
+    }
+    @Entity
+    public class Order extends BaseEntity {
+      private String orderNumber;
+      // 다른 필드들...
+    }
+    ```
+    </div>
+    <details/>
+
+    - `@PrePersist`: 엔티티가 **처음 저장되기 전에** 실행되는 메서드를 정의. (`createdAt`, `updatedAt` 자동 설정)
+    - `@PreUpdate`: 엔티티가 **업데이트되기 전에** 실행되는 메서드를 정의. (`updatedAt` 자동 갱신)
+
+- **ENUM** 데이터 사용 시 `@Enumerated(EnumType.STRING)` 로 꼭 `STRING` 으로 옵션
+
+  - ```java
+    public enum OrderStatus {
+      NEW, PROCESSING, COMPLETED, CANCELLED
+    }
+    
+    @Entity
+    public class Order {
+      @Enumerated(EnumType.STRING)
+      private OrderStatus status;
+      // 다른 필드들...
+    }
+    ```
+
+  - 데이터베이스에 `NEW`, `PROCESSING` 같은 "문자열이 저장" (인덱스 이런게 아니라)
+
+  - 따라서 Enum 순서가 바뀌거나 값이 바뀌어도 문제가 생기지 않음.
+
+<br>
+
+**초기화 - 생성자 주입, 컬렉션**
+
+- **컬렉션(List같은)은 필드**에서 초기화 하자
+  - 코드간결, **null 문제에서 안전**
+  - ex: `private List<Task> tasks = new ArrayList<>();`
+- 의존성 주입(DI)은 필드 주입대신에 **생성자 주입을 사용**하자. 
+  - 즉, DI 중 @Autowired를 이용한 Field Injection보다는  
+    **@RequiredArgsConstructor와 final**을 이용한 **Constructor Injection**을 사용하자
+  - **@RequiredArgsConstructor는 “final 붙은 필드를 인자로 받는 생성자"를 자동 생성**
+    - ex: `private final ExpService expService` 선언만 해도 바로 사용 가능!
+
+<br>
+
+**엔티티의 메서드 TIP : 생성\_편의 메서드, 연관관계\_편의 메서드, 비지니스\_편의 메서드(업뎃,조회 등) 권장**
+
+- **생성 메서드** 사용 권장 -> 생성자 대용 굿
+
+  - ex: `public static Member createMember()` 같은 것
+
+  - 목적 : 엔티티에 있는 다양한 속성들을 이 생성메서드 **하나로 간편**히 다 적용 & **무분별한 엔티티 생성을 막기** 위함 -> 생성자 Protected 패턴!!
+  
+  - 이를 위해 **`@NoArgsConstructor(access = AccessLevel.PROTECTED)` 사용!**
+  
+    - 기본 생성자의 접근 제어를 PROTECTED로 설정해놓게 되면 **무분별한 객체 생성에 ide 상에서 한번 더 체크할 수 있는 수단**
+    - Protected 접근자는 반드시 **같은 패키지만 허용!!** - 상위, 하위 패키지 전부 불가
+  
+  - <details><summary><b>생성 메서드 코드<b/></summary>
+    <div markdown="1">
+    ```java
+    // 기본생성자 Public->Protected
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public class Order {
+      // ...
+      //==생성 메서드==// => 수많은 정보 한번에! 그리고 public static 필수
+      public static Order createOrder(Member member, Delivery delivery, OrderItem... orderItems) {
+        Order order = new Order();
+        order.setMember(member);
+        order.setDelivery(delivery);
+        for(OrderItem orderItem : orderItems) {
+          order.addOrderItem(orderItem);
+        }
+        order.setStatus(OrderStatus.ORDER);
+        order.setOrderDate(LocalDateTime.now());
+        return order;
+      }
+    }
+    // main 함수 내부 가정
+    // 외부 가능
+    Order order1 = Order.createOrder(member, delivery, orderItems); 
+    order1.setDelivery(delivery2); // 정상
+    // 외부 불가능 (Protected:같은 패키지만 가능!!)
+    Order order2 = new Order(); 
+    order2.setDelivery(delivery2); // ide상에서 에러 발생
+    ```
+    </div>
+    <details/>
+  
+- **연관관계\_편의 메서드** 사용 권장 -> **양방향**에 굿!!
+
+  - ex: `addLists(), sestCharacter()` 같은 것
+
+    - (가정) Order와 OrderItem는 1:N이고 외래키 가진 주인은 OrderItem 인 상태이다.
+    - (1) 주인인 OrderItem가 Order를 접근하는건 **단방향**이므로 **바로** 접근 가능
+    - (2) Order가 OrderItem를 접근하는건 **양방향**이므로 **조금 돌아가서** 접근 가능
+    - **(3) Order->OrderItem 접근을 간단히 사용하기 위해 연관관계 메서드를 사용**
+
+  - <details><summary><b>연관관계 메서드 코드<b/></summary>
+    <div markdown="1">
+    ```java
+    // (1) OrderItem->Order 접근 예시 => 단반향
+    orderItem.getOrder(); // orderItem에서 order정보 접근 모습
+    //
+    // (2) Order->OrderItem 접근 예시 => 반대방향 (양방향)
+    order.getOrderItems().add(orderItem); // order에 orderItem추가 목적
+    orderItem.setOrder(order); // 두줄 필요 (중요!!)
+    //
+    // (3) 연관관계 편의 메서드
+    // 즉, Order->OrderItem 접근(양방향)을 편의 메서드 만들어서 활용!
+    // Order 클래스 내부
+    public void addOrderItem(OrderItem orderItem) {
+      this.orderItems.add(orderItem);
+      orderItem.setOrder(this);
+    }
+    // main 함수 내부
+    public void main~~(){
+      order.addOrderItem(orderItem); // 한줄로 order에 orderItem정보 추가
+    }
+    ```
+    </div>
+    <details/>
 
   - **비지니스 메서드** 사용 권장
 
     - Service 파트가 아닌 Entity파트에서 비지니스 로직 구현이 가능할 것 같은 경우에는 Entity에서 개발을 적극 권장(=**도메인 모델 패턴**) => **장점 : 좀 더 객체 지향적인 코드**
 
+    - <details><summary><b>비지니스 메서드 코드<b/></summary>
+      <div markdown="1">
       ```java
       // 간단히 엔티티에서 구현 가능하면, 서비스가 아닌 엔티티에서 로직 구현(객체지향적)
       // 재고 추가 함수 (비지니스 로직)
       public void addStock(int quantity) {
-          this.stockQuantity += quantity;
+        this.stockQuantity += quantity;
       }
-      // update 로직의 경우도 충분히 가능
-      ```
-
-  - **생성 메서드** 사용 권장
-
-    - 목적 : 엔티티에있는 다양한 속성들을 이 생성메서드 **하나로 간편**히 다 적용 & **무분별한 엔티티 생성을 막기** 위함
-
-    - **`@NoArgsConstructor(access = AccessLevel.PROTECTED)` 를 사용!**
-
-      - 기본 생성자의 접근 제어를 PROTECTED로 설정해놓게 되면 **무분별한 객체 생성에 ide 상에서 한번 더 체크할 수 있는 수단**
-        - Protected 접근자는 반드시 **같은 패키지만 허용!!** - 상위, 하위 패키지 전부 불가
-
-      - 외부에서 생성자 사용 위해서는 `public static Order createOrder(...)` 형태로 구현 필수!
-
-      ```java
-      // 기본생성자 Public->Protected
-      @NoArgsConstructor(access = AccessLevel.PROTECTED) 
-      public class Order {
-      	// ...
-          
-          //==생성 메서드==// => 수많은 정보 한번에! 그리고 public static 필수
-              public static Order createOrder(Member member, Delivery delivery, OrderItem... orderItems) {
-              Order order = new Order();
-              order.setMember(member);
-              order.setDelivery(delivery);
-              for(OrderItem orderItem : orderItems) {
-                  order.addOrderItem(orderItem);
-              }
-              order.setStatus(OrderStatus.ORDER);
-              order.setOrderDate(LocalDateTime.now());
-              return order;
-          }
+      // 날짜 비교 함수 (비지니스 로직)
+      private static boolean compareDate(Task task, LocalDateTime listsDate) {
+        // 년,월,일 만 비교하면 충분 하므로 Time 은 비교X
+        LocalDate taskDay = task.getStartTime().toLocalDate();
+        LocalDate listsDay = listsDate.toLocalDate();
+        if (taskDay.compareTo(listsDay) == 0) { // 동일시 0
+          return true;
+        }
+        return false;
       }
-      // main 함수 내부 가정
-      Order order1 = Order.createOrder(member, delivery, orderItems); // 외부 가능
-      order1.setDelivery(delivery2); // 정상
-      
-      Order order2 = new Order(); // 외부에선 이게 안된다는것 (Protected:같은 패키지만!!)
-      order2.setDelivery(delivery2); // ide상에서 에러 발생
-      ```
-
-  - **조회 메서드** 사용 권장
-
-    - 조회 로직의 경우에도 간단하므로 엔티티에서 개발을 권장
-
-      ```java
-      //==조회 로직==//
-      /** 주문상품 전체 가격 조회 */
+      // update (비지니스 로직)
+      public Lists updateTime(Long timerAllUseTime, Long curTime) {
+        this.timerAllUseTime = timerAllUseTime;
+        this.curTime = curTime;
+        return this;
+      }
+      // 주문상품 전체 가격 조회 (비지니스 로직)
       public int getTotalPrice() {
-          return getOrderPrice() * getCount(); // 가격 * 수량 = 주문상품 가격
+        return getOrderPrice() * getCount(); // 가격 * 수량 = 주문상품 가격
       }
       ```
+      </div>
+      <details/>
 
-<br><br>
+<br>
+
+<br>
+
+## (레포지토리=DAO, 서비스) 기능 구현
+
+
+
+
+
+<br>
+
+<br>
+
+## (컨트롤러) 통신 구현
+
+
+
+
+
+
+
+<br>
+
+<br>
 
 ## 중요한 엔티티의 조회
 
@@ -1126,6 +1432,187 @@ my:
 
 <br><br>
 
+## application.yml
+
+**application.yml 에 세팅한 내용을 총 정리 -> API와 WEB(타임리프), 테섭과 본섭(프로필 차이 등)**
+
+- `spring: datasource: url, username, password...` 에서 h2 db 연결 세팅
+  - **테스트에선 db연동 이부분을 주석 해야지 "메모리DB" 사용.**
+  - **db걱정 없음!! h2가 자바기반이라 제공**
+- `spring: jpa: hibernate, properties` 에서 create, none 옵션으로 테이블 생성 또는 기존 테이블 사용 설정 + show_sql로 jpa가아닌 실제 sql문 체크(튜닝 하려면 sql 필수로 체크)
+  - 근데 show_sql 사용 안하고, 아래 **logging.level의 SQL을 사용 하자.**
+- `server: servlet: session: timout: 30m` 으로 세션 타임아웃 설정
+- `logging.level: org.hibernate.SQL: debug` 는 SQL쿼리를 디버그 레벨로 로깅
+  - `com.level: debug`로 level설정도 debug로 하면 프로젝트 로그레벨은 debug 레벨 사용
+  - **로그레벨 (왼쪽 가장 상세): trace > debug > info > warn > error > fatal 포함 관계**
+- `management` 에서 endpoint 노출 설정했음. (모니터링 때문에)
+  - ex) shutdown 활성화해서 해당 앱을 외부에서 종료할 수 있게 엔드포인트 노출.
+    - 기본적으로 비활성화지만 활성화하면 관리자가 **http 요청으로 앱 종료 가능**
+  - exclude옵션에는 env, beans 엔드포인트 노출을 제외했음. (환경정보, 빈 정보)
+- `spring.cache.caffeine.spec=maximumSize=100` 는 캐시 사이즈 설정이다. **물론 자바 코드에서도 설정 가능하다.**
+- `spring.messages.basename=message,errors` 로 **"메시지, 국제화 기능" 사용**
+  - `messages.properties` 에 공통 관리할 messages 내용 세팅
+  - `erros.properties` 에도 가능. 즉, 여러개 추가 가능
+- `spring.config.activate.on-profile: prod` 로 **프로필 설정 가능**
+  - 아무 설정 안하면?? -> default 프로필로 실행 (기본값임)
+- `spring.thymeleaf.cache: false` 로 **thymeleaf 캐시 사용X** -> 실시간 reload
+- `my.datasource.imgPath: "C:/images/` 로 **"외부설정”** 사용 -> 경로 등등
+- `server.port.8080` 로 포트 8080(개발용), 포트 80(배포용) 를 지정 가능
+  - http는 80포트를 기본값으로 사용
+
+<details><summary><b>본섭API:application.yml<b/></summary>
+<div markdown=”1”>
+application.yml 과 application.properties 는 똑같은 역할 (문법만 다를 뿐)<br>
+```yaml
+spring:
+  datasource:
+    url: jdbc:h2:tcp://localhost/~/lepldb/lepl
+    username: sa
+    password:
+      driver-class-name: org.h2.Driver
+#    url: jdbc:oracle:thin:@localhost:1521:STR
+#    username: testUser
+#    password: 1234
+#    driver-class-name: oracle.jdbc.OracleDriver
+  jpa:
+    hibernate:
+#      ddl-auto: create # table 자동 생성
+      ddl-auto: none # db 초기화 없앰
+  properties:
+    hibernate:
+#        show_sql: true
+      format_sql: true
+server:
+  servlet:
+    session:
+      timeout: 30m # session timeout 30min
+logging.level:
+  org.hibernate.SQL: debug
+  org.hibernate.type: trace
+logging:
+  level:
+    com.lepl: debug
+management:
+  endpoint:
+    shutdown:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+        exclude: "env,beans"
+```
+</div>
+<details/>
+
+<details><summary><b>테섭API:application.yml<b/></summary>
+<div markdown=”1”>
+application.yml 과 application.properties 는 똑같은 역할 (문법만 다를 뿐)<br>
+```yaml
+# 테스트 코드는 메모리 DB를 사용하기 위해 datasource 주석
+spring:
+#  datasource:
+#    url: jdbc:h2:tcp://localhost/~/lepldb/lepl
+#    username: sa
+#    password:
+#      driver-class-name: org.h2.Driver
+jpa:
+#    hibernate:
+#      ddl-auto: create # table 자동 생성
+###      ddl-auto: none
+properties:
+hibernate:
+#        show_sql: true
+format_sql: true
+logging.level:
+org.hibernate.SQL: debug
+org.hibernate.type: trace
+logging:
+level:
+com.lepl: debug
+```
+</div>
+<details/>
+<details><summary><b>프로필WEB:application.yml<b/></summary>
+<div markdown=”1”>
+# default 프로필 -> 개발모드로 사용
+spring:
+  # thymeleaf 캐시 사용 X로 실시간 reload
+  thymeleaf:
+    cache: false
+    prefix: file:src/main/resources/templates/ # thymeleaf 경로지정
+  # H2 DB
+  datasource:
+    url: jdbc:h2:tcp://localhost/~/secret-art-typing-gallery/secret
+    username: sa
+    password:
+      driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create # DB 초기화 사용
+    properties:
+      hibernate:
+#        show_sql: true
+        format_sql: true
+  # 메시지 - thymeleaf 연동
+  messages:
+    basename: messages
+server:
+  port: 8080
+#  address: 223.39.212.163
+  servlet:
+    session:
+      timeout: 30m # session timeout 30min
+logging.level: # DB 쿼리 로그
+  org.hibernate.SQL: debug
+  org.hibernate.type: trace
+my: # 외부설정 값
+  datasource:
+    imgPath: C:/images-spring/
+logging:
+  level:
+    com.dau.secretarttypinggallery.controller: debug # 컨트롤러에서만 로그확인
+--- # 프로필 구분자
+# prod 프로필 -> 배포모드로 사용
+spring:
+  config:
+    activate:
+      on-profile: prod
+  # thymeleaf 캐시 사용!!
+  thymeleaf:
+    cache: true
+    prefix: classpath:/templates/ # 리눅스용(배포환경) 경로지정
+  # MYSQL DB
+  datasource:
+    url: jdbc:mysql://localhost:3306/secret?useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul
+    username: secretUser
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+#      ddl-auto: none # DB 초기화 사용 X
+      ddl-auto: create # DB 초기화 사용
+  # 메시지 - thymeleaf 연동
+  messages:
+    basename: messages
+server:
+  port: 8080 # 포트 포워딩으로 http(80) -> 8080 설정하면 "URL에 포트없이 바로 접속가능"
+  servlet:
+    session:
+      timeout: 30m # session timeout 30min
+my: # 외부설정 값
+  datasource:
+    imgPath: /var/www/images-spring/
+logging:
+  level:
+    com.dau.secretarttypinggallery.controller: info # 배포는 기본값(=info) 사용
+</div>
+<details/>
+
+<br>
+
+<br>
+
 # Thymeleaf 로 웹 개발 TIP 모음
 
 **버전.. 환경설정 등 기초적인건 생략**
@@ -1310,94 +1797,7 @@ my:
   * "메시지-국제화" 사용(messages.properties) -> thymeleaf와 연동 최고
   * 포트 8080(개발용), 포트 80(배포용) -> http는 80포트 기본값
   * 로그레벨 설정
-
-```yaml
-# default 프로필 -> 개발모드로 사용
-spring:
-  # thymeleaf 캐시 사용 X로 실시간 reload
-  thymeleaf:
-    cache: false
-    prefix: file:src/main/resources/templates/ # thymeleaf 경로지정
-
-  # H2 DB
-  datasource:
-    url: jdbc:h2:tcp://localhost/~/secret-art-typing-gallery/secret
-    username: sa
-    password:
-      driver-class-name: org.h2.Driver
-
-  jpa:
-    hibernate:
-      ddl-auto: create # DB 초기화 사용
-    properties:
-      hibernate:
-#        show_sql: true
-        format_sql: true
-
-  # 메시지 - thymeleaf 연동
-  messages:
-    basename: messages
-
-server:
-  port: 8080
-#  address: 223.39.212.163
-  servlet:
-    session:
-      timeout: 30m # session timeout 30min
-
-logging.level: # DB 쿼리 로그
-  org.hibernate.SQL: debug
-  org.hibernate.type: trace
-
-my: # 외부설정 값
-  datasource:
-    imgPath: C:/images-spring/
-
-logging:
-  level:
-    com.dau.secretarttypinggallery.controller: debug # 컨트롤러에서만 로그확인
---- # 프로필 구분자
-# prod 프로필 -> 배포모드로 사용
-spring:
-  config:
-    activate:
-      on-profile: prod
-
-  # thymeleaf 캐시 사용!!
-  thymeleaf:
-    cache: true
-    prefix: classpath:/templates/ # 리눅스용(배포환경) 경로지정
-
-  # MYSQL DB
-  datasource:
-    url: jdbc:mysql://localhost:3306/secret?useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul
-    username: secretUser
-    password: 1234
-    driver-class-name: com.mysql.cj.jdbc.Driver
-
-  jpa:
-    hibernate:
-#      ddl-auto: none # DB 초기화 사용 X
-      ddl-auto: create # DB 초기화 사용
-
-  # 메시지 - thymeleaf 연동
-  messages:
-    basename: messages
-
-server:
-  port: 8080 # 포트 포워딩으로 http(80) -> 8080 설정하면 "URL에 포트없이 바로 접속가능"
-  servlet:
-    session:
-      timeout: 30m # session timeout 30min
-
-my: # 외부설정 값
-  datasource:
-    imgPath: /var/www/images-spring/
-
-logging:
-  level:
-    com.dau.secretarttypinggallery.controller: info # 배포는 기본값(=info) 사용
-```
+* 소스 코드는 앞에서 이미 언급했으니 그걸 참고
 
 <br>
 
