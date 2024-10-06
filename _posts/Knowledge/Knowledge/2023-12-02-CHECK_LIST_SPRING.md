@@ -284,6 +284,8 @@ typora-root-url: ../../..
 **객체 중심** 설계!
 
 * ```java
+  @Getter @Entity @Slf4j // @Slf4j 는 log
+  @NoArgsConstructor(access = AccessLevel.PROTECTED)
   @Table(name = "MEMBER", indexes = @Index(name = "IDX_MEMBER_ID", columnList = "member_id desc")) // 인덱스 추가 법
   public class Member {...}
       
@@ -292,7 +294,7 @@ typora-root-url: ../../..
   @Column(name = "member_id") // db컬럼명 매핑, 참고로 nullable = false 속성은 not null
   private Long id; // 엔티티에선 id 에도 보통 "테이블명 생략"
   ```
-
+  
 * 보통 **PK**인 필드명을 `id` 로 쓰고 **직접** 테이블의 컬럼명과 **매핑**을 선언함 - @Column(...)
 
 * 개발과정에선 **@Getter, @Setter**를 열어두고 나중에 **리팩토링으로 @Setter 제거**
@@ -631,6 +633,7 @@ typora-root-url: ../../..
     </div>
     <details/>
 
+
   - **비지니스 메서드** 사용 권장
 
     - Service 파트가 아닌 Entity파트에서 비지니스 로직 구현이 가능할 것 같은 경우에는 Entity에서 개발을 적극 권장(=**도메인 모델 패턴**) => **장점 : 좀 더 객체 지향적인 코드**
@@ -671,11 +674,277 @@ typora-root-url: ../../..
 
 <br>
 
-## (레포지토리=DAO, 서비스) 기능 구현
+## (레포지토리=DAO, 서비스) 기능 구현 + 인터페이스
+
+**인터페이스 관련해서 얘기하기 위해 주제에서 언급했다. 본인은 확장성을 위해서라도 항상 "레포지토리,서비스 단에 인터페이스를 활용"할 생각이다.**
+
+**인터페이스를 간략히 알아보자.**
+
+- **만약 MemberRepository 클래스**를 구현 했다면??  
+  **만약 MemberRepository 인터페이스를 정의**하고 **MemberRepositoryImpl 클래스로 해당 인터페이스를 구현(implements)** 했다면??
+- 둘 다 서비스계층에서 바로 `memberRepository.save()` 이런식으로 사용 가능
+  - 여기서 알 수 있는 장점 -> 인터페이스를 구현하는 **MemberRepositoryImpl2 클래스**를 또 추가해서 구현체를 바꿔도 "서비스계층의 `memberRepository.save()`" 코드는 수정 할 필요가 없다!! 굉장히 유연해진다!!
+
+<br><br>
+
+### 레포지토리(DAO)
+
+**레포지토리는** `Spring Data JPA + JPA` **함께 사용 중!**
+
+참고로 Spring Data JPA는 `JpaReository 인터페이스` 로 볼 수 있고, 이거만 상속해도 **서비스 단에서 바로 사용**이 가능하다.   
+**-> 자동으로 구현체를 만들어 주기 때문**
+
+<details><summary><b>예시 코드 보기 - 레포지토리<b/></summary>
+<div markdown="1">
+**MemberRepository 인터페이스 + MemberRepositoryCustom 인터페이스 + MemberRepositoryCustomImpl 클래스 의 조합**<br>
+```java
+/**
+ * MemberRepository 인터페이스 -> 서비스 계층에서 사용하게 될 본체
+ * 여기서 2개의 인터페이스를 상속 받는다.
+ * - JpaRepository<Member, Long> 이 바로 Spring Data JPA 이다.
+ * - MemberRepositoryCustom 이 바로 일반 JPA 이다. 
+ */
+public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
+  //CRUD 자동 제공
+}
+/**
+ * MemberRepositoryCustom 인터페이스 -> 일반 JPA로 커스텀
+ */
+public interface MemberRepositoryCustom {
+  Member findOne(Long id);
+  Member findByUid(String uid);
+  List<FindMemberResponseDto> findAllWithPage(int pageId);
+}
+/**
+ * MemberRepositoryCustomImpl 클래스 -> 일반 JPA로 커스텀 구현체
+ * - save() 주석 -> JpaRepository 꺼 사용하려고
+ * - @Override -> 인터페이스 구현 때 당연히 필수 키워드
+ */
+@Repository
+@RequiredArgsConstructor // 생성자 주입 + 엔티티매니저 주입 제공
+public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
+  private final EntityManager em;
+  /**
+   * save, findOne, findByUid, findAllWithPage
+   */
+//  public void save(Member member) {
+//    if (member.getId() == null) {
+//      em.persist(member); // db 저장
+//    }
+//  }
+  @Override
+  public Member findOne(Long id) {
+    return em.find(Member.class, id);
+  }
+  @Override
+  public Member findByUid(String uid) {
+    List<Member> findMembers = em.createQuery("select m from Member m where m.uid = :uid",
+            Member.class)
+        .setParameter("uid", uid)
+        .getResultList(); // List로 반환 받아야 null처리가 쉬움
+    return findMembers.isEmpty() ? null : findMembers.get(0);
+  }
+  @Override
+  public List<FindMemberResponseDto> findAllWithPage(int pageId) {
+    int offset = (pageId - 1) * 10;
+    int limit = 10;
+    List<Object[]> objects = em.createNativeQuery("select m.member_id, m.nickname, e.level " +
+            "from (select * from member order by member_id desc limit " + offset + "," + limit + ") m "
+            +
+            "inner join character c on m.character_id=c.character_id " +
+            "inner join exp e on c.exp_id=e.exp_id;")
+        .getResultList();
+    return objects.stream()
+        .map(o -> new FindMemberResponseDto((Long) o[0], (String) o[1], (Long) o[2]))
+        .collect(Collectors.toList());
+  }
+}
+```
+</div>
+<details/>
 
 
+<details><summary><b>Spring Data Jpa 기본 제공 CRUD표<b/></summary>
+<div markdown="1">
+참고: save() 는 update 기능 포함<br>
+| 메소드           | 설명                                              |
+| ---------------- | ------------------------------------------------- |
+| findAll()        | 전체 데이터를 조회할 수 있습니다.                 |
+| findBy()         | 조건을 추가하여 전체 데이터를 조회할 수 있습니다. |
+| findTop5By()     | 조건에 맞는 데이터 중 상위 5건만 가져옵니다.      |
+| findDistinctBy() | 중복을 제거하여 조회할 수 있습니다.               |
+| findFirstBy()    | 조회된 데이터 중 1건만 가져옵니다.                |
+| count()          | 전체 행 수를 조회합니다.                          |
+| countBy()        | 조건에 맞는 전체 행 수를 조회합니다.              |
+| save()           | 단일 데이터를 저장합니다.                         |
+| saveAll()        | 여러 건의 데이터를 저장합니다.                    |
+| delete()         | 단일 데이터를 삭제합니다.                         |
+| deleteAll()      | 여러 건의 데이터를 삭제합니다.                    |
+| deleteBy()       | 조건에 맞는 데이터를 삭제합니다.                  |
+<br>메서드 조건 규칙<br>
+| 조건                                     | 메소드 명명규칙 예시                                         | 실제 생성된 쿼리 예시                                        |
+| ---------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| 동일(=)                                  | findByName                                                   | select te1_0.id,te1_0.code,te1_0.date,te1_0.name from test_entity te1_0 where te1_0.name=? |
+| 대소(>, >=, <, <=)                       | > : findByCodeIsGreaterThan                                  | select te1_0.id,te1_0.code,te1_0.date,te1_0.name from test_entity te1_0 where te1_0.code>? |
+| >= : findByCodeIsGreaterThanEqual        | select te1_0.id,te1_0.code,te1_0.date,te1_0.name from test_entity te1_0 where te1_0.code>=? |                                                              |
+| < : findByCodeIsLessThan                 | select te1_0.id,te1_0.code,te1_0.date,te1_0.name from test_entity te1_0 where te1_0.code<? |                                                              |
+| <= : findByCodeIsLessThanEqual           | select te1_0.id,te1_0.code,te1_0.date,te1_0.name from test_entity te1_0 where te1_0.code<=? |                                                              |
+| 범위(BETWEEN)                            | findByCodeBetween * 파라미터 2개 필요                        | select te1_0.id,te1_0.code,te1_0.date,te1_0.name from test_entity te1_0 where te1_0.code between ? and ? |
+| 포함(LIKE, NOT LIKE)                     | findByNameContains                                           | select te1_0.id,te1_0.code,te1_0.date,te1_0.name from test_entity te1_0 where te1_0.name like ? escape '\\' |
+| findByNameNotContains                    | select te1_0.id,te1_0.code,te1_0.date,te1_0.name from test_entity te1_0 where te1_0.name not like ? escape '\\' |                                                              |
+| findByNameLike                           | select te1_0.id,te1_0.code,te1_0.date,te1_0.name from test_entity te1_0 where te1_0.name like ? escape '\\' |                                                              |
+| findByNameNotLike                        | select te1_0.id,te1_0.code,te1_0.date,te1_0.name from test_entity te1_0 where te1_0.name not like ? escape '\\' |                                                              |
+| 시작, 끝 값(startWith, endWith)          | findByNameStartsWith                                         | select te1_0.id,te1_0.code,te1_0.date,te1_0.name from test_entity te1_0 where te1_0.name like ? escape '\\' |
+| findByNameEndsWith                       | select te1_0.id,te1_0.code,te1_0.date,te1_0.name from test_entity te1_0 where te1_0.name like ? escape '\\' |                                                              |
+| NULL                                     | findByNameIsNull * 파라미터 필요 없음                        | select te1_0.id,te1_0.code,te1_0.date,te1_0.name from test_entity te1_0 where te1_0.name is null |
+| findByNameIsNotNull * 파라미터 필요 없음 | select te1_0.id,te1_0.code,te1_0.date,te1_0.name from test_entity te1_0 where te1_0.name is not null |                                                              |
+| IN                                       | findByNameIn * List 파라미터 필요                            | select te1_0.id,te1_0.code,te1_0.date,te1_0.name from test_entity te1_0 where te1_0.name in (?) |
+| findByNameNotIn * List 파라미터 필요     | select te1_0.id,te1_0.code,te1_0.date,te1_0.name from test_entity te1_0 where te1_0.name not in (?) |                                                              |
+<br>정렬 규칙<br>
+| 종류        | 메소드 예시                   | 쿼리 예시                                                    |
+| ----------- | ----------------------------- | ------------------------------------------------------------ |
+| 오름차순    | findbyOrderByCode             | select te1_0.id,te1_0.code,te1_0.date,te1_0.name from test_entity te1_0 order by te1_0.code |
+| 내림차순    | findbyOrderByCodeDesc         | select te1_0.id,te1_0.code,te1_0.date,te1_0.name from test_entity te1_0 order by te1_0.code desc |
+| 컬럼 여러개 | findbyOrderByCodeDescNameDesc | select te1_0.id,te1_0.code,te1_0.date,te1_0.name from test_entity te1_0 order by te1_0.code desc,te1_0.name desc |
+</div>
+<details/>
+<details><summary><b><b/></summary>
+<div markdown="1">
+</div>
+<details/>
 
+- 출처: [JpaRepository 메소드 규칙 정리](https://priming.tistory.com/114)
 
+<br>
+
+**레포에서 em.createQuery()**할때 `.getResultList();` 로 반환받는게 null처리 용이!! (보통 하나를 받더라도 이걸로 하는 중!)
+
+**JPQL 은 아래 정리한 주제에서 참고**
+
+<br><br>
+
+### 서비스
+
+도메인, 레포지토리 처럼 @Service 선언해서 자동 빈 등록하면 됨.  
+**그러나, 인터페이스 활용을 보여주기 위해 "수동 빈 등록 + 모니터링 비지니스 로직" 코드로 정리!**
+
+인터페이스 설명은 레포지토리에서 했기에 생략하고, 모니터링 비지니스 로직을 위한 **"수동 빈 등록"** 을 잠시 보자.
+
+- @Service 는 자동 빈 등록을 하는데 이걸 대신하려면 수동으로 빈 등록을 해야한다.
+
+- @Configuration 과 @Bean 조합으로 등록할 수 있다.
+
+- ```java
+  // 빈 등록
+  @Configuration
+  public class TaskConfigV2 {
+    @Bean
+    TaskService taskService(TaskRepository taskRepository, MeterRegistry registry) {
+      return new TaskServiceV2(taskRepository, registry);
+    }
+    // @Timed 사용(->예시 코드 참고) 위해서 반드시 필수 -> AOP 사용
+    @Bean
+    public TimedAspect timedAspect(MeterRegistry registry) {
+      return new TimedAspect(registry); 
+    }
+  }
+  ```
+
+<br>
+
+<details><summary><b>예시 코드 보기 - 서비스<b/></summary>
+<div markdown="1">
+**TaskService 인터페이스 + TaskServiceV2 클래스(구현체) + TaskConfigV2 클래스(설정-빈 등록)**<br>
+TaskServiceV2 를 보면 정말 레포지토리 <-> 컨트롤러 이어주는 역할 하는 느낌이다.<br>
+```java
+/**
+ * TaskService 인터페이스 -> 모니터링 위해 임의로 인터페이스 사용. 
+ */
+public interface TaskService {
+  void join(Task task); // 일정 등록
+  Task findOne(Long taskId);
+  Task findOneWithMember(Long memberId, Long taskId);
+  void remove(Task task);
+  void update(Task task, String content, LocalDateTime startTime, LocalDateTime endTime);
+  void updateStatus(Task task, Boolean completedStatus, Boolean timerOnOff,
+      Long remainTime); // 일정 완료
+  void updateAll(List<Task> taskList, String content, LocalDateTime startTime, LocalDateTime endTime);
+}
+//
+/*
+@Timed 사용 시 아래와같은 빌더 작성을 생략가능
+Counter.builder("my.task")
+        .tag("class", this.getClass().getName())
+        .tag("method", "addTask")
+        .description("task")
+        .register(registry).increment();
+ */
+//TaskServiceV2 클래스 -> 인터페이스 구현체 (@Override 필수)
+@Timed("my.task") // 모니터링
+@Transactional(readOnly = true) // 읽기모드 기본 사용
+@RequiredArgsConstructor // 생성자 주입 + 엔티티 매니저(서비스에서는 안씀)
+public class TaskServiceV2 implements TaskService {
+  private final TaskRepository taskRepository;
+  private final MeterRegistry registry;
+  @Override
+  @Transactional // 쓰기모드 사용 위해
+  public void join(Task task) {
+    taskRepository.save(task);
+    sleep(500);
+  }
+  @Override
+  @Transactional // 쓰기모드 사용 위해
+  public void remove(Task task) {
+    taskRepository.remove(task);
+  }
+  @Override
+  @Transactional // 더티체킹 - db 적용
+  public void update(Task task, String content, LocalDateTime startTime, LocalDateTime endTime) {
+    task.updateTask(content, startTime, endTime);
+  }
+  //...
+}
+//TaskConfigV2 클래스 -> 수동 빈 등록 설정
+@Configuration
+public class TaskConfigV2 {
+  @Bean
+  TaskService taskService(TaskRepository taskRepository, MeterRegistry registry) {
+    return new TaskServiceV2(taskRepository, registry);
+  }
+  // 위에서 사용한 @Timed 사용 위해 반드시 필수 -> AOP 사용
+  @Bean
+  public TimedAspect timedAspect(MeterRegistry registry) {
+    return new TimedAspect(registry); 
+  }
+}
+```
+</div>
+<details/>
+
+<br>
+
+**서비스 단에서 @Transactional(readOnly=true) 전역, @Cacheable(), @Scheduled()**   
+-> 캐시랑 스케줄링을 여기서 사용했다. 
+
+- **쓰기모드 필요할때만 @Transactional 추가 선언** -> readOnly=false
+
+```java
+// value랑 cacheNames는 동일. 둘다 "캐시이름"의미. 하나 생략 가능.
+// key는 말 그대로 구분하는 키값
+// 만약 설정한 캐시매니저가 따로 있으면 cacheManager = "cacheManager2" 속성 추가
+@Cacheable(value = "members", key = "#pageId", cacheNames = "members") // [캐시 없으면 저장] 조회
+public List<FindMemberResponseDto> findAllWithPage(int pageId) {
+  return memberRepository.findAllWithPage(pageId);
+}
+
+// 캐시에 저장된 값 제거 -> 30분 마다 실행하겠다.
+// 초(0-59) 분(0-59) 시간(0-23) 일(1-31) 월(1-12) 요일(0-6) : "00 30 * * * *"
+// - 요일? (0: 일, 1: 월, 2:화, 3:수, 4:목, 5:금, 6:토)
+@Scheduled(cron = "00 30 * * * *") // 30분 00초 마다 수행
+@CacheEvict(value = "members", allEntries = true)
+public void initCacheMembers() {
+}
+```
 
 <br>
 
@@ -683,72 +952,824 @@ typora-root-url: ../../..
 
 ## (컨트롤러) 통신 구현
 
+**파라미터 요청이나 응답** 둘다 “**DTO(+Valid)”는 거의 필수** 사용 -> Jackson, Gson (json변환 라이브러리) 필수 공부
 
+- LePl 플젝(Jackson), Swing 플젝(Gson) 사용했으니 참고~~
 
+  - JSON 반환시 꼭 마지막에 객체로 감싸서 반환 -> `{ 데이터 }`
+  - 배열 JSON이면 꼭 마지막에 배열로 감싸서 반환 -> `[{},{}...]`
 
+- <details><summary><b>Jackson 2.8.0 이전 버전 LocalDateTime 오류?<b/></summary>
+  <div markdown="1">
+  ```java
+  Map<String, LocalDateTime> map = new HashMap<>();
+  map.put("startTime", st);
+  map.put("endTime", en);
+  ObjectMapper obj = new ObjectMapper();
+  String content = obj.registerModule(new JavaTimeModule())
+      .writeValueAsString(map); // Jackson 2.8.0 이전 버전에서는 JavaTimeModule 을 써야 에러 해결(직렬화 에러)
+  ```
+  </div>
+  <details/>
 
+- API 응답 스펙에 맞추어 별도의 **DTO를 반환** 권장
 
+  * **setter를 최대한 사용하지않고, 파라미터를 줄여주는 효과**
+
+- 특히, **DTO에서 lazy 강제 초기화 하고 있다.** 안하면 `LazyInitializationException` 에러
+
+  - 강제 초기화를 안하면 fetch join으로 모두 조회 했어도 해당 엔티티를 찾을 수 없게 되어서 null이 응답!! -> "영속성에 등록하지 않아서. 즉, 메모리에 올려두지 않아서."
+
+  - <details><summary><b>자세히 (출력사진+코드)<b/></summary>
+    <div markdown="1">
+    **Lazy 강제 초기화 안 할때**<br>
+    <img src="https://github.com/user-attachments/assets/093f2678-788f-4ecf-8ade-4790f5cb31e1" alt="image" style="zoom:80%;" /><br>
+    <img src="https://github.com/user-attachments/assets/4c512757-f58b-44ba-b89f-4fb9d0706dae" alt="image" style="zoom:80%;" /><br>
+    <br>**강제 초기화 할 때(하는법 코드참고)**<br>
+    ```java
+    //ListsResDto 생성자 내부
+    List<Lists> listsList = listsService...
+    List<ListsResDto> result = listsList.stream()
+        .map(o -> new ListsResDto(o))
+        .collect(Collectors.toList()); //반환 List타입 설정
+    this.listsTasks = lists.getTasks().stream()
+        .map(o -> new TaskDto(o))
+        .collect(Collectors.toList());
+    //TaskDto 생성자 내부
+    this.completedStatus = task.getTaskStatus().getCompletedStatus();
+    this.timerOnOff = task.getTaskStatus().getTimerOnOff();
+    ```<br>
+    <img src="https://github.com/user-attachments/assets/80d56805-64a3-41e9-ba9d-a0cddb027498" alt="image" style="zoom:80%;" /><br>    
+    </div>
+    <details/>
+
+<br>
+
+**보통 @RestController + @RequestMapping + @RequiredArgsConstructor 조합 사용**
+
+- @RequiredArgsConstructor 은 이미 언급해서 생략
+
+- @RestController 는 API에 필수(+**@ResponseBody도 포함**해서 예로 Json 반환 자동)
+
+- @RequestMapping("api/v1/members") 는 전역 주소
+  - @PostMapping, @GetMapping -> 주로 사용
+  - @RequestBody, @ResponseBody : HttpEntity 처럼 **HTTP 메시지 컨버터**가 **HTTP 메시지 바디**의 내용을 우리가 원하는 문자나 객체(DTO) 등으로 자동 변환
+
+  - 요청(ex:json)엔 @RequestBody, 응답엔 @ResponseBody!!
+  - **응답은 항상 아래 흐름**
+    - `ResponseEntity.status(HttpStatus.NOT_FOUND).body(FAIL_LOGIN)` 이런 패턴 사용중임! -> ResponseEntity 활용 (상태코드 담기 좋다)
+    - `@ResponseStatus(HttpStatus.*BAD_REQUEST*)` 이걸로ResponseEntity 없이 쉽게 반환할 수도 있음 (상태코드를 @ResponseStatus로 해결)
+    - **Valid 사용하면 Api응답양식**까지 포함해서 body에 반환
+       `ApiResponse res = ApiResponse.error(HttpStatus.BAD_REQUEST.value(), bindingResult);` -> (ApirResponse는 아래 리팩토링 주제 쪽에서 참고-Valid)
+
+- <details><summary><b>HttpStatus 클래스에서 제공하는 주요 상태 코드<b/></summary>
+  <div markdown="1">
+  - **1xx: 정보 응답**
+      - **100 Continue**: 클라이언트가 요청을 계속 진행해도 좋다는 의미입니다.
+      - **101 Switching Protocols**: 서버가 클라이언트의 요청에 따라 프로토콜을 전환하고 있다는 의미입니다.
+  - **2xx: 성공**
+      - **200 OK**: 요청이 성공적으로 처리되었습니다.
+      - **201 Created**: 요청이 성공적으로 처리되어 새로운 자원이 생성되었습니다.
+      - **202 Accepted**: 요청이 수락되었으나 아직 처리되지 않았음을 의미합니다.
+      - **204 No Content**: 요청이 성공적으로 처리되었으나 반환할 내용이 없음을 의미합니다.
+  - **3xx: 리다이렉션**
+      - **300 Multiple Choices**: 요청에 대해 여러 개의 선택지가 있음을 의미합니다.
+      - **301 Moved Permanently**: 요청한 자원이 영구적으로 새로운 URI로 이동하였음을 나타냅니다.
+      - **302 Found**: 요청한 자원이 다른 URI로 임시로 이동되었음을 의미합니다.
+      - **304 Not Modified**: 클라이언트가 캐시한 자원이 수정되지 않았음을 나타냅니다.
+  - **4xx: 클라이언트 오류**
+      - **400 Bad Request**: 요청이 잘못되어 서버가 이해할 수 없음을 의미합니다.
+      - **401 Unauthorized**: 요청에 인증이 필요하며, 인증 정보가 없거나 유효하지 않음을 나타냅니다.
+      - **403 Forbidden**: 서버가 요청을 이해했지만, 요청을 수행할 권한이 없음을 의미합니다.
+      - **404 Not Found**: 요청한 자원을 찾을 수 없음을 나타냅니다.
+      - **405 Method Not Allowed**: 요청한 HTTP 메서드가 해당 자원에서 지원되지 않음을 의미합니다.
+  - **5xx: 서버 오류**
+      - **500 Internal Server Error**: 서버에서 요청을 처리하는 도중 오류가 발생했음을 나타냅니다.
+      - **501 Not Implemented**: 요청한 메서드가 서버에서 구현되지 않았음을 의미합니다.
+      - **503 Service Unavailable**: 서버가 현재 요청을 처리할 수 없음을 나타내며, 보통 서버가 과부하 상태이거나 유지보수 중일 때 발생합니다.
+  </div>
+  <details/>
+
+- **세션 얻으려고 HttpServletRequest** 파라미터를 받기도 함. -> request 가 세션 관리 기억!
+
+  ```java
+  // 세션 있으면 세션 반환, 없으면 신규 세션 생성
+  HttpSession session = request.getSession(); // UUID 형태로 알아서 생성 (기본값 : true)
+  // 세션에 로그인 회원 정보 보관
+  session.setAttribute(SESSION_NAME_LOGIN, findMember.getId());
+  ```
 
 <br>
 
 <br>
 
-## 중요한 엔티티의 조회
-
-**엔티티 조회 권장 순서**
-
-1. **엔티티 조회 방식**으로 우선접근 : **지연로딩!!**
-   1. **일반 엔티티** 최적화 : 페치조인으로 쿼리 수를 최적화
-   2. **컬렉션** 최적화
-      1. 페이징 필요O : `hibernate.default_batch_fetch_size` , `@BatchSize` 로 최적화
-      2. 페이징 필요X : 페치조인 사용
-2. 엔티티 조회 방식으로 해결이 안되면 DTO 조회 방식 사용
-3. DTO 조회 방식으로 해결이 안되면 NativeSQL or 스프링 JdbcTemplate 활용
-
-<br>
-
-**참고) 엔티티 조회 에러 해결**
-
-* **엔티티를 외부에 노출하면서 발생하는 문제들이라서 사실상 이부분을 알 필요는 없다.**
-* @JsonIgnore : **양방향 무한 반복의 문제**를 해결
-  * 하지만 지양하고 **DTO** 방식으로 해결을 지향
-* Hibernate5Module을 @Bean 등록 까지 해주면 **Lazy 문제**도 해결 
-  * 하지만 이 또한 지양하고 **LAZY 강제 초기화**로 다 해결
-  * 예로 전체 엔티티를 LAZY로 개발한 후 Order를 조회할 때?? 단, Order 엔 Member가 있음.
-  * 이때, LAZY 강제 초기화를 안하면 Member를 null로 나타낸다는게 **LAZY 문제**라는것.
-    * **해결방안**으로 **`order.getMember().getName()` 같은 코드를 추가해야 LAZY 강제 초기화**를 진행
-    * 이 경우 Member를 select하는 **쿼리를 추가로 전송**하는 행동을 해준다. **이를 막으려면??**
-    * **단, 이 경우엔 `fetch join` (`distinct`도 사용 권장) 을 꼭 함께 사용해줘야 추가 전송하는 쿼리를 막고 1개의 쿼리만으로 모든걸 해결 할 수 있다. => 매우중요!!**
-      * **하이버네이트6 버전 부터는 자동으로 distinct를 적용해주고 있다고 함!!**
+## 테스트 코드 -> 코드 커버리지 필수
 
 <br><br>
 
-## JPQL(JPA) TIP - Fetch Join 중요
+### 코드 커버리지
 
-**JPQL TIP**
+[코드 커버리지](https://amaran-th.github.io/소프트웨어 설계/[IntelliJ] 코드 커버리지 확인하기/) 내용이 궁금하다면 참고 링크
 
-* **느낀점** 
+- **인텔리J-edit configurations 세팅** 및 테스트 실행 때 **run test with 커버리지로 실행 ㄱ(run test with 커버리지 이것만해도 바로 됨)**  
 
-  * JPQL 작성한 경우 DB 테이블의 필드명들로 쿼리문에 사용하는게 아니라,
-  * Java 파일로 만든 엔티티 파일에 선언된 필드명으로 쿼리문에 작성해야 하는듯 하다.
+  <img src="https://github.com/user-attachments/assets/3804a3c4-e550-466d-bef9-3e6d56da6dcf" alt="image" style="zoom:150%;" /> 
 
-* **반환 방식**
+  - 참고로 **edit configurations에서** **Run 멀티 설정, 실행 프로필 설정 등** 여러가지 할 수 있음.
 
-  * TypeQuery: 반환 타입이 명확할 때 사용
-  * Query: 반환 타입이 명확하지 않을 때 사용
-  * **Dto : QueryDSL 사용시 패키지 명까지 없앨 수 있음 (우선 이걸로 자주 사용하자)**
+<br><br>
+
+### 테스트 코드 흐름
+
+참고) [졸작](https://github.com/BH946/LePl_Spring/tree/kbh)은 JUnit5, [우테코](https://github.com/BH946/java-lotto-6/tree/main/src/test/java/lotto)는 AssertJ 사용했음, **TDD는 테스트 주도 개발 방법론**
+
+* **JUnit5**
+
+  * `Assertions.assertNull, Assertions.assertInstanceOf, Assertions.assertEquals, Assertions.assertThrows` 등등 자주 사용
+
+  * ```java
+    //어떤 객체인지 체크
+    Assertions.assertInstanceOf(Character.class, character);
+    //결과 비교 - equals
+    Assertions.assertEquals(member, memberRepository.findOne(saveId));
+    //예외 처리 + 예외 메시지까지 확인법
+    Throwable exception = Assertions.assertThrows(IllegalStateException.class, () -> {
+        followService.join(findFollow); // 중복검증 예외 발생
+    });
+    Assertions.assertEquals("이미 팔로우 요청을 하셨습니다.", exception.getMessage());
+    log.info("exception.getMessage() : {}", exception.getMessage());
+    //일부러 예외 터트린 테스트라면
+    Assertions.fail("중복검증 예외가 발생해야 한다.");
+    //프록시 체크 -> 서비스에 @Transactinal 은 프록시 사용
+    Assertions.assertThat(AopUtils.isAopProxy(memberService)).isTrue();
+    Assertions.assertThat(AopUtils.isAopProxy(memberRepository)).isFalse();
+    ```
+
+* **AssertJ -> Junit5에서 파생된것**
+
+  * ```java
+    assertThat(connection).isNotNull();
+    assertThat(findMember).isEqualTo(member);
+    assertThatThrownBy(() -> repository.findById(member.getMemberId()))
+        .isInstanceOf(NoSuchElementException.class); // 예외 터지는거 확인
+    ```
+
+* **print대신 assert 로 비교하자**
+  * `Assertion`을 이용하자. 이걸 사용해서 `assertEquals`함수 사용시 두개 인자가 동일한지 봐준다
+    * 안 동일하면 오류, 동일하면 정상 동작
+    * `Assertions.assertEquals(member, memberRepository.findOne(saveId));`
+    * `Assertions.assertThat(member).isEqualeTo(result);` 이것도 위처럼 사용된다.
+    * `Assertions.assertInstanceOf(Character.class, character);` 어떤 객체인지 체크하기 좋음
+* **예외 테스트**
+
+  * (1)try, catch보다 간편하게 `assertThrows`를 사용해서 일부러 예외를 터트려서 테스트
+
+    * 아래 JUnit5 에 정리한 부분이 이 내용
+
+  * (2)또는 try, catch대신 `@Test(expected = IllegalStateException.class)` 를 선언하면 알아서 해당 예외 터질 때 종료해줌
+    * 만약 해당 예외가 안터지면 그다음 코드들이 계속 실행됨. 그 코드는 아래 형태로 작성
+    * `Assertions.fail("예외가 발생해야 한다.");` 예외가 안터져서 오히려 에러 라고 로그를 남겨줌
+
+
+<br>
+
+* **스프링 테스트 선언법**
+
+  * Junit4 : @RunWith, @SpringBootTest 둘다 선언 - 클래스 단에
+  * **Junit5** : @SpringBootTest 선언 - 클래스 단에
+  * **이후 @Test** 를 메소드마다 선언하여 테스트!! - 메소드 단에
+    * @RunWith(SpringRunner.class) : 스프링과 테스트 통합 -> **Junit4 이하만 사용**
+    * **@SpringBootTest** :  스프링 컨테이너와 테스트를 함께 실행. 모든 빈 로드. (이게 없으면 @Autowired 다 실패) -> (레포, 서비스에 당연히 쓰겠지?) **=> 컨트롤러만 테스트?? @WebMvcTest 사용 (서블릿 컨테이너 MOCK)**
+      * 즉, 스프링 빈 사용하고 싶으면 반드시 필수
+      * @TestConfiguration : 테스트에서 **스프링 빈 등록을 지원**하는 어노테이션
+
+* **given, when, then 예시** -> tdd 로 자동완성 사용 중
+
+  * given에 멤버 이름 설정
+  * when에 서비스의 join함수 사용(회원가입 되는지 확인하는 것)
+  * then에 결과를 보는것. 멤버이름이 잘 생겼는지 등등..(assert보통 씀!)
+    - **@BeforEach, @AfterEach**는 각 @Test 수행 전, 후 동작 -> @Test마다 **독립적 실행** 상태라 필요 (@Test마다 실행해 줌)
+    - 다만, DB와 연동하는 **레포(DAO)단**에선 **@Transactional의 @Rollback(false)**를 통해 **DB의 데이터 공유는 전역**으로 가능해서 테스트가 정상 동작 하는 것!
+
+* **@Transactional** : 테스트를 실행할 때 마다 트랜잭션을 시작하고 테스트가 끝나면 트랜잭션을 강제로 롤백 (이 어노테이션은 테스트 케이스에서 사용될때만 기본값으로 롤백)
+
+  * **롤백을 하기때문에 내부에서 굳이 영속성 컨텍스트 플러시를 안하는 특징**을 가짐
+  * @Rollback(false) : **롤백 취소**
+    * 롤백을 안하니까 **자동flush** 진행하므로 insert문 로그 확인가능
+  * em.flush() 함수 사용 : **flush 진행**
+    * 롤백은 건드리지않고 **수동flush** 진행하므로, 롤백은 그대로 진행하면서 insert문 로그 확인가능
+  * **서비스 TDD 때 트랜잭션 선언안하면 서비스가 동작을 안하기 때문에 그냥 전역으로 써주고! 대신에 서비스 코드에 트랜잭션 있는건 꼭 확인**
+    * 왜냐하면 **TDD에 선언한 트랜잭션때문에 서비스에 트랜잭션이 없어도 동작하기 때문!**
+    * 참고) 트랜잭션이 겹칠텐데 전파로 인해 기존 사용중인 트랜잭션을 그대로 사용하므로 문제가 없다.
+
+* **@TestMethodOrder(MethodOrderer.OrderAnnotation.class)**
+
+  * **@Order()+@Rollback(value=false)** 활용 -> 주로 db저장 먼저하려고!
+  * `@Order(1), @Order(2)` ... 로 테스트 코드 실행 순서 지정 가능
+    * 주의 : Order 라는 클래스가 이미 import 중이라면 `@org.junit.jupiter.api.Order(1)`
+    * 또한, `org.junit.jupiter.api` 패키지의 Order 를 사용한다는 점을 기억
+
+  * `@DisplayName` 는 간단히 테스트 출력때 항목 이름을 설정해서 출력 가능
+
+- **@Slf4j** -> `private static final Logger log = LoggerFactory.getLogger(YourClassName.class);`와 같은 로깅 필드가 자동 생성
+  - `log.info("{}", member.getId());` 이런식 사용
+
+- **컨트롤러"만" 테스트: @WebMvcTest** 사용 (서블릿 컨테이너 MOCK) -> WAS 역할을 톰캣 대신 해주는것!
+
+  - @MockBean 으로 **가짜** 객체 등록. -> **중요: 실제 동작X**
+
+    - 따라서 `when(member.getId()).thenReturn(1L);` 이런식으로 **임의로 리턴값 지정**
+    - `mockMvc.perform()` 사용때 post, get 잘 구분해서 적용
+    - `Member member = mock(Member.class);` 처럼 함수내에서 Mocking 객체도 간단 (@MockBean이랑 동작은 비슷할 듯)
+    - 진짜 **컨트롤러 코드만 테스트** 하는것!
+
+  - **MockMvc의 목적은 3가지**
+
+    * **request** 잘 받는지 - **content()**
+    * 서비스 메서드로 **데이터 잘 전달** 되는지 - **verify()**
+      * times() 도 같이 많이 사용
+      * 왜냐하면 여러번 서비스 불리는 경우 몇번 불리는지 times로 명시해줘야 TooMany 에러 방지
+
+    * 서비스 반환값으로 **response** 잘 받는지 - **when, given 필수!**
+      * when, given 으로 해당 서비스의 반환값을 직접 설정가능!
+      * response(응답) 관련 검증 메소드는 매우 다양!
+        * andExpect() - status(), view(), redirectedUrl(), model(), content(), jsonPath() 등등.. 응답 관련 메소드..
+        * andDo() : 요청, 응답관련 전체 메시지 출력
+
+  - 로그인 세션 같이 **세션은??**
+
+    - `MockHttpSession()` 활용 -> 가짜 세션으로 로그인 인증 "인터셉터" 통과
+
+    - 반대로 세션을 반환하는 "로그인" 컨트롤러 테스트 경우?
+
+      - 로그인 로직은 로그인 성공시 세션을 생성! **(request 역할)**
+
+        <img src="https://github.com/user-attachments/assets/34989c07-a468-46cd-b796-d9dafa4abc17" alt="image" style="zoom:150%;" /> 
+
+      - @WebMvcTest 테스트 수행한 로그 request쪽에 session atr 보면 생성된 HttpServletRequest 정보 확인 가능
+
+      - 다만, 응답 쿠키는 확인이 불가능했다. 쿠키는 웹에서는 자동 처리해주다보니 환경 차이인 것 같다.
+
+  - <details><summary><b>Mock관련 메서드들 참고<b/></summary>
+    <div markdown="1">
+    1) perfom()<br>
+    - HTTP 요청을 할 수 있다.<br>
+    - 체이닝이 지원되어 여러 검증 기능을 이어서 선언할 수 있다.<br>
+    2) andExcept()<br>
+    - mvc.perform의 결과를 검증한다.<br>
+    - status() : 상태 코드를 검증할 수 있다.<br>
+    - view() : 리턴하는 뷰에 대해 검증한다.<br>
+      - ex) andExcept(view().name("/detailpage"))<br>
+    - redirectedUrl() : 리다이렉트 url을 검증한다.<br>
+      - ex) redirectedUrl("/where");<br>
+    - model() : 컨트롤러의 Model에 관해 검증한다.<br>
+      - ex) model().attribute("alcoholDetails", alcoholDetails)<br>
+      - ex) model().attributeHasFieldErrorCode("loginForm", "userId", "NotBlank")<br>
+    - content() : 응답에 대한 정보를 검증한다.<br>
+    - jsonPath() : response body에 들어갈 json 데이터를 검증한다.<br>
+      - ex) jsonPath("$.status").value("400")<br>
+    3) andDo()<br>
+    요청/응답 전체 메세지를 확인할 수 있다.<br>
+    <br>
+    Mock() - 모의 객체를 생성하는 역할<br>
+    when() - 협력객체 메소드 반환 값을 지정해주는 역할(stub)<br>
+    verify() - stub안의 협력객체 메소드가 호출 되었는지 확인<br>
+    times() - 지정한 횟수 만큼 협력 객체 메소드가 호출 되었는지 확인<br>
+    never() - 호출되지 않았는지 여부 검증<br>
+    atLeastOnce() - 최소 한 번은 특정 메소드가 호출되었는지 확인<br>
+    atLeast() - 최소 지정한 횟수 만큼 호출되었는지 확인<br>
+    atMost() - 최대 지정한 횟수 만큼 호출되었는지 확인<br>
+    clear() - stub을 초기화 한다<br>
+    timeOut() - 지정된 시간 안에 호출되었는지 확인
+    </div>
+    <details/>
+
+  - **HttpServletRequest, HttpServletResponse 관련 테스트** -> `MockHttpServletRequest, MockHttpServletResponse` 을 사용! (아직 사용해보지는 않았음)
+
+  - **NoSuchBeanDefinitionException 주의)** 컨트롤러에서 사용한 레포,서비스 등등 은 꼭 Mock해주자. 테스트코드에는 없고 컨트롤러에서만 사용중이어도 무조건 **@MockBean 등록은 일단 필수다!!**
+
+    - **예로 @Test 회원가입() 로직에 memberService만 사용**하고 exp, character서비스는 사용하지 않았다.
+    - 근데, 실제 register() 로직인 회원가입 컨트롤러 코드를 보면 exp, character서비스 전부 사용한다.
+    - 그렇다면 아래처럼 @MockBean 등록은 일단 필수다!!
+
+    <img src="https://github.com/user-attachments/assets/7b1c7fb2-c740-45c5-9018-49490c2dd293" alt="image" style="zoom:80%;" />  
+
+  - `mockMvc.perform` 함수에서 **json 내용**을 체크 하고 싶을때? -> `jsonPath()`
+
+    - 배열 처리는?
+       `.andExpect(jsonPath("$[0].content").value("알림테스트1")) // 응답 body 의 json 확인 .andExpect(jsonPath("$[2].content").exists()) .andExpect(jsonPath("$[3]").doesNotExist()) // 없어야 정상`
+    - 일반 적인 {}는?
+       `.andExpect(*jsonPath*("$.data.uid").value("12345")) // 응답 body 의 json 확인`
+
+<br>
+
+**예시 코드 참고**
+
+- <details><summary><b>도메인<b/></summary>
+  <div markdown="1">
+  ```java
+  @Slf4j
+  class MemberTest {
+    @Test
+    public void 생성_편의메서드() throws Exception {
+      // given
+      Member member = null;
+      // when
+      member = Member.createMember("test", "테스트1");
+      // then
+      Assertions.assertInstanceOf(Member.class, member);
+    }
+  //
+    @Test
+    public void 연관관계_편의메서드() throws Exception {
+      // given
+      Member member = Member.createMember("test", "테스트2");
+      Lists lists = Lists.createLists(member, LocalDateTime.now(), new ArrayList<>());
+      log.info("{}", member.getLists().size()); //=0
+      // when
+      member.addLists(lists);
+      log.info("{}", member.getLists().size()); //=1
+      // then
+      Assertions.assertEquals(member.getLists().size(), 1);
+    }
+  }
+  ```
+  </div>
+  <details/>
+
+- <details><summary><b>레포지토리<b/></summary>
+  <div markdown="1">
+  ```java
+  @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+  @SpringBootTest
+  @Slf4j
+  class MemberRepositoryTest {
+    @Autowired
+    MemberRepository memberRepository;
+    @Autowired
+    EntityManager em;
+  //
+    /**
+     * save, findOne, findByUid, findAllWithPage
+     */
+    @Test
+    @Order(1)
+    @Transactional // 롤백
+    @Rollback(value = false)
+    public void 회원가입_조회() throws Exception {
+      // given
+      Member member = Member.createMember("test", "test1");
+      // 혹시모를 FK 에러 방지
+      Exp exp = Exp.createExp(0L, 0L, 1L);
+      em.persist(exp); // FK id 위해
+      Character character = Character.createCharacter(exp, new ArrayList<>(), new ArrayList<>(),
+          new ArrayList<>());
+      em.persist(character); // FK id 위해
+      member.setCharacter(character);
+  //
+      // when
+      memberRepository.save(member); // persist
+      log.info("{}", member.getId());
+  //        em.flush(); // 롤백 true 때문에 insert 쿼리 생략시 flush 추가로 볼 수 있음
+  //        em.clear(); // flush 사용시 이것까지 해줘야 아래 select 문 전송 쿼리도 볼 수 있음
+      Member findMember = memberRepository.findOne(member.getId());
+      log.info("{}", member.getId());
+  //
+      // then
+      Assertions.assertEquals(member.getId(), findMember.getId());
+      // 단, 위에서 em.clear를 한 경우 영속성이(캐시) 비어있으므로 findMember가 새로운 주소!!
+      // 따라서 아래 출력으로 틀리다는 결론이 나온다.
+      Assertions.assertEquals(member, findMember);
+    }
+  //
+    @Test
+    @Order(2)
+    @Transactional
+    public void 회원조회_UID() throws Exception {
+      // given
+      Member findMember;
+      // when
+      findMember = memberRepository.findByUid("test");
+      Member findMember2 = memberRepository.findByUid("testtest");
+      // then
+      Assertions.assertEquals(findMember.getNickname(), "test1");
+      Assertions.assertEquals(findMember2, null);
+    }
+  //
+    @Test
+    @Order(3)
+    @Transactional
+    public void 회원조회_Page() throws Exception {
+      // given
+      List<FindMemberResponseDto> memberList = new ArrayList<>();
+      // when
+      memberList = memberRepository.findAllWithPage(1); // order by desc
+      log.info("memberList : {}", memberList.size());
+      log.info("memberList.get(0) : {}", memberList.get(0));
+      // then
+      for (FindMemberResponseDto dto : memberList) {
+        log.info("member id : {}, nickname : {}", dto.getId(), dto.getNickname());
+      }
+      Assertions.assertEquals(memberList.get(0).getNickname(), "test1");
+    }
+  }
+  ```
+  </div>
+  <details/>
+
+- <details><summary><b>서비스<b/></summary>
+  <div markdown="1">
+  ```java
+  @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+  @SpringBootTest
+  @Transactional // 쓰기모드 -> 서비스코드에 트랜잭션 유무 반드시 확인
+  @Slf4j
+  public class MemberServiceTest {
+    @Autowired
+    EntityManager em;
+    @Autowired
+    MemberService memberService;
+    static final String UID = "12345";
+    static final String MESSAGE = "이미 존재하는 회원입니다.";
+    static Long memberId;
+  //
+    /**
+     * join(중복검증 포함), findOne, findByUid, {findAllWithPage, initCacheMembers}(=회원 최신순_페이징 조회+캐시)
+     *
+    @Test
+    @Order(1)
+    @Rollback(value = false)
+    public void 회원가입_조회() throws Exception {
+      // given
+      Member member = Member.createMember(UID, "테스트 닉네임");
+      Exp exp = Exp.createExp(0L, 0L, 1L);
+      em.persist(exp);
+      Character character = Character.createCharacter(exp, new ArrayList<>(), new ArrayList<>(),
+          new ArrayList<>());
+      em.persist(character);
+      member.setCharacter(character);
+      // when
+      memberService.join(member);
+      Member findMember = memberService.findOne(member.getId());
+      Member findMember2 = memberService.findByUid(UID);
+      // then
+      Assertions.assertEquals(member.getId(), findMember.getId());
+      Assertions.assertEquals(member.getId(), findMember2.getId());
+      memberId = member.getId();
+    }
+  //
+    @Test
+    @Order(2)
+    public void 중복검증_예외() throws Exception {
+      // given
+      Member member = memberService.findOne(memberId);
+      // when
+      // then
+      Throwable exception = Assertions.assertThrows(IllegalStateException.class, () -> {
+        memberService.join(member); // 예외발생 로직
+      });
+      Assertions.assertEquals(MESSAGE, exception.getMessage());
+      log.info("exception.getMessage() : {}", exception.getMessage());
+    }
+  //
+    @Test
+    @Order(3)
+    public void 회원_페이징_캐시_조회() throws Exception {
+      // given
+      // when
+      List<FindMemberResponseDto> dto = memberService.findAllWithPage(1);
+      log.info("캐시되었으면 쿼리 안날라감1");
+      memberService.findAllWithPage(1);
+      log.info("캐시되었으면 쿼리 안날라감2");
+      memberService.findAllWithPage(1);
+      log.info("캐시되었으면 쿼리 안날라감3");
+      memberService.initCacheMembers(); // 캐시 초기화
+      log.info("캐시 초기화 했으므로 쿼리 날라가야 함");
+      memberService.findAllWithPage(1);
+      // then
+      for (FindMemberResponseDto m : dto) {
+        log.info("member.id : {}", m.getId());
+        log.info("member.nickName : {}", m.getNickname());
+      }
+    }
+  }
+  ```    
+  </div>
+  <details/>
+
+- <details><summary><b>컨트롤러<b/></summary>
+  <div markdown="1">
+  ```java
+  @WebMvcTest(controllers = MemberApiController.class)
+  class MemberApiControllerTest {
+      @Autowired
+      MockMvc mockMvc;
+      @MockBean // 가짜 객체이므로 실제 동작은 X
+      ExpService expService;
+      @MockBean
+      CharacterService characterService;
+      @MockBean
+      MemberService memberService;
+  //
+      /**
+       * login, register, logout, findAllWithPage
+       */
+      @Test
+      public void 회원가입() throws Exception {
+          // given
+          String content = "{\"uid\":\"12345\", \"nickname\":\"회원가입 테스트\"}"; //입력 json 흉내
+  //        Member member = Member.createMember("12345", "회원가입 테스트");
+  //        member.setId(1L);
+          // Mocking Member 객체
+          Member member = mock(Member.class);
+          when(member.getId()).thenReturn(1L); // ID 반환 설정
+          when(member.getUid()).thenReturn("12345");
+          when(member.getNickname()).thenReturn("회원가입 테스트");
+          // when
+          when(memberService.join(any())).thenReturn(member);
+          mockMvc.perform(
+                          post("/api/v1/members/register")
+                                  .contentType(MediaType.APPLICATION_JSON)
+                                  .accept(MediaType.APPLICATION_JSON)
+                                  .characterEncoding("UTF-8")
+                                  .content(content)
+                  )
+                  .andExpect(status().isCreated()) // 예상 응답
+                  .andExpect(jsonPath("$.data.uid").value("12345")) // 응답 body 의 json 확인
+                  .andDo(print());
+          // then
+          verify(memberService).join(any());
+          verify(expService).join(any());
+          verify(characterService).join(any());
+      }
+  //
+      @Test
+      public void 로그인() throws Exception {
+          // given
+          String content = "{\"uid\":\"123\"}"; // {"name":"value"} 형태로 작성해야 JSON 형태!
+  //        Member member = Member.createMember("123", "test");
+  //        member.setId(1L);
+          // Mocking Member 객체
+          Member member = mock(Member.class);
+          when(member.getId()).thenReturn(1L); // ID 반환 설정
+          when(member.getUid()).thenReturn("123");
+          when(member.getNickname()).thenReturn("로그인 테스트");
+          // when
+          when(memberService.findByUid(any())).thenReturn(member);
+          mockMvc.perform(
+                          post("/api/v1/members/login")
+                                  .contentType(MediaType.APPLICATION_JSON)
+                                  .accept(MediaType.APPLICATION_JSON)
+                                  .characterEncoding("UTF-8")
+                                  .content(content)
+                  )
+                  .andExpect(status().isOk()) // 예상 응답
+                  .andDo(print());
+          // then
+          verify(memberService).findByUid(any());
+      }
+  //
+      @Test
+      public void 로그아웃_성공과중복() throws Exception {
+          // given
+  //        Member member = Member.createMember("123", "test");
+  //        member.setId(1L);
+          // Mocking Member 객체
+          Member member = mock(Member.class);
+          when(member.getId()).thenReturn(1L); // ID 반환 설정
+          when(member.getUid()).thenReturn("123");
+          when(member.getNickname()).thenReturn("로그아웃 테스트");
+          MockHttpSession session = new MockHttpSession();
+          session.setAttribute(SESSION_NAME_LOGIN, member.getId());
+          // when
+          mockMvc.perform(
+                          post("/api/v1/members/logout")
+                                  .session(session)
+                                  .contentType(MediaType.APPLICATION_JSON)
+                                  .accept(MediaType.APPLICATION_JSON)
+                                  .characterEncoding("UTF-8")
+                  )
+                  .andExpect(status().isOk()); // 로그아웃 성공
+          mockMvc.perform(
+                          post("/api/v1/members/logout")
+                                  .contentType(MediaType.APPLICATION_JSON)
+                                  .accept(MediaType.APPLICATION_JSON)
+                                  .characterEncoding("UTF-8")
+                  )
+                  .andExpect(status().isConflict()); // 로그아웃 중복
+          // then
+      }
+  //
+      @Test
+      public void 멤버_조회_페이징() throws Exception {
+          // given
+          int pageId = 1;
+          MockHttpSession session = new MockHttpSession();
+          session.setAttribute(SESSION_NAME_LOGIN, 1); // 회원 인증 인터셉터 통과위해
+          // 테스트용 members 세팅
+          List<FindMemberResponseDto> members = new ArrayList<>();
+          FindMemberResponseDto m1 = new FindMemberResponseDto(111L, "테스트1", 1L);
+          FindMemberResponseDto m2 = new FindMemberResponseDto(222L, "테스트2", 1L);
+          FindMemberResponseDto m3 = new FindMemberResponseDto(333L, "테스트3", 1L);
+          members.add(m1);
+          members.add(m2);
+          members.add(m3);
+          // when
+          when(memberService.findAllWithPage(1)).thenReturn(members);
+          mockMvc.perform(
+                          get("/api/v1/members/" + pageId)
+                                  .session(session)
+                                  .contentType(MediaType.APPLICATION_JSON)
+                                  .accept(MediaType.APPLICATION_JSON)
+                                  .characterEncoding("UTF-8")
+                  )
+                  .andExpect(status().isOk()) // 예상 응답
+                  .andDo(print());
+          // then
+          verify(memberService).findAllWithPage(1);
+      }
+  } 
+  ```
+  </div>
+  <details/>
+
+<br>
+
+<br>
+
+## 리팩토링 - 인터셉터, 메시지, AOP, 검증, 예외 등
+
+
+
+
+
+<br>
+
+<br>
+
+## JPQL(JPA-ORM), (MyBatis-SQL Mapper)
+
+<br><br>
+
+### JPA - 영속성 컨텍스트
+
+**중요!! - 영속성 컨텍스트**
+
+- **4가지 상태 : 영속, 비영속, 준영속, 삭제**
+  - 비영속(transient)은 말 그대로 persist(=영속) 하지 않은 상태 **-> 영속성과 아예 무관**
+  - 준영속(detached)은 영속성 컨텍스트에서 **분리(em.detach()) 된 상태**
+  - 삭제(removed)는 말 그대로 영속성에서 **삭제 된 상태**
+
+* **flush : 영속성 내용 DB 반영 (쿼리)**
+
+  * **(1)em.createQuery** 같이 쿼리문 작성하는 것들이 **flush 자동 발생**
+  * **(2)트랜잭션**은 당연히 **flush 자동 발생**
+    * 목적: 쌓인 영속성 내용을 DB에 먼저 반영해줘야 jpql로 조회할 때 데이터 **불일치 방지**
+    * 단, 이건 내가 테스트해서 확인한거긴 한데 **jpql 에 member 를 사용중이고 이미 member가 영속성(변경내역)에 존재할 때 flush 자동발생. 그게 아니면 굳이 영속성 내용을 먼저 반영할 필요가 없다보니 자동발생 안함.**  
+      => 예로 `select m from Member m` 를 사용하기전 Member 영속성(변경할 내역)을 먼저 체크 후 flush 동반 유무 결정
+
+* **persist : 영속성 등록**
+
+  * 우선 em(엔티티매니저) 사용하려면 **트랜잭션이 필수!!**
+
+  * save(=persist) : **(1)영속성 등록**, (2)쓰기지연 SQL저장소에 insert쿼리, (3)순차번호 구하기위해 select전송
+
+    * 쓰기지연 SQL저장소의 insert 는 **flush 때 전송**
+
+    * **기본 키 자동 생성**의 경우, 순차번호 구하는 **select 는 바로 전송**
+
+      * <details><summary><b>generatedKey 보충 설명 : nextval 쿼리<b/></summary>
+        <div markdown="1">
+        persist때 generatedKey 등록한 엔티티는 자동 nextval 시퀀스 쿼리 발생해 줌<br>
+        - 단, identity 방식 사용중이면 insert쿼리 시점에 DB에서 키를 생성<br>
+          - `IDENTITY` 전략을 사용한다고 해서 **JPA의 쓰기 지연 기능을 전혀 쓸 수 없는 것은 아닙니다**. 엔티티에 기본 키가 필요할 때만 즉각적으로 `flush()`가 발생하고, 나머지 쿼리들은 여전히 지연될 수 있습니다.<br>
+          - `SEQUENCE` 전략은 기본 키를 미리 할당받기 때문에 **쓰기 지연과 더 원활**하게 작동할 수 있습니다.<br>
+        - **H2, PostgreSQL, Oracle** 등에서는 기본적으로 `GenerationType.SEQUENCE` 를 사용<br>
+          - 오라클12c 부턴 시퀀스 뿐만 아니라 identity 문법도 제공<br>
+        - **MySQL, SQL Server** 같은 DB에서는 기본적으로 `GenerationType.IDENTITY`가 사용<br>
+        </div>
+        <details/>
+
+    * <details><summary><b>save() 보충 설명: JPA와 Spring Data JPA<b/></summary>
+      <div markdown="1">
+      `JPA`는 직접 구현 필요 (본인은 persist만 사용), `Spring Data Jpa`는 save()함수 제공(persist+merge 형태)<br>
+      * isNew() 함수로 엔티티가 이미 있는지 체크하는데 isNew()는 엔티티의 Id가 null인지 체크한다. 따라서 @GeneratedValue를 사용하지 않은 id의 경우엔 임의로 id를 넣어 줄텐데 이러면 여기서 문제가 발생한다. **-> Spring Data Jpa의 save() 함수 로직임.**<br>
+        * 왜 문제? id가 null이어야 persist(영속성등록) 할테니까<br>
+      * id가 null이 아니니까 persist가 아닌 merge 가 발생하는데 DB에 해당 엔티티를 찾아내려고 select쿼리가 나가는 문제이다.(없을텐데 불필요하게 나가는..)<br>
+        - 해결법은 [이 분꺼 참고](https://velog.io/@pjh612/JPA-Spring-Data-JPA의-save의-동작-과정)<br>
+        - 참고) merge동작은 이미 있는 엔티티(준영속상태)를 영속성상태로 바꿔줘서 업뎃이 가능하게 만드는 것. 이 과정에서 DB 조회도 발생! (해당 엔티티 찾으려고)
+      </div>
+      <details/>
+
+  * em.find : **(1)영속성 등록**, (2)찾는 id 인 값 select전송
+
+    * **(1)영속성 등록이란** 엔티티를 find() 할 때 **바로 영속성에 있다면 거기서 해당 주소**를 가져와 줌. => db에 쏘는 **쿼리 발생 안함.**
+    * **영속성에 없다면, select 는 바로 전송** -> flush 아님.
+
+  * em.remove : **(1)영속성 해제**, (2)쓰기지연 SQL저장소에 delete쿼리, (3)삭제할 아이템 구하기 위해 select전송
+
+    * 쓰기지연 SQL저장소의 delete 는 **flush 때 전송**
+
+    * **영속성에 없다면,** 삭제할 아이템 구하는 **select 는 바로 전송**
+
+    * <details><summary><b>remove 예시 코드<b/></summary>
+      <div markdown="1">
+      ```java
+      // given
+      Task findTask = taskService.findOne(taskId); // Task 찾기
+      log.info("findTask : {}", findTask);
+      // when
+      //1. 영속성 컨텍스트에서 삭제 된걸 확인했기 때문에 아래 findOne 에서 db 조회까지 안가고 종료
+      taskService.remove(findTask); // 영속성 컨텍스트에서 상태4개 중 "삭제 상태"로 운영 됨. (taskStatus 랑 cascade 이므로 지연로딩이였어서 여기서 taskStatus 조회가 발생)
+      findTask = taskService.findOne(taskId); // 로그 없음. (삭제되어서) -> 영속성에서 이미 삭제된 걸 확인. 이해 안되면 정리한 em.find 확인
+      //
+      //2. 원래 em.find() 는 영속성 컨텍스트에 엔티티 없으면 db 조회까지 하기 때문에 그 부분을 로그로 보려고 함.
+      em.flush();  // 삭제된 엔티티를 DB에 반영 (강제 플러시)
+      em.clear();  // 영속성 컨텍스트 초기화
+      //
+      // 이제 다시 조회를 시도하면 DB에서 조회
+      findTask = taskService.findOne(taskId); // 삭제된 엔티티 조회 시도. 쿼리 발생! (null이어야 함)
+      ```
+      </div>
+      <details/>
+
+- **FK오류 방지**
+
+  * id를 @GeneratedValue 로 지정했기 때문에 em.persist를 해야 id를 생성 해준다.
+  * 따라서 em.persist를 안한 엔티티를 외래키로 쓸때 id가 없어서 FK오류가 발생!!
+  * **추가 Update 쿼리(더티체킹) 방지**
+    * FK오류를 방지하면서 코드를 짰으면 사실 문제없을텐데, 그게아니라면??  
+      => 추가 update 쿼리가 나갈 수 있다.
+    * 예로 em.persist를 하지않은 엔티티를 먼저 외래키로 사용한 후에 persist한 경우  
+      나중에 flush 할때 더티체킹(id가 생겼으니)으로 update 쿼리가 추가 생성된다.
+  * **따라서 그냥 FK오류 방지를 준수하면서 꼭 작성!**
+
+- **Update 참고 (더티체킹,벌크 추천)**: `em.merge()` 로 준영속을 영속성 만들면 데이터 수정시 "더티체킹(flush시점)" 발생  
+  하지만 `em.merge()` 보단 `em.find()` 로 영속성 가져와 데이터 수정을 더 추천
+
+  - **update 예시 -> em.find() 영속성 활용 방식**
+
+    - <details><summary><b>예시 코드<b/></summary>
+      <div markdown="1">
+      ```java
+      // entity part
+      // 준속성 엔티티 -> 영속성 엔티티 에 사용
+      public void change(String name, int price, int stockQuantity) {
+        this.name = name;
+        this.price = price;
+        this.stockQuantity = stockQuantity;
+      }
+      // service part
+      @Transactional
+      public void updateItem(Long id, UpdateItemDto itemDto){
+        Item item = itemRepository.findOne(id); // 영속성 엔티티
+        item.change(itemDto.getName(), itemDto.getPrice(), itemDto.getStockQuantity()); // 준속성 엔티티(itemDto) -> 영속성 엔티티
+      }
+      // controller part
+      public String updateItem(@PathVariable Long itemId, @ModelAttribute("form") BookForm form){
+        UpdateItemDto itemDto = new UpdateItemDto(form.getName(), form.getPrice(), form.getStockQuantity());
+        itemService.updateItem(itemId, itemDto);
+        return "redirect:/items"; // 위에서 "상품 목록" 매핑한 부분으로 이동
+      }
+      ```
+      </div>
+      <details/>
+
+  - 단, 변화가 넘 많으면 **"벌크연산 추천"** -> 간단함. (우리가 잘 쓰는 쿼리문일 뿐)  
+    -> 예: `UPDATE Task t SET t.status = :status WHERE t.dueDate < :currentDate`
+
+  - **벌크 연산 -> 여러 데이터 한번에 "수정, 삭제" 연산**
+
+    * JPA 는 보통 실시간 연산에 치우쳐저 있는데, 대표적인 예가 "더티 체킹"
+      * 100개 데이터가 변경되었으면 100개의 Update 쿼리가 나가게 되는 문제
+      * **이런건 "벌크 연산" 으로 해결하자**
+    * **올바른 사용법**
+      * **벌크 연산을 먼저 실행**
+      * **벌크 연산 수행 후 영속성 컨텍스트 초기화 -> em.clear()**
+        * 더 이상 더티 체킹 일어나지 않게 하기 위함!! (중요)
+
+<br><br>
+
+### JPQL (페이징, distinct, 연관관계)
+
+**반환 방식**
+
+* TypeQuery: 반환 타입이 명확할 때 사용
+  * **일반적(자주 사용!)** : `List<Member> findMembers = em.createQuery("select m from Member m", Member.class)`
+  * **Dto : QueryDSL 사용시 패키지 명(jpql.)까지 없앨 수 있음 (자주 사용!)**
     * `List<MemberDTO> result = em.createQuery("select new jpql.MemberDTO(m.username, m.age) from Member m", MemberDTO.class)`
-  * **query.getResultList(): 결과가 하나 이상일 때, 리스트 반환**
-  * query.getSingleResult(): 결과가 정확히 하나, 단일 객체 반환
+* Query: 반환 타입이 명확하지 않을 때 사용
+  * `List<Query> findMembers = em.createQuery("select m from Member m")`
+  * 이땐 굳이 반환타입 Member.class를 명시할 필요가 없음
+* **query.getResultList(): 결과가 하나 이상일 때, 리스트 반환** **-> 자주사용!! (1개 여도!)**
+* query.getSingleResult(): 결과가 정확히 하나, 단일 객체 반환
 
-* **쿼리문도 조건식 존재(case...then...else...end)**
+<br>
 
-  * `select case when m.age <= 10 then '학생요금' when m.age >= 60 then '경로요금'  else '일반요금' end from Member m`
+**페치징 API**
 
-* **페치징 API**
-
-  * `setFirstResult(int startPosition)` : 조회 시작 위치 (0부터 시작)
-  * `setMaxResults(int maxResult)` : 조회할 데이터 수
+* `setFirstResult(int startPosition)` : 조회 시작 위치 (0부터 시작)
+* `setMaxResults(int maxResult)` : 조회할 데이터 수
 
 * **fetch join** : 객체 그래프 유지할 때 사용시 효과적이고, **"즉시로딩"** 사용을 의미
 
@@ -783,187 +1804,153 @@ typora-root-url: ../../..
   * **JPQL에서 엔티티를 직접 사용하면 SQL에서 해당 엔티티의 "기본 키" 값을 사용**
   * (JPQL) : select count**(m)** from Member m    
   * (SQL) : select count**(m.id)** as cnt from Member m
+  * **JPQL은 m.* 이런식의 조회를 m 으로 동일하게 가능.**   
+    -> 즉, `select m from Member m` 이런 형태가 JPQL은 가능. 오히려 권장.
 
 * **Named 쿼리**
 
-  * **(참고) 실무에서는 Spring Data JPA 를 사용하는데 @Query("select...") 문법이 바로 "Named 쿼리"**
-    * 지금은 쓰지말고, Spring Data JPA 를 공부하고 나면 ㄱㄱ
-
-* **벌크 연산 - 여러 데이터 한번에 "수정, 삭제" 연산**
-
-  * JPA 는 보통 실시간 연산에 치우쳐저 있는데, 대표적인 예가 "더티 체킹"
-    * 100개 데이터가 변경되었으면 100개의 Update 쿼리가 나가게 되는 문제
-    * **이런건 "벌크 연산" 으로 해결하자**
-  * **올바른 사용법**
-    * **벌크 연산을 먼저 실행**
-    * **벌크 연산 수행 후 영속성 컨텍스트 초기화**
-  * **@BatchSize 관련과 구분!! - 여러 데이터 한번에 "조회" 연산**
+  * **실무에서는 Spring Data JPA 를 사용하는데 @Query("select...") 문법이 바로 "Named 쿼리"**
+    * JPQL 예: `@Query("SELECT m FROM Member m")`
+    * Natvie SQL 예: `@Query(value="SELECT m FROM Member m", nativeQuery=true)`
 
 * **동적 쿼리**는 **Querydsl** 을 권장
 
   * 자세한 내용은 강의보고 적어두자@
 
+<br>
+
+
+
+
+
+이 아래내용은 드롭다운으로 남겨두기 -> 서버최적화.md에 저장해둔 내용임.
+
+#### 페이징 + 캐시 예시 2개
+
+굉장히 좋은 참고 문서: [페이지네이션 최적화 - Offset 문제 가져간 이유](https://taegyunwoo.github.io/tech/Tech_DBPagination) 참고!
+
+여기서 기억에 남은 말: **가장 먼저 서브쿼리를 통해서 커버링 인덱스로 페이징을 진행합니다. 그리고 그 결과와 기존 테이블을 조인시켜서 ‘인덱스에 포함되지 않은 칼럼’을 가져옵니다.**
+
+**(1)회원 랭킹 보여주는 페이지(정렬필수) -> 30분 마다 갱신**
+
+- **레포지토리**
+  - **서브쿼리에 인덱스로 member 테이블을 빠르게 조회 (정렬 된)**
+    - 서브쿼리, limit, offset 사용 위해 Native Query 사용
+  - 이후 기존 테이블과 조인해서 결과 반환
+
+```java
+//Limit, Offset -> SQL
+List<Object[]> objects = em.createNativeQuery(
+"select m.member_id, m.nickname, e.level " + 
+"from (select * from member order by member_id desc limit " + offset + "," + limit + ") m " +
+"inner join character c on m.character_id=c.character_id " +
+"inner join exp e on c.exp_id=e.exp_id;")
+        .getResultList();
+```
+
+- **서비스**
+  - 30분 마다 갱신이라 **@CacheEvict, @Cacheable, @Scheduled로 충분**
+  - 페이지별로(pageId) 묶어서 캐시 관리가 좋아서 이렇게 진행. (게시물마다 하는건 너무 많은 캐시 메모리 사용?) + 캐시사이즈 설정
+
+```java
+/**
+ * 회원 최신순 조회 + 캐시
+ */
+@Cacheable(value = "members", key = "#pageId") // [캐시 없으면 저장] 조회
+public List<FindMemberResponseDto> findAllWithPage(int pageId) {
+    return memberRepository.findAllWithPage(pageId);
+}
+
+// 캐시에 저장된 값 제거 -> 30분 마다 실행하겠다.
+// 초(0-59) 분(0-59) 시간(0-23) 일(1-31) 월(1-12) 요일(0-6) (0: 일, 1: 월, 2:화, 3:수, 4:목, 5:금, 6:토)
+@Scheduled(cron = "00 30 * * * *") // 30분 00초 마다 수행
+@CacheEvict(value = "members", allEntries = true)
+public void initCacheMembers() {
+}
+```
 
 <br>
 
-**JPA TIP + 추가정보**
+**(2)게시물 10개씩 출력하는 페이지(홈페이지) -> 수정, 삭제, 추가에 갱신**
 
-* **중요!! - 영속성 컨텍스트**
+- **레포지토리**
+  - 서브쿼리 사용할 필요 없어서 바로 JPQL의 페이징 기법 활용 -> 이 또한, 인덱스 사용
 
-  * **FK오류 방지**
-    * id를 @GeneratedValue 로 지정했기 때문에 em.persist를 해야 id를 생성 해준다.
-    * 따라서 em.persist를 안한 엔티티를 외래키로 쓸때 id가 없어서 FK오류가 발생!!
+```java
+//setFirstResult(), setMaxResults() -> JPQL
+public List<Item> findAllWithPage(int pageId) {
+  return em.createQuery("select i from Item i" +
+                        " order by i.id desc", Item.class)
+      .setFirstResult((pageId-1)*10)
+      .setMaxResults(10) // 개수임!!
+      .getResultList();
+}
+```
 
-  * **추가 Update 쿼리(더티체킹) 방지**
-    * FK오류를 방지하면서 코드를 짰으면 사실 문제없을텐데, 그게아니라면??  
-      => 추가 update 쿼리가 나갈 수 있다.
-    * 예로 em.persist를 하지않은 엔티티를 먼저 외래키로 사용한 후에 persist한 경우  
-      나중에 flush 할때 더티체킹(id가 생겼으니)으로 update 쿼리가 생성된다.
-    * **따라서 그냥 FK오류 방지를 준수하면서 꼭 작성!**
+- **서비스 -> 여기선 이게 중요!!**
+  - 페이지별로 url(?page=1) 접근하면 해당 페이지별로 데이터를 가져올거고 이 데이터를 **@CachePut로 기록하고, @Cacheable로 조회, 삭제는 @CacheEvict**
+    - 만약 게시물 삭제되면 애초에 게시물No(순번)이 갱신되어야해서 그냥 @CacheEvict로 삭제후 다시 기록하면 됨.
+    - 게시물 수정이면 @CachePut으로 해당 PageId 부분만 갱신하면 됨. 게시물 개수는 그대로니까!
+  - 페이지별로(pageId) 묶어서 캐시 관리가 좋아서 이렇게 진행. (게시물마다 하는건 너무 많은 캐시 메모리 사용?) + 캐시사이즈 설정
 
-  * **flush**
-    * **em.createQuery** 같이 쿼리문 작성하는 것들이 **flush 동반**
-    * **트랜잭션**은 당연히 **flush 동반**
+```java
+// page 단위로(key) 캐시 기록 -> 참고 : value 로 꼭 캐시 영역을 지정해줘야 함
+@Cacheable(value = "posts", key = "#pageId") // [캐시 없으면 저장] 조회
+public List<Item> findAllWithPage(int pageId) {
+    return itemRepository.findAllWithPage(pageId);
+}
+// page 단위로(key) 캐시 기록 -> 참고 : value 로 꼭 캐시 영역을 지정해줘야 함
+@CachePut(value = "posts", key = "#pageId") // [캐시에 데이터 있어도] 저장
+public List<Item> updateAllWithPage(int pageId) {
+    // pageId 로 간단히 캐시 업데이트용 함수
+    return itemRepository.findAllWithPage(pageId); // 반환값을 캐시에 기록하기 때문에 만든 함수
+}
+// 캐시에 저장된 값 제거
+@CacheEvict(value="posts", allEntries = true)
+public void initCachePosts(){}
+// totalCount 이름으로 캐시 메모리에 기록 [캐시 없으면 저장] 조회
+@Cacheable(value = "totalCount")
+public Long findTotalCount() { return itemRepository.findTotalCount(); }
+// [캐시에 데이터 있어도] 저장
+@CachePut(value = "totalCount")
+public Long updateTotalCount() { return itemRepository.findTotalCount(); }
+```
 
-  * **persist**
-    * 우선 em(엔티티매니저) 사용하려면 **트랜잭션이 필수!!**(없으면 아래 에러)
-    * em.save(=persist) : **(1)영속성 등록**, (2)쓰기지연 SQL저장소에 insert쿼리, (3)순차번호 구하기위해 select전송
-      * 순차번호 구하는 **select 는 바로 전송**
-      * 쓰기지연 SQL저장소의 insert 는 **flush 때 전송**
+<br>
 
-    * em.find : **(1)영속성 등록**, (2)찾는 id 인 값 select전송
-      * **select 는 바로 전송** -> 당근 flush란건 아님. 다른것들 처럼 바로전송일 뿐
 
-    * em.remove : **(1)영속성 해제**, (2)쓰기지연 SQL저장소에 delete쿼리, (3)삭제할 아이템 구하기 위해 select전송
-      * 삭제할 아이템 구하는 **select 는 바로 전송**
-      * 쓰기지연 SQL저장소의 delete 는 **flush 때 전송**
 
-* **API에 제공할때 절대로 엔티티를 바로 나타내지 말것**
+<br>
 
-  * API 응답 스펙에 맞추어 별도의 **DTO를 반환** 권장
+<br>
 
-    * **setter를 최대한 사용하지않고, 파라미터를 줄여주는 효과**
+## 엔티티 조회 권장 순서
 
-    ```java
-    // DTO 형태 예
-    @Getter @Setter
-    @RequiredArgsConstructor // 생성자
-    public class UpdateItemDto {
-        private final String name;
-        private final int price;
-        private final int stockQuantity;
-    }
-    ```
+**엔티티 조회 권장 순서**
 
-* **준영속 엔티티를 수정할 때 Merge방식보다는 Dirty Checking 방법 권장**
+1. **엔티티 조회 방식**으로 우선접근 : **지연로딩!!**
+   1. **일반 엔티티** 최적화 : 페치조인으로 쿼리 수를 최적화
+   2. **컬렉션** 최적화
+      1. 페이징 필요O : `hibernate.default_batch_fetch_size` , `@BatchSize` 로 최적화
+      2. 페이징 필요X : 페치조인 사용
+2. 엔티티 조회 방식으로 해결이 안되면 DTO 조회 방식 사용
+3. DTO 조회 방식으로 해결이 안되면 NativeSQL or 스프링 JdbcTemplate 활용
 
-  * 변경 감지 기능(Dirty Checking)은 **Flush 할때 발생**
+<br>
 
-    * **flush 자동 호출은 3가지 경우 - commit 시점, query 날리는 시점, 강제 em.flush()**
-      * flush는 1차캐시 지우지는 않음(내생각)
-      * persist는 영속성 컨텍스트로.. clear() 는 비워줌.. commit은 1차캐시 지움
-    * **참고로 "트랜잭션-@Transa..." 사용시 "로직 종료때 commit" 이라서 flush가 자동 호출됨!**
-      * **또한, em관련 쿼리들 실행할때 자동 flush()**
-      * **특히, persist 할때 자동 ID select도 따로 함.**
+**참고) 엔티티 조회 에러 해결**
 
-  * **영속성 컨텍스트를 사용하는 로직으로 작성해서 더티 체킹이 발생하도록 하자**
+* **엔티티를 외부에 노출하면서 발생하는 문제들이라서 사실상 이부분을 알 필요는 없다.**
+* @JsonIgnore : **양방향 무한 반복의 문제**를 해결
+  * 하지만 지양하고 **DTO** 방식으로 해결을 지향
+* Hibernate5Module을 @Bean 등록 까지 해주면 **Lazy 문제**도 해결 
+  * 하지만 이 또한 지양하고 **LAZY 강제 초기화**로 다 해결
 
-    * **update 예시**
-    
-    ```java
-    // entity part
-    // 준속성 엔티티 -> 영속성 엔티티 에 사용
-    public void change(String name, int price, int stockQuantity) {
-        this.name = name;
-        this.price = price;
-        this.stockQuantity = stockQuantity;
-    }
-    
-    // service part
-    @Transactional
-    public void updateItem(Long id, UpdateItemDto itemDto){
-        Item item = itemRepository.findOne(id); // 영속성 엔티티
-        item.change(itemDto.getName(), itemDto.getPrice(), itemDto.getStockQuantity()); // 준속성 엔티티(itemDto) -> 영속성 엔티티
-    }
-    
-    // controller part
-    public String updateItem(@PathVariable Long itemId, @ModelAttribute("form") BookForm form){
-        UpdateItemDto itemDto = new UpdateItemDto(form.getName(), form.getPrice(), form.getStockQuantity());
-        itemService.updateItem(itemId, itemDto);
-        return "redirect:/items"; // 위에서 "상품 목록" 매핑한 부분으로 이동
-    ```
+<br>
 
-* **JSON 반환시 꼭 마지막에 객체로 감싸서 반환**
+<br>
 
-  * 반드시 `{ 데이터 }` 형태로 만들기 위함
-
-* **DTO와 DI(의존성 주입) 구분할 것**
-
-  * **스프링에서 DI(Dependency Injection)**는 객체를 new로 직접 생성하는것이 아닌 **스프링 컨테이너(외부)에서 객체를 생성해서 주는 방식**을 의미
-  * **DTO(Data Transfer Object)**는 **계층 간 데이터 교환을 하기 위해 사용하는 객체**로, 로직을 가지지 않는 순수한 데이터 객체
-    * 메소드는 주로 getter, setter만 가짐
-
-* **(최적화1)"캐시메모리" 사용 최적화 -> 서비스 계층에서 사용(트랜잭션 쪽)**
-
-  * **[잘 정리한 사이트](https://adjh54.tistory.com/m/165) -> 사용법 다양함**
-  * **게시물 삭제, 수정, 추가에 @CachePut사용, 조회에 @Cacheable 사용함으로써 간단한 최적화 가능**
-  * **왜?? 사용하나??** 
-    * CSR같은경우 서버에서 API로직으로 JSON같은 데이터 넘겨주면 Client에서 React였으면 Redux, React-Native였으면 AsyncStorage 등등으로 기록해서 사용하므로 "데이터존재" 하면 API호출을 따로 하지않을 것
-    * 그러나, SSR같이 서버에서 구현할 경우 Thymeleaf에 React같은 Redux 같은기능이 없기때문에 서버단에서 완전히 해결해줘야 한다.
-      * **이때, "캐시메모리"를 활용해서 해결이 가능하다는 것**
-      * 서버 메모리에 저장하기 때문에 DB에 쿼리문 날릴필요 없기때문
-  * 한마디로 성능개선을 위해 "캐시"를 사용하고, DEVOPS 정리한 md파일에서 자세히 확인!
-
-* **(최적화2)DB의 Limit, offset 을 활용한 "페이징"을 더 간단히 하는법**
-
-  * **JPQL**에서는 Limit와 Offset 키워드는 사용 불가하고 **setFirstResult(), setMaxResults()** 를 사용해야 함.
-
-  * 또다른 방법은 제공해주는 클래스 사용 -> **Pageable 클래스 활용**
-
-    ```java
-    public List<Item> findAllWithPage(int pageId) {
-        return em.createQuery("select i from Item i", Item.class)
-            .setFirstResult((pageId-1)*10)
-            .setMaxResults(((pageId-1)*10)+10)
-            .getResultList(); // 해당 페이지(pageId) 데이터 조회
-    }
-    ```
-
-  * **왜?? 사용하나??**
-
-    * **(SSR 가정) 1000개 게시물을 1page에 10개씩 보여주는 구조를 만든다면??**
-
-      * 캐시메모리 사용 시 오히려 캐시메모리 사용량과 갱신에 많은 오버헤드 우려
-      * 대신 전체 게시물을 캐시메모리에 기록하는게 아니라 **"페이지별로" 캐싱**
-
-    * 페이지별로 url(?page=1) 접근하면 해당 페이지별로 데이터를 가져올거고 이 데이터를 **@CachePut로 기록하고, @Cacheable로 조회**
-
-      * 예로 `@CachePut(value = "posts", key = "#pageId")` 이런 형태
-
-        * posts를 저장된 구간(키값)으로 보면되고, #pageId 를 파라미터로 들어온 pageId 속성값으로 매핑되며 해당 값을 키값으로 메모리에 기록
-        * 이 때문에 pageId로 이 값을 바로 찾을수도 있음
-
-      * **그럼 page를 하나하나 100개 전부 접근하면 결국 1000개 데이터가 전부 캐시메모리에 기록되고, 오버헤드가 우려되지 않는가???**
-
-        * 캐시 크기 선언해서 해결
-
-          ```properties
-          # application.properties
-          spring.cache.cache-names=posts
-          spring.cache.caffeine.spec=maximumSize=100 # 캐시 사이즈 설정 (예시로 최대 100개의 페이지를 캐시로 관리)
-          ```
-
-      * **그럼 게시물이 삭제되거나 수정되면?? 특히 삭제되면 페이지별 데이터 10개 구성한것도 9개가 되고 갱신도 되어야할거고 그럴텐데 이건 어떻게 해결할건데??**
-
-        * 사실 게시물 순서가 보장되어야 하는 경우에는 캐시 삭제 후 갱신된 데이터로 캐시
-
-  * 한마디로 성능개선을 위해 "페이징"을 사용하고, DEVOPS 정리한 md파일에서 자세히 확인!
-
-* **최적화 관련은 반드시 DEVOPS 정리한 md파일을 볼 것**
-
-<br><br>
-
-## 스프링 부트의 어토네이션들
+## 참고) 스프링 부트의 애노테이션들
 
 **엔티티**
 
@@ -1112,141 +2099,6 @@ typora-root-url: ../../..
   * **@RestController - Data 반환**
 
 * 쿠키 편리하게 조회 **@CookieValue**
-
-<br>
-
-**테스트 코드(TDD) -> 졸작에 테스트코드 반드시 참고!!**
-
-- [코드 커버리지 내용 추가하자](https://amaran-th.github.io/%EC%86%8C%ED%94%84%ED%8A%B8%EC%9B%A8%EC%96%B4%20%EC%84%A4%EA%B3%84/[IntelliJ]%20%EC%BD%94%EB%93%9C%20%EC%BB%A4%EB%B2%84%EB%A6%AC%EC%A7%80%20%ED%99%95%EC%9D%B8%ED%95%98%EA%B8%B0/)
-
-* 참고) 졸작은 JUnit5, 우테코는 AssertJ 사용했음, **TDD는 테스트 주도 개발 방법론**
-
-* **중요!! 컨트롤러 테스트할 때? -> MockMvc 활용 (perfom())**
-
-  * MockMvc는 서버에 앱을 올리지않고 테스트용으로 시뮬레이션하여 MVC가 되도록 도와주는 클래스! -> WAS 역할을 톰캣 대신 해주는것!
-
-    * **단위 테스트로써 컨트롤러 "만" 테스트** 할 것이기 때문에 DB에 쿼리 전송? 서비스나 레포지토리? 이런걸 신경쓰면 안된다!
-
-      * 왜냐하면 서비스, 레퍼지토리 등등은 따로 `단위 테스트코드` 작성하기 때문!
-
-    * 따라서 **MockMvc의 목적은 3가지**
-
-      * request 잘 받는지 - **content()**
-      * 서비스로 데이터 잘 전달 되는지 - **verify()**
-        * times() 도 같이 많이 사용
-        * 왜냐하면 여러번 서비스 불리는 경우 몇번 불리는지 times로 명시해줘야 TooMany 에러 방지
-
-      * 서비스 반환값으로 response 잘 받는지 - **when, given 필수!**
-        * when, given 으로 해당 서비스의 반환값을 직접 설정가능!
-        * response(응답) 관련 검증 메소드는 매우 다양!
-          * andExpect() - status(), view(), redirectedUrl(), model(), content(), jsonPath() 등등.. 응답 관련 메소드..
-          * andDo() : 요청, 응답관련 전체 메시지 출력
-
-    * **중요 어노테이션 - @WebMvcTest : 컨트롤러만 테스트, @MockBean : 가짜 객체 주입(실제 동작X)**
-
-    * 예제
-
-      ```java
-      mockMvc.perform(
-          post("/api/v1/members/register") // post or get
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON)
-          .characterEncoding("UTF-8")
-          .content(content)
-      )
-          .andExpect(status().isCreated()) // 예상 응답 status
-          .andExpect(jsonPath("uid").value("12345")) // 응답 body 의 json
-          .andDo(print()); // 전체 메시지 출력
-      ```
-
-  * **[참고1 - 메서드들 참고](https://velog.io/@doforme/Controller-%ED%85%8C%EC%8A%A4%ED%8A%B8-%EC%BD%94%EB%93%9C-%EC%9E%91%EC%84%B1%ED%95%98%EA%B8%B0), [참고2 - 메서드들도 참고](https://doongjun.tistory.com/71)**
-
-  * **HttpServletRequest, HttpServletResponse 관련 테스트**
-
-    * 이를 흉내내주는 `MockHttpServletRequest, MockHttpServletResponse` 을 사용!
-
-* **@TestMethodOrder(MethodOrderer.OrderAnnotation.class)**
-
-  * `@Order(1), @Order(2)` ... 로 테스트 코드 실행 순서 지정 가능
-  * 주의 : Order 라는 클래스가 이미 import 중이라면 `@org.junit.jupiter.api.Order(1)`
-  * 또한, `org.junit.jupiter.api` 패키지의 Order 를 사용한다는 점을 기억
-
-* **`given, when, then` 예시**
-
-  * given에 멤버 이름 설정
-  * when에 서비스의 join함수 사용(회원가입 되는지 확인하는 것)
-  * then에 결과를 보는것. 멤버이름이 잘 생겼는지 등등..(assert보통 씀!)
-
-* **스프링 테스트 선언법**
-
-  * Junit4 : @RunWith, @SpringBootTest 둘다 선언 - 클래스 단에
-  * **Junit5** : @SpringBootTest 선언 - 클래스 단에
-  * **이후 @Test** 를 메소드마다 선언하여 테스트!! - 메소드 단에
-    * @RunWith(SpringRunner.class) : 스프링과 테스트 통합 -> **Junit4 이하만 사용**
-    * @SpringBootTest :  스프링 컨테이너와 테스트를 함께 실행 (이게 없으면 @Autowired 다 실패)
-      * 즉, 스프링 빈 사용하고 싶으면 반드시 필수
-      * @TestConfiguration : 테스트에서 **스프링 빈 등록을 지원**하는 어노테이션
-
-* **@Transactional** : 반복가능한 테스트지원, 각각의 테스트를 실행할 때 마다 트랜잭션을 시작하고 테스트가 끝나면 트랜잭션을 강제로 롤백 (이 어노테이션은 테스트 케이스에서 사용될때만 기본값으로 롤백)
-
-  * **롤백을 하기때문에 내부에서 굳이 영속성 컨텍스트 플러시를 안하는 특징**을 가짐
-  * @Rollback(false) : **롤백 취소**
-    * 롤백을 안하니까 flush까지 진행하므로 insert문 로그 확인가능
-  * em.flush() 함수 사용 : **flush 진행**
-    * 롤백은 건드리지않고 flush 진행하므로, 롤백은 그대로 진행하면서 insert문 로그 확인가능
-  * **서비스 TDD 때 트랜잭션 선언안하면 서비스가 동작을 안하기 때문에 그냥 전역으로 써주고! 대신에 서비스 코드에 트랜잭션 있는건 꼭 확인**
-    * 왜냐하면 TDD에 선언한 트랜잭션때문에 서비스에 트랜잭션이 없어도 동작하기 때문!
-
-* `@AfterEach` 는 테스트 끝나면 실행되는 것인데, 이를 활용한다.
-
-* `@BeforeEach` 는 테스트 시작전 실행되는 것인데, 이것도 활용할 수 있다.
-
-  * **단!! 이 2개는 @Test 마다 수행된다는점을 꼭 인지!!**
-
-* `@DisplayName` 는 간단히 테스트 출력때 항목 이름을 설정해서 출력 가능
-
-* **print대신 assert비교 테스트**
-
-  * `Assertion`을 이용하자. 이걸 사용해서 `assertEquals`함수 사용시 두개 인자가 동일한지 봐준다
-    * 안동일하면 오류, 동일하면 아무일도 없음
-    * `Assertions.assertEquals(member, memberRepository.findOne(saveId));`
-    * `Assertions.assertThat(member).isEqualeTo(result);` 이것도 위처럼 사용된다.
-    * `Assertions.assertInstanceOf(Character.class, character);` 어떤 객체인지 체크하기 좋음
-
-* **예외 테스트**
-
-  * (1)try, catch보다 간편하게 `assertThrows`를 사용해서 일부러 예외를 터트려서 테스트 하는것이 있다.
-
-    * 아래 JUnit5 에 정리한 부분이 이 내용이다.
-
-  * (2)또는 try, catch대신 `@Test(expected = IllegalStateException.class)` 를 선언하면 알아서 해당 예외 터질 때 종료해줌
-    * 만약 해당 예외가 안터지면 그다음 코드들이 계속 실행됨. 그 코드는 아래 형태로 작성
-    * `Assertions.fail("예외가 발생해야 한다.");` 예외가 안터져서 오히려 에러라고 로그를 남겨줌
-
-  * **JUnit5**
-
-    * `Assertions.assertNull, Assertions.assertInstanceOf, Assertions.assertEquals, Assertions.assertThrows` 등등 자주 사용
-
-    * ```java
-      // 특히 예외 처리 + 예외 메시지까지 확인법
-      Throwable exception = Assertions.assertThrows(IllegalStateException.class, () -> {
-          followService.join(findFollow); // 중복검증 예외 발생
-      });
-      Assertions.assertEquals("이미 팔로우 요청을 하셨습니다.", exception.getMessage());
-      log.info("exception.getMessage() : {}", exception.getMessage());
-      // 프록시 체크? -> 서비스에 @Transactinal 은 프록시 사용
-      Assertions.assertThat(AopUtils.isAopProxy(memberService)).isTrue();
-      Assertions.assertThat(AopUtils.isAopProxy(memberRepository)).isFalse();
-      ```
-
-  * **AssertJ -> Junit5에서 파생된것**
-
-    * ```java
-      assertThat(connection).isNotNull();
-      assertThat(findMember).isEqualTo(member);
-      assertThatThrownBy(() -> repository.findById(member.getMemberId()))
-          .isInstanceOf(NoSuchElementException.class); // 예외 터지는거 확인
-      ```
 
 <br>
 
@@ -2305,5 +3157,39 @@ private BooleanExpression maxPrice(Integer maxPrice) {
 
 참고로 메모리db 사용시 create table도 자동으로 jpa가!
 
+- db처리는 트랜잭션이 필수니까 “서비스 단”에서 보통 트랜잭션을 사용한다. 테스트 코드를 작성할때도 사용하고있다.. 그럼 트랜잭션이 겹칠테고 전파로 인해 기존 사용중인 트랜잭션을 그대로 사용하는것도 안다. 
 
+- **그럼 독립적으로 트랜잭션을 사용하는 경우는 뭐가 있을까??**
+
+  (1)기본값: 트랜잭션 그대로 전파 사용은 @Transactional의 `Propagation.REQUIRED` 속성
+
+  (2)트랜잭션 독립 사용은 @Transactional의 `Propagation.REQUIRED_NEW` 속성
+
+  - 사례1는 **결제 처리와 알림**이다. 결제가 성공하면 알림을 보낼건데, 알림 전송 실패하더라도 결제는 성공적으로 이루어져야 한다. 이것도 충분히 가능하다. -> 이게 실제 서비스에서 고려할 만한 부분인 것 같다.
+
+  - 사례2은 **배치 작업 및 상태 업데이트**다. 대량 데이터를 처리하는 배치 로직에서 "상태 업데이트"를 독립 트랜잭션으로 실행해서 롤백을 당해도 상태는 업데이트 할 수 있는 방안이다.
+
+    ```java
+    @Transactional
+    public void processBatch(List<Data> dataList) {
+      for (Data data : dataList) {
+          try {
+              // 데이터 처리
+              processData(data);
+              statusUpdateService.updateStatus(data.getId(), "Processed");
+          } catch (Exception e) {
+              // 처리 중 오류가 발생해도 상태 업데이트는 독립적으로 진행
+              statusUpdateService.updateStatus(data.getId(), "Failed");
+          }
+      }
+    }
+    
+    -------------------------------
+        
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void updateStatus(Long dataId, String status) {
+    // 상태 업데이트
+    	statusRepository.updateStatus(dataId, status);
+    }
+    ```
 
