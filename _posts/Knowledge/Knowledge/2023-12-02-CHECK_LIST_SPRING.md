@@ -16,22 +16,21 @@ typora-root-url: ../../..
 
 <br>
 
-<details>
-<summary>build.gradle 설정 예시 (+플러그인)</summary>
-<div markdown="1">
-**스프링부트 플러그인 사용 시 "라이브러리 버전관리 자동화" -> 지원 안되는건 "직접 버전 등록 필수!"**<br>
-`spring 3.x` 사용은 `java17` 필수!<br>
-```java
-System.out.println("test");
-//dd
-```
-</div>
-</details>
-
+- <details>
+  <summary>build.gradle 설정 예시 (+플러그인)</summary>
+  <div markdown="1">
+  **스프링부트 플러그인 사용 시 "라이브러리 버전관리 자동화" -> 지원 안되는건 "직접   버전 등록 필수!"**<br>
+  `spring 3.x` 사용은 `java17` 필수!<br>
+  ```java
+  System.out.println("test");
+  //dd
+  ```
+  </div>
+  </details>
 
 <details>
 <summary><b>build.gradle 설정 예시 (+플러그인)</b></summary>
-  <div markdown=”1”>
+  <div markdown="1">
   **스프링부트 플러그인 사용 시 "라이브러리 버전관리 자동화" -> 지원 안되는건 "직접 버전 등록 필수!"**<br>
   `spring 3.x` 사용은 `java17` 필수!<br>
   ```groovy
@@ -81,6 +80,7 @@ System.out.println("test");
   ```
   </div>
 </details>
+
 <details>
 <summary>test</summary>
 <div markdown="1">
@@ -88,7 +88,11 @@ System.out.println("test");
 </div>
 </details>
 
+히ㅇ 계속 안되는것 같으면 test환경에서 실행해서 보자,,,
+
 <br>
+
+
 
 `IDE: IntelliJ & Eclipse + Build Tool: Gradle - Groovy & Maven - Pom.xml`
 
@@ -112,7 +116,7 @@ System.out.println("test");
 </details>
 
 - <details><summary><b>build.gradle 설정 예시 (+플러그인)</b></summary>
-  <div markdown=”1”>
+  <div markdown="1">
   **스프링부트 플러그인 사용 시 "라이브러리 버전관리 자동화" -> 지원 안되는건 "직접 버전 등록 필수!"**<br>
   `spring 3.x` 사용은 `java17` 필수!<br>
   ```java
@@ -290,7 +294,7 @@ System.out.println("test");
 * N:M 관계를 두 테이블로 구성하는건 데이터 중복 야기. 외래키를 2개 써서 해결하려 해도 애초에 외래키 2개 사용 자체가 너무 비효율. 가능은 한지도 모르겠고.
 
 * <details><summary><b>테이블 관계 TIP<b/></summary>
-  <div markdown=”1”>
+  <div markdown="1">
   1. 관계를 생각 할 때 테이블로 생각하지 말고, '한 행'을 기준으로 생각. 테이블 명도 마찬가지.<br>
      - '학생', '수업'<br>
   2. 논리적으로 생각할 땐, 연결(매핑) 테이블은 생각하지 않는다.<br>
@@ -311,7 +315,7 @@ System.out.println("test");
 *  **1:N, N:1** 의 경우 **N**에 사용 -> **1**은 양방향 필요시 연결(엔티티)
   
   * <details><summary><b>1쪽에 FK 놓으면 2가지 단점<b/></summary>
-    <div markdown=”1”>
+    <div markdown="1">
     플레이어(N) 2명 등록 후 첫 팀(1)에 모두 등록 시??<br>
     - Team 테이블에 pk 중복 문제<br>
     - Player 테이블 업뎃 시 Team 테이블도 같이 업뎃 문제<br>
@@ -399,7 +403,7 @@ System.out.println("test");
 
 
   - <details><summary><b>즉시 로딩, 지연로딩에서 N+1 왜 발생??<b/></summary>
-    <div markdown=”1”>
+    <div markdown="1">
     User:Article = 1:N 가정<br>
     **(1)즉시로딩 예시**<br>
     <img src="https://github.com/user-attachments/assets/1dfa20b9-817c-4e6b-8e50-f5fdf9d1a424" alt="image" style="zoom:80%;" /><br>
@@ -2387,7 +2391,7 @@ my:
   - http는 80포트를 기본값으로 사용
 
 <details><summary><b>본섭API:application.yml<b/></summary>
-<div markdown=”1”>
+<div markdown="1">
 application.yml 과 application.properties 는 똑같은 역할 (문법만 다를 뿐)<br>
 ```yaml
 spring:
@@ -2432,7 +2436,7 @@ management:
 <details/>
 
 <details><summary><b>테섭API:application.yml<b/></summary>
-<div markdown=”1”>
+<div markdown="1">
 application.yml 과 application.properties 는 똑같은 역할 (문법만 다를 뿐)<br>
 ```yaml
 # 테스트 코드는 메모리 DB를 사용하기 위해 datasource 주석
@@ -2460,7 +2464,7 @@ com.lepl: debug
 </div>
 <details/>
 <details><summary><b>프로필WEB:application.yml<b/></summary>
-<div markdown=”1”>
+<div markdown="1">
 # default 프로필 -> 개발모드로 사용
 spring:
   # thymeleaf 캐시 사용 X로 실시간 reload
