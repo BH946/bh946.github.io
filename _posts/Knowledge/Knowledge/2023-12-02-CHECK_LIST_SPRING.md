@@ -16,22 +16,24 @@ typora-root-url: ../../..
 
 <br>
 
-<details><summary><b>build.gradle 설정 예시 (+플러그인)</b></summary>
-  <div markdown=”1”>
-  **스프링부트 플러그인 사용 시 "라이브러리 버전관리 자동화" -> 지원 안되는건 "직접 버전 등록 필수!"**<br>
-  `spring 3.x` 사용은 `java17` 필수!<br>
-  ```
-  hello
-  //ddd
-  ```<br>
-  ```java
-  System.out.println("test");
-  //dd
-  ```
-  </div>
+<details>
+<summary>build.gradle 설정 예시 (+플러그인)</summary>
+<div markdown=”1”>
+**스프링부트 플러그인 사용 시 "라이브러리 버전관리 자동화" -> 지원 안되는건 "직접 버전 등록 필수!"**<br>
+`spring 3.x` 사용은 `java17` 필수!<br>
+```
+hello
+//ddd
+```<br>
+```java
+System.out.println("test");
+//dd
+```
+</div>
 </details>
 
-<details><summary><b>build.gradle 설정 예시 (+플러그인)</b></summary>
+<details>
+<summary><b>build.gradle 설정 예시 (+플러그인)</b></summary>
   <div markdown=”1”>
   **스프링부트 플러그인 사용 시 "라이브러리 버전관리 자동화" -> 지원 안되는건 "직접 버전 등록 필수!"**<br>
   `spring 3.x` 사용은 `java17` 필수!<br>
