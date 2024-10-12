@@ -16,40 +16,8 @@ typora-root-url: ../../..
 
 <br>
 
-- <details><summary><b><b/></summary>
-  <div markdown=”1”>
-  </div>
-  <details/>
-
-<details><summary><b><b/></summary>
-<div markdown=”1”>
-</div>
-<details/>
-<br>
-
-`IDE: IntelliJ & Eclipse + Build Tool: Gradle - Groovy & Maven - Pom.xml`
-
-
-> 주로 IntelliJ + Gradle 사용 중
-
-<details><summary><b>실제 빌드와 실행 둘 다 IntelliJ 로 설정 (실행 속도가 더 빠름) + "코드 컨벤션" + "자바 버전 설정"</b></summary><br>
-<b>Settings → gradle 검색 → IntelliJ IDEA로 설정 (빌드툴, 실제 실행 설정)</b>
-<img src="https://github.com/user-attachments/assets/9f087f29-4dba-4d9e-9c33-42b15a449a03"/><br><br>
-<b>Settings → Editor → Code Style → 구글 컨밴션 적용 (Ctrl+I, Ctrl+L 로 빠르게 정렬)</b><img src="https://github.com/user-attachments/assets/ddd01a9d-5c01-4ab0-9435-dc15a697e63f"/><br><br>
-<b>Settings -> gradle 검색 -> 빌드 툴(Gradle) 자바버전 설정(위 사진참고)</b><br>
-<b>Project Strucutre -> Project -> 프로젝트의 자바버전 설정</b>
-<img src="https://github.com/user-attachments/assets/4ffc05a9-0ac2-40f6-83b4-1bf6929937fc"/>
-</details>
-<details><summary><b>툴 마다 외부 라이브러리 적용법</b></summary>
-<ul>
-    <li>Maven(빌드 툴)은 <b>pom.xml</b>에서 라이브러리 설정</li>
-    <li>Gradle(빌드 툴)은 <b>build.gradle</b>에서 라이브러리 설정</li>
-    <li><b/>이클립스(IDE)에서 빌드 툴 사용안했을 때는 직접 jar파일 집어 넣었었음.(전통)</li>
-</ul>
-</details>
-
 - <details><summary><b>build.gradle 설정 예시 (+플러그인)</b></summary>
-  <div markdown="1">
+  <div markdown=”1”>
   **스프링부트 플러그인 사용 시 "라이브러리 버전관리 자동화" -> 지원 안되는건 "직접 버전 등록 필수!"**<br>
   `spring 3.x` 사용은 `java17` 필수!<br>
   ```java
@@ -59,9 +27,9 @@ typora-root-url: ../../..
     id 'io.spring.dependency-management' version '1.1.0'
   }
   group = 'com'
-	version = '0.0.1-SNAPSHOT'
-	sourceCompatibility = '17'
-	configurations {
+    version = '0.0.1-SNAPSHOT'
+   	sourceCompatibility = '17'
+    configurations {
     compileOnly {
       extendsFrom annotationProcessor
     }
@@ -99,7 +67,87 @@ typora-root-url: ../../..
   ```
   </div>
   </details>
-  
+
+<details><summary><b></b></summary>
+<div markdown=”1”>
+</div>
+</details>
+<br>
+
+`IDE: IntelliJ & Eclipse + Build Tool: Gradle - Groovy & Maven - Pom.xml`
+
+
+> 주로 IntelliJ + Gradle 사용 중
+
+<details><summary><b>실제 빌드와 실행 둘 다 IntelliJ 로 설정 (실행 속도가 더 빠름) + "코드 컨벤션" + "자바 버전 설정"</b></summary><br>
+<b>Settings → gradle 검색 → IntelliJ IDEA로 설정 (빌드툴, 실제 실행 설정)</b>
+<img src="https://github.com/user-attachments/assets/9f087f29-4dba-4d9e-9c33-42b15a449a03"/><br><br>
+<b>Settings → Editor → Code Style → 구글 컨밴션 적용 (Ctrl+I, Ctrl+L 로 빠르게 정렬)</b><img src="https://github.com/user-attachments/assets/ddd01a9d-5c01-4ab0-9435-dc15a697e63f"/><br><br>
+<b>Settings -> gradle 검색 -> 빌드 툴(Gradle) 자바버전 설정(위 사진참고)</b><br>
+<b>Project Strucutre -> Project -> 프로젝트의 자바버전 설정</b>
+<img src="https://github.com/user-attachments/assets/4ffc05a9-0ac2-40f6-83b4-1bf6929937fc"/>
+</details>
+<details><summary><b>툴 마다 외부 라이브러리 적용법</b></summary>
+<ul>
+    <li>Maven(빌드 툴)은 <b>pom.xml</b>에서 라이브러리 설정</li>
+    <li>Gradle(빌드 툴)은 <b>build.gradle</b>에서 라이브러리 설정</li>
+    <li><b/>이클립스(IDE)에서 빌드 툴 사용안했을 때는 직접 jar파일 집어 넣었었음.(전통)</li>
+</ul>
+</details>
+
+- <details><summary><b>build.gradle 설정 예시 (+플러그인)</b></summary>
+  <div markdown=”1”>
+  **스프링부트 플러그인 사용 시 "라이브러리 버전관리 자동화" -> 지원 안되는건 "직접 버전 등록 필수!"**<br>
+  `spring 3.x` 사용은 `java17` 필수!<br>
+  ```java
+  plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.1.2'
+    id 'io.spring.dependency-management' version '1.1.0'
+  }
+  group = 'com'
+    version = '0.0.1-SNAPSHOT'
+   	sourceCompatibility = '17'
+    configurations {
+    compileOnly {
+      extendsFrom annotationProcessor
+    }
+  }
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    // data-jpa(jpa, spring data jpa), web(http), lombok, db(h2, oracle)
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    compileOnly 'org.projectlombok:lombok'
+    runtimeOnly 'com.h2database:h2'
+    // https://mvnrepository.com/artifact/com.oracle.database.jdbc/ojdbc10
+    implementation group: 'com.oracle.database.jdbc', name: 'ojdbc10',     version: '19.21.0.0'
+    annotationProcessor 'org.projectlombok:lombok'
+    // test(JUnit, AsserJ 등), lombok 을 test 에서 사용
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+    //valid(NotEmpty 등) 사용위해 추가
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-devtools'
+    // 캐시(caffeine 로 캐시매니저 간단 등록)
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'com.github.ben-manes.caffeine:caffeine:3.1.1' 
+    // 모니터링(actuator, prometheus)
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+  }
+  tasks.named('test') {
+    useJUnitPlatform()
+  }
+  ```
+  </div>
+  </details>
+
+
 - <details><summary><b>Spring+JUnit 버전별로 라이브러리 추가 주의(Spring2+JUnit4, Srping3+JUnit5)</b></summary>
   <div markdown="1">
   * **(1) Spring 2.xx + JUnit4(Test Code)**<br>
@@ -140,7 +188,7 @@ typora-root-url: ../../..
     public void 조회() {} 
   }
   ```
-  <div/>
+  </div>
   </details>
 
 <br>
@@ -1750,94 +1798,113 @@ public void initCacheMembers() {
 
 <br><br>
 
-### JPQL (페이징, distinct, 연관관계)
+### JPQL (distinct, 연관관계, vs MyBatis 등), 페이징
 
-**반환 방식**
+#### JPQL
 
-* TypeQuery: 반환 타입이 명확할 때 사용
-  * **일반적(자주 사용!)** : `List<Member> findMembers = em.createQuery("select m from Member m", Member.class)`
-  * **Dto : QueryDSL 사용시 패키지 명(jpql.)까지 없앨 수 있음 (자주 사용!)**
-    * `List<MemberDTO> result = em.createQuery("select new jpql.MemberDTO(m.username, m.age) from Member m", MemberDTO.class)`
-* Query: 반환 타입이 명확하지 않을 때 사용
-  * `List<Query> findMembers = em.createQuery("select m from Member m")`
-  * 이땐 굳이 반환타입 Member.class를 명시할 필요가 없음
-* **query.getResultList(): 결과가 하나 이상일 때, 리스트 반환** **-> 자주사용!! (1개 여도!)**
-* query.getSingleResult(): 결과가 정확히 하나, 단일 객체 반환
+- **반환 방식** -> `query.getResultList()`
+
+  * <details><summary><b>TypeQuery, Query<b/></summary>
+    <div markdown="1">
+    * TypeQuery: 반환 타입이 명확할 때 사용<br>
+      * **일반적(자주 사용!)** : `List<Member> findMembers = em.createQuery("select m from Member m", Member.class)`<br>
+      * **Dto : QueryDSL 사용시 패키지 명(jpql.)까지 없앨 수 있음 (자주 사용!)**<br>
+        * `List<MemberDTO> result = em.createQuery("select new jpql.MemberDTO(m.username, m.age) from Member m", MemberDTO.class)`<br>
+    * Query: 반환 타입이 명확하지 않을 때 사용<br>
+      * `List<Query> findMembers = em.createQuery("select m from Member m")`<br>
+      * 이땐 굳이 반환타입 `Member.class`를 명시할 필요가 없음<br>
+    * **query.getResultList(): 결과가 하나 이상일 때, 리스트 반환** **-> 자주사용!! (1개 여도!)**<br>
+    * query.getSingleResult(): 결과가 정확히 하나, 단일 객체 반환
+    </div>
+    <details/>
+
+
+* <details><summary><b>fetch join(즉시로딩) -> `XToOne`는 바로 페치조인O, `XToMany`는 일반 select + BatchSize (페치조인X, 글로벌로 100정도 깔아두고 개발ㄲㄲ)<b/></summary>
+  <div markdown="1">
+  * 주의: **페치 조인**은 **객체 그래프 유지**할 때 사용 시 효과적인 반면, 여러 테이블을 조인해서 엔티티가 가진 모양이 아닌 전혀 다른 결과를 내야 하면, 페치 조인 보다는 **일반 조인**을 사용해서 필요한 데이터들만 조회해서 **DTO**로 반환하는 것이 효과적.<br>
+  * **fetch join**을 **일반 join**으로 따라하려면 T.\*, M.* 로 두 테이블 모두 조회 ("즉시 로딩")<br>
+    * `XToOne` 문제없음, `XToMany` 는 Distinct 함께 사용(컬렉션이라 중복 문제!!)<br>
+    * 근데, **하이버네이트6 부터 Distinct 자동 적용**해주는듯. 아직 테스트 못해봤다.<br>
+  * **페치 조인 대상에는 별칭X** - 유일하게 연속으로 join 가져오는 경우에만 사용<br>
+  * **둘 이상의 컬렉션은 페치 조인X**
+  </div>
+  <details/>
+
+* <details><summary><b>경로 표현식 3가지(.을 찍어 "탐색") -> 상태, 연관 필드(단일 연관, 컬렉션 연관)  <b/></summary>
+  <div markdown="1">
+  * **상태 필드(탐색X)**: 단순히 값을 저장하기 위한 필드 (ex: `m.username`)<br>
+  * **단일 값 연관 필드(탐색O)**: @ManyTo**One**, @OneTo**One**, 대상이 엔티티(ex: `m.team`)<br>
+    * **"즉시 로딩" 이 기본값**이므로 꼭 "지연 로딩" + "join fetch" 사용 권장 <br>
+    * 탐색가능 예시: `select m.team.id from Member m` <br>
+  * **컬렉션 값 연관 필드(탐색X)**: @OneTo**Many**, @ManyTo**Many**, 대상이 컬렉션(ex: `m.orders`) <br>
+    * 컬렉션은 "Object" 객체로 생각하면 되며, **"지연 로딩" 이 기본값**<br>
+  * **주의: 일반 join 필요 시 "묵시적 내부 조인" 이 아닌 "명시적 조인" 을 사용할 것**<br>
+    * `select m.team from Member m` 이나 `select m.orders from Member m` 처럼 사용 가능한데, 이 경우 **묵시적 내부 조인이 발생(자동 inner join)** **-> 매우 비권장!!**<br>
+    * 쿼리 튜닝하기에 매우 힘듦
+  </div>
+  <details/>
+
+
+* <details><summary><b>엔티티 직접 사용 -> count(m) = count(m.id) 로 자동 SQL 변형!<b/></summary>
+  <div markdown="1">
+  * **JPQL에서 엔티티를 직접 사용하면 SQL에서 해당 엔티티의 "기본 키" 값을 사용**<br>
+    * (JPQL) : select count**(m)** from Member m <br>
+    * (SQL) : select count**(m.id)** as cnt from Member m <br>
+  * **참고: JPQL은 m.* 이런식의 조회를 m 으로 동일하게 가능.** <br>
+    * 예: `select m from Member m`  와 `select m.* from Member m` 동일!!
+  </div>
+  <details/>
+
+- <details><summary><b>Named 쿼리 -> Spring Data JPA의 interface에서 간단히 쿼리 커스텀!!<b/></summary>
+  <div markdown="1">
+  * **실무에서는 Spring Data JPA 를 사용하는데 @Query("select...") 문법이 바로 "Named 쿼리"** **-> 원하는 쿼리문 바로 작성가능한 편리성**<br>
+    * JPQL 예: `@Query("SELECT m FROM Member m")`<br>
+    * Natvie SQL 예: `@Query(value="SELECT m FROM Member m", nativeQuery=true)`<br>
+  * **참고: 물론 일반 JPA로 구현로직 추가해서 인터페이스 상속 추가해서 사용도 좋다~** <br>
+    * 본인은 이 방식으로 JPA+Spring Data JPA 함께 쓰는 편
+  </div>
+  <details/>
+
+
+* **동적 쿼리**는 **Querydsl** 을 권장
+* 자세한 내용은 강의보고 적어두자
 
 <br>
 
-**페치징 API**
+**꼭 이해하자 아래 개념!**
+
+- **join vs fetch join와 distinct(SQL, JPQL) 차이는??**
+
+- **연관관계(1:1,1:N,N:1,N:N) 자세히..**
+
+- **JPA(ORM) 와 MyBatis(SQL Mapper) 차이는??**
+
+<br>
+
+#### 페이징 (+최적화 예시)
+
+**페이징**
 
 * `setFirstResult(int startPosition)` : 조회 시작 위치 (0부터 시작)
 * `setMaxResults(int maxResult)` : 조회할 데이터 수
 
-* **fetch join** : 객체 그래프 유지할 때 사용시 효과적이고, **"즉시로딩"** 사용을 의미
+* 
 
-  * 여러 테이블을 조인해서 엔티티가 가진 모양이 아닌 전혀 다른 결과를 내야 하면,   
-    페치 조인 보다는 일반 조인을 사용하고 필요한 데이터들만 조회해서 DTO로 반환하는 것이 효과적
-  * **fetch join**을 **일반 join**으로 따라하려면 T.\*, M.* 로 두 테이블 모두 조회 ("즉시 로딩")
-    * **`XToOne` 문제없음, `XToMany` 는 Distinct 함께 사용(컬렉션이라 중복들이...)**
-    * 근데, **하이버네이트6 부터 Distinct 자동 적용**해주는듯?! 아직 테스트 못해봤다.
-  * **페이징 API - `XToOne`는 바로 페치조인O, `XToMany`는 일반 select + BatchSize (페치조인X)**
-    * **글로벌로 100정도 깔아두고 개발하자**
-  * **페치 조인 대상에는 별칭X** - 유일하게 연속으로 join 가져오는 경우에만 사용
-  * **둘 이상의 컬렉션은 페치 조인X**
-
-* **경로 표현식 3가지** - 상태, 연관 필드(단일 연관, 컬렉션 연관)
-
-  * 경로 표현식 : .(점)을 찍어 객체 그래프를 탐색하는 것
-
-  * **일반 join 사용시 "묵시적 내부 조인" 이 아닌 "명시적 조인" 을 사용할 것**
-
-  * 묵시적 내부 조인은 자동 inner join을 진행 -> 묵시적 내부 조인 비권장!
-
-    ```java
-    select m.username -> 상태 필드 (묵시적 내부 조인X, 탐색X)
-      from Member m 
-        join m.team t    -> 단일 값 연관 필드 (묵시적 내부 조인O, 탐색O)
-        join m.orders o -> 컬렉션 값 연관 필드 (묵시적 내부 조인O, 탐색X)
-    where t.name = '팀A'
-    ```
-
-* **엔티티 직접 사용**
-
-  * **JPQL에서 엔티티를 직접 사용하면 SQL에서 해당 엔티티의 "기본 키" 값을 사용**
-  * (JPQL) : select count**(m)** from Member m    
-  * (SQL) : select count**(m.id)** as cnt from Member m
-  * **JPQL은 m.* 이런식의 조회를 m 으로 동일하게 가능.**   
-    -> 즉, `select m from Member m` 이런 형태가 JPQL은 가능. 오히려 권장.
-
-* **Named 쿼리**
-
-  * **실무에서는 Spring Data JPA 를 사용하는데 @Query("select...") 문법이 바로 "Named 쿼리"**
-    * JPQL 예: `@Query("SELECT m FROM Member m")`
-    * Natvie SQL 예: `@Query(value="SELECT m FROM Member m", nativeQuery=true)`
-
-* **동적 쿼리**는 **Querydsl** 을 권장
-
-  * 자세한 내용은 강의보고 적어두자@
 
 <br>
 
+**페이징 + 캐시 예시 2개**
 
+- 굉장히 좋은 참고 문서: [페이지네이션 최적화 - Offset 문제 가져간 이유](https://taegyunwoo.github.io/tech/Tech_DBPagination) 참고!
 
+- 여기서 기억에 남은 말: **가장 먼저 서브쿼리를 통해서 커버링 인덱스로 페이징을 진행합니다. 그리고 그 결과와 기존 테이블을 조인시켜서 ‘인덱스에 포함되지 않은 칼럼’을 가져옵니다.**
 
-
-이 아래내용은 드롭다운으로 남겨두기 -> 서버최적화.md에 저장해둔 내용임.
-
-#### 페이징 + 캐시 예시 2개
-
-굉장히 좋은 참고 문서: [페이지네이션 최적화 - Offset 문제 가져간 이유](https://taegyunwoo.github.io/tech/Tech_DBPagination) 참고!
-
-여기서 기억에 남은 말: **가장 먼저 서브쿼리를 통해서 커버링 인덱스로 페이징을 진행합니다. 그리고 그 결과와 기존 테이블을 조인시켜서 ‘인덱스에 포함되지 않은 칼럼’을 가져옵니다.**
-
-**(1)회원 랭킹 보여주는 페이지(정렬필수) -> 30분 마다 갱신**
-
-- **레포지토리**
-  - **서브쿼리에 인덱스로 member 테이블을 빠르게 조회 (정렬 된)**
-    - 서브쿼리, limit, offset 사용 위해 Native Query 사용
-  - 이후 기존 테이블과 조인해서 결과 반환
-
+<details><summary><b>(1)회원 랭킹 보여주는 페이지(정렬필수) -> 30분 마다 갱신<b/></summary>
+<div markdown="1">
+**레포지토리**<br>
+- **서브쿼리에 인덱스로 member 테이블을 빠르게 조회 (정렬 된)**<br>
+  - 서브쿼리, limit, offset 사용 위해 Native Query 사용<br>
+- 이후 기존 테이블과 조인해서 결과 반환<br>
 ```java
 //Limit, Offset -> SQL
 List<Object[]> objects = em.createNativeQuery(
@@ -1846,12 +1913,10 @@ List<Object[]> objects = em.createNativeQuery(
 "inner join character c on m.character_id=c.character_id " +
 "inner join exp e on c.exp_id=e.exp_id;")
         .getResultList();
-```
-
-- **서비스**
-  - 30분 마다 갱신이라 **@CacheEvict, @Cacheable, @Scheduled로 충분**
-  - 페이지별로(pageId) 묶어서 캐시 관리가 좋아서 이렇게 진행. (게시물마다 하는건 너무 많은 캐시 메모리 사용?) + 캐시사이즈 설정
-
+```<br>
+**서비스**<br>
+- 30분 마다 갱신이라 **@CacheEvict, @Cacheable, @Scheduled로 충분**<br>
+- 페이지별로(pageId) 묶어서 캐시 관리가 좋아서 이렇게 진행. (게시물마다 하는건 너무 많은 캐시 메모리 사용?) + 캐시사이즈 설정<br>
 ```java
 /**
  * 회원 최신순 조회 + 캐시
@@ -1860,7 +1925,6 @@ List<Object[]> objects = em.createNativeQuery(
 public List<FindMemberResponseDto> findAllWithPage(int pageId) {
     return memberRepository.findAllWithPage(pageId);
 }
-
 // 캐시에 저장된 값 제거 -> 30분 마다 실행하겠다.
 // 초(0-59) 분(0-59) 시간(0-23) 일(1-31) 월(1-12) 요일(0-6) (0: 일, 1: 월, 2:화, 3:수, 4:목, 5:금, 6:토)
 @Scheduled(cron = "00 30 * * * *") // 30분 00초 마다 수행
@@ -1868,14 +1932,13 @@ public List<FindMemberResponseDto> findAllWithPage(int pageId) {
 public void initCacheMembers() {
 }
 ```
+</div>
+<details/>
 
-<br>
-
-**(2)게시물 10개씩 출력하는 페이지(홈페이지) -> 수정, 삭제, 추가에 갱신**
-
-- **레포지토리**
-  - 서브쿼리 사용할 필요 없어서 바로 JPQL의 페이징 기법 활용 -> 이 또한, 인덱스 사용
-
+<details><summary><b>(2)게시물 10개씩 출력하는 페이지(홈페이지) -> 수정, 삭제, 추가에 갱신<b/></summary>
+<div markdown="1">
+**레포지토리**<br>
+- 서브쿼리 사용할 필요 없어서 바로 JPQL의 페이징 기법 활용 -> 이 또한, 인덱스 사용<br>
 ```java
 //setFirstResult(), setMaxResults() -> JPQL
 public List<Item> findAllWithPage(int pageId) {
@@ -1885,14 +1948,12 @@ public List<Item> findAllWithPage(int pageId) {
       .setMaxResults(10) // 개수임!!
       .getResultList();
 }
-```
-
-- **서비스 -> 여기선 이게 중요!!**
-  - 페이지별로 url(?page=1) 접근하면 해당 페이지별로 데이터를 가져올거고 이 데이터를 **@CachePut로 기록하고, @Cacheable로 조회, 삭제는 @CacheEvict**
-    - 만약 게시물 삭제되면 애초에 게시물No(순번)이 갱신되어야해서 그냥 @CacheEvict로 삭제후 다시 기록하면 됨.
-    - 게시물 수정이면 @CachePut으로 해당 PageId 부분만 갱신하면 됨. 게시물 개수는 그대로니까!
-  - 페이지별로(pageId) 묶어서 캐시 관리가 좋아서 이렇게 진행. (게시물마다 하는건 너무 많은 캐시 메모리 사용?) + 캐시사이즈 설정
-
+```<br>
+**서비스 -> 여기선 이게 중요!!**<br>
+- 페이지별로 url(?page=1) 접근하면 해당 페이지별로 데이터를 가져올거고 이 데이터를 **@CachePut로 기록하고, @Cacheable로 조회, 삭제는 @CacheEvict**<br>
+  - 만약 게시물 삭제되면 애초에 게시물No(순번)이 갱신되어야해서 그냥 @CacheEvict로 삭제후 다시 기록하면 됨.<br>
+  - 게시물 수정이면 @CachePut으로 해당 PageId 부분만 갱신하면 됨. 게시물 개수는 그대로니까!<br>
+- 페이지별로(pageId) 묶어서 캐시 관리가 좋아서 이렇게 진행. (게시물마다 하는건 너무 많은 캐시 메모리 사용?) + 캐시사이즈 설정<br>
 ```java
 // page 단위로(key) 캐시 기록 -> 참고 : value 로 꼭 캐시 영역을 지정해줘야 함
 @Cacheable(value = "posts", key = "#pageId") // [캐시 없으면 저장] 조회
@@ -1915,11 +1976,8 @@ public Long findTotalCount() { return itemRepository.findTotalCount(); }
 @CachePut(value = "totalCount")
 public Long updateTotalCount() { return itemRepository.findTotalCount(); }
 ```
-
-<br>
-
-
-
+</div>
+<details/>
 <br>
 
 <br>
