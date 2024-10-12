@@ -92,8 +92,6 @@ typora-root-url: ../../..
 
 <br>
 
-
-
 `IDE: IntelliJ & Eclipse + Build Tool: Gradle - Groovy & Maven - Pom.xml`
 
 
@@ -111,7 +109,7 @@ typora-root-url: ../../..
 <ul>
     <li>Maven(빌드 툴)은 <b>pom.xml</b>에서 라이브러리 설정</li>
     <li>Gradle(빌드 툴)은 <b>build.gradle</b>에서 라이브러리 설정</li>
-    <li><b/>이클립스(IDE)에서 빌드 툴 사용안했을 때는 직접 jar파일 집어 넣었었음.(전통)</li>
+    <li>이클립스(IDE)에서 빌드 툴 사용안했을 때는 직접 jar파일 집어 넣었었음.(전통)</li>
 </ul>
 </details>
 
@@ -212,6 +210,49 @@ typora-root-url: ../../..
   </details>
 
 <br>
+- <details><summary><b>Spring+JUnit 버전별로 라이브러리 추가 주의(Spring2+JUnit4, Srping3+JUnit5)</b></summary>
+  <div markdown="1">
+  **(1) Spring 2.xx + JUnit4(Test Code)**<br>
+  * `build.gradle`<br>
+  ```groovy
+  //JUnit4 추가(junit5로 자동실행 되기 때문) - 의존성 추가
+  testImplementation("org.junit.vintage:junit-vintage-engine") {
+    exclude group: "org.hamcrest", module: "hamcrest-core"
+  }
+  ```
+  * `TestCode.java`
+  ```java
+  @RunWith(SpringRunner.class) // SpringRunner : Junit4
+  @SpringBootTest // 스프링과 통합 테스트 - "빈" 등 스프링 사용시 필수
+  public class ItemServiceTest { 
+    @Test // 기본 테스트(필수)
+    public void 조회() {} 
+  }
+  ```
+  **(2) Spring 3.xx + JUni5(Test Code)**
+  * H2 사용시 반드시 버전 업그레이드 + 자바 17이상
+  * RunWith, JUnit4 등록이 없어졌다고 보면 됨.
+  * `build.gradle`
+  ```groovy
+  // JUnit5 자동 사용!
+  // 테스트 코드에서 lombok 사용하는 꿀 팁! -> 아래 의존성 추가
+  testCompileOnly 'org.projectlombok:lombok'
+  testAnnotationProcessor 'org.projectlombok:lombok'
+  ```
+  * `TestCode.java`
+  * 참고 : 왜 @Transactional 이런건 바로 사용 가능한가?
+    * @Transactional 은 "빈에 반드시 TransactionManager 가 필요" 
+    * 스프링 부트는 자동으로 TransactionManager 등등 을 "빈에 등록" -> "자동 구성"
+  ```java
+  @SpringBootTest // 스프링과 통합 테스트 - "빈" 등 스프링 사용시 필수
+  public class ItemServiceTest { 
+    @Test // 기본 테스트(필수)
+    public void 조회() {} 
+  }
+  ```
+  </div>
+  </details>
+<br>
 
 **IntelliJ 단축키**
 
@@ -293,7 +334,7 @@ typora-root-url: ../../..
 
 * N:M 관계를 두 테이블로 구성하는건 데이터 중복 야기. 외래키를 2개 써서 해결하려 해도 애초에 외래키 2개 사용 자체가 너무 비효율. 가능은 한지도 모르겠고.
 
-* <details><summary><b>테이블 관계 TIP<b/></summary>
+* <details><summary><b>테이블 관계 TIP</b></summary>
   <div markdown="1">
   1. 관계를 생각 할 때 테이블로 생각하지 말고, '한 행'을 기준으로 생각. 테이블 명도 마찬가지.<br>
      - '학생', '수업'<br>
@@ -306,7 +347,7 @@ typora-root-url: ../../..
   <img src="https://github.com/user-attachments/assets/21355a21-4a11-460e-879d-1685387e1a57" alt="N:M관계" style="zoom:80%;" /><br>
   <img src="https://github.com/user-attachments/assets/5f9f899c-86e8-4f51-ab52-e872fba9863a" alt="1:N:1관계"/>
   </div>
-  <details/>
+  </details>
 
 <br>
 
@@ -314,7 +355,7 @@ typora-root-url: ../../..
 
 *  **1:N, N:1** 의 경우 **N**에 사용 -> **1**은 양방향 필요시 연결(엔티티)
   
-  * <details><summary><b>1쪽에 FK 놓으면 2가지 단점<b/></summary>
+  * <details><summary><b>1쪽에 FK 놓으면 2가지 단점</b></summary>
     <div markdown="1">
     플레이어(N) 2명 등록 후 첫 팀(1)에 모두 등록 시??<br>
     - Team 테이블에 pk 중복 문제<br>
@@ -326,7 +367,7 @@ typora-root-url: ../../..
     insert into Team (id, name, player_id) values (1, '떡잎팀', 2); -- 훈이 추가
     ```
     </div>
-    <details/>
+    </details>
   
 * **1:1**의 경우 **상황에 따라** 사용 - 보통은 **주 테이블에 외래키** 사용
   
@@ -402,7 +443,7 @@ typora-root-url: ../../..
 즉시 or 지연 로딩 중에서 무조건 **"지연 로딩"** 으로 개발 => **즉시 로딩의 N+1 문제** 때문
 
 
-  - <details><summary><b>즉시 로딩, 지연로딩에서 N+1 왜 발생??<b/></summary>
+  - <details><summary><b>즉시 로딩, 지연로딩에서 N+1 왜 발생??</b></summary>
     <div markdown="1">
     User:Article = 1:N 가정<br>
     **(1)즉시로딩 예시**<br>
@@ -420,7 +461,7 @@ typora-root-url: ../../..
     - 모든 User 검색(findAll) 요청(1번) 후 나중에 User의 컬럼에 Article 조회할 때(N번) 추가 쿼리<br>
     - 지연 로딩임을 보고 처음에 추가 쿼리를 날리지는 않음. 단, 이후에 User.article 접근할 때 이미 User는 select했어서 join을 사용하지 못하고 N번 Article을 추가 select 쿼리 발생
     </div>
-    <details/>
+    </details>
     
     - [정말 잘 정리하신 분! 참고 N+1](https://velog.io/@jinyoungchoi95/JPA-%EB%AA%A8%EB%93%A0-N1-%EB%B0%9C%EC%83%9D-%EC%BC%80%EC%9D%B4%EC%8A%A4%EA%B3%BC-%ED%95%B4%EA%B2%B0%EC%B1%85)
 
@@ -438,7 +479,7 @@ typora-root-url: ../../..
 
 - 단지 이를 사용하면 **생명주기를 같이** 하는것
 
-- <details><summary><b>두 가지 예시 코드<b/></summary>
+- <details><summary><b>두 가지 예시 코드</b></summary>
   <div markdown="1">
   ```java
   //Task.java
@@ -452,7 +493,7 @@ typora-root-url: ../../..
   private List<Task> tasks = new ArrayList<>();
   ```
   </div>
-  <details/>
+  </details>
 
 <br>
 
@@ -469,7 +510,7 @@ typora-root-url: ../../..
 
   - **설계할때 부터 "값 타입"으로 활용될거는 따로 빼서 설계 + 상속은 중복 보고 리팩토링 하던지**
 
-  - <details><summary><b>임베디드 타입(값 타입)+컬렉션 엔티티 예시<b/></summary>
+  - <details><summary><b>임베디드 타입(값 타입)+컬렉션 엔티티 예시</b></summary>
     <div markdown="1">
     - "임베디드 객체" 는 값 타입 하나. @Embedded 로<br>
     - "값 타입 컬렉션" 은 값 타입 하나 이상. 일대다 고아+cascade 로<br>
@@ -545,9 +586,9 @@ typora-root-url: ../../..
     private List<Address> addresses = new ArrayList<>();
     ```
     </div>
-    <details/>
+    </details>
 
-  - <details><summary><b>상속-@MappedSuperclass<b/></summary>
+  - <details><summary><b>상속-@MappedSuperclass</b></summary>
     <div markdown="1">
     특징: 필드+메소드까지 상속<br>
     ```java
@@ -584,7 +625,7 @@ typora-root-url: ../../..
     }
     ```
     </div>
-    <details/>
+    </details>
 
     - `@PrePersist`: 엔티티가 **처음 저장되기 전에** 실행되는 메서드를 정의. (`createdAt`, `updatedAt` 자동 설정)
     - `@PreUpdate`: 엔티티가 **업데이트되기 전에** 실행되는 메서드를 정의. (`updatedAt` 자동 갱신)
@@ -636,7 +677,7 @@ typora-root-url: ../../..
     - 기본 생성자의 접근 제어를 PROTECTED로 설정해놓게 되면 **무분별한 객체 생성에 ide 상에서 한번 더 체크할 수 있는 수단**
     - Protected 접근자는 반드시 **같은 패키지만 허용!!** - 상위, 하위 패키지 전부 불가
   
-  - <details><summary><b>생성 메서드 코드<b/></summary>
+  - <details><summary><b>생성 메서드 코드</b></summary>
     <div markdown="1">
     ```java
     // 기본생성자 Public->Protected
@@ -665,7 +706,7 @@ typora-root-url: ../../..
     order2.setDelivery(delivery2); // ide상에서 에러 발생
     ```
     </div>
-    <details/>
+    </details>
   
 - **연관관계\_편의 메서드** 사용 권장 -> **양방향**에 굿!!
 
@@ -676,7 +717,7 @@ typora-root-url: ../../..
     - (2) Order가 OrderItem를 접근하는건 **양방향**이므로 **조금 돌아가서** 접근 가능
     - **(3) Order->OrderItem 접근을 간단히 사용하기 위해 연관관계 메서드를 사용**
 
-  - <details><summary><b>연관관계 메서드 코드<b/></summary>
+  - <details><summary><b>연관관계 메서드 코드</b></summary>
     <div markdown="1">
     ```java
     // (1) OrderItem->Order 접근 예시 => 단반향
@@ -699,14 +740,14 @@ typora-root-url: ../../..
     }
     ```
     </div>
-    <details/>
+    </details>
 
 
   - **비지니스 메서드** 사용 권장
 
     - Service 파트가 아닌 Entity파트에서 비지니스 로직 구현이 가능할 것 같은 경우에는 Entity에서 개발을 적극 권장(=**도메인 모델 패턴**) => **장점 : 좀 더 객체 지향적인 코드**
 
-    - <details><summary><b>비지니스 메서드 코드<b/></summary>
+    - <details><summary><b>비지니스 메서드 코드</b></summary>
       <div markdown="1">
       ```java
       // 간단히 엔티티에서 구현 가능하면, 서비스가 아닌 엔티티에서 로직 구현(객체지향적)
@@ -736,7 +777,7 @@ typora-root-url: ../../..
       }
       ```
       </div>
-      <details/>
+      </details>
 
 <br>
 
@@ -762,7 +803,7 @@ typora-root-url: ../../..
 참고로 Spring Data JPA는 `JpaReository 인터페이스` 로 볼 수 있고, 이거만 상속해도 **서비스 단에서 바로 사용**이 가능하다.   
 **-> 자동으로 구현체를 만들어 주기 때문**
 
-<details><summary><b>예시 코드 보기 - 레포지토리<b/></summary>
+<details><summary><b>예시 코드 보기 - 레포지토리</b></summary>
 <div markdown="1">
 **MemberRepository 인터페이스 + MemberRepositoryCustom 인터페이스 + MemberRepositoryCustomImpl 클래스 의 조합**<br>
 ```java
@@ -829,10 +870,10 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
 }
 ```
 </div>
-<details/>
+</details>
 
 
-<details><summary><b>Spring Data Jpa 기본 제공 CRUD표<b/></summary>
+<details><summary><b>Spring Data Jpa 기본 제공 CRUD표</b></summary>
 <div markdown="1">
 참고: save() 는 update 기능 포함<br>
 | 메소드           | 설명                                              |
@@ -875,11 +916,11 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
 | 내림차순    | findbyOrderByCodeDesc         | select te1_0.id,te1_0.code,te1_0.date,te1_0.name from test_entity te1_0 order by te1_0.code desc |
 | 컬럼 여러개 | findbyOrderByCodeDescNameDesc | select te1_0.id,te1_0.code,te1_0.date,te1_0.name from test_entity te1_0 order by te1_0.code desc,te1_0.name desc |
 </div>
-<details/>
-<details><summary><b><b/></summary>
+</details>
+<details><summary><b></b></summary>
 <div markdown="1">
 </div>
-<details/>
+</details>
 
 - 출처: [JpaRepository 메소드 규칙 정리](https://priming.tistory.com/114)
 
@@ -920,7 +961,7 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
 
 <br>
 
-<details><summary><b>예시 코드 보기 - 서비스<b/></summary>
+<details><summary><b>예시 코드 보기 - 서비스</b></summary>
 <div markdown="1">
 **TaskService 인터페이스 + TaskServiceV2 클래스(구현체) + TaskConfigV2 클래스(설정-빈 등록)**<br>
 TaskServiceV2 를 보면 정말 레포지토리 <-> 컨트롤러 이어주는 역할 하는 느낌이다.<br>
@@ -987,7 +1028,7 @@ public class TaskConfigV2 {
 }
 ```
 </div>
-<details/>
+</details>
 
 <br>
 
@@ -1027,7 +1068,7 @@ public void initCacheMembers() {
   - JSON 반환시 꼭 마지막에 객체로 감싸서 반환 -> `{ 데이터 }`
   - 배열 JSON이면 꼭 마지막에 배열로 감싸서 반환 -> `[{},{}...]`
 
-- <details><summary><b>Jackson 2.8.0 이전 버전 LocalDateTime 오류?<b/></summary>
+- <details><summary><b>Jackson 2.8.0 이전 버전 LocalDateTime 오류?</b></summary>
   <div markdown="1">
   ```java
   Map<String, LocalDateTime> map = new HashMap<>();
@@ -1038,7 +1079,7 @@ public void initCacheMembers() {
       .writeValueAsString(map); // Jackson 2.8.0 이전 버전에서는 JavaTimeModule 을 써야 에러 해결(직렬화 에러)
   ```
   </div>
-  <details/>
+  </details>
 
 - API 응답 스펙에 맞추어 별도의 **DTO를 반환** 권장
 
@@ -1048,7 +1089,7 @@ public void initCacheMembers() {
 
   - 강제 초기화를 안하면 fetch join으로 모두 조회 했어도 해당 엔티티를 찾을 수 없게 되어서 null이 응답!! -> "영속성에 등록하지 않아서. 즉, 메모리에 올려두지 않아서."
 
-  - <details><summary><b>자세히 (출력사진+코드)<b/></summary>
+  - <details><summary><b>자세히 (출력사진+코드)</b></summary>
     <div markdown="1">
     **Lazy 강제 초기화 안 할때**<br>
     <img src="https://github.com/user-attachments/assets/093f2678-788f-4ecf-8ade-4790f5cb31e1" alt="image" style="zoom:80%;" /><br>
@@ -1069,7 +1110,7 @@ public void initCacheMembers() {
     ```<br>
     <img src="https://github.com/user-attachments/assets/80d56805-64a3-41e9-ba9d-a0cddb027498" alt="image" style="zoom:80%;" /><br>    
     </div>
-    <details/>
+    </details>
 
 <br>
 
@@ -1090,7 +1131,7 @@ public void initCacheMembers() {
     - **Valid 사용하면 Api응답양식**까지 포함해서 body에 반환
        `ApiResponse res = ApiResponse.error(HttpStatus.BAD_REQUEST.value(), bindingResult);` -> (ApirResponse는 아래 리팩토링 주제 쪽에서 참고-Valid)
 
-- <details><summary><b>HttpStatus 클래스에서 제공하는 주요 상태 코드<b/></summary>
+- <details><summary><b>HttpStatus 클래스에서 제공하는 주요 상태 코드</b></summary>
   <div markdown="1">
   - **1xx: 정보 응답**
       - **100 Continue**: 클라이언트가 요청을 계속 진행해도 좋다는 의미입니다.
@@ -1116,7 +1157,7 @@ public void initCacheMembers() {
       - **501 Not Implemented**: 요청한 메서드가 서버에서 구현되지 않았음을 의미합니다.
       - **503 Service Unavailable**: 서버가 현재 요청을 처리할 수 없음을 나타내며, 보통 서버가 과부하 상태이거나 유지보수 중일 때 발생합니다.
   </div>
-  <details/>
+  </details>
 
 - **세션 얻으려고 HttpServletRequest** 파라미터를 받기도 함. -> request 가 세션 관리 기억!
 
@@ -1278,7 +1319,7 @@ public void initCacheMembers() {
 
       - 다만, 응답 쿠키는 확인이 불가능했다. 쿠키는 웹에서는 자동 처리해주다보니 환경 차이인 것 같다.
 
-  - <details><summary><b>Mock관련 메서드들 참고<b/></summary>
+  - <details><summary><b>Mock관련 메서드들 참고</b></summary>
     <div markdown="1">
     1) perfom()<br>
     - HTTP 요청을 할 수 있다.<br>
@@ -1310,7 +1351,7 @@ public void initCacheMembers() {
     clear() - stub을 초기화 한다<br>
     timeOut() - 지정된 시간 안에 호출되었는지 확인
     </div>
-    <details/>
+    </details>
 
   - **HttpServletRequest, HttpServletResponse 관련 테스트** -> `MockHttpServletRequest, MockHttpServletResponse` 을 사용! (아직 사용해보지는 않았음)
 
@@ -1333,7 +1374,7 @@ public void initCacheMembers() {
 
 **예시 코드 참고**
 
-- <details><summary><b>도메인<b/></summary>
+- <details><summary><b>도메인</b></summary>
   <div markdown="1">
   ```java
   @Slf4j
@@ -1363,9 +1404,9 @@ public void initCacheMembers() {
   }
   ```
   </div>
-  <details/>
+  </details>
 
-- <details><summary><b>레포지토리<b/></summary>
+- <details><summary><b>레포지토리</b></summary>
   <div markdown="1">
   ```java
   @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -1443,9 +1484,9 @@ public void initCacheMembers() {
   }
   ```
   </div>
-  <details/>
+  </details>
 
-- <details><summary><b>서비스<b/></summary>
+- <details><summary><b>서비스</b></summary>
   <div markdown="1">
   ```java
   @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -1523,9 +1564,9 @@ public void initCacheMembers() {
   }
   ```    
   </div>
-  <details/>
+  </details>
 
-- <details><summary><b>컨트롤러<b/></summary>
+- <details><summary><b>컨트롤러</b></summary>
   <div markdown="1">
   ```java
   @WebMvcTest(controllers = MemberApiController.class)
@@ -1659,7 +1700,7 @@ public void initCacheMembers() {
   } 
   ```
   </div>
-  <details/>
+  </details>
 
 <br>
 
@@ -1706,7 +1747,7 @@ public void initCacheMembers() {
 
     * **기본 키 자동 생성**의 경우, 순차번호 구하는 **select 는 바로 전송**
 
-      * <details><summary><b>generatedKey 보충 설명 : nextval 쿼리<b/></summary>
+      * <details><summary><b>generatedKey 보충 설명 : nextval 쿼리</b></summary>
         <div markdown="1">
         persist때 generatedKey 등록한 엔티티는 자동 nextval 시퀀스 쿼리 발생해 줌<br>
         - 단, identity 방식 사용중이면 insert쿼리 시점에 DB에서 키를 생성<br>
@@ -1716,9 +1757,9 @@ public void initCacheMembers() {
           - 오라클12c 부턴 시퀀스 뿐만 아니라 identity 문법도 제공<br>
         - **MySQL, SQL Server** 같은 DB에서는 기본적으로 `GenerationType.IDENTITY`가 사용<br>
         </div>
-        <details/>
+        </details>
 
-    * <details><summary><b>save() 보충 설명: JPA와 Spring Data JPA<b/></summary>
+    * <details><summary><b>save() 보충 설명: JPA와 Spring Data JPA</b></summary>
       <div markdown="1">
       `JPA`는 직접 구현 필요 (본인은 persist만 사용), `Spring Data Jpa`는 save()함수 제공(persist+merge 형태)<br>
       * isNew() 함수로 엔티티가 이미 있는지 체크하는데 isNew()는 엔티티의 Id가 null인지 체크한다. 따라서 @GeneratedValue를 사용하지 않은 id의 경우엔 임의로 id를 넣어 줄텐데 이러면 여기서 문제가 발생한다. **-> Spring Data Jpa의 save() 함수 로직임.**<br>
@@ -1727,7 +1768,7 @@ public void initCacheMembers() {
         - 해결법은 [이 분꺼 참고](https://velog.io/@pjh612/JPA-Spring-Data-JPA의-save의-동작-과정)<br>
         - 참고) merge동작은 이미 있는 엔티티(준영속상태)를 영속성상태로 바꿔줘서 업뎃이 가능하게 만드는 것. 이 과정에서 DB 조회도 발생! (해당 엔티티 찾으려고)
       </div>
-      <details/>
+      </details>
 
   * em.find : **(1)영속성 등록**, (2)찾는 id 인 값 select전송
 
@@ -1740,7 +1781,7 @@ public void initCacheMembers() {
 
     * **영속성에 없다면,** 삭제할 아이템 구하는 **select 는 바로 전송**
 
-    * <details><summary><b>remove 예시 코드<b/></summary>
+    * <details><summary><b>remove 예시 코드</b></summary>
       <div markdown="1">
       ```java
       // given
@@ -1759,7 +1800,7 @@ public void initCacheMembers() {
       findTask = taskService.findOne(taskId); // 삭제된 엔티티 조회 시도. 쿼리 발생! (null이어야 함)
       ```
       </div>
-      <details/>
+      </details>
 
 - **FK오류 방지**
 
@@ -1777,7 +1818,7 @@ public void initCacheMembers() {
 
   - **update 예시 -> em.find() 영속성 활용 방식**
 
-    - <details><summary><b>예시 코드<b/></summary>
+    - <details><summary><b>예시 코드</b></summary>
       <div markdown="1">
       ```java
       // entity part
@@ -1801,7 +1842,7 @@ public void initCacheMembers() {
       }
       ```
       </div>
-      <details/>
+      </details>
 
   - 단, 변화가 넘 많으면 **"벌크연산 추천"** -> 간단함. (우리가 잘 쓰는 쿼리문일 뿐)  
     -> 예: `UPDATE Task t SET t.status = :status WHERE t.dueDate < :currentDate`
@@ -1824,7 +1865,7 @@ public void initCacheMembers() {
 
 - **반환 방식** -> `query.getResultList()`
 
-  * <details><summary><b>TypeQuery, Query<b/></summary>
+  * <details><summary><b>TypeQuery, Query</b></summary>
     <div markdown="1">
     * TypeQuery: 반환 타입이 명확할 때 사용<br>
       * **일반적(자주 사용!)** : `List<Member> findMembers = em.createQuery("select m from Member m", Member.class)`<br>
@@ -1836,10 +1877,10 @@ public void initCacheMembers() {
     * **query.getResultList(): 결과가 하나 이상일 때, 리스트 반환** **-> 자주사용!! (1개 여도!)**<br>
     * query.getSingleResult(): 결과가 정확히 하나, 단일 객체 반환
     </div>
-    <details/>
+    </details>
 
 
-* <details><summary><b>fetch join(즉시로딩) -> `XToOne`는 바로 페치조인O, `XToMany`는 일반 select + BatchSize (페치조인X, 글로벌로 100정도 깔아두고 개발ㄲㄲ)<b/></summary>
+* <details><summary><b>fetch join(즉시로딩) -> `XToOne`는 바로 페치조인O, `XToMany`는 일반 select + BatchSize (페치조인X, 글로벌로 100정도 깔아두고 개발ㄲㄲ)</b></summary>
   <div markdown="1">
   * 주의: **페치 조인**은 **객체 그래프 유지**할 때 사용 시 효과적인 반면, 여러 테이블을 조인해서 엔티티가 가진 모양이 아닌 전혀 다른 결과를 내야 하면, 페치 조인 보다는 **일반 조인**을 사용해서 필요한 데이터들만 조회해서 **DTO**로 반환하는 것이 효과적.<br>
   * **fetch join**을 **일반 join**으로 따라하려면 T.\*, M.* 로 두 테이블 모두 조회 ("즉시 로딩")<br>
@@ -1848,9 +1889,9 @@ public void initCacheMembers() {
   * **페치 조인 대상에는 별칭X** - 유일하게 연속으로 join 가져오는 경우에만 사용<br>
   * **둘 이상의 컬렉션은 페치 조인X**
   </div>
-  <details/>
+  </details>
 
-* <details><summary><b>경로 표현식 3가지(.을 찍어 "탐색") -> 상태, 연관 필드(단일 연관, 컬렉션 연관)  <b/></summary>
+* <details><summary><b>경로 표현식 3가지(.을 찍어 "탐색") -> 상태, 연관 필드(단일 연관, 컬렉션 연관)  </b></summary>
   <div markdown="1">
   * **상태 필드(탐색X)**: 단순히 값을 저장하기 위한 필드 (ex: `m.username`)<br>
   * **단일 값 연관 필드(탐색O)**: @ManyTo**One**, @OneTo**One**, 대상이 엔티티(ex: `m.team`)<br>
@@ -1862,10 +1903,10 @@ public void initCacheMembers() {
     * `select m.team from Member m` 이나 `select m.orders from Member m` 처럼 사용 가능한데, 이 경우 **묵시적 내부 조인이 발생(자동 inner join)** **-> 매우 비권장!!**<br>
     * 쿼리 튜닝하기에 매우 힘듦
   </div>
-  <details/>
+  </details>
 
 
-* <details><summary><b>엔티티 직접 사용 -> count(m) = count(m.id) 로 자동 SQL 변형!<b/></summary>
+* <details><summary><b>엔티티 직접 사용 -> count(m) = count(m.id) 로 자동 SQL 변형!</b></summary>
   <div markdown="1">
   * **JPQL에서 엔티티를 직접 사용하면 SQL에서 해당 엔티티의 "기본 키" 값을 사용**<br>
     * (JPQL) : select count**(m)** from Member m <br>
@@ -1873,9 +1914,9 @@ public void initCacheMembers() {
   * **참고: JPQL은 m.* 이런식의 조회를 m 으로 동일하게 가능.** <br>
     * 예: `select m from Member m`  와 `select m.* from Member m` 동일!!
   </div>
-  <details/>
+  </details>
 
-- <details><summary><b>Named 쿼리 -> Spring Data JPA의 interface에서 간단히 쿼리 커스텀!!<b/></summary>
+- <details><summary><b>Named 쿼리 -> Spring Data JPA의 interface에서 간단히 쿼리 커스텀!!</b></summary>
   <div markdown="1">
   * **실무에서는 Spring Data JPA 를 사용하는데 @Query("select...") 문법이 바로 "Named 쿼리"** **-> 원하는 쿼리문 바로 작성가능한 편리성**<br>
     * JPQL 예: `@Query("SELECT m FROM Member m")`<br>
@@ -1883,7 +1924,7 @@ public void initCacheMembers() {
   * **참고: 물론 일반 JPA로 구현로직 추가해서 인터페이스 상속 추가해서 사용도 좋다~** <br>
     * 본인은 이 방식으로 JPA+Spring Data JPA 함께 쓰는 편
   </div>
-  <details/>
+  </details>
 
 
 * **동적 쿼리**는 **Querydsl** 을 권장
@@ -1919,7 +1960,7 @@ public void initCacheMembers() {
 
 - 여기서 기억에 남은 말: **가장 먼저 서브쿼리를 통해서 커버링 인덱스로 페이징을 진행합니다. 그리고 그 결과와 기존 테이블을 조인시켜서 ‘인덱스에 포함되지 않은 칼럼’을 가져옵니다.**
 
-<details><summary><b>(1)회원 랭킹 보여주는 페이지(정렬필수) -> 30분 마다 갱신<b/></summary>
+<details><summary><b>(1)회원 랭킹 보여주는 페이지(정렬필수) -> 30분 마다 갱신</b></summary>
 <div markdown="1">
 **레포지토리**<br>
 - **서브쿼리에 인덱스로 member 테이블을 빠르게 조회 (정렬 된)**<br>
@@ -1953,9 +1994,9 @@ public void initCacheMembers() {
 }
 ```
 </div>
-<details/>
+</details>
 
-<details><summary><b>(2)게시물 10개씩 출력하는 페이지(홈페이지) -> 수정, 삭제, 추가에 갱신<b/></summary>
+<details><summary><b>(2)게시물 10개씩 출력하는 페이지(홈페이지) -> 수정, 삭제, 추가에 갱신</b></summary>
 <div markdown="1">
 **레포지토리**<br>
 - 서브쿼리 사용할 필요 없어서 바로 JPQL의 페이징 기법 활용 -> 이 또한, 인덱스 사용<br>
@@ -1997,7 +2038,7 @@ public Long findTotalCount() { return itemRepository.findTotalCount(); }
 public Long updateTotalCount() { return itemRepository.findTotalCount(); }
 ```
 </div>
-<details/>
+</details>
 <br>
 
 <br>
@@ -2390,7 +2431,7 @@ my:
 - `server.port.8080` 로 포트 8080(개발용), 포트 80(배포용) 를 지정 가능
   - http는 80포트를 기본값으로 사용
 
-<details><summary><b>본섭API:application.yml<b/></summary>
+<details><summary><b>본섭API:application.yml</b></summary>
 <div markdown="1">
 application.yml 과 application.properties 는 똑같은 역할 (문법만 다를 뿐)<br>
 ```yaml
@@ -2433,9 +2474,9 @@ management:
         exclude: "env,beans"
 ```
 </div>
-<details/>
+</details>
 
-<details><summary><b>테섭API:application.yml<b/></summary>
+<details><summary><b>테섭API:application.yml</b></summary>
 <div markdown="1">
 application.yml 과 application.properties 는 똑같은 역할 (문법만 다를 뿐)<br>
 ```yaml
@@ -2462,8 +2503,8 @@ level:
 com.lepl: debug
 ```
 </div>
-<details/>
-<details><summary><b>프로필WEB:application.yml<b/></summary>
+</details>
+<details><summary><b>프로필WEB:application.yml</b></summary>
 <div markdown="1">
 # default 프로필 -> 개발모드로 사용
 spring:
@@ -2537,8 +2578,7 @@ logging:
   level:
     com.dau.secretarttypinggallery.controller: info # 배포는 기본값(=info) 사용
 </div>
-<details/>
-
+</details>
 <br>
 
 <br>
