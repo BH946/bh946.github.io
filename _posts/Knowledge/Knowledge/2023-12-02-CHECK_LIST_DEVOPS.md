@@ -12,15 +12,11 @@ typora-root-url: ../../..
 
 
 
-# Intro
-
 **DevOps 경험을 정리**
 
-<br><br>
+<br>
 
-# CHECK LIST
-
-
+<br>
 
 ## DevOps - 모니터링
 
@@ -148,13 +144,28 @@ typora-root-url: ../../..
 
 ![image](https://github.com/BH946/spring-second-roadmap/assets/80165014/94791ab9-4bab-43ff-b080-779f855f6907) 
 
-<br><br>
+<br>
+
+<br>
 
 ## DevOps - 테스트(+부하테스트)
 
-**API를 일반적으로 테스트할때? -> 포스트맨 추천!**
+**API를 일반적으로 테스트할때? -> 포스트맨 추천!** <br>포스트맨의 장점은 **API 명세서**도 제공!! -> 생각보다 괜찮음!\
 
-* 포스트맨의 장점은 **API 명세서**도 제공!! -> 생각보다 괜찮음!
+[API 명세서](https://documenter.getpostman.com/view/21970313/2s93mBwec5)
+
+GET,POST 방법은 정말 많이 했으니까 생략하고 **명세서 부분만 설명! (사진참고)**
+
+주로 **add request와 add example** 을 많이 사용할거고, 프로젝트 클릭하여 View complete documentation 으로 이동하면 **“명세서 부분 확인 및 수정 가능”**
+
+<details><summary><b>사진 참고</b></summary>
+<div markdown="1"><br>
+![image](https://github.com/user-attachments/assets/9735c105-2ae4-4e58-b1ff-dbaaafd0e93a)<br>
+![image](https://github.com/user-attachments/assets/4b9bc945-2981-4406-89bd-35ce244ef605)<br><br>
+![image](https://github.com/user-attachments/assets/4979d249-cdde-4663-9f7a-98d9ffd5a9aa)<br>
+![image](https://github.com/user-attachments/assets/d1158a48-aae1-4d47-906c-ae31ed9b1eaf)
+</div>
+</details>
 
 <br>
 
@@ -214,7 +225,9 @@ typora-root-url: ../../..
         * 따라서 설정한 횟수 만큼 테스트 함
       * GTest 객체 : 각각 테스트 시나리오 (@Test에 작성하는것 - 스크립트)
 
-<br><br>
+<br>
+
+<br>
 
 ## DevOps - CI/CD (지속적 통합과 배포)
 

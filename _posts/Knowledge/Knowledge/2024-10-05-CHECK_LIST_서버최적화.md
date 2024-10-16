@@ -30,7 +30,7 @@ N+1, 캐시, 페이징 관련 개념은 CHECK_LIST_SPRING.md 참고 (이미 잘 
 
 ### JPA(캐시,페이징,Index)
 
-**사용한 최적화:** **`페이징, N+1 해결(=쿼리수 줄이기=적절한 JOIN사용=ORM의 문제 해결), Index 사용(단일 or 복합), db캐시(물론 db캐시는 안쓰고 서버,웹 캐시만 사용할 예정)` 전부 해당**
+**사용한 최적화:** `페이징, N+1 해결(=쿼리수 줄이기=적절한 JOIN사용=ORM의 문제 해결), Index 사용(단일 or 복합), db캐시(물론 db캐시는 안쓰고 서버,웹 캐시만 사용할 예정)` **전부 해당**
 
 **SQL 페이징과 JPQL에서 페이징**
 
@@ -95,13 +95,13 @@ N+1, 캐시, 페이징 관련 개념은 CHECK_LIST_SPRING.md 참고 (이미 잘 
 
 여기서 기억에 남은 말: **가장 먼저 서브쿼리를 통해서 커버링 인덱스로 페이징을 진행합니다. 그리고 그 결과와 기존 테이블을 조인시켜서 ‘인덱스에 포함되지 않은 칼럼’을 가져옵니다.**
 
-**(1)회원 랭킹 보여주는 페이지(정렬필수) -> 30분 마다 갱신**
-
-- **레포지토리**
-  - **서브쿼리에 인덱스로 member 테이블을 빠르게 조회 (정렬 된)**
-    - 서브쿼리, limit, offset 사용 위해 Native Query 사용
-  - 이후 기존 테이블과 조인해서 결과 반환
-
+<details><summary><b>(1)회원 랭킹 보여주는 페이지(정렬필수) -> 30분 마다 갱신</b></summary>
+<div markdown="1"><br>
+**레포지토리**<br>
+- **서브쿼리에 인덱스로 member 테이블을 빠르게 조회 (정렬 된)**<br>
+  * 서브쿼리, limit, offset 사용 위해 Native Query 사용<br>
+- 이후 기존 테이블과 조인해서 결과 반환<br>
+<div markdown="1">
 ```java
 //Limit, Offset -> SQL
 List<Object[]> objects = em.createNativeQuery(
@@ -109,22 +109,19 @@ List<Object[]> objects = em.createNativeQuery(
 "from (select * from member order by member_id desc limit " + offset + "," + limit + ") m " +
 "inner join character c on m.character_id=c.character_id " +
 "inner join exp e on c.exp_id=e.exp_id;")
-        .getResultList();
+.getResultList();
 ```
-
-- **서비스**
-  - 30분 마다 갱신이라 **@CacheEvict, @Cacheable, @Scheduled로 충분**
-  - 페이지별로(pageId) 묶어서 캐시 관리가 좋아서 이렇게 진행. (게시물마다 하는건 너무 많은 캐시 메모리 사용?) + 캐시사이즈 설정
-
+</div>
+**서비스**<br>
+- 30분 마다 갱신이라 **@CacheEvict, @Cacheable, @Scheduled로 충분**<br>
+- 페이지별로(pageId) 묶어서 캐시 관리가 좋아서 이렇게 진행. (게시물마다 하는건 너무 많은 캐시 메모리 사용?) + 캐시사이즈 설정<br>
+<div markdown="1">
 ```java
-/**
- * 회원 최신순 조회 + 캐시
- */
+/** 회원 최신순 조회 + 캐시 */
 @Cacheable(value = "members", key = "#pageId") // [캐시 없으면 저장] 조회
 public List<FindMemberResponseDto> findAllWithPage(int pageId) {
     return memberRepository.findAllWithPage(pageId);
 }
-
 // 캐시에 저장된 값 제거 -> 30분 마다 실행하겠다.
 // 초(0-59) 분(0-59) 시간(0-23) 일(1-31) 월(1-12) 요일(0-6) (0: 일, 1: 월, 2:화, 3:수, 4:목, 5:금, 6:토)
 @Scheduled(cron = "00 30 * * * *") // 30분 00초 마다 수행
@@ -132,14 +129,14 @@ public List<FindMemberResponseDto> findAllWithPage(int pageId) {
 public void initCacheMembers() {
 }
 ```
-
-<br>
-
-**(2)게시물 10개씩 출력하는 페이지(홈페이지) -> 수정, 삭제, 추가에 갱신**
-
-- **레포지토리**
-  - 서브쿼리 사용할 필요 없어서 바로 JPQL의 페이징 기법 활용 -> 이 또한, 인덱스 사용
-
+</div>
+</div>
+</details>
+<details><summary><b>(2)게시물 10개씩 출력하는 페이지(홈페이지) -> 수정, 삭제, 추가에 갱신</b></summary>
+<div markdown="1"><br>
+**레포지토리**<br>
+- 서브쿼리 사용할 필요 없어서 바로 JPQL의 페이징 기법 활용 -> 이 또한, 인덱스 사용<br>
+<div markdown="1">
 ```java
 //setFirstResult(), setMaxResults() -> JPQL
 public List<Item> findAllWithPage(int pageId) {
@@ -150,13 +147,13 @@ public List<Item> findAllWithPage(int pageId) {
       .getResultList();
 }
 ```
-
-- **서비스 -> 여기선 이게 중요!!**
-  - 페이지별로 url(?page=1) 접근하면 해당 페이지별로 데이터를 가져올거고 이 데이터를 **@CachePut로 기록하고, @Cacheable로 조회, 삭제는 @CacheEvict**
-    - 만약 게시물 삭제되면 애초에 게시물No(순번)이 갱신되어야해서 그냥 @CacheEvict로 삭제후 다시 기록하면 됨.
-    - 게시물 수정이면 @CachePut으로 해당 PageId 부분만 갱신하면 됨. 게시물 개수는 그대로니까!
-  - 페이지별로(pageId) 묶어서 캐시 관리가 좋아서 이렇게 진행. (게시물마다 하는건 너무 많은 캐시 메모리 사용?) + 캐시사이즈 설정
-
+</div>
+**서비스 -> 여기선 이게 중요!!**<br>
+- 페이지별로 url(?page=1) 접근하면 해당 페이지별로 데이터를 가져올거고 이 데이터를 **@CachePut로 기록하고, @Cacheable로 조회, 삭제는 @CacheEvict**<br>
+  - 만약 게시물 삭제되면 애초에 게시물No(순번)이 갱신되어야해서 그냥 @CacheEvict로 삭제후 다시 기록하면 됨.<br>
+  - 게시물 수정이면 @CachePut으로 해당 PageId 부분만 갱신하면 됨. 게시물 개수는 그대로니까!<br>
+- 페이지별로(pageId) 묶어서 캐시 관리가 좋아서 이렇게 진행. (게시물마다 하는건 너무 많은 캐시 메모리 사용?) + 캐시사이즈 설정<br>
+<div markdown="1">
 ```java
 // page 단위로(key) 캐시 기록 -> 참고 : value 로 꼭 캐시 영역을 지정해줘야 함
 @Cacheable(value = "posts", key = "#pageId") // [캐시 없으면 저장] 조회
@@ -179,6 +176,9 @@ public Long findTotalCount() { return itemRepository.findTotalCount(); }
 @CachePut(value = "totalCount")
 public Long updateTotalCount() { return itemRepository.findTotalCount(); }
 ```
+</div>
+</div>
+</details>
 
 <br><br>
 
@@ -263,7 +263,6 @@ public Long updateTotalCount() { return itemRepository.findTotalCount(); }
     * 물론 OFFSET의 문제는 가져가긴 하지만, 
     * 제일 큰 문제인 매번 조회마다 "order by desc" 실행을 해결한것이 큰 이득
     * OFFSET의 문제를 가져간 이유가 궁금하다면 [페이지네이션 최적화](https://taegyunwoo.github.io/tech/Tech_DBPagination) 참고!
-    * 여기서 기억에 남은 말: **가장 먼저 서브쿼리를 통해서 커버링 인덱스로 페이징을 진행합니다. 그리고 그 결과와 기존 테이블을 조인시켜서 ‘인덱스에 포함되지 않은 칼럼’을 가져옵니다.**
 
 <br><br>
 
