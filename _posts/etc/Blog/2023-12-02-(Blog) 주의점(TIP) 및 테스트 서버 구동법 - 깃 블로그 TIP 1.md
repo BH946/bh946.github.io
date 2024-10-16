@@ -13,7 +13,7 @@ typora-root-url: ../../..
 
 
 **깃 블로그 지킬 테스트 서버 구동 및 문법과 여러 주의할 점(TIP)들 위주로 정리 한다.**  
-**Ruby 언어 주의점과 특수 문자들로 인한 에러나 이미지 경로 문제나 깃 블로그 잔디 문제 등...**
+**Ruby 언어 주의점과 특수 문자들로 인한 에러나 이미지 경로 문제나 깃 블로그 잔디와 드롭리스트 문제 등...**
 
 <br>
 
@@ -389,19 +389,38 @@ md 파일 열심히 작성하고 포스팅을 했는데 이런 에러가 발생�
 ````
 -  **1:N, N:1** 의 경우 **N**에 사용 -> **1**은 양방향 필요시 연결(엔티티)
 
-<details><summary><b>1쪽에 FK 놓으면 2가지 단점</b></summary>
-<div markdown="1"><br>
-아무거나 입력
-<div markdown="1">
-```java
-System.out.println("test");
-```
-</div>
-</div>
-</details>
+  <details><summary><b>1쪽에 FK 놓으면 2가지 단점</b></summary>
+  <div markdown="1"><br>
+  아무거나 입력
+  <div markdown="1">
+  ```java
+  System.out.println("test");
+  ```
+  </div>
+  </div>
+  </details>
 
 - 안녕하세요.
 
 => - 이거와 details 사이에 공백처럼 한칸 엔터 필수!! + details 부분은 꼭 들여쓰기.
 ````
+
+<br>
+
+**예시**
+
+-  **1:N, N:1** 의 경우 **N**에 사용 -> **1**은 양방향 필요시 연결(엔티티)
+
+  <details><summary><b>1쪽에 FK 놓으면 2가지 단점</b></summary>
+  <div markdown="1"><br>
+  아무거나 입력
+  <div markdown="1">
+  ```java
+  System.out.println("test");
+  ```
+  </div>
+  </div>
+  </details>
+
+- 안녕하세요.
 
