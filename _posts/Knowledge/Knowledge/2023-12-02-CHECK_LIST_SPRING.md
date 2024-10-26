@@ -682,6 +682,142 @@ typora-root-url: ../../..
 
 <br>
 
+**추가 TIP: 엔티티에 정규식(Valid)과 타입컨버터 + DTO방식**
+
+- 규칙을 @Pattern 애노테이션 하나로 바로 적용이 가능 -> Vaildation 꺼임.
+
+  - `@NotNull @Pattern(regexp = "^[0-9]+", message = "비밀번호는 숫자로 입력 해주세요.")`
+
+- 타입컨버터 사용으로 LocalDateTime으로 저장된 데이터가 나중에 **사용할 때 정해둔 pattern 방식으로 String 반환되는 것!**
+
+  ```java
+  private String password;
+  @DateTimeFormat(pattern = "yy.MM.dd.HH:mm")
+  private LocalDateTime date1;
+  @DateTimeFormat(pattern = "yy년 MM월 dd일 HH시 mm분")
+  private LocalDateTime date2;
+  ```
+
+- 만약 타입컨버터 애노테이션을 사용안했으면?? -> **더 복잡한 코드**
+
+  ```java
+  private String date1; // string으로 변경 및 format 활용
+  private String date2;
+  
+  DateTimeFormatter formatter1 = DateTimeFormatter.ofPattern("yy.MM.dd.HH:mm");
+  DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("yy년 MM월 dd일 HH시 mm분");
+  item.date1 = LocalDateTime.now().format(formatter1);
+  item.date2 = LocalDateTime.now().format(formatter2);
+  ```
+
+- **Item.java -> dto/AddItemDto.java, dto/UpdateItemDto.java**
+
+  <details><summary><b>예시 코드</b></summary>
+  <div markdown="1"><br>
+  **Item.java**
+  ```java
+  @Entity
+  @Getter
+  @NoArgsConstructor(access = AccessLevel.PROTECTED)
+  public class Item {
+    @Id
+    @GeneratedValue
+    @Column(name = "item_id")
+    private Long id;
+    private Long No;
+    private String nickName;
+    private String password;
+    private String title;
+    private String content;
+    private String imgSrc;
+    @DateTimeFormat(pattern = "yy.MM.dd.HH:mm")
+    private LocalDateTime date1;
+    @DateTimeFormat(pattern = "yy년 MM월 dd일 HH시 mm분")
+    private LocalDateTime date2;
+    //==생성 편의 메서드==//
+    public static Item createItem(AddItemDto addItemDto) {
+      Item item = new Item();
+      item.nickName = (addItemDto.getNickName().equals("")) ? "익명" : addItemDto.getNickName();
+      item.password = (addItemDto.getPassword().equals("")) ? "" : addItemDto.getPassword();
+      item.title = (addItemDto.getTitle().equals("")) ? "무제" : addItemDto.getTitle();
+      item.content = (addItemDto.getContent().equals("")) ? "" : addItemDto.getContent();
+      item.imgSrc = addItemDto.getImgSrc();
+      item.date1 = LocalDateTime.now();
+      item.date2 = LocalDateTime.now();
+      return item;
+    }
+    //==비지니스 로직 편의 메서드==//
+    public Item updateItem(UpdateItemDto dto) {
+      this.nickName = (dto.getNickName().equals("")) ? "익명" : dto.getNickName();
+      this.password = (dto.getPassword().equals("")) ? "" : dto.getPassword();
+      this.title = (dto.getTitle().equals("")) ? "무제" : dto.getTitle();
+      this.content = (dto.getContent().equals("")) ? "" : dto.getContent();
+      // 최신 업데이트 시간
+      this.date1 = LocalDateTime.now();
+      this.date2 = LocalDateTime.now();
+      return this;
+    }
+  }
+  ```
+  **AddItemDto.java -> id와 date가 없는 detail**
+  ```java
+  @Getter
+  public class AddItemDto {
+    @NotNull
+    private String nickName;
+    @NotNull
+    @Pattern(regexp = "^[0-9]+", message = "비밀번호는 숫자로 입력 해주세요.")
+    private String password;
+    @NotNull
+    private String title;
+    @NotNull
+    private String content;
+    @NotBlank(message = "이미지가 없습니다. 다시 시도하세요.")
+    private String imgSrc;
+    //==생성 편의 메서드==//
+    public AddItemDto(String nickName, String password, String title, String content, String imgSrc) {
+      this.nickName = nickName;
+      this.password = password;
+      this.title = title;
+      this.content = content;
+      this.imgSrc = imgSrc;
+    }
+  }
+  ```
+  **UpdateItemDto.java -> id가 있는 datil**
+  ```java
+  @Getter
+  public class UpdateItemDto {
+    @NotNull
+    private Long id;
+    @NotNull
+    private String nickName;
+    @NotNull
+    @Pattern(regexp = "^[0-9]+", message = "비밀번호는 숫자로 입력 해주세요.")
+    private String password;
+    @NotNull
+    private String title;
+    @NotNull
+    private String content;
+    @NotBlank(message = "이미지가 없습니다. 다시 시도하세요.")
+    private String imgSrc;
+    //==생성 편의 메서드==//
+    public UpdateItemDto(Long id, String nickName, String password, String title, String content,
+        String imgSrc) {
+      this.id = id;
+      this.nickName = nickName;
+      this.password = password;
+      this.title = title;
+      this.content = content;
+      this.imgSrc = imgSrc;
+    }
+  }
+  ```
+  </div>
+  </details>
+
+<br>
+
 <br>
 
 ## (레포지토리=DAO, 서비스) 기능 구현 + 인터페이스
@@ -1571,7 +1707,55 @@ class MemberApiControllerTest {
 ```
 </div>
 </details>
+<br><br>
 
+### InitDB -> 데이터 삽입 자동
+
+`InitDB.java` **로 개발 모드에서 간편하게 시작과 동시에 데이터를 미리 넣어두려는 목적(테스트 용이)**
+
+```java
+/**
+ * 개발 모드에서 간편하게 시작과 동시에 데이터 생성 미리 넣어두려는 목적
+ * 안 사용할 거면 스프링 빈 등록 안되게끔(스캔X) @Component 주석 ㄱㄱ + @PostConstruct 주석도 마찬가지
+ * 실행흐름: InitService 라는 서비스를 inner class 로 간단히 추가 및 빈 등록하고, @PostConstruct 로 바로 실행
+ */
+@Slf4j
+@Component
+@RequiredArgsConstructor // 생성자 주입
+public class InitDB {
+    private final InitService initService;
+
+    // 해당 클래스 인스턴스 생성(construct)된 후 자동 실행
+    @PostConstruct
+    public void init() {
+        initService.initItem();
+    }
+
+    @Service
+    @RequiredArgsConstructor
+    @Transactional // 쓰기모드 -> 바로 DB 저장
+    public static class InitService {
+        private final EntityManager em;
+        private final ItemRepository itemRepository;
+
+        public void initItem() {
+            Item item1 = Item.createItem("김익명", "123", "최근에 있었던 대외비", "최근에 이름 들으면 알 만한 회사랑 어떤 프로젝트 협업할 뻔했는데, 중간에 갑자기 뭐가 바껴서 결국 나랑 하기로 한 건 무산되었다. 너무 아까운 일이었는데 대외비라 어디에 이름 까고 말도 못해서 답답했음. 근데 최근에 보니까 그 프로젝트 초대박났더라고 하......^^^^;;; 또 생각해도 개빡치네*발ㅠㅠ", "test.jpeg");
+            Item item2 = Item.createItem("", "1234", "", "", "");
+            Item item3 = Item.createItem("철수", "123", "", "테스트", "test.jpeg");
+            itemRepository.save(item1);
+            itemRepository.save(item2);
+            itemRepository.save(item3);
+            List<Item> items = itemRepository.updateAllNo();
+//            for(int i= 0 ; i<150; i++) {
+//                String name = "test"+i;
+//                Item item = Item.createItem(name, "12345", "테스트", "테스트123123", "");
+//                itemRepository.save(item);
+//            }
+        }
+
+    }
+}
+```
 
 <br>
 
@@ -1800,6 +1984,7 @@ logging:
       }
     //
       // 정적이미지 경로 핸들링 + 브라우저 캐시
+      // 경로 매핑 작업을 하는 오버라이딩이며 특정 경로(=static/) 에 브라우저 캐시까지 추가한 로직!!
       @Override
       public void addResourceHandlers(ResourceHandlerRegistry registry) {
         CacheControl cacheControl = CacheControl.maxAge(Duration.ofDays(365));
@@ -1821,6 +2006,7 @@ logging:
     <details><summary><b>예시 코드<br>서버 메모리 캐시 위해 CachingConfigurerSupport 상속 및 구현(기능확장)</b></summary>
     <div markdown="1"><br>
     CacheManager를 오버라이딩!! 물론, 간단히 설정파일(yaml)에서 설정도 지원 중<br>
+    main 함수있는 클래스에서 `@EnableCaching` 필수 선언!
     코드는 사용법과 만드는 법을 간단히 소개
     ```java
     // 사용법: 서비스단 메소드에 이런식으로 적용
@@ -2330,9 +2516,95 @@ private final MyDataSourceConfig source;
 
 * **html**
 
-  * **자동으로 에러에 필요한 로직을 등록**하므로 바로 활용가능
+  * **자동으로 에러에 필요한 로직을 등록하므로 바로 활용가능 (스프링 부트가 에러 페이지도 자동으로 제공해준다는 것!! 물론 직접 추가도 되고)**
+
   * `ErrorPage, BasicErrorController` 자동 등록 및 `/error` 경로로 기본설정
+
   * `BasicErrorController` 는 `ErrorPage` 에서 등록한 `/error` 를 매핑해서 처리하는 컨트롤러
+
+  * **뷰선택 우선순위(BasicErrorController 가 제공하는 기능)**
+
+    1. 뷰템플릿
+
+       - resources/templates/error/500.html
+
+       - html resources/templates/error/5xx.html
+
+    2. 정적리소스( static , public ) resources/
+
+       - static/error/400.html
+
+       - resources/static/error/404.html
+
+       - resources/static/error/4xx.html
+
+    3. 적용대상이없을 때뷰이름( error )
+       - resources/templates/error.html
+
+    <details><summary><b>html 적용 예시</b></summary>
+    <div markdown="1"><br>
+    `errorTest.java` -> 예외 페이지 확인 용 (직접 커스텀 페이지인 4xx.html, 404.html, 500.html 테스트 코드!)
+    ```java
+    @Controller
+    @RequiredArgsConstructor
+    @Slf4j
+    public class errorTest {
+        /**
+         * 일부러 에러 발생 시키기 -> 예외 페이지 확인위해
+         * 테스트가 아닌 실제로 에러 발생시 해당 에러내용들이 예외 페이지로 정리되어 출력
+         */
+        @GetMapping("/error-404")
+        public void error404(HttpServletResponse response) throws IOException {
+            response.sendError(404, "404 오류!");
+        }
+        @GetMapping("/error-500")
+        public void error500(HttpServletResponse response) throws IOException {
+            response.sendError(500);
+        }
+        @GetMapping("/error-403")
+        public void error403(HttpServletResponse response) throws IOException {
+            response.sendError(403, "403 오류!");
+        }
+    }
+    ```
+    <div markdown="1"><br>
+    `/templates/error/4xx.html` 코드 (404, 500도 이런식)
+    ```html
+    <!DOCTYPE HTML>
+    <html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="utf-8">
+    </head>
+    <body>
+    <div class="container" style="max-width: 600px">
+        <div class="py-5 text-center">
+            <h2>4xx 오류 화면 스프링 부트 제공</h2>
+        </div>
+        <div>
+            <p>오류 화면 입니다.</p>
+        </div>
+        <ul>
+            <li>오류 정보</li>
+            <ul>
+                <li th:text="|timestamp: ${timestamp}|"></li>
+                <li th:text="|path: ${path}|"></li>
+                <li th:text="|status: ${status}|"></li>
+                <li th:text="|message: ${message}|"></li>
+                <li th:text="|error: ${error}|"></li>
+                <li th:text="|exception: ${exception}|"></li>
+                <li th:text="|errors: ${errors}|"></li>
+                <li th:text="|trace: ${trace}|"></li>
+            </ul>
+            </li>
+        </ul>
+        <hr class="my-4">
+    </div> <!-- /container -->
+    </body>
+    </html>
+    ```
+    </div>
+    </div>
+    </details>
 
 * **API**
 
@@ -2422,9 +2694,9 @@ private final MyDataSourceConfig source;
 **포트생략법**
 
 * 배포할 때 `http://localhost:8080` 이 아닌 `http://localhost` 로 접속법(포트생략법)
-* http는 80포트를 기본값으로 사용 / 개발할 때 사용한 포트는 8080포트
+* **http는 80포트를 기본값**으로 사용하고, 개발할 때 사용한 포트는 8080포트
 * 따라서 **"포트포워딩"** 을 사용해서 **80포트 접속시 -> 8080포트로 변경**해주면 끝
-* 예시
+* 80포트 -> 8080포트 포트포워딩 예시
   * 등록 : `sudo iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 8080`
   * 조회 : `iptables -nL PREROUTING -t nat --line-numbers`
   * 삭제 : `iptables -t nat -D PREROUTING {number}`
@@ -2433,14 +2705,31 @@ private final MyDataSourceConfig source;
 
 **"실행 시점" 에 원하는 프로필 사용!!**
 
-* IDE에서 Application 에 `--spring.profiles.active=prod` 하거나 (물론 값도 가능)
-* jar 실행 : `java -.... app.jar`
+1. IDE에서 Application 에 `--spring.profiles.active=prod` 하거나 (물론 값도 가능)
+
+   <details><summary><b>인텔리J에서 활용한 예시(사진)</b></summary>
+   <div markdown="1"><br>
+   ![image](https://github.com/user-attachments/assets/a4cebe08-935c-44fe-ac9c-2ab3ad7ebd3c)<br>
+   **prod(배포 프로필)**
+   ![image](https://github.com/user-attachments/assets/45ae772d-5122-45ac-9fb4-6f564d29c8be)<br>
+   **default(개발 프로필)**
+   ![image](https://github.com/user-attachments/assets/5df1afac-634c-4fc6-b7ac-0a8c0cc1a356)
+   </div>
+   </details>
+
+2. 터미널에서 명령어로 jar or war 실행. 2가지 방법 소개 (해당 파일 경로에서 꼭 입력)
+
+   nohup은 백그라운드에서 실행!! -> nohup.out에 로그남음
+
+   `nohup java -jar secret-art-typing-gallery-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod &`
+
+   `nohup java -Dspring.profiles.active=prod -jar secret-art-typing-gallery-0.0.1-SNAPSHOT.jar &`
 
 <br>
 
 <br>
 
-## JPQL(JPA-ORM), (MyBatis-SQL Mapper)
+## JPQL(JPA-ORM), SQL(MyBatis-SQL Mapper)
 
 <br><br>
 
@@ -2583,9 +2872,9 @@ private final MyDataSourceConfig source;
 
 <br><br>
 
-### JPQL (distinct, 연관관계, vs MyBatis 등), 페이징
+### JPQL + 페이징
 
-#### JPQL
+#### JPQL (distinct, 연관관계, vs MyBatis 등)
 
 <details><summary><b>반환 방식(TypeQuery, Query) -> `query.getResultList()`</b></summary>
 <div markdown="1">
@@ -2898,7 +3187,7 @@ public Long updateTotalCount() { return itemRepository.findTotalCount(); }
 
 <br>
 
-## 엔티티 조회 권장 순서
+## 엔티티 조회 권장 순서 - 필수!
 
 **엔티티 조회 권장 순서**
 
@@ -3045,7 +3334,6 @@ public Long updateTotalCount() { return itemRepository.findTotalCount(); }
   * 하지만 이 또한 지양하고 **LAZY 강제 초기화**로 다 해결
 </div>
 </details>
-
 <br>
 
 <br>
@@ -3204,45 +3492,122 @@ public HelloData requestBodyJsonV5(@RequestBody HelloData data) {
 * **@AllArgsConstructor : 생성자 대신 만들어줘서 필드만 선언**
   * 참고로 EM 생성자 주입 방식인 `@RequiredArgsConstructor` 와 햇갈리지 말것
 * @Value : application.properties에 선언한 변수 사용
+* @EnableCaching : Spring Boot Cache 사용을 선언
 </div>
 </details>
+
 <br>
 
 <br>
 
 ## Thymeleaf 로 웹 개발 TIP
 
-**버전.. 환경설정 등 기초적인건 생략**
+<details><summary><b>build.gradle 참고</b></summary>
+<div markdown="1">
+```groovy
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.0.2'
+	id 'io.spring.dependency-management' version '1.1.0'
+}
+group = 'com.dau'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+repositories {
+	mavenCentral()
+}
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-devtools' // 빠른 reload
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	runtimeOnly 'com.h2database:h2' // H2
+	// https://docs.spring.io/spring-boot/docs/current/reference/html/dependency-versions.html#appendix.dependency-versions.coordinates
+	implementation group: 'com.mysql', name: 'mysql-connector-j', version: '8.0.33' // MYSQL
+	//test lombok 사용
+	testCompileOnly 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
+	// 검증기 사용
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter'
+	// 캐시
+	implementation 'org.springframework.boot:spring-boot-starter-cache'
+}
+tasks.named('test') {
+	useJUnitPlatform()
+}
+```
+</div>
+</details>
 
 <br><br>
 
 ### (1) HTTP 중요지식
 
-**redirect vs forward**
-
-* redirect 는 서버에서 응답을 통해 클라까지 응답이 나갔다가 클라가 redirect 경로를 보고 다시 해당 경로로 서버에 요청하는 형태
-* forward 는 서버 내부에서 일어나는 호출이므로 클라가 전혀 인지하지 못함
-  * 따라서 URL은 처음 호출한 URL 그대로이며(클라는 인지못해서), 동일 Web Container인 페이지로만 이동 가능!
-  * 단, request와 response는 공유
+<details><summary><b>redirect vs forward</b></summary>
+<div markdown="1">
+- **비유 예시(고객:클라, 상담원:서버, 123or124:URL)**
+  - **첫번째 사례(redirect)**
+    1. 고객이 고객센터로 상담원에게 123번으로 전화를 건다.
+    2. 상담원은 고객에게 다음과 같이 이야기한다. "고객님 해당 문의사항은 124번으로 다시 문의 해주시겠어요?"
+    3. 고객은 다시 124번으로 문의해서 일을 처리한다.
+  - **두번째 사례(forward)**
+    1. 고객이 고객센터로 상담원에게 123번으로 전화를 건다.
+    2. 상담원은 해당 문의사항에 대해 잘 알지 못해서 옆의 다른 상담원에게 해당 문의사항에 답을 얻는다.
+    3. 상담원은 고객에게 문의사항을 처리해준다.
+* **redirect의 경우 최초 요청을 받은 URL1에서 클라이언트에 redirect할 URL2를 리턴하고, 클라이언트에게 전혀 새로운 요청을 생성하여 URL2에 다시 요청을 보낸다. 따라서 처음 보냈던 최초의 요청정보는 더이상 유효하지 않게된다.**
+  * web container는 redirect 명령이 들어오면 웹 브라우저에게 다른 페이지로 이동하라는 명령을 내린다.(첫번째 사례의 경우, 고객은 전화를 끊고 124번으로 다시 전화를 건다)
+    * 다른 web container에 있는 주소로 이동 가능(ex: 123 -> 124)
+  * 새로운 페이지에서는 request, response객체가 새롭게 생성된다.(123번에서 고객이 요청했던 문의사항은 사라지고 124번으로 다시 걸어서 요청한 문의사항을 다시 말해야한다.)
+* **forwar방식은 다음 이동한 URL로 요청정보를 그대로 전달한다. 말 그대로 forward(건네주기)하는 것이다. 그렇기 때문에 사용자가 최초로 요청한 요청정보는 다음 URL에서도 유효하다.**
+  * web container 차원**(서버단)**에서의 페이지 이동, 실제로 웹 브라우저는 다른 페이지로 이동했는지 알 수 없다.(두번째 사례의 경우, 고객은 상담원이 누구한테 물어봤는지 알 수 없다.)
+    * 동일한 web container에 있는 페이지로만 이동이 가능하다.
+  * 현재 실행중인 페이지와 forward에 의해 호출될 페이지는 request, response 객체를 공유한다.(고객이 요청한 문의사항은 고객이 전화를 끊을 때까지 유효하다.)
+* **차이점**
+  * URL의 변화여부: redirect(변화O), forward(변화X)
+  * 객체의 재사용여부 : redirect(재사용X), forward(재사용O)
+* **언제 사용하는게 바람직한가?**
+  * 시스템(session, DB)에 변화가 생기는 요청(로그인, 회원가입, 글쓰기)의 경우 **redirect**방식으로 응답하는 것이 바람직
+  * 시스템에 변화가 생기지 않는 단순조회(리스트보기, 검색)의 경우 **forward**방식으로 응답하는 것이 바람직
+</div>
+</details>
 
 <br>
 
-**PRG Post/Redirect/Get - POST를 무한한 재요청 문제 해결 패턴** 
-
+<details><summary><b>PRG Post/Redirect/Get - POST를 무한한 재요청 문제 해결 패턴</b></summary>
+<div markdown="1">
 * **웹 브라우저의 새로고침은 마지막 서버에 전송한 데이터를 다시 전송한다.**  
 * **따라서 POST 적용후 새로고침을 하면 계속 POST 보내는 문제가 발생하므로 이를 Redirect를 통해서 GET으로 요청하는 방식으로 해결할 수 있다.**
   * Redirect를 사용해야지만 POST 보내는 URL을 벗어나기 때문!!
-
-* **RedirectAttributes 추천**
+* **RedirectAttributes 추천** -> Redirect는 원래 연결 끊어지니까 자원 재전송 필요시!!
   * Redirect 할때 Model처럼 파라미터를 추가해서 간편히 넘겨줄 수 있고, URL 인코딩 문제에서 자유롭다!
     * `"redirect:/basic/items/" + item.getId()` 는 인코딩 문제가 발생할 수 있는데,
     * `"redirect:/basic/items/{itemId}"` 는 인코딩 문제에서 자유롭다.
   * **특히 Status 정보를 파라미터로 넘김으로써 `th:if` 문법으로 "저장완료" 표시도 나타내는데 많이 사용한다.**
-  * **따라서 Redirect 할때는 RedirectAttributes.addAttribute() 추천, html 반환 할때는 Model.addAttribute() 추천**
-    * 리다이렉트가 발생하면 원래 요청은 끊어지고, 새로운 HTTP GET 요청이 시작된다.(브라우저에게 이 URL로 리다이렉트해!) 때문에 리다이렉트 실행 이전에 수행된 모델 데이터는 소멸한다. 따라서 리다이렉트로 모델을 전달하는 것은 의미 없다.**[출처]** [[스프링\] RedirectAttributes](https://blog.naver.com/allkanet72/220964699929)|**작성자** [페얼프인](https://blog.naver.com/allkanet72)
-    * 즉, 리다이렉트시 새로운 HTTP GET 요청을 하므로 기존에 RedirectAttributes에 담아둔 데이터를 사용할 수 없음
-      * 단, `redirectAttributes.addAttribute` 는 파라미터로 전송되므로 **@RequestParam(defaultValue = "")** 등으로 사용가능!!
-      * `redirectAttributes.addFlashAttribute` 의 경우 불가능!! 파라미터 전송이 아니기 때문이며 세션에 저장해서 딱 한번 HTML에만 전송될 뿐!!
+    <div markdown="1">
+    ```java
+    // 저장 성공 상태를 파라미터로 전달 (파라미터로 URL에 추가됨)
+    // ex: URL...?status=success
+    redirectAttributes.addAttribute("status", "success");
+    <!-- "저장 완료" 메시지 표시 -->
+    <div th:if="${status == 'success'}">
+        <p>저장 완료!</p>
+    </div>
+    ```
+    </div>
+  * **따라서 Redirect 할때는 RedirectAttributes.addAttribute() 추천, html 반환(렌더링) 할때는 Model.addAttribute() 추천**
+    * `redirectAttributes.addAttribute` 는 파라미터로 전송되므로 **@RequestParam(defaultValue = "")** 등으로 간편히 사용가능!!
+    * 참고: `redirectAttributes.addFlashAttribute` 의 경우 불가능!! 파라미터 전송이 아니고 딱 한번 세션에 저장해서 전달하는 방식이라서!! 아마 @ModelAttribute로 받아질걸??
+</div>
+</details>
 
 <br>
 
@@ -3257,13 +3622,17 @@ public HelloData requestBodyJsonV5(@RequestBody HelloData data) {
 
 **타임리프 문법**
 
-* 핵심 : 서버로 실행(뷰 템플릿 사용)하면 타임리프 문법들이 적용해서 동적으로 변경!
+* **핵심** : 서버로 실행(뷰 템플릿 사용)하면 타임리프 문법들이 적용해서 **동적으로 변경!**
+  
   * 스프링 부트는 "뷰 리졸버" 를 자동 등록하는데, 이때 설정파일에 등록한  `spring.mvc.view.prefix , spring.mvc.view.suffix` 정보를 사용해서 등록한다.
-  * "뷰 리졸버" 에 필요한 "경로" 를 설정하는 부분인데 요즘 Thymeleaf 는 이것도 자동으로 등록해줘서 설정할 필요가 없다.
-    * 혹시나 JSP 사용할 경우에는 이부분 기억해두자.
+  * "뷰 리졸버" 에 **필요한 "경로" 를 설정**하는 부분인데 요즘 Thymeleaf 는 이것도 자동으로 등록해줘서 설정할 필요가 없다.
+    * **혹시나 JSP 사용할 경우에는 이부분 기억해두자.**
+  
 * **타임리프 사용 선언**
+  
   * `<html xmlns:th="http://www.thymeleaf.org">`
-* 속성 변경
+  
+* **속성 변경**
 
   * `th:href="@{/css/bootstrap.min.css}"`
   * `th:onclick="|location.href='@{/basic/items/add}'|"`
@@ -3271,205 +3640,881 @@ public HelloData requestBodyJsonV5(@RequestBody HelloData data) {
   * `th:value="${item.id}"`
   * `th:action`
   * ... 등등 매우 다양
+  
 * **URL 링크표현식 - @{...}**
+  
   * `th:href="@{/css/bootstrap.min.css}"`
-
   * `th:href="@{/basic/items/{itemId}(itemId=${item.id})}"`
-  * 심화) `th:href="@{/basic/items/{itemId}(itemId=${item.id}, query='test')}" `
-    * 생성된 링크: `http://localhost:8080/basic/items/1?query=test`
+    * 생성된 링크: `http://localhost:8080/basic/items/1`
+  * `th:href="@{gallery/productDetail/(id=${item.id})}"`
+    * 생성된 링크: `http://localhost:8080/gallery/productDetail/?id=1`
+    * 심화) `th:href="@{/basic/items/{itemId}(itemId=${item.id}, query='test')}" `
+      * 위 2개 둘 다 사용한 방식임. **{itemId}(itemId=${item.id})랑 (id=${item.id})**
+      * 생성된 링크: `http://localhost:8080/basic/items/1?query=test`
   * **간편) `th:href="@{|/basic/items/${item.id}|}"`**
-    * **리터럴 대체문법 적용가능 => 이거 쓰자**
-* **리터럴 대체 - |...|**
-  * 타임리프에서 문자와 표현식 등은 분리되어 있기 때문에 더해서 사용해야 한다.
+    * **"리터럴 대체" 문법도 적용가능 => 이거 함께 쓰자(아래 참고)**
+  
+* **리터럴 대체 - \|\...\|**
+  
+  * 타임리프에서 **문자**와 **표현식** 등은 분리되어 있기 때문에 **더해서 사용**해야 한다.
     * `<span th:text="'Welcome to our application, ' + ${user.name} + '!'">`
-  * 다음과같이 리터럴 대체문법을 사용하면, 더하기 없이 편리하게 사용할 수 있다.
-    * **`<span th:text="|Welcome to our application, ${user.name}!|">`**
-    * **`th:onclick="|location.href='@{/basic/items/{itemId}/edit(itemId=${item.id})}'|"`**
-* 변수표현식 - ${...}
+  * 다음과같이 리터럴 대체문법을 사용하면, **더하기 없이 편리**하게 사용할 수 있다.
+    * `<span th:text="|Welcome to our application, ${user.name}!|">`
+    * `th:onclick="|location.href='@{/basic/items/{itemId}/edit(itemId=${item.id})}'|"`
+  
+* **변수표현식 - ${...}**
 
   * `<td th:text="${item.price}">10000</td>`
-* 반복출력 - th:each
+  
+* **반복출력 - th:each**
 
   * `<tr th:each="item : ${items}">`
-  * 컬렉션의 수만큼 `<tr>..</tr>` 이 하위 테그를 포함해서 생성된다.
+  
+  * 컬렉션의 수 만큼 `<tr>..</tr>` 이 하위 태그 반복 생성!
+  
+  * ```html
+    <table>
+        <tr th:each="item : ${items}">
+            <td th:text="${item.id}"></td>
+            <td th:text="${item.name}"></td>
+            <td th:text="${item.price}"></td>
+        </tr>
+    </table>
+    ```
+  
 * **조건문 - th:if or Default**
-  * **th:if 문들은 false인 경우 아예 태그를 렌더링을 안해서 그럴경우 사용!!**
+  
+  * **th:if 문들은 false인 경우 아예 태그를 렌더링을 안함. 그럴 경우 사용!!**  
+    param?의 ?는 null safe 처리 지원
     * `<h2 th:if="${param?.status}" th:text="'저장 완료'"></h2>`
     * `<h2 th:unless="${param?.status}" th:text="'저장 실패'"></h2>`
-
-  * **그외 + Default 경우**
-    * `th:text="|B1 ~ B${(totalCount!=null) ? (totalCount/10+1) : '??'}F|"`
-    * 또는 Default 활용 : `th:text="|B1 ~ B${(totalCount) ?: '??'}F|"`
-      * Default는 자동으로 null을 잡아주지만, 
-      * null/10 이런건 불가해서 이런경우는 위처럼 it-then-else 사용
-
-* 변수선언 - th:with
-  * `th:with="first=${users[0]}"` -> frist 로 사용 가능
-* text, utext, [[...]], [(...)]
-  * text vs utext
+  * **삼항 연산자 + Default(=Elvis 연산자) 경우**
+    * 삼항 연산자: `th:text="|B1 ~ B${(totalCount!=null) ? (totalCount/10+1) : '??'}F|"`
+      * 실제로 **B1 ~ B4F** 이런식으로 출력
+    * Default(=Elvis 연산자) 활용 : `th:text="|B1 ~ B${(totalCount) ?: '??'}F|"`
+      * Default는 **totalCount**가 유효한 값이 있으면 그 값을 사용!<br>0이거나 null이면 **"??"가 출력!** -> 즉, 자동으로 null을 잡아줌! 
+      * 다만, `(totalCount/10+1)` 이라면?<br>null/10+1 로 에러떠서 이런 경우는 위처럼 **it-then-else 사용**
+    * 추가정보) `"${data}? : _"` 라면? 
+      * No-Operation : "_" 로써 마치 타임리프 실행 안한것처럼 동작
+  
+* **변수선언 - th:with**
+  
+  * `th:with="first=${users[0]}"` -> frist 로 재사용 가능
+  
+  * ```html
+    <div th:with="first=${users[0]}">
+        <p th:text="${first.name}">User Name</p>
+    </div>
+    ```
+  
+* **태그 인식 유무 - text, utext == [[...]], [(...)]**
+  
+  * text vs utext -> 속성 사용
     - th:text = Hello \<b>Spring!\</b>
-    - th:utext = Hello **Spring!**
-
+    - th:utext = Hello **Spring!** -> 진하게 태그(\<b>) 자동 적용된 모습
+  
   * [[...]] vs [(...)] -> 속성이 아니라 컨텐츠 안에서 직접 출력!
     - [[...]] = Hello \<b>Spring!\</b>
     - [(...)] = Hello **Spring!**
-* 편의 객체 제공 - param, session 등
-  * `param.title` 같이 파라미터 바로 접근 가능
-* 비교연산 - HTML 엔티티 주의!! 
-  * \> : gt 로 표기
-* Elvis 연산자 - `"${data}? : _"`
-  * data 있으면 true조건 실행
-* No-Operation : "_" 
-  * 마치 타임리프 실행안한것처럼 동작
-* 타임리프 파서 주석 : `<!--/* [[${data}]] */-->`
+  
+* **편의 객체 제공 - param, session 등**
+  
+  * `param.title` 같이 파라미터 바로 접근 가능하게 **편의 객체를 제공**
+  * `session.user.name` 은 세션 바로 접근
+  
+* **비교연산(ex: >) - HTML 엔티티 주의!!** 
+  
+  * `>` : gt 로 표기 한다.
+  
+* **타임리프 파서 주석 :** `<!--/* [[${data}]] */-->`
+  
   * 참고로 `/*사이에서 여러줄 가능*/`
-  * 렌더링때 삭제되는 것
-* **블록 - `<th:block>`**
-  * `<th:block>` 는 타임리프가 제공하는 유일한 자체 "태그"
+  * 일반 HTML 주석과 비슷하지만, `/*`와 `*/` 사이에 있는 내용은 **타임리프의 파서에 의해 처리 된 후 렌더링 때 삭제**되는 것
+  
+* **블록 - \<th:block>**
+  
+  * `<th:block>` 는 타임리프가 제공하는 유일한 자체 **"태그"**
+  
   * **렌더링 할때는 아예 태그가 삭제**
-* **fragment, JS**
+  
+  * **\<div> 로 데이터 잘 표현 했을 경우 \<th:block> 추가하면 깔끔**
+  
+  * ```html
+    <!-- 렌더링 후 아래 div 태그만 남게 되는 것 -->
+    <th:block th:each="item : ${items}" th:object="${item}">
+      <div th:class="${item.id==items[0].id}? 'gallery-item-first' : 'gallery-item-many'" style="flex:1; padding-top: 30px;">
+      </div>
+    </th:block>
+    ```
+  
+* **fragment, js**
+  
   * fragment : 코드 재사용
-  * JS : javascript 에서 사용 가능
-* **`<input>과<label>` 에서 th:for로 id값 연결 하는 편 -> 보통 form 에 잘 구성**
-  * 동적 id 인식 - `#ids.prev()`
-* **`<table> <tr> <td> <th>` 형태로 데이터 잘 표현** 
-* **`<div>` 로 데이터 잘 표현한 경우 `<th:block>` 같이 사용하면 깔끔**
-* **젤 중요!! `th:field` 는 "검증"에 매우 유용해서 그냥 사용가능하면 무조건 사용**
-  * value에 값 자동 넣어주며, id, name 자동 생성 및 체크박스도 자동체크 등 - **input**에 주 사용
-  * `*{...}` : 선택 변수 식으로써 `th:object` 에서 선택한 객체에 접근 활용
-  * **그냥 여러개 쓸땐 th:object로 관리쉽게 쓰고, th:field는 input이나 체크박스에 사용하자**
+  
+    * fragment생성: `<head th:fragment="head(title)">`
+  
+    * ```html
+      <!DOCTYPE html>
+      <html xmlns:th="http://www.thymeleaf.org">
+        <head th:fragment="head(title)">
+          <!-- Required meta tags -->
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+      
+          <!-- Bootstrap CSS -->
+          <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+      
+          <!-- 커스텀(기본) CSS -->
+          <link rel="stylesheet" type="text/css" media="all" 
+                href="../static/basic.css" th:href="@{/basic.css}"/>
+      
+          <title th:text="${title}">타이틀 화면</title>
+      
+        </head>
+        <body>    
+        </body>
+      </html>
+      ```
+  
+    * fragment 적용: `<head th:replace="fragments/head :: head('스튜디오')">`<br>**fragments/head** 는 **resources/templates/fragments/head.html** 경로를 의미
+  
+    * ```html
+      <head th:replace="fragments/head :: head('스튜디오')">
+      </head>
+      ```
+  
+  * js : 타임리프 문법 inline으로 javascript 에서 사용 가능 + css도 마찬가지
+  
+    * ```html
+      <script th:inline="javascript">
+      var pageCount = /*[[${(totalCount/10)+1}]]*/ null;
+      // 물론, /* */ 주석을 제거해도됨. 단지 빨간줄 떠서 추가함.
+      ```
+  
+* **\<input>과\<label> 에서 th:for로 id값 연결 하는 편 -> 보통 form 에 잘 구성**
+  
+  * 동적 id 인식도 지원 됨! - `#ids.prev()`
+  
+  * 참고: \#ids.prev('regions')를 사용한 이유는 label에서 for 속성에 input의 id 속성과 맞추기 위해서 입니다.
+  
+    이것을 맞추어 두어야 label을 선택했을 때, 그러니까 **글자를 선택했을 때도 input 요소가 선택되기 때문**입니다.
+  
+  * HTML의 기본 동작: `label`의 `for` 속성이 `input`의 `id`와 일치하면, 사용자가 `label`을 클릭할 때 브라우저가 자동으로 해당 `input` 요소에 포커스를 주도록 설계되어 있습니다.
+  
+    ```html
+    <!-- 대충 이런느낌으로 연결 해두면 된다는 거~! -->
+    <div class="container" th:each="region : ${regions}">
+        <label th:for="${region.id}">지역 선택:</label>
+        <input type="text" th:id="${region.id}" placeholder="지역을 입력하세요">
+    ```
+  
+* **보통 \<table> \<tr> \<td> \<th> 형태로 데이터를 표현** 
+
+* **젤 중요!! th:field 는 "검증"에 매우 유용해서 그냥 사용가능하면 무조건 사용**<br>**여러개 쓸땐 th:object로 관리쉽게끔 함께 고고**
+  
+  * value 속성에 값 자동 삽입 + **id, name 속성 자동 생성** + 체크박스도 자동체크 등 -> **input태그나 체크박스**에 주로 사용 (그냥 다 사용하면 되긴 해~)
+  * `*{...}` : 선택 변수 식으로써 **th:object** 에서 선택한 객체에 접근
+    * **\*\{\{...}}**: `*{date1}` 은 @DateTimeFormat 표현식(타입컨버터)이 안 먹히기 때문에 \*\{\{date1}} 로 지정하는 것이다.
 
 <br>
+
 
 **타임리프 + 스프링 통합 문법**
 
 * **th:object, th:field, *{itemName} 활용**
-  * Form과 함께 Input, 체크박스, 라디오버튼, 셀렉트 박스에서 활용
+  
+  * Form과 함께 Input, 체크박스, 라디오버튼, 셀렉트 박스에서 주로 활용
   * TIP) addForm, editForm 이렇게 2개 따로 만드는게 개발하기 수월
-
+  
 * **(중요)"메시지, 국제화 기능"**
+  
   * `application.properties` 에 `spring.messages.basename=messages` 를 추가!!
-* 여러개 추가할거면?? 예로 errors.properties 추가한다고 하면 message, errors 이렇게 이어적으면 됨
-  * 이후 `messages.properties` 를 추가해서 messages에 담을 내용을 세팅
-* 타임리프로 사용 예시 : `<h2 th:text="#{page.addItem}">상품 등록</h2>` `
+  * `messages.properties` 를 생성해서 messages에 담을 내용을 세팅
+    * properties에 `page.addItem=상품 등록` 메시지 추가
+    * 타임리프로 `<h2 th:text="#{page.addItem}">상품 등록</h2>` `
+  * 여러개 추가할거면?? 예로 errors.properties 추가한다고 하면 =message, errors 이렇게 이어적으면 됨
+  
 * **(참고) nullsafe**
   * `th:if="${errors?.containsKey('globalError')}"` 에서 ?를 통해 null 로 나타나므로 if는 false로 반환
   * ?가 없으면 null.containesKey... 로 에러
-* "컨트롤러"에서 그냥 @GET 으로 페이지 로딩할때 item을 빈값이라도 선언해둬서 Model에 담아 반환하는걸 권장
+
+* **"컨트롤러"에서 @GET** 으로 페이지 로딩할때 **item을 빈값이라도 선언**해둬서 Model에 담아 반환하는걸 권장
+
   * **검증 실패 때 forward로 "자원 재활용"이 됨.**
-  * HTML 코드도 더 깔끔 -  if문으로 null인지 확인할 필요없이 그냥 item을 타임리프 문법으로 사용하면 되기때문
+
+  * HTML 코드도 더 깔끔 -  if문으로 null인지 확인하는 코드 필요없이 그냥 item을 타임리프 문법으로 사용하면 되기때문
+
+  * **Model에 빈 객체를 미리 담아 전달**하면, 타임리프가 폼을 렌더링할 때 **객체가 null인지 확인할 필요 없이 바로 사용할 수 있기 때문 (코드 더 깔끔)**
+
+    * **폼 페이지에서 제출된 데이터**가 검증에 실패하면, 다시 폼 페이지로 돌아가야 합니다. 이때, 새로운 GET 요청(redirect)을 발생시키지 않고, **forward**로 같은 페이지를 다시 렌더링합니다.
+    * 이렇게 하면 **입력한 값들이 그대로 유지**되므로, 사용자는 데이터를 다시 입력할 필요가 없습니다.<br>타임리프에서 `th:field`를 사용하면, **검증 실패 시 자동으로 폼 필드에 사용자가 입력한 값**을 다시 채워줍니다. 이게 가능하려면, 컨트롤러에서 **빈 값이 아닌 객체**를 넘겨주는 것이 중요합니다.
+
+  * ```java
+    @Controller
+    public class ItemController {
+    
+        @GetMapping("/items/new")
+        public String showItemForm(Model model) {
+            // 빈 Item 객체를 Model에 추가
+            model.addAttribute("item", new Item());
+            return "itemForm";  // form 템플릿을 반환
+        }
+    
+        @PostMapping("/items/new")
+        public String createItem(@ModelAttribute("item") Item item, 
+                                 BindingResult bindingResult,
+                                 RedirectAttributes redirectAttributes) {
+            // 검증 실패 시
+            if (bindingResult.hasErrors()) {
+                return "itemForm";  // 다시 폼을 forward하여 자원 재활용
+            }
+    
+            // 성공적으로 저장한 후
+            redirectAttributes.addAttribute("status", "success");
+            return "redirect:/items/" + item.getId();
+        }
+    }
+    ```
+
+  * ```html
+    <form th:object="${item}" th:action="@{/items/new}" method="post">
+        <label for="name">Item Name</label>
+        <input type="text" th:field="*{name}" id="name" />
+    
+        <label for="price">Price</label>
+        <input type="number" th:field="*{price}" id="price" />
+    
+        <button type="submit">Save</button>
+    </form>
+    ```
 
 <br><br>
 
-### (3) Thymeleaf TIP
+### (3) Thymeleaf TIP - 필독!
 
-**Page 생성 기본과정**
+참고 공식문서: [부트스트랩 공문](https://getbootstrap.com/docs/5.3/components/navbar/#toggler), [타임리프 공문](https://www.thymeleaf.org/doc/tutorials/3.1/usingthymeleaf.html#including-template-fragments)
 
-* \<div> + Container 를 활용해서 전체적인 "페이지 틀" 을 먼저 작성
-  * 단, container와 flex 같이 선언하지 말기
+**웹 개발은 VSCode(정적) + IntelliJ(동적)로 개발 -> 본인은 그냥 IntelliJ로 개발! (캐시설정ㄱㄱ)**
 
-* fragment로 head, header, footer, scripts, modal 등등 작성 (scripts, modal은 관리편리)
-* 데이터 간단히 표현 : `table, td, tr 등등` 또는 `div로 잘 구현`
-  * `th:each` + `<th:block>` 도 적절히 함께 활용
-* FORM 데이터 : `label, input, 체크박스 등등` 권장
-  * th:field(name,id,value자동) 와 *{...} 랑 th:object(데이터 관리쉽게) 함께 사용 권장
-  * `th:errors` 등등 도 함께 사용
-* 문법 잘 활용
-  * |...| : `<span th:text="|Welcome to our application, ${user.name}!|">`
-  * @{} : 간편) -`th:href="@{|/basic/items/${item.id}|}"`
+- **보통 VSCode 가 html 문법 잘 지원해서(플러그인 다양함+Go Live로 바로 실행 지원) 이것으로 개발<br>IntelliJ는 서버 실행하여 Thymeleaf 문법 적용할 때 주로 사용**
+  - 근데, 이것도 캐시만 잘 설정하면 reload를 빠르게 가능!! -> 본인은 그래서 IntelliJ로 개발
+  - 배포할땐 꼭 true로!! : `spring.thymeleaf.cache=false`,  `spring.thymeleaf.prefix=file:src/main/resources/templates/`
+
+- **서버 동작 없이 html(정적)에서 텍스트 확인 위해 span태그 사이에 "23.05.22.16:00k"입력까지 한 것**<br>**\<span class="pt-2" th:field="\*\{\{date1}}" th:text="*\{\{date1}}">23.05.22.16:00k\</span>**
 
 <br>
 
-**css**
+**반응형 웹 개발을 위해 "부트스트랩(+인라인스타일링)"+"basic.css(전체), 커스텀.css(부분)"**
 
-* 부트스트랩, J쿼리 기본 import + basic.css(전체 CSS) 정도는 깔고가면 편리
-* **자주 사용하는 hover 의 주의점** : 태그의 style이 제일 우선순위 높으므로 이쪽에 color, background-color 등이 있으면 지워주고 따로 \<style> 태그나 css에서 진행할것
-  * 특히 .page-link:hover 과 .page-link.active 처럼 hover은 ":", active는 "." 사용하는 등의 자잘한 실수를 유발할 수 있으므로 꼼꼼히 살펴볼 것
+* 부트스트랩은 자동으로 반응형(해상도)에 맞게 스타일 지정되어 있다. 따라서 가져다 사용만 하면 됨!<br>**단, 원하는 스타일대로 커스텀하고 싶다면 “부트스트랩 문법에 인라인 style" or "일반 CSS를 직접 커스텀” 하자.** 이때, 반복(재사용)되는것들만 일반CSS로 따로 커스텀하고, 그게 아니면 부트스트랩 사용하면서 인라인 스타일로 바로 작성하는게 좋겠다.
+* **본인은 보통 basic.css로 전체 페이지에 적용할 css파일 만들고, 부분적으로 커스텀할 부분은 gallery.css같이 해당 페이지명으로 만들어서 적용 중이다.**
+
+  <details><summary><b>주의점?</b></summary>
+  <div markdown="1">
+  - **부트스트랩**은 수 많은 것을 **자동 제공!!**
+    - 일반적인 방식 `font-size:100px;` 는 `100px`로 글자가 **"고정"**
+      - **따라서 반응형 웹 CSS는 원래 em, rem, vw, vh 같은 단위를 사용해줘야 한다.**
+        - **em은 "부모"의 font-size의 크기에 따라서 결정**
+        - **rem은?? -> em과 동일하지만 제일 root 부모의 font-size를 따름**
+        - **vw, vh는 뷰포트 화면(장치:예로 브라우저)크기에 따라 사이즈 결정됨**
+      - **따라서 본인은 `vw, vh`로 "부모"부분 먼저 크기 결정후 `em`으로 "자식" 부분 크기 결정** (장치 기준이 젤 부모가 되는게 좋다고 생각해서)
+    - 부트스트랩 방식 `fs-1, fs-2 등` 은 **"반응형"** 으로 글자 크기 제공 (fs: font-size)
+    - 부트스트랩만으로 해결이 안되어서 **css 혼합하여 커스텀 예시**
+      - `<div class="d-flex custom-header-flex">`
+      - **d-flex**는 부트스트랩이 제공하는 display:flex를 의미 (flex:1을 지원안함 ㅠ)
+      - 따라서 **custom-header-flex** 부분은 style태그로 따로 flex:1을 적용한 방식
+  - **스타일 우선순위**: inline stylet속성 -> style태그 -> css파일 (차례대로 우선순위)
+  - **class, id 별 접근자**: id=#, class=.
+  - **웹 폰트 적용??**: `font-family: 'SUITE-Regular', sans-serif;` 로써 해당 우선순위대로 폰트 적용 (suite 폰트는 외부파일)
+  - **전역 변수 정의??: basic.css**
+      <div markdown="1">
+      ```css
+      // 글꼴, 색상, 스타일 전역변수 정의
+      @font-face {
+        font-family: 'SUITE-Regular';
+        /* src: url('../static/SUITE-Regular.woff2') format('woff2'); */
+        src: url('/SUITE-Regular.woff2') format('woff2');
+        font-weight: 400;
+        font-style: normal;
+      }
+      :root {
+        --line: #393A40;
+        --main-1: #0C0C0C;
+        --main-2: #323338;
+        --text-2: #8E8F9B;
+      }
+      ```
+      </div>
+  - `&times;` **는 "X" 표시**: close 버튼을 이것으로 입력된 구조가 많음
+  - **웹(프론트)에서의 검증(ex:비밀번호)**: 정규식 검사하는 js 문법 활용
+    - `onkeypress` 방식을 사용! 단, 복붙을 구별X. 따라서 서버단에서도 추가 검증이 더욱 안전
+      <div markdown="1">
+      ```html
+      <input type="password" class="no-spin" th:field="*{password}" id="password" name="password" pattern="\d+" required onkeypress='return checkNumber(event)'/>
+      <script th:fragment="scripts3">
+        // 비밀번호 정규식 등록
+        function checkNumber(event) {
+          var pw = event.key
+          if (/^\d+$/.test(pw)) {
+              return true;
+            } else {
+              return false;
+            }
+          return false;
+        }
+      </script>
+      ```
+      </div>
+  * **텍스트 가로유지(텍스트 크기 초과 방지)**: `white-space: nowrap;` 스타일 적용
+  * **flex로 0.98:0.02 로 비율 나눠도 덮어 씌어질 경우**: `max-width:92%` 로 해결
+  * **hover, active 문법 실수 조심** : `.page-link:hover` 과 `.page-link.active` 처럼 hover은 ":", active는 "." 사용
+  * **백그라운드 컬러 변경으로 개발 테스트 용이**: `bg-info, primary, secondary` 등으로 간편하게 적용!
+  * **border은 항상 style을 지정**:  `solid` 나 굵기는 `width` 함께해야 잘 적용!
+  </div>
+  </details>
+
+<br>
+
+**Page 생성 기본!!**
+
+- **HTML 태그 위치별 기본 사용 구조**
+
+  - **\<html>** → thymeleaf 선언
+
+    - **\<head>**
+
+      - **\<meta>** → utf-8(문자인코딩), viewport(모바일 뷰크기 설정) : 이 2개는 필수 사용
+
+      - **\<link>** → 주로 bootstrap(css), 커스텀css(ex:/basic.css) 선언
+
+        - bootstrap(js)의 경우 \<script>에서!!!!
+
+        - **css코드 예시?! basic.css, custom.css**<br>basic은 전역(기본) css, custom은 basic말고 적용하려고 추가로 만든 css
+
+          <details><summary><b>basic.css → 글꼴, 색상, 스타일 전역변수 정의도 함!</b></summary>
+          <div markdown="1">
+          ```css
+          /*
+           * 글꼴, 색상, 스타일 전역변수 정의
+           */
+          @font-face {
+            font-family: 'SUITE-Regular';
+            /* src: url('../static/SUITE-Regular.woff2') format('woff2'); */
+            src: url('/SUITE-Regular.woff2') format('woff2');
+            font-weight: 400;
+            font-style: normal;
+          }
+          :root {
+            --line: #393A40;
+            --main-1: #0C0C0C;
+            --main-2: #323338;
+            --text-2: #8E8F9B;
+          }
+          /*
+           * Base structure
+           */
+           body {
+              background-color: var(--main-1);
+              /* SUITE 못 찾으면 sans-serif 사용 */
+              font-family: 'SUITE-Regular', sans-serif;
+              margin-top: 15vh;
+           }
+           .field-error {
+              color: red; font-weight: 700; padding:10px;
+           }
+          /*
+           * Header
+           */
+            nav {
+              border-left-width: 0px;
+              border-right-width: 0px;
+              border-top-width: 0px;
+              border-bottom-width: 0px;
+              border-style: solid;
+              border-color: var(--line);
+            }
+            .nav-item {
+              position: relative;
+              text-align: center;
+              font-size: 1.2vw;
+              width: 15vw;
+              padding: 20px;
+              padding-bottom: 30px;
+            border-left-width: 0px;
+            border-right-width: 1px;
+            border-top-width: 0px;
+            border-bottom-width: 0px;
+            border-style: solid;
+            border-color: var(--line);
+          }
+          /* 여기서 header는 navbar-nav 의 높이를 기준으로 정해진다고 볼 수 있음 */
+          .navbar-nav {
+            height: 15vh;
+          }
+          #nav-item-first {border-left-width: 1px; }
+          .nav-link {
+            color: white; font-weight: 700;
+          }
+          #custom-nav-item:hover,
+          #custom-nav-item:active,
+          #custom-nav-item.visited {
+            background-color: var(--main-2);
+          }
+          .nav-item-inner {
+            position:absolute; 
+            bottom:0;
+            left:0;
+            font-size: 0.7em;
+            color:white; font-weight: 400; letter-spacing: -0.14px; opacity: 0.6;
+            padding: 16px;
+          }
+          /*
+           * Main
+           */
+              .custom-container-default {
+              padding-top: 5vh;
+              padding-bottom: 5vh;
+              padding-left: 15vw;
+              padding-right: 15vw;
+              }
+              #enterBtn {
+              background-color: var(--main-1); color: white;
+              border-radius: 0px;
+              }
+              #enterBtn:hover{
+              background-color: white;
+              color: var(--main-1);
+              border-radius: 10px;
+              }
+            /* 모달에 스타일링 */
+            /* 스크롤을 숨기는 스타일 */
+            .no-scroll::-webkit-scrollbar {
+            width: 0px;
+            }
+            /* 스핀 버튼 숨기기 */
+            input[type="number"]::-webkit-inner-spin-button,
+            input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            }
+            /*
+          * Footer
+          */
+          .custom-footer {
+            color:var(--text-2);
+            display: flex;
+            justify-content: center; 
+            align-items: center; 
+            border-style: solid;
+            border-top-width: 1px;
+            border-left-width: 0px;
+            border-right-width: 0px;
+            border-bottom-width: 0px;
+            border-color: var(--line);
+            margin-left: 15vw; /* custom-container-default 의 padding 과 너비 맞출것 */
+            margin-right: 15vw;
+          }
+          ```
+          </div>
+          </details>
+          
+          <details><summary><b>custom.css(=gallery.css)</b></summary>
+          <div markdown="1">
+          ```css
+          .gallery-item-first{
+            display: flex;
+            flex-direction: row;
+            padding-top: 20px;
+            padding-bottom: 30px;
+            /*height: 25vh;*/
+          }
+          .gallery-item-many{
+            display: flex;
+            flex-direction: row;
+            padding-top: 20px;
+            padding-bottom: 30px;
+            /*height: 25vh;*/
+            /* first와 차이점은 아래 border부분뿐 */
+            border-color: var(--line);
+            border-style: solid;
+            border-left-width: 0px;
+            border-right-width: 0px;
+            border-bottom-width: 0px;
+            border-top-width: 1px;
+          }
+          .page-link{
+          background-color: var(--main-1);
+          border-width:0px;
+          font-weight: 500;
+          text-align: center;
+          color:white;
+          }
+          .page-link.active{
+          background-color: white;
+          color:var(--main-1);
+          }
+          .page-link:hover{
+          background-color: var(--main-2);
+          color:white;
+          }
+          ```
+          </div>
+          </details>
+
+      - **\<title>** → 브라우저의 URL링크 상단바에 실제 제목
+
+    - **\<body>** → 배경색, 커서 설정하기 좋지, 전체 폰트도~!
+
+      - **\<style>** → css처럼 스타일링. 위 \<link> 스타일 보다 더 높은레벨 (실제 \<div style=""> 처럼 태그안에 스타일은 최상위레벨)
+      - **\<nav>** → header 부분으로 시작~!
+      - **\<div class="container">** 처럼 이제 쭉 레이아웃 형성 + 실제 웹 화면 구성 ㄱㄱ
+      - **\<footer>** → 마지막은 footer로 마무리~!
+
+    - **\<script>** → javascript 관련 모든 것 (+jquery, bootstrap 설치도 포함)
+       bootstrap4까지는 jquery 사용 때문에 jquery먼저 설치코드 필요하지만, bootstrap5부터는 그런 의존성 없애서 꼭 상관없다~
+       **물론, jquery 유용하니까 항상 설정하는것도 좋지.**
+
+    <details><summary><b>html 전체 코드</b></summary>
+    <div markdown="1">
+    ```html
+    <!doctype html>
+    <html xmlns:th="http://www.thymeleaf.org">
+      <head th:replace="fragments/head :: head('갤러리')">
+      </head>
+      <body>
+        <style>
+          .page-link{
+            font-size:1.2vw;
+            padding: 1vw;
+          }
+          /* body태그, id=enterBtn 에 적용 */
+          @media all and (min-width: 1921px) and (max-width: 4096px) {
+              body, #enterBtn {
+                  cursor: url('/cursor.svg') 10 60, auto;
+              }
+          }
+          @media all and (max-width: 1920px) {
+              body, #enterBtn {
+                  cursor: url('/cursor_1920.svg') 10 60, auto;
+              }
+          }
+        </style>
+        <!-- header -->
+        <nav th:replace="fragments/header :: header">
+        </nav>
+        <!-- main 개발 -->
+        <!-- 메인 그림 -->
+        <div class="container-fluid p-0">
+          <img class="img-fluid" src="../static/6.png" 
+            th:attr="src=@{/6.png},title=#{logo},alt=#{logo}"
+          style="width:100%;"/>
+        </div>
+        <!-- 본문  -->
+        <div class="custom-container-default">
+          <!-- 제목(층수) -->
+          <div class="d-flex flex-column" style="min-height: 0vh; padding-bottom: 5vh;">
+            <div class="container" style="text-align: center;">
+            ...
+            </div>
+          </div>
+          <!-- 작품 나열 -->
+          <div class="d-flex flex-column" style="min-height: 80vh;"
+          th:replace="fragments/item :: item">
+            <div class="gallery-item-first">
+              ...
+            </div>
+            <div class="gallery-item-many">
+              ...
+            </div>
+          </div>
+          <!-- pagination -->
+          <br><br><br><br>
+          <nav aria-label="Page navigation">
+            <ul id="dyn_ul" class="pagination" style="justify-content: center;">
+            </ul>
+          </nav>
+        </div>
+        <!-- footer -->
+        <footer th:replace="fragments/footer :: footer"
+        class="custom-footer">
+        </footer>
+        <!-- Jquery CDN 로드 : 항상 최신 버전 사용 -->
+        <script th:replace="fragments/scripts :: scripts4" src="https://code.jquery.com/jquery-latest.min.js"></script>
+        <!-- bootstrap5(JS) CDN 로드 -->
+        <script th:replace="fragments/scripts :: scripts1"  src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous">
+        </script>
+        <script th:replace="fragments/scripts :: scripts2">
+          // nav 클릭때마다 배경색 변경 커스텀
+          // 스크롤시 NavBar 불투명도 변경
+        </script>
+        <!-- 페이징 -->
+        <!--    var pageCount = /*[[${(totalCount/10)+1}]]*/ null; // 총 페이지 크기 -> 통신으로 받음-->
+        <script th:inline="javascript">
+        ...
+        </script>
+      </body>
+    </html>
+    ```
+    </div>
+    </details>
+
+- **conatiner+flex+position?! -> div태그로 class=container 사용해서 레이아웃 구성 꼭 해주고! 필요에 따라 flex, position사용을 하면서 구현 ㄱㄱ**
+
+  - **container** 는 보통 위에서 아래로 쌓지. 그럼 내부엔 수직, 수평, 절대위치로 삽입하고 싶다?
+  - 난 grid는 안쓰고 **flex** 사용해서 하는중. **아래 속성도 유용함.**
+    - `text-center` : 텍스트 중앙 정렬(좌우)
+    - `align-items-start,center,end` : items 정렬이므로 자신의 자식들 정렬
+    - `align-self-start,center,end` : self 정렬이므로 자신이 정렬
+  - 절대위치는 그냥 **position:absolute랑 relative** 씀
+    - absolute 사용하는데, 중앙에 위치하고 싶어서 `top:50%, left:50%, transform: translate(-50%, -50%)` 
+      - `top: 50%;`: 이 요소의 상단이 부모 요소의 50% 위치에 배치됩니다.<br>`left: 50%;`: 이 요소의 왼쪽이 부모 요소의 50% 위치에 배치됩니다.<br>`transform: translate(-50%, -50%);`: 이 속성은 요소를 자신의 너비와 높이의 50%만큼 위와 왼쪽으로 이동시킵니다. 결과적으로 이 두 가지 설정을 조합하면 요소가 화면 중앙에 위치하게 됩니다.
+
+- **padding, margin?! → 굉장히 많이 사용!! 이것도 위와 같이 사용 굉장히 많이 함!**
+
+  - `padding` : 요소 “내부”의 여백을 설정
+    - **내부다 보니 배경색에 영향O**
+    - **내부다 보니 전체 너비와 높이에 “포함”**
+    
+  - `margin` : 요소 “외부”의 여백을 설정
+    - **외부다 보니 배경색에 영향X**
+    - **외부다 보니 전체 너비와 높이에 “추가”!!!!!!!!**
+    
+    <details><summary><b>동작원리(사진포함)</b></summary>
+    <div markdown="1"><br>
+    **총 3개 박스: margin, padding, margin + padding**
+    ```html
+    <div style="margin: 20px; background-color: lightblue;">
+      콘텐츠가 있는 박스
+    </div>
+    <div style="padding: 20px; background-color: lightblue;">
+      콘텐츠가 있는 박스
+    </div>
+    <div style="padding: 20px; margin: 20px; background-color: lightblue;">
+      콘텐츠가 있는 박스
+    </div>
+    ```
+    <br>
+    ![image](https://github.com/user-attachments/assets/da89b7e3-849d-4c82-b1e9-d5793d0800ba)<br>
+    ![image](https://github.com/user-attachments/assets/ee779963-18e1-4fc8-a9de-db2540c18ed9)<br>
+    ![image](https://github.com/user-attachments/assets/f3817275-edb9-422b-800e-1255bc10ba9f)<br>
+    ![image](https://github.com/user-attachments/assets/6b0b8162-0d79-4c39-a002-12cc4c865bce)
+    </div>
+    </details>
+  
+
+* **fragment를 head, header, footer, modal, scripts는 꼭 사용 중**
+  
+  - head는 \<head>에, header는 \<nav>에, footer은 \<footer>에, modal은 \<div>(class명은 modal)에, scripts는 \<script>에 사용 중!
+  - **modal은 공.문 참고!**
+  
+* **데이터 표현** : `table, td, tr 등등` 또는 `div로 잘 구현`
+
+  * `th:each` + `<th:block>` 도 적절히 함께 활용
+
+    <details><summary><b>참고 코드</b></summary>
+    <div markdown="1">
+    ```html
+    <!-- 렌더링시 제거 block -->
+    <th:block th:each="item : ${items}" th:object="${item}">
+      <div th:class="${item.id==items[0].id}? 'gallery-item-first' : 'gallery-item-many'"
+      style="flex:1; padding-top: 30px;">
+        <div class="d-flex flex-column pe-4" style="flex:0.15;">
+          <span class="" style="font-weight: 500; color: white; font-size: 1.2vw;" th:text="'No.'+*{No}">No.15</span>
+          <span class="pt-2" style="font-weight: 400; color: var(--text-2); font-size: 1vw; letter-spacing: -0.16px;
+          " th:field="*{{date1}}" th:text="*{{date1}}">23.05.22.16:00k</span>
+        </div>
+        <div class="d-flex flex-column pe-4" style="flex:0.42;">
+          <span class="text-truncate" style="font-weight: 500; color: white; font-size: 1.2vw; width:25vw;" th:text="*{title}">최근에 있엇던 대외비</span>
+          <span class="text-truncate pt-2" style="font-weight: 400; color: var(--text-2); font-size: 1vw; letter-spacing: -0.16px; width:25vw;
+          " th:text="*{nickName} ">방문자가작성한닉네임</span>
+          <a class="btn btn-light mt-4" type="button" id="enterBtn" onclick="redirectSavedBgm()"
+          style="font-size: 1vw;
+          align-self: flex-start; width: 12vw; padding:0.5em;"
+          href="#" th:href="@{|/gallery/${pageId}/itemDetail/*{id}|}">
+            <span class="fw-bold" id="enterBtn1" style="font-size: 1em; white-space: nowrap;" th:text="|*{No}전시실 입장|">15전시실 입장 test용</span>
+          </a>
+        </div>
+        <div class="d-flex flex-column" style="flex:0.43;">
+          <img class="img-fluid" src="../static/6.png"
+             th:src="@{|/image/*{imgSrc}|}"
+          style="height:15vh; border-radius: 10vh 10vh 0 0;"/>
+        </div>
+      </div>
+    </th:block>
+    ```
+    </div>
+    </details>
+
+* **FORM 데이터** : `label, input, 체크박스 등등` 권장
+  * `th:field`(name,id,value자동생성) 와 `*{...}` 랑 `th:object`(데이터 관리쉽게) 함께 사용 권장
+  * `th:errors` 등등 도 함께 사용<br>-> ex: `<div class="field-error" th:errors="${item.imgSrc}">이미지 오류</div>`
+    * 이 문장은 **`item.imgSrc` 필드에 오류가 발생했을 경우**에만 해당 `<div>` 태그가 렌더링되며, 오류 메시지가 출력됩니다. 오류 없으면 이 태그는 렌더링 되지 않음!
+    * \<div> 태그의 기본 텍스트 "이미지 오류"는 오류 메시지가 없을 경우 기본 메시지로 사용할 수 있습니다. 그러나 보통은 **Spring Validation에서 오류 메시지를 자동**으로 가져옵니다.
+
+* **문법 잘 활용**
+
+  * \|\...\| : `<span th:text="|Welcome to our application, ${user.name}!|">`
+  * @{} : 간편) -`th:href="@{|/basic/items/${item.id}|}"`
+  * 등등 문법 정리 챕터 참고...
 
 <br>
 
 **PRG 패턴 적용(위에 PRG 정리한 내용 참고) - 무한 POST 방지**
 
-* 추가로 forward 사용가능한 건 forward 형태로!
-* Redirect, Forward 개념 인지하고 사용!!
+* **추가로 forward 사용가능한 건 forward 형태로 하는게 효과적**
 
-**자원 재활용(forward) : 폼... 분리 가능한건 분리해서 작성 권장 - addForm, editForm**
+- **자원 재활용(forward) : 폼... 분리 가능한건 분리해서 작성 권장 - addForm, editForm**
 
-* 이거때문에 굉장히 많은 삽질 ㅜㅜ
-  * GET에 꼭 빈값이라도 엔티티 Model에 삽입 - th:object 함께 사용
-  * POST에는 `@Validated @ModelAttribute("item") AddItemDto form, BindingResult bindingResult, RedirectAttributes redirectAttributes)` 이런식으로 파라미터 거진 필수
-  * 장점은 검증실패시 html로 바로 return보내게 로직 작성시 서버단에서만 동작하는 forward 이기 때문에 자원 재활용!!
+  * **GET에 꼭 빈 값이라도 엔티티 Model에 삽입 - th:object 함께 사용**
 
-**검증 : 위에서 따로 정리했기때문에 꼭 참고**
+  * POST에는 `@Validated @ModelAttribute("item") AddItemDto form, BindingResult bindingResult, RedirectAttributes redirectAttributes)` 이런식으로 파라미터 필수
 
-* 참고) id에는 @NotBlank, pw에는 @Pattern(정규식="^[0-9]+") 등 추천!
-  * 특히 pw는 클라에서도 따로 검증하더라도 Postman 같은걸로 접근 가능하기때문에 한번더 "검증"
+  * **장점은 검증 실패시 html로 바로 return!! -> forward 이기 때문에 자원 재활용!! (redirect 안해도 되는거즤~)**
+
+  * ```java
+    if(bindingResult.hasErrors()) {
+      log.info("error={}", bindingResult);
+      return "studio-complete"; // studio-complete.html 반환 -> forward 로 자원 재활용
+      // 어차피 "검증" 에 걸려서 DB 사용안하기에 PRG 패턴 상관없움
+    }
+    //성공로직...
+    return "redirect:/gallery/{pageId}/itemDetail/{itemId}"; // PRG 패턴 적용
+    ```
 
 <br>
 
-**Model, @ModelAttribute("item"), forward, RedirectAttributes, UpdateItemDto, @PathVariable, @RequestParam**
-
-* API 말고 여기 웹 개발 컨트롤러에서 주로 사용한 것들인데 꼭 동작을 전부 이해해둬야 함
-* **Model** - **(1)html로 return**때 데이터 자주 넘겨줬음(forward로 볼 수 있음)
+<details><summary><b>Model, @ModelAttribute("item"), forward, RedirectAttributes, UpdateItemDto, @PathVariable, @RequestParam</b></summary>
+<div markdown="1">
+* **API 말고 여기 웹 개발 컨트롤러에서 주로 사용한 것들인데 꼭 동작을 전부 이해해둬야 함**
+* **Model 과 @ModelAttribute 잘 구분** <br>@ModelAttribute는 넘어온 form값을 Model.addAttribute() 를 자동! 결국 둘다 Model인거고, 직접 addAttribute() 할 거를 @를 붙여서 구현된 애노테이션을 활용해서 더 쉽게 해주는것
+  * **(1)html로 return**때 데이터 자주 넘겨줬음(**forward로 볼 수 있음**)
   * **(2)return을 forward:/ 형태로 동일 컨트롤러내에서는 다른 곳으로 요청가능(서버내에서)**
+    * **즉, forward로써 서버 내에서 요청을 다시 처리하는 것**이기 때문에, 실제로 **페이지가 이동하지 않고(URL변경X)** 서버 내부에서 **다른 컨트롤러 메서드로 요청을 넘기는** 역할(forward뜻=전달)
   * **(3)return을 html이 아닌 redirect로** 넘길시 새롭게 웹브라우저가 다시요청 하는것이므로 Model 값 사라져서 이땐 사용안하고 **RedirectAttributes 를 사용**
-    * RedirectAttributes 로 데이터 넘겨줄수 있기 때문
-  * **@ModelAttribute("item") UpdateItemDto form** - Post때 주로 사용하며 Form데이터 자동 매핑 후 Model에 item 이름으로 기록! 
-    * **UpdateItemDto** 만 사용시 @ModelAttribute 과 동일하되 Model에 UpdateItemDto 이름으로 기록
-    * form 데이터 넘길땐 UpdateItemDto 관련 데이터를 전부 서버로 form에서 넘겨줘야하며 이때 View에 안보여줄 데이터는 \<input> + hidden 으로 넘겨주면 간단하다.
-* @PathVariable - URL 뒤의 값 바로 사용 (자주 사용)
-  * @RequestParam - 쿼리 파라미터값 가져올때 자주사용 (기본값 설정도 가끔사용)
-
-<br>
-
-**application.yml**
-
-* "프로필" 사용 - 개발용, 배포용 따로설정
-  * gradlew clean build
-  * "외부설정" 사용 -> 경로 등등
-  * thymeleaf 캐시 사용X -> 실시간 reload
-  * "메시지-국제화" 사용(messages.properties) -> thymeleaf와 연동 최고
-  * 포트 8080(개발용), 포트 80(배포용) -> http는 80포트 기본값
-  * 로그레벨 설정
-* 소스 코드는 앞에서 이미 언급했으니 그걸 참고
+    * RedirectAttributes 로 데이터 쉽게 다시 넘겨줄 수 있기 때문
+  * `@ModelAttribute("item") UpdateItemDto form` - Post때 주로 사용하며 Form데이터 자동 매핑 후 **Model에 item 이름으로 기록!** 
+    * **UpdateItemDto** 만 사용시 @ModelAttribute 과 동일하되 Model에 UpdateItemDto 이름으로 기록하므로 이렇게 한 것!
+    * form 데이터 넘길땐 UpdateItemDto 관련 데이터를 전부 서버로 form에서 넘겨줘야하며 이때 View에 안 보여줄 데이터는 **\<input> + hidden** 으로 넘겨주면 간단하다.
+  <div markdown="1">
+  * ```java
+    //예시 컨트롤러 -> forward와 redirect
+    @GetMapping() // default
+    public String gallery() {
+        log.debug("debug 테스트");
+        log.debug("gallery() : 입장");
+        return "forward:gallery/1"; // -> galleryPage() 함수로 토스 (서버 내에서)
+    }
+    @GetMapping("/{pageId}")
+    public String galleryPage(@PathVariable int pageId, Model model) {
+        log.debug("galleryPage() : 입장");
+        log.debug("pageId : {}", pageId);
+        List<Item> items = itemService.findAllWithPage(pageId);
+        Long totalCount = itemService.findTotalCount();
+        log.debug("items : {}, totalCount : {}", items.size(), totalCount);
+        List<ItemDto> itemsDto = items.stream()
+            .map(o -> new ItemDto(o))
+            .collect(Collectors.toList());
+        //        log.debug("item Id check : {}",items.get(0).getId());
+        model.addAttribute("items", itemsDto); // gallery.html 에 넘길 데이터
+        model.addAttribute("totalCount", totalCount);
+        for(Item it : items)
+            log.debug("itemId : {}, itemNo : {}", it.getId(), it.getNo());
+        return "gallery"; // gallery.html 반환 (forward일걸)
+    }
+    @PostMapping("{pageId}/delete/{itemId}")
+    public String deleteGalleryItem(@PathVariable Long pageId, @PathVariable Long itemId, @RequestParam String password, RedirectAttributes redirectAttributes) {
+        Item item = itemService.findOne(itemId); // 이미 없으면 null
+        if (item != null) {
+            if(item.getPassword().equals(password)){
+                log.debug("비번통과");
+                itemService.initCachePosts(); // 캐시 초기화(페이지들 새로 No 업데이트 하기 때문)
+                itemService.remove(item);
+                //                List<Item> items = itemService.findAllWithNoPage(pageId.intValue()); // 캐싱
+                List<Item> items = itemService.updateAllNo();
+                itemService.updateTotalCount(); // 캐싱
+                redirectAttributes.addAttribute("status", "deleteON");
+                return "redirect:/gallery"; // gallery() 함수로 이동
+            }
+            else log.debug("비번실패");
+        }
+        redirectAttributes.addAttribute("pageId", pageId);
+        redirectAttributes.addAttribute("itemId", itemId);
+        redirectAttributes.addAttribute("status", "deleteOFF");
+        return "redirect:/gallery/{pageId}/itemDetail/{itemId}"; // 기존 화면 다시 로딩
+        // PRG 패턴 위해 Redirect
+    }
+    ```
+  </div>
+* **RedirectAttributes** -> return을 html이 아닌 **redirect로** 넘길시 새롭게 웹브라우저가 다시요청 하는것이므로 Model 값 사라져서(forward면 안사라지지만!) 이땐 사용안하고 **RedirectAttributes 를 사용**
+  * **Model과 RedirectAttributes 사용방식이 파라미터에 선언해서 사용!! (코드 속 파라미터 참고)**
+  <div markdown="1">
+  * ```java
+    @GetMapping("studio") // URL 매핑(GET)
+    public String studio(Model model) {
+        Long totalCount = itemService.findTotalCount();
+        model.addAttribute("totalCount", totalCount);
+        return "studio"; // studio.html 반환
+    }
+    //
+    // @ModelAttribute("item") 매우중요!!
+    //=> th:object를 item 사용하므로 반드시 Model에 "item"으로 담기게끔!
+    @PostMapping("studioComplete")
+    public String studioAdd(@Validated @ModelAttribute("item") AddItemDto form, BindingResult bindingResult,
+                            RedirectAttributes redirectAttributes) throws IOException {
+        redirectAttributes.addAttribute("status", "addON");
+        return "redirect:/gallery/{pageId}/itemDetail/{itemId}";
+    ```
+  </div>
+* **@PathVariable** - URL 뒤의 값 바로 사용 (자주 사용)
+* **@RequestParam** - 쿼리 파라미터 값 가져올때 자주사용 (기본값 설정도 가끔사용)
+* **상식**: get은 쿼리파라미터(url) 방식이고, post는 body에 데이터 담겨옴. from 데이터는 name,value 방식으로써 데이터 바인딩하기 수월
+</div>
+</details>
 
 <br>
 
 **타입 컨버터**
 
-* DB에는 LocalDateTime(원하는..) 형태로 저장 후 HTML 출력때 원하는 "타입 컨버터" 사용
-* ` @DateTimeFormat(pattern = "yy.MM.dd.HH:mm"), @NumberFormat(pattern = "###,###")` 등등 사용 가능
-* 타임리프에 적용법 : `th:field=*{{...}}`\
+* DB에는 LocalDateTime(원하는..) 형태로 저장 후 HTML 출력 때 원하는 "타입 컨버터" 사용
 
-* **(보충) 타입 컨버터**
+* `@DateTimeFormat(pattern = "yy.MM.dd.HH:mm"), @NumberFormat(pattern = "###,###")` 등등 사용 가능
 
+* 타임리프에 적용법 : **th:field=*\{\{\...}}**
+
+  <details><summary><b>(보충) 타입 컨버터</b></summary>
+  <div markdown="1">
   * **(1) 웹 - `@Requestparam, @ModelAttribute, @PathVariable` 스프링이 기본 지원**
-
     * 예로 `@PathVariable Long itemId` 는 자동으로 String->Long 타입변환
-
     * "확장 가능" 하고, "**애노테이션**"을 제공
-
       * **@DateTimeFormat**예시 : DB엔 LocalDateTime타입, Thymeleaf는 지정한 pattern 사용
-      * "타임리프 사용법" - `th:field, ${{...}}`
-        * **예로) `th:field="*{{date1}}"` 이런식으로 사용**
-
+      * **예로) th:field="*\{\{date1}}" 이런식으로 사용**
+      <div markdown="1">
       ```java
       @Data
       static class Form {
           @NumberFormat(pattern = "###,###") // 타입 컨버터
           private Integer number;
-      
           @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
           private LocalDateTime localDateTime; 
           // db엔 LocalDateTime 형태로 저장
           // Thymeleaf에선 지정한 "패턴"으로 출력
       }
       ```
-
-
+      </div>
   * **(2) HTTP API (@ResponseBody 등) - 의 경우 지원하지 않는다(HttpMessageConverter 는 "컨버전 서비스 적용 불가")**
     * **이 경우에는 `Jackson 같은` 라이브러리에서 포맷터를 찾아 사용**
     * JSON->객체,  객체->JSON 등등 쉽게 타입 변환 가능
+  * **자세히 정리하자면?**
+    * **(1) 일반적인 폼 전송 (웹 애플리케이션)**
+      - **Thymeleaf** 같은 템플릿 엔진을 사용해 **HTML 폼**을 전송할 때, Spring은 **자동으로 타입 변환**을 지원합니다. 예를 들어, 문자열을 **숫자**나 **날짜**로 변환하는 경우, `@RequestParam`, `@ModelAttribute`, `@PathVariable` 등의 애노테이션을 사용하여 **자동 타입 변환**이 됩니다.
+      - 이때 **Spring의 ConversionService**를 사용하여 **String -> Integer** 또는 **String -> LocalDate** 같은 변환이 가능합니다.
+    * **(2) HTTP API 응답 (`@ResponseBody`)**
+      - **`@ResponseBody`**를 사용하는 경우, **HTML을 반환하는 게 아니라 데이터 (JSON, XML 등)를 반환**하는 것입니다. 이때 **Spring의 ConversionService는 적용되지 않습니다**.
+      - 대신, **JSON 변환**을 처리하기 위해 **`HttpMessageConverter`**가 사용됩니다. 일반적으로는 **Jackson** 라이브러리가 Spring Boot에 포함되어 있어 **객체를 JSON으로 변환**해줍니다.
+    * **중요한 차이점**은:
+      - **HTTP API 응답**에서는 **타입 변환은 `HttpMessageConverter`가 담당**하며, **자동 타입 변환(ConversionService)는 적용되지 않습니다**.
+      - **ConversionService**는 주로 **폼 데이터**(예: 템플릿 렌더링)에서 쓰이고, **`HttpMessageConverter`는 JSON 변환**처럼 **HTTP 메시지 본문을 처리**할 때 사용됩니다.
+  </div>
+  </details>
 
 <br>
 
@@ -3492,8 +4537,92 @@ public HelloData requestBodyJsonV5(@RequestBody HelloData data) {
 
 **정적파일 전부 캐싱 + gzip압축 (속도개선)**
 
-* gzip 압축 -> 보통 이미지나 동영상은 이미 압축되어 있는 상태가 대부분이라 HTML,CSS,JS 만 압축!!
-* 단, 개발할땐 캐싱 주석해둘것. -> 캐싱때문에 이미지 바꿔도 적용안된걸로 착각할 위험이 있음
+* gzip 압축 -> 보통 이미지나 동영상은 이미 압축되어 있는 상태라 **HTML,CSS,JS 만 압축!!**
+* 단, 개발할 땐 캐싱 주석해둘것 -> 캐싱때문에 이미지 바꿔도 적용안된걸로 착각할 위험이 있음
+
+<br>
+
+<details><summary><b>페이지 네비게이션 구현 코드</b></summary>
+<div markdown="1">
+```html
+<!-- 페이징 -->
+<!--    var pageCount = /*[[${(totalCount/10)+1}]]*/ null; // 총 페이지 크기 -> 통신으로 받음-->
+<script th:inline="javascript">
+  var totalCount = /*[[${totalCount}]]*/ null;
+  if(totalCount % 10 == 0) {var pageCount = totalCount/10;}
+  else {var pageCount = totalCount/10 +1;} // 총 페이지 크기 -> 통신으로 받은값으로 계산
+  var pageMax = 10; // 보여줄 페이지 수
+  var activePage = /*[[${pageId}]]*/ null; // 현재 페이지 -> 통신으로 받음(active)
+  // 보여줄 시작 페이지(계산 여기서 하겠음)
+  // 현재페이지/보여줄페이지수 몫 * 보여줄페이지수
+  // ex) 23 / 10 * 10 -> 2*10 -> 20
+  var startIndex = parseInt((activePage-1)/pageMax)*pageMax + 1;
+  var endIndex = startIndex + pageMax -1;
+  if(endIndex > pageCount)
+    endIndex = startIndex + (pageCount%startIndex);
+  // 동적 스타일링
+  var arrowLeft = "<img class='img-fluid' src='/arrow-left.svg' style='width:1.2vw;' onclick='redirectSavedBgm()'/>"
+  var arrowRight = "<img class='img-fluid' src='/arrow-right.svg' style='width:1.2vw;' onclick='redirectSavedBgm()'/>"
+  // [동적 ul 페이징 처리 실시]
+  if(pageCount == 1){ //생성해야할 페이지가 1페이지인 경우
+    var insertUl = "<li class='page-item'>"; // 변수 선언
+    insertUl += insertUl + "<a class='page-link active' href='/gallery/1' onclick = 'redirectSavedBgm()'>";
+    insertUl += "1</a></li>";
+    $("#dyn_ul").append(insertUl); //jquery append 사용해 동적으로 추가 실시
+  }
+  else if(pageCount >= 2){ //생성해야할 페이지가 2페이지 이상인 경우
+    // (Previous)이전 페이지 추가 실시
+    var insertSTR = "<li class='page-item'>"; // 변수 선언
+    if(activePage===1) insertSTR = insertSTR + "<a class='page-link disabled' style='background-color: var(--main-1); opacity:0.3;' href='/gallery/"+(activePage)+"' onclick = 'redirectSavedBgm()'>";
+    else insertSTR = insertSTR + "<a class='page-link' href='/gallery/"+(activePage-1)+"' onclick = 'redirectSavedBgm()'>";
+    // insertSTR = insertSTR + "Previous";
+    insertSTR = insertSTR + arrowLeft;
+    insertSTR = insertSTR + "</a></li>";
+    $("#dyn_ul").append(insertSTR); //jquery append 사용해 동적으로 추가 실시
+    // ... 페이지 추가 (앞에 페이지 더 있을경우 맨앞 페이지로 이동)
+    if((activePage > pageMax)) {
+      var insertMID = "<li class='page-item'>"; // 변수 선언
+      insertMID = insertMID + "<a class='page-link' href='/gallery/"+(1)+"' onclick = 'redirectSavedBgm()'>";
+      insertMID = insertMID + "...";
+      insertMID = insertMID + "</a></li>";
+      $("#dyn_ul").append(insertMID); //jquery append 사용해 동적으로 추가 실시
+    }
+    // 1, 2, 3 .. 페이지 추가 실시
+    var count = 1;
+    for(var i=startIndex; i<=pageCount; i++){
+      if(count > pageMax){ //최대로 생성될 페이지 개수가 된 경우
+        page = i - pageMax; //생성된 페이지 초기값 저장 (초기 i값 4 탈출 인경우 >> 1값 저장)
+        break; //for 반복문 탈출
+      }
+      var insertUl = "<li class='page-item'>"; // 변수 선언
+      if(i===activePage) insertUl = insertUl + "<a class='page-link active' href='/gallery/"+i+"' onclick = 'redirectSavedBgm()'>";
+      else insertUl = insertUl + "<a class='page-link' href='/gallery/"+i+"' onclick = 'redirectSavedBgm()'>";
+      insertUl = insertUl + String(i);
+      insertUl = insertUl + "</a></li>";
+      $("#dyn_ul").append(insertUl); //jquery append 사용해 동적으로 추가 실시
+      count ++;
+    }
+    // ... 페이지 추가 (뒤에 페이지 더 있을경우 끝 페이지로 이동)
+    if((activePage < pageCount) && (activePage >= pageMax) && (endIndex < pageCount)) {
+      var insertMID = "<li class='page-item'>"; // 변수 선언
+      insertMID = insertMID + "<a class='page-link' href='/gallery/"+(pageCount)+"' onclick = 'redirectSavedBgm()'>";
+      insertMID = insertMID + "...";
+      insertMID = insertMID + "</a></li>";
+      $("#dyn_ul").append(insertMID); //jquery append 사용해 동적으로 추가 실시
+    }
+    // (Next)다음 페이지 추가 실시
+    var insertEND = "<li class='page-item'>"; // 변수 선언
+    if(activePage === pageCount)  insertEND = insertEND + "<a class='page-link disabled' style='background-color: var(--main-1); opacity:0.3;' href='/gallery/"+(activePage)+"' onclick = 'redirectSavedBgm()'>";
+    else insertEND = insertEND + "<a class='page-link' href='/gallery/"+(activePage+1)+"' onclick = 'redirectSavedBgm()'>";
+    // insertEND = insertEND + "Next";
+    insertEND = insertEND + arrowRight;
+    insertEND = insertEND + "</a></li>";
+    $("#dyn_ul").append(insertEND); //jquery append 사용해 동적으로 추가 실시
+  }
+</script>
+```
+</div>
+</details>
 
 <br>
 
@@ -3506,6 +4635,16 @@ public HelloData requestBodyJsonV5(@RequestBody HelloData data) {
 <br><br>
 
 ### "로그인 구현 방식"의 기본 지식
+
+AOP챕터에서 ArgumentResolver 관련 코드 보면 거기도 로그인 로직 코드 있으니 참고!
+
+- Login.java(인터페이스) -> @Login 애노테이션 생성
+  ```java
+  @Target(ElementType.PARAMETER) // 파라미터에 사용
+  @Retention(RetentionPolicy.RUNTIME) // RUNTIME 까지 살아남게 설정
+  public @interface Login {
+  }
+  ```
 
 * 컨트롤러 - ArgumentResolver 활용해서 @Login으로 바로 Member 객체 가져오기
 
@@ -3535,7 +4674,7 @@ public HelloData requestBodyJsonV5(@RequestBody HelloData data) {
   
           log.info("인증 체크 인터셉터 실행 {}", requestURI);
   
-          HttpSession session = request.getSession(); // false가 나을듯?
+          HttpSession session = request.getSession(); 
   
           if (session == null || session.getAttribute(SessionConst.LOGIN_MEMBER) == null) {
               log.info("미인증 사용자 요청");
@@ -3571,10 +4710,13 @@ public HelloData requestBodyJsonV5(@RequestBody HelloData data) {
   }
   ```
 
-* 타임아웃은 글로벌 설정으로 이미 1800(30분)으로 적용되어 있는것같아서 수정할 필요 없어보임.
+* 세션 타임아웃은 글로벌 설정으로 이미 1800(30분)으로 적용되어 있는것같아서 수정할 필요 없어보임.<br>
   그래도 설정이 눈에 보이게끔 server.servlet.session.timeout=1800 // 분단위. 이렇게 놔둬.
 
 * 쿠키 id는 SessionConst.java 만들어서 상수로 등록 권장. 자주쓰니까
+
+  * String타입인 "SESSION_NAME_LOGIN" 이런 상수가 저장된 파일일 뿐
+
 
 <br><br>
 

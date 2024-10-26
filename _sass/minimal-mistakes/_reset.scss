@@ -58,6 +58,13 @@ section {
   display: block;
 }
 
+/* droplist custom!! */
+details {
+  summary {
+    cursor: pointer; // summary에만 손 모양 커서
+  }
+}
+
 /* Display block in IE6-9 and FF3 */
 
 audio,
