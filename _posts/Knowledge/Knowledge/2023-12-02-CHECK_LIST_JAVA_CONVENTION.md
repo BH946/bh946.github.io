@@ -120,31 +120,67 @@ typora-root-url: ../../..
   * `.class` 파일은 java코드로 생성되어서 관리할 필요 X 
   * `.idea` 폴더는 IntelliJ IDEA 가 자동 생성하므로 관리할 필요 X
   * `.gitignore` 확인해보면 "out/, .idea" 선언 확인
+
 * **서비스 구현을 요청받았을때 해결 과정**
   * README.md 작성 : **요구사항 분석 -> 기능 목록 <-> 구현**
   * 비지니스, UI 로직 분리는 기본
   * 참고) 프리코스 3주차 README.md 내용을 아래에서 확인
+
 * 기능 목록을 처음부터 상세히 작성할 필요X -> 오히려 구현하면서 수정해주자(+예외처리)
+
 * 값을 "하드 코딩 X" -> **상수(static final)** 권장!
+
 * 변수 이름에 **자료형 사용X**
+
 * 하나의 **함수는 하나의 기능**!! + **함수 길이 15라인** 이내로 분리 연습!!
   * main 함수도 포함
+
 * 테스트는 "작은 단위 테스트" 부터 진행!
+
 * **3항 연산자는 사용X** -> 가독성이 떨어지기 때문!
+
 * **else 사용X** 연습!! -> 부정문 등등 여러 방법으로 조건문 생각하길
+
 * 연관성 있는 상수는 **Java Enum 사용** -> static final 대신 enum 연습!!
+
 * 값의 변경을 막을 변수들은 꼭 **final 키워드** 사용!!
+
 * 인스턴스 변수의 접근 제어자는 private으로 구현(항상 하는거긴 함)
+
 * 객체는 객체스럽게 사용! -> getter만 하지말고 "가능한 비지니스 로직"은 작성권장(=**도메인 모델 패턴**)
+
 * 불 필요한 필드(인스턴스 변수)는 제거
+
 * **테스트를 위한 코드는 구현 코드에서 구현하지 말자**
+
   * 테스트를 위해 접근 제어자를 바꾸는 경우
   * **테스트 코드에서만 사용되는 메서드**
+
 * **[메서드 시그니처를 수정하여 테스트하기 좋은 메서드로 만들기](https://tecoble.techcourse.co.kr/post/2020-05-07-appropriate_method_for_test_by_parameter/)**
+
 * **private 함수를 테스트 하고 싶다면 클래스(객체) 분리를 고려**
   * 가독성의 이유만으로 분리한 private 함수의 경우 public 함수로 검증 가능하다고 여겨질 수 있다. (public 함수가 private 함수를 사용하고 있는 경우 테스트 범위에 포함됨)
   * 하지만 가독성 이상의 역할을 하는 경우, 테스트하기 쉽게 구현하기 위해서는 해당 역할을 수행하는 다른 객체를 만들 타이밍이 아닐지 고민해 볼 수 있다. 
   * **따라서 너무 많은 역할을 하고 있는 함수나 객체를 어떻게 의미 있는 단위로 분할할지에 초점을 맞춰 볼 필요가 있다.**
+
+* **리소스 정리(close)** 는 필수고 **"역순"**으로 할 것
+
+  - **try - with - resource AutoCloseable 기능** 활용도 좋다. 여러개는 세미콜론(;)로 구분
+  - 주의점: 자동 반환이니까 원하지 않는 경우에도 닫힐 수 있다.
+
+  ```JAVA
+  /**
+   * 회원가입 -> try - resource 패턴으로 자원 자동 반환
+   */
+  public User save(User user) {
+    try (SqlSession session = sqlSessionFactory.openSession()) {
+      UserMapper mapper = session.getMapper(UserMapper.class);
+      mapper.saveUser(user);
+      session.commit(); //트랜잭션 commit
+      return user; //생성된 generatedKeys 포함
+    }
+  }
+  ```
 
 <br>
 

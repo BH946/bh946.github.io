@@ -10,9 +10,9 @@ sidebar:
 typora-root-url: ../../..
 ---
 
+<br>
 
-
-**Spring + Spring Boot + JPA + Spring Data JPA + MyBatis + Thymeleaf + DB(H2, MySQL, Oracle) 등 활용한 개발 규칙**
+**Spring + Spring Boot + JPA + Spring Data JPA + MyBatis + Thymeleaf + DB(H2, MySQL, Oracle) 등 활용한 개발 경험**
 
 <br>
 
@@ -29,6 +29,7 @@ typora-root-url: ../../..
 <b>Project Strucutre -> Project -> 프로젝트의 자바버전 설정</b>
 <img src="https://github.com/user-attachments/assets/4ffc05a9-0ac2-40f6-83b4-1bf6929937fc"/>
 </details>
+
 <details><summary><b>툴 마다 외부 라이브러리 적용법</b></summary>
 <ul>
     <li>Maven(빌드 툴)은 <b>pom.xml</b>에서 라이브러리 설정</li>
@@ -37,13 +38,13 @@ typora-root-url: ../../..
 </ul>
 </details>
 
-- **참고**
+- 특히 web 라이브러리 없으면 바로 종료되기 때문에, Spring을 사용한다면 이때 `ApplicationRunner` 구현체로 자바코드 실행하는게 보통
 
   <details><summary><b>build.gradle 설정 예시 (+플러그인)</b></summary>
   <div markdown="1"><br>
   **스프링부트 플러그인 사용 시 "라이브러리 버전관리 자동화" -> 지원 안되는건 "직접 버전 등록 필수!"**<br>
   `spring 3.x` 사용은 `java17` 필수!<br>
-  <div markdown="1">
+  ```groovy
   plugins {
     id 'java'
     id 'org.springframework.boot' version '3.1.2'
@@ -90,10 +91,11 @@ typora-root-url: ../../..
   ```
   </div>
   </details>
+
   <details><summary><b>Spring+JUnit 버전별로 라이브러리 추가 주의(Spring2+JUnit4, Srping3+JUnit5)</b></summary>
   <div markdown="1"><br>
   **(1) Spring 2.xx + JUnit4(Test Code)**<br>
-  * `build.gradle`<br>
+  * `build.gradle`
   <div markdown="1">
   ```groovy
   //JUnit4 추가(junit5로 자동실행 되기 때문) - 의존성 추가
@@ -126,9 +128,6 @@ typora-root-url: ../../..
   ```
   </div>
   * `TestCode.java`
-  * 참고 : 왜 @Transactional 이런건 바로 사용 가능한가?
-    * @Transactional 은 "빈에 반드시 TransactionManager 가 필요" 
-    * 스프링 부트는 자동으로 TransactionManager 등등 을 "빈에 등록" -> "자동 구성"
   <div markdown="1">
   ```java
   @SpringBootTest // 스프링과 통합 테스트 - "빈" 등 스프링 사용시 필수
@@ -140,8 +139,6 @@ typora-root-url: ../../..
   </div>
   </div>
   </details>
-
-- 특히 web 라이브러리 없으면 바로 종료되기 때문에, 이때 `ApplicationRunner` 구현체로 자바코드 실행하는게 보통
 
 <br>
 
@@ -578,7 +575,7 @@ typora-root-url: ../../..
     - 기본 생성자의 접근 제어를 PROTECTED로 설정해놓게 되면 **무분별한 객체 생성에 ide 상에서 한번 더 체크할 수 있는 수단**
     - Protected 접근자는 반드시 **같은 패키지만 허용!!** - 상위, 하위 패키지 전부 불가
   
-  - <details><summary><b>생성 메서드 코드</b></summary>
+    <details><summary><b>생성 메서드 코드</b></summary>
     <div markdown="1">
     ```java
     // 기본생성자 Public->Protected
@@ -618,7 +615,7 @@ typora-root-url: ../../..
     - (2) Order가 OrderItem를 접근하는건 **양방향**이므로 **조금 돌아가서** 접근 가능
     - **(3) Order->OrderItem 접근을 간단히 사용하기 위해 연관관계 메서드를 사용**
 
-  - <details><summary><b>연관관계 메서드 코드</b></summary>
+    <details><summary><b>연관관계 메서드 코드</b></summary>
     <div markdown="1">
     ```java
     // (1) OrderItem->Order 접근 예시 => 단반향
@@ -648,7 +645,7 @@ typora-root-url: ../../..
 
     - Service 파트가 아닌 Entity파트에서 비지니스 로직 구현이 가능할 것 같은 경우에는 Entity에서 개발을 적극 권장(=**도메인 모델 패턴**) => **장점 : 좀 더 객체 지향적인 코드**
 
-    - <details><summary><b>비지니스 메서드 코드</b></summary>
+      <details><summary><b>비지니스 메서드 코드</b></summary>
       <div markdown="1">
       ```java
       // 간단히 엔티티에서 구현 가능하면, 서비스가 아닌 엔티티에서 로직 구현(객체지향적)
@@ -835,12 +832,12 @@ typora-root-url: ../../..
 
 ### 레포지토리(DAO)
 
-**레포지토리는** `Spring Data JPA + JPA` **함께 사용 중!**
+**레포지토리는** `Spring Data JPA + JPA` **함께 사용 중! -> 아래 "스프링 DB 관련" 챕터 필독!**
 
 참고로 Spring Data JPA는 `JpaReository 인터페이스` 로 볼 수 있고, 이거만 상속해도 **서비스 단에서 바로 사용**이 가능하다.   
 **-> 자동으로 구현체를 만들어 주기 때문**
 
-**인터페이스 사용을 추천한다!**
+**따라서 인터페이스 사용을 추천한다!**
 
 <details><summary><b>예시 코드 보기 - 레포지토리</b></summary>
 <div markdown="1"><br>
@@ -1030,6 +1027,10 @@ public class TaskConfigV2 {
 **서비스 단에서 @Transactional(readOnly=true) 전역, @Cacheable(), @Scheduled()**   
 -> 캐시랑 스케줄링을 여기서 사용했다. 
 
+* 참고 : 왜 @Transactional 이런건 바로 사용 가능한가?
+  * @Transactional 은 "빈에 반드시 TransactionManager 가 필요" 
+  * 스프링 부트는 자동으로 TransactionManager 등등 을 "빈에 등록" -> "자동 구성"
+
 - **쓰기모드 필요할때만 @Transactional 추가 선언** -> readOnly=false 해야해서
 
 ```java
@@ -1054,16 +1055,26 @@ public void initCacheMembers() {
 
 <br>
 
-## (컨트롤러) 통신 구현
+## (컨트롤러) 통신 구현 + 컴포넌트 스캔
+
+**컴포넌트 스캔은 전체와 부분으로 적용 가능**
+
+- 그냥 @SpringBootApplication 만 해도 컴포넌트 스캔을 **전체 범위**로 설정!!
+- `@SpringBootApplication(scanBasePackages = "hello.itemservice.web")` 로 하면 **web하위만** 컴포넌트 스캔!!<br>부분 스캔이면... 나머지는 어떻게 스캔?? -> **@Import**
+  - 해당 하위에 컨트롤러들이 있는데 @Controller 를 제외한 레포,서비스 등은 스프링빈 수동 등록!! 이를 **@Import(레포이름) 스캔 추가 등록!**
+
+<br>
 
 **파라미터 요청이나 응답** 둘다 “**DTO(+Valid)”는 거의 필수** 사용 -> Jackson, Gson (json변환 라이브러리) 필수 공부
 
-- LePl 플젝(Jackson), Swing 플젝(Gson) 사용했으니 참고~~
+- **DTO는 경로 상 제일 하위에서 가지는 계층에 두자**
+
+- LePl 플젝(Jackson), Swing 플젝(Gson) 사용했으니 참고~~: [정리한 노션](https://www.notion.so/Java-Spring-7611b33fb665463284dc7a4ffb783c39#19c4a96ae5e341a2b2b628a963bf6d53)
 
   - JSON 반환시 꼭 마지막에 객체로 감싸서 반환 -> `{ 데이터 }`
   - 배열 JSON이면 꼭 마지막에 배열로 감싸서 반환 -> `[{},{}...]`
 
-- <details><summary><b>Jackson 2.8.0 이전 버전 LocalDateTime 오류?</b></summary>
+  <details><summary><b>Jackson 2.8.0 이전 버전 LocalDateTime 오류?</b></summary>
   <div markdown="1">
   ```java
   Map<String, LocalDateTime> map = new HashMap<>();
@@ -1084,7 +1095,7 @@ public void initCacheMembers() {
 
   - 강제 초기화를 안하면 fetch join으로 모두 조회 했어도 해당 엔티티를 찾을 수 없게 되어서 null이 응답!! -> "영속성에 등록하지 않아서. 즉, 메모리에 올려두지 않아서."
 
-  - <details><summary><b>자세히 (출력사진+코드)</b></summary>
+    <details><summary><b>자세히 (출력사진+코드)</b></summary>
     <div markdown="1"><br>
     **Lazy 강제 초기화 안 할때**<br>
     <img src="https://github.com/user-attachments/assets/093f2678-788f-4ecf-8ade-4790f5cb31e1" alt="image" style="zoom:80%;" /><br>
@@ -2374,7 +2385,7 @@ private final MyDataSourceConfig source;
 
 ### 검증(Valid)과 예외처리(Exception)
 
-주의: 웹이 아닌 API의 경우 JSON으로 변경된 데이터를 Valid로 검증하는것. JSON으로 변경될 때 에러나 그 전에 이미 발생한 에러는 Exception으로 해결!
+주의: 웹이 아닌 **API의 경우 JSON으로 변경된 데이터를 Valid로 검증**하는것. **JSON으로 변경될 때 에러나 그 전에 이미 발생한 에러는 Exception(예외처리)**으로 해결!
 
 **Valid는 클라, 서버 둘다에서 하면 더 안전하고 좋다.** 왜 그런지는 아래를 참고
 
@@ -2388,11 +2399,22 @@ private final MyDataSourceConfig source;
 * 예외처리 예시 => ex: String 타입에 int가 넘어온 에러를 처리
 * 검증 예시 => ex: 0~9999 숫자범위"를 지정
 
-**예외란**
+**예외란??** -> **Error**는 주로 JVM에서 발생하는 문제라서 에러처리 하지 않아도 된다. Exception을 보자.
 
-* 가장 좋은 예외는 **컴파일 예외**, 그리고 **애플리케이션 로딩 시점에 발생하는 예외**
-* 가장 나쁜 예외는 고객 서비스중에 발생하는 **런타임 예외**
-* 검증기 사용시 **"앱 로딩 시점 예외"로 나타내 줄 수 있다는 장점!**
+<img src="https://github.com/user-attachments/assets/e192334c-077e-42d8-a2a0-4f70a4c89e96" alt="image" style="zoom: 50%;" /> 
+
+* **"가장 좋은 예외(복구가능 예외)"**는 **컴파일(체크) 예외**, 그리고 **애플리케이션 로딩 시점에 발생하는 예외**<br>ex: IOException, SQLException -> try-catch(처리), throws(회피)로 주로 해결
+  * 검증기 사용시 **"앱 로딩 시점 예외"로 나타내 줄 수 있다는 장점!**
+
+* **"가장 나쁜 예외(복구불가능 예외)"**는 고객 서비스중에 발생하는 **런타임(언체크) 예외**<br>ex: NullPointerException, IndexOutOfBoundException -> throw(전환)로 주로 해결
+  * 참고: try-catch, throws, throw는 어디서든 사용할 수 있다.
+
+
+- 하지만, 기본적으로 **런타임(언체크) 예외를 사용하자(문사화 필수!)**<br>왜 WHY??<br>SQLException 의 경우 쿼리를 수정 후 재배포하지 않는 이상 복구할 수 없다.<br>try-catch로 잡고 아무 조치도 하지 않는 건 위험하다.<br>무분별한 throws Exception는 어떤 에러인지 알기 어려워 try-catch처리가 힘들다.
+  - 따라서 **"체크 예외"는 의도를 가지고 던지는 경우**만 try-catch, throws로 처리하고, **그 외는 언체크 예외로 전환**하자!
+  - 그리고 예외를 **공통으로 처리**하는 `ExceptionHandler`를 만들어서 처리하자.
+
+- **주의점:** 스프링 프레임워크가 제공하는 **선언적 트랜잭션(@Transactional)**안에서 **에러 발생 시 체크 예외는 롤백이 되지 않고, 언체크 예외는 롤백이 된다.** 이는 **자바 언어와는 무관**하게 프레임워크의 기능임을 반드시 알고 넘어가도록 하자. (물론 옵션을 변경할 수 있다.)<br>**또한, 예외변환** `throw new 커스텀예외(e);` 는 현재 error를 담는 e를 꼭 생성자 매개변수에 넘겨줘야 하위의 에러내용들을 다 기록한다는걸 기억!
 
 **검증이란** Form 데이터같은 것들이 POST 요청왔을때 원하는 "검증"을 진행하는 것  
 
@@ -2731,6 +2753,12 @@ private final MyDataSourceConfig source;
 
 ## JPQL(JPA-ORM), SQL(MyBatis-SQL Mapper)
 
+[JPA vs Mybatis 참고 문헌](https://www.elancer.co.kr/blog/detail/231?seq=231)
+
+ORM과 SQL Mapper 는 둘 다 객체와 SQL 매핑을 도와줘서 유사하긴 하다.<br>다만, ORM은 SQL을 작성 할 필요 없을 정도로 더 많은 걸 지원한다. (JPQL 작성도 하긴 함)
+
+SQL Mapper는 Java 코드와 SQL(XML) 문을 아예 분리 + 동적쿼리를 세밀하게 지원 해준다.
+
 <br><br>
 
 ### JPA - 영속성 컨텍스트
@@ -2794,7 +2822,7 @@ private final MyDataSourceConfig source;
 
     * **영속성에 없다면,** 삭제할 아이템 구하는 **select 는 바로 전송**
 
-    * <details><summary><b>remove 예시 코드</b></summary>
+      <details><summary><b>remove 예시 코드</b></summary>
       <div markdown="1">
       ```java
       // given
@@ -2831,31 +2859,31 @@ private final MyDataSourceConfig source;
 
   - **update 예시 -> em.find() 영속성 활용 방식**
 
-    - <details><summary><b>예시 코드</b></summary>
-      <div markdown="1">
-      ```java
-      // entity part
-      // 준속성 엔티티 -> 영속성 엔티티 에 사용
-      public void change(String name, int price, int stockQuantity) {
-        this.name = name;
-        this.price = price;
-        this.stockQuantity = stockQuantity;
-      }
-      // service part
-      @Transactional
-      public void updateItem(Long id, UpdateItemDto itemDto){
-        Item item = itemRepository.findOne(id); // 영속성 엔티티
-        item.change(itemDto.getName(), itemDto.getPrice(), itemDto.getStockQuantity()); // 준속성 엔티티(itemDto) -> 영속성 엔티티
-      }
-      // controller part
-      public String updateItem(@PathVariable Long itemId, @ModelAttribute("form") BookForm form){
-        UpdateItemDto itemDto = new UpdateItemDto(form.getName(), form.getPrice(), form.getStockQuantity());
-        itemService.updateItem(itemId, itemDto);
-        return "redirect:/items"; // 위에서 "상품 목록" 매핑한 부분으로 이동
-      }
-      ```
-      </div>
-      </details>
+    <details><summary><b>예시 코드</b></summary>
+    <div markdown="1">
+    ```java
+    // entity part
+    // 준속성 엔티티 -> 영속성 엔티티 에 사용
+    public void change(String name, int price, int stockQuantity) {
+      this.name = name;
+      this.price = price;
+      this.stockQuantity = stockQuantity;
+    }
+    // service part
+    @Transactional
+    public void updateItem(Long id, UpdateItemDto itemDto){
+      Item item = itemRepository.findOne(id); // 영속성 엔티티
+      item.change(itemDto.getName(), itemDto.getPrice(), itemDto.getStockQuantity()); // 준속성 엔티티(itemDto) -> 영속성 엔티티
+    }
+    // controller part
+    public String updateItem(@PathVariable Long itemId, @ModelAttribute("form") BookForm form){
+      UpdateItemDto itemDto = new UpdateItemDto(form.getName(), form.getPrice(), form.getStockQuantity());
+      itemService.updateItem(itemId, itemDto);
+      return "redirect:/items"; // 위에서 "상품 목록" 매핑한 부분으로 이동
+    }
+    ```
+    </div>
+    </details>
 
   - 단, 변화가 넘 많으면 **"벌크연산 추천"** -> 간단함. (우리가 잘 쓰는 쿼리문일 뿐)  
     -> 예: `UPDATE Task t SET t.status = :status WHERE t.dueDate < :currentDate`
@@ -2874,7 +2902,7 @@ private final MyDataSourceConfig source;
 
 ### JPQL + 페이징
 
-#### JPQL (distinct, 연관관계, vs MyBatis 등)
+#### JPQL (distinct, 연관관계, sql vs jpql)
 
 <details><summary><b>반환 방식(TypeQuery, Query) -> `query.getResultList()`</b></summary>
 <div markdown="1">
@@ -2967,39 +2995,7 @@ private final MyDataSourceConfig source;
   * 본인은 이 방식으로 JPA+Spring Data JPA 함께 쓰는 편
 </div>
 </details>
-**동적 쿼리**는 **Querydsl** 을 권장
-
-
-* 자세한 내용은 강의보고 적어두자
-
-<details><summary><b>JPA(ORM) 와 MyBatis(SQL Mapper) 차이는??</b></summary>
-<div markdown="1"><br>
-자세한 차이는 그냥 생략한다. MyBatis는 JPQL말고 일반 SQL문 사용한다는 것 정도 기억.<br>
-만약 MyBatis의 1:N(컬렉션) 일반 Join은?<br>
-→ ORM이 아니라 SQL 매퍼다. 수동 처리해야한다. (Order가 `List<OrderItem>` 컬렉션 가지게 하는것 의미)<br>
-<div markdown="1">
-```xml
-<resultMap id="OrderResultMap" type="Order">
-    <id property="id" column="order_id"/>
-    <result property="orderDate" column="order_date"/>
-    <collection property="orderItems" ofType="OrderItem">
-        <id property="id" column="item_id"/>
-        <result property="productName" column="product_name"/>
-        <result property="quantity" column="quantity"/>
-    </collection>
-</resultMap>
-<select id="getOrdersWithItems" resultMap="OrderResultMap">
-    SELECT o.id AS order_id, o.order_date, 
-           i.id AS item_id, i.product_name, i.quantity
-    FROM orders o
-    LEFT JOIN order_items i ON o.id = i.order_id
-</select>
-```
-</div>
-- ResultMap을 사용해서 MyBatis가 수동 매핑해줘서 Order는 orderItems라는 컬렉션을 가질 수 있게 된다.<br>
-→ 설정만 잘하면 MyBatis가 해주니까 ORM처럼 자동 느낌 가능하다.
-</div>
-</details>
+**JAP 사용 때 동적 쿼리**는 **Querydsl** 을 권장
 
 <br>
 
@@ -3334,6 +3330,1028 @@ public Long updateTotalCount() { return itemRepository.findTotalCount(); }
   * 하지만 이 또한 지양하고 **LAZY 강제 초기화**로 다 해결
 </div>
 </details>
+<br>
+
+<br>
+
+## 필독! 스프링 DB 관련 추가 지식 
+
+앱에서 DB 접근시 **커넥션**뿐만 아니라 DB 내부에서는 **“세션”** 생성 -> **세션이 SQL을 실행!**
+
+- 커넥션은 DB와 클라이언트 간의 TCP 소켓을 통한 **물리적인 연결(채널)**
+
+- 세션은 DB와 클라이언트 간의 **논리적인 연결**
+
+<img src="https://github.com/user-attachments/assets/ffb210a9-867e-4e4e-9090-c286f642d468" alt="image" style="zoom:67%;" /> 
+
+<br><br>
+
+### DataSource
+
+DataSource 가 `(1)my.datasource.하위` 와 `(2)spring: datasource: url, username, password...` 등 여러곳에서 언급되다 보니 헷갈릴 수 있겠다고 생각한다.
+
+`(1)my.datasource.하위` 는 **외부설정이다!** 리팩토링에 정리한 **메시지와 외부설정 파트를 참고**하자
+
+`(2)spring: datasource: url, username, password...` 은 **DB관련 설정**으로 보자!
+
+- **커넥션 풀**은 **실무**에서 무조건 사용하는데, **성능테스트**를 통해 크기를 결정하는 편이다.<br>또한, **hikariCP(=커넥션풀 오픈소스)** 를 **기본으로 스프링 부트가 사용중**
+
+- **hikariCP** 는 DataSource 인터페이스의 **구현체**이고, 스프링부트는 **DataSource**를 자동으로 **application.yml** 같은 설정파일의 DB정보(URL,ID,PW 등)을 읽기 때문에 해당 설정파일을 잘 작성하면 된다.<br>물론, 직접 **Datasource**를 새로 만들어 스프링 빈에 직접 등록해서 사용해도 된다!
+
+- **H2는 Java로 만들어진 DB이다. 따라서 메모리모드(=임베디드 모드)를 지원한다.**
+  - 기존 방식: 임베디드모드(메모리모드)를 사용하기 위해 Datasource를 새로 만들어 스프링 빈에 등록한다. -> JVM(메모리)에 DB를 만들어 사용
+    - `src/test/resources/schema.sql` 에 원하는 create table 을 작성 (메모리DB는 OFF시 데이터 사라져서)
+  - **스프링부트 방식**: 스프링부트는 테스트의 설정파일(application.yml)에 datasource관련내용이 없다면(주석)?? 바로 임베디드 모드(메모리모드)를 자동 생성! (매우간편)
+    - create table 도 코드 한줄로 매우쉽게 설정 가능
+
+<br><br>
+
+### 스프링 JdbcTemplate, MyBatis, JPA, 스프링 데이터 JPA, Querydsl
+
+**[스프링 DB 2편 - 데이터 접근 활용 기술](https://github.com/BH946/spring-first-roadmap/tree/main/spring_study_7/itemservice-db)에서 JdbcTemplate, JPA 참고**
+
+참고: Mybatis, Jpa는 귀찮은 setId가 필요 없다. (jdbc의 PreparedStatement구문엔 필요)
+
+**데이터접근 결론으로 무엇을 추천하는가??**
+
+- **JPA, 스프링 데이터 JPA, Querydsl** 을 기본으로 사용 -> **[적용 플젝(레포): v1~v3](https://github.com/BH946/LePl_Spring/tree/kbh/lepl/src/main/java/com/lepl/Repository/member), [적용 플젝(서비스): v1~v2](https://github.com/BH946/LePl_Spring/tree/kbh/lepl/src/main/java/com/lepl/Service/member)**
+
+  - 어댑터 추가ver, 단순ver 은 상황에 맞게 선택!
+  - 상관없다면?? **단순ver을 사용**하자 -> **스프링데이터JPA + QueryDSL** 를 기본으로 잡자!<br>스프링데이터JPA의 **@Query로 충분히 JPQL작성**도 가능하기 때문!
+
+- 복잡한 쿼리가 잘 해결이 안될때 해당 부분은 JdbcTemplate이나 MyBatis를 함께 사용
+
+  - JPA랑 JDBC는 트랜잭션 매니저가 다를텐데 어떡하나??
+  - `JpaTransactionManager` 가 대부분 기능들을 제공해서 괜찮다고 한다.
+  - 단, JPA 플러시 타이밍에 주의
+
+- **참고) 동적쿼리 문제란?? 예시**
+
+  - 검색 조건이 없을 때, 상품명으로 검색 때, 최대가격 검색 때, 상품명과 최대가격 둘다 검색 때 -> 총 4가지를 전부 동적으로 SQL 생성이 필요하다면 코드가 복잡..!
+
+  - MyBatis나 QueryDSL로 해결 추천<br>why?? 기존엔 너무 복잡하게 if, else 반복으로 구현하기 때문 (아래 예시코드)
+
+  - ```java
+    //QueryDSL 사용하지 않았을 때 동적 쿼리 구현 방식
+    public List<Item> findAll(ItemSearchCond cond) {
+        String itemName = cond.getItemName();
+        Integer maxPrice = cond.getMaxPrice();
+        if (StringUtils.hasText(itemName) && maxPrice != null) {
+            return repository.findItems("%" + itemName + "%", maxPrice);
+        } else if (StringUtils.hasText(itemName)) {
+            return repository.findByItemNameLike("%" + itemName + "%");
+        } else if (maxPrice != null) {
+            return repository.findByPriceLessThanEqual(maxPrice);
+        } else {
+            return repository.findAll();
+        }
+    }
+    ```
+
+<br>
+
+#### MyBatis
+
+**MyBatis 사용한 2가지 예시 + 동적쿼리**<br>
+
+**(1) 스프링을 사용하지 않은 MyBatis 방식**<br>**4개의 파일 활용:** mybatis-config.xml, SqlSessionTemplate.java, UserMapper.xml, UserMapper.interface
+
+- **라이브러리 추가**: `build.gradle` 의존성 추가: `implementation 'org.mybatis:mybatis:3.5.7' // MyBatis`
+
+- **사용흐름**
+
+  1. `mybatis-config.xml` 에 세팅 및 `UserMapper.xml` 매핑 추가
+  2. `UserMapper.xml` 파일 생성 및 sql문 작성+매핑에 namespace=UserMapper인터페이스 추가
+     - **참고 문법**
+       1. id 값(중복불가): 이 속성으로 SQL 구분+매퍼 인터페이스의 메서드 이름과 연결되어 쿼리를 더 쉽게 호출
+       2. useGeneratedKeys="true": 이 속성은 데이터베이스에서 생성된 키를 반환하도록 MyBatis에 지시합니다.
+       3. keyColumn="user_id": db의 user_id 필드명이 generatedKeys 임을 알려줌.(아마 keyProperty를 한다면 이건 생략해도 될거임 ㅇㅇ)
+       4. keyProperty="user_id": 생성된 키가 User 객체의 user_id 필드에 설정되도록 합니다.
+       5. SQL의 데이터 입력 매핑?
+          - 단일 데이터 입력: parameterType 설정안해도 어차피 1개라 자동 매핑
+          - 다중 테이터 입력: 인터페이스에서 @Param 활용해서 xml의 #{}과 매핑 or 같은 필드명 가진 객체(Object)로 매핑(=parameterType설정)
+  3. `UserMapper인터페이스`  파일 생성 및 기능 함수 작성 (insert쪽은 void로!)
+  4. `UserRepository` 를 마지막으로 생성 및 DAO 로직 작성
+     - 참고로 `SqlSession, SqlSessionFactory` 를 추가 활용
+
+  5. `SqlSessionTemplate` 는 `UserRepository` 에 **SqlSessionFactory를 파라미터로** 넣어 사용 위함
+     - mybatis-config.xml 설정 내용도 SqlSessionFactory 자바 객체에 담게 된다.
+
+  <details><summary><b>전체코드</b></summary>
+  <div markdown="1"><br>
+  **mybatis-config.xml**
+  ```xml
+  <?xml version="1.0" encoding="UTF-8" ?>
+  <!DOCTYPE configuration
+    PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-config.dtd">
+  <!-- -->
+  <!-- -->
+  <configuration>
+    <!-- config.xml 안에서 태그 작성시 태그의 사용 순서 -->
+    <!--
+      properties, settings, typeAliases, typeHandlers,
+      objectFactory, objectWrapperFactory, refletorFactory,
+      plugins, environments, databaseIdProvider, mappers
+     -->
+  <!-- -->
+  <!-- -->
+    <!-- typeAliases를 통해서 사용하고자 하는 객체를 등록해야함 -->
+    <typeAliases>
+      <typeAlias type="org.example.v2.domain.User" alias="User"/>
+      <typeAlias type="org.example.v2.domain.Profile" alias="Profile"/>
+      <typeAlias type="org.example.v2.domain.ChatRoom" alias="ChatRoom"/>
+      <typeAlias type="org.example.v2.domain.Message" alias="Message"/>
+    </typeAliases>
+  <!-- -->
+  <!-- -->
+    <environments default="development">
+      <environment id="development">
+        <transactionManager type="JDBC"/>
+        <dataSource type="POOLED">
+          <property name="driver" value="oracle.jdbc.OracleDriver"/>
+          <property name="url" value="jdbc:oracle:thin:@localhost:1521:STR"/>
+          <property name="username" value="testUser"/>
+          <property name="password" value="1234"/>
+        </dataSource>
+      </environment>
+    </environments>
+    <mappers>
+      <mapper resource="org/example/UserMapper.xml"/>
+      <mapper resource="org/example/ChatRoomMapper.xml"/>
+      <mapper resource="org/example/MessageMapper.xml"/>
+    </mappers>
+  </configuration>
+  ```
+  **UserMapper.xml**
+  ```xml
+  <?xml version="1.0" encoding="UTF-8"?>
+  <!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+  <!--
+  id 값(중복불가): 이 속성으로 SQL 구분+매퍼 인터페이스의 메서드 이름과 연결되어 쿼리를 더 쉽게 호출
+  useGeneratedKeys="true": 이 속성은 데이터베이스에서 생성된 키를 반환하도록 MyBatis에 지시합니다.
+  keyColumn="user_id": db의 user_id 필드명이 generatedKeys 임을 알려줌.
+  keyProperty="user_id": 생성된 키가 User 객체의 user_id 필드에 설정되도록 합니다.
+  ...
+  sql의 데이터 입력은 매핑이 되어야 함.
+  다중 테이터 입력: 인터페이스에서 @Param 활용해서 xml의 #{}과 매핑 or 같은 필드명 가진 객체(Object)로 매핑(=parameterType설정)
+  단일 데이터 입력: parameterType 설정안해도 어차피 1개라 자동 매핑 됨
+  -->
+  <mapper namespace="org.example.v2.repository.mapper.UserMapper">
+    <select id="findByIdNPw" resultType="User">
+      select * from Member where id = #{id} and pw = #{pw}
+    </select>
+    <insert id="saveUser" parameterType="User" useGeneratedKeys="true" keyColumn="user_id" keyProperty="user_id">
+      insert into Member (id, pw, nickname) values (#{id}, #{pw}, #{nickname})
+    </insert>
+    <insert id="saveProfile" parameterType="Profile">
+      insert into Profile (profile_id, name, col, email) values (#{profile_id}, #{name}, #{col}, #{email})
+    </insert>
+    <select id="findById" resultType="User">
+      select * from Member where id = #{id}
+    </select>
+    <select id="findByNickname" resultType="User">
+      select * from Member where nickname = #{nickname}
+    </select>
+  </mapper>
+  ```
+  **UserMapper인터페이스**
+  ```java
+  public interface UserMapper {
+    /**
+     * 회원가입
+     */
+    void saveUser(User user);
+    void saveProfile(Profile profile);
+    /**
+     * 로그인
+     */
+    User findByIdNPw(@Param("id") String id, @Param("pw") String pw); //id,pw로 찾기
+    /**
+     * 조회
+     */
+    User findById(String id); //아이디로 찾기
+    User findByNickname(String nickname); //닉네임으로 찾기
+  }
+  ```
+  **UserRepository**
+  ```java
+  public class UserRepository {
+    private SqlSessionFactory sqlSessionFactory;
+    public UserRepository(SqlSessionFactory sqlSessionFactory) {
+      this.sqlSessionFactory = sqlSessionFactory;
+    }
+    /**
+     * 회원가입
+     */
+    public User save(User user) {
+      try (SqlSession session = sqlSessionFactory.openSession()) {
+        UserMapper mapper = session.getMapper(UserMapper.class);
+        mapper.saveUser(user);
+        session.commit(); //트랜잭션 commit
+        return user; //생성된 generatedKeys 포함
+      }
+    }
+    public Profile save(Profile profile) {
+      try (SqlSession session = sqlSessionFactory.openSession()) {
+        UserMapper mapper = session.getMapper(UserMapper.class);
+        mapper.saveProfile(profile);
+        session.commit(); //트랜잭션 commit
+        return profile; //생성된 generatedKeys 포함X
+      }
+    }
+    /**
+     * 로그인
+     */
+    public User findByIdNPw(String id, String pw) {
+      try (SqlSession session = sqlSessionFactory.openSession()) {
+        UserMapper mapper = session.getMapper(UserMapper.class);
+        return mapper.findByIdNPw(id, pw);
+      }
+    }
+    /**
+     * 조회
+     */
+    public User findById(String id) {
+      try (SqlSession session = sqlSessionFactory.openSession()) {
+        UserMapper mapper = session.getMapper(UserMapper.class);
+        return mapper.findById(id);
+      }
+    }
+    public User findByNickname(String nickname) {
+      try (SqlSession session = sqlSessionFactory.openSession()) {
+        UserMapper mapper = session.getMapper(UserMapper.class);
+        return mapper.findByNickname(nickname);
+      }
+    }
+  }
+  ```
+  **SqlSessionTemplate**
+  ```java
+  public class SqlSessionTemplate {
+    private static SqlSessionFactory sqlSessionFactory;
+    public static SqlSessionFactory getSqlSessionFactory() {
+      return sqlSessionFactory;
+    }
+    //1번 초기화 하면 충분. 싱글패턴. 정적 초기화로 ㄱ.
+    static {
+      try {
+        String resource = "mybatis-config.xml";
+        Reader reader = Resources.getResourceAsReader(resource);
+        sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader); //Builder 로 설정 간단히.
+      } catch (IOException e) {
+        throw new RuntimeException("Failed to initialize SqlSessionFactory: " + e.getMessage(), e);
+      }
+    }
+  }
+  ```
+  </div>
+  </details>
+
+<br>
+
+**(2) 스프링을 사용한 MyBatis 방식 + 동적쿼리**<br>**3개의 파일 활용:** application.properties, ItemMapper.interface, ItemMapper.xml, ItemRepository
+
+<details><summary><b>주요 동작방식(그림)</b></summary>
+<div markdown="1"><br>
+![image](https://github.com/user-attachments/assets/e7639c7e-498d-40b3-aa93-998b66719ed0)
+</div>
+</details>
+
+- **라이브러리 추가**: `implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.2.0' //spring boot mybatis`
+
+- **사용 흐름**
+
+  1. `application.properties` 로 type-aliases(별칭), underscore와 camel-case 매핑, 로그 등 설정
+  2. `ItemMapper인터페이스`는 Mybatis 매핑 XML(=ItemMapper.xml)을 호출해주는 "매퍼 인터페이스" + 매핑에 namespace=UserMapper인터페이스 추가
+     - **@Mapper** 를 반드시 사용 -> 최종적으로 스프링은 프록시 구현체 만들어 **"빈 등록!"**
+  3. `ItemMapper.xml` 로 `src/main/resources` 하위에 위치 및 사용할 sql을 작성한다.
+     - **참고 문법**<br>**자세한 코드 예시는 [Spring Boot MyBatis](https://github.com/BH946/spring-first-roadmap/tree/main/spring_study_7/itemservice-db#mybatis)**
+       1. **동적 SQL** -> `if, choose (when, otherwise) , trim (where, set), foreach`
+       2. **애노테이션으로 SQL 작성** -> xml 대신 애노테이션에 SQL 작성
+       3. **문자열 대체** -> SQL 인젝션 공격을 당할 수 있어서 권장하지 않음
+       4. **재사용 가능한 SQL 조각** -> sql 태그
+       5. **Result Maps** -> as 별칭을 대체 가능
+  4. `ItemRepository` 를 마지막으로 생성 및 DAO 로직 작성
+     - 빈에 등록된 ItemMapper 를 바로 가져다 사용 가능~!!~!
+
+  <details><summary><b>전체코드</b></summary>
+  <div markdown="1"><br>
+  **application.properties**
+  ```properties
+  #MyBatis
+  mybatis.type-aliases-package=hello.itemservice.domain 
+  mybatis.configuration.map-underscore-to-camel-case=true 
+  logging.level.hello.itemservice.repository.mybatis=trace
+  ```
+  **ItemMapper인터페이스**
+  ```java
+  @Mapper
+  public interface ItemMapper {
+      void save(Item item);
+      void update(@Param("id") Long id, @Param("updateParam") ItemUpdateDto updateParam);
+      Optional<Item> findById(Long id);
+      List<Item> findAll(ItemSearchCond itemSearch);
+  }
+  ```
+  **ItemMapper.xml**
+  ```xml
+  <?xml version="1.0" encoding="UTF-8"?>
+  <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+          "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="hello.itemservice.repository.mybatis.ItemMapper">
+      <insert id="save" useGeneratedKeys="true" keyProperty="id">
+          insert into item (item_name, price, quantity)
+          values (#{itemName}, #{price}, #{quantity})
+      </insert>
+      <update id="update">
+          update item
+          set item_name=#{updateParam.itemName},
+              price=#{updateParam.price},
+              quantity=#{updateParam.quantity}
+          where id = #{id}
+      </update>
+      <select id="findById" resultType="Item">
+          select id, item_name, price, quantity
+          from item
+          where id = #{id}
+      </select>
+      <select id="findAll" resultType="Item">
+          select id, item_name, price, quantity
+          from item
+          <where>
+              <if test="itemName != null and itemName != ''">
+                  and item_name like concat('%', #{itemName}, '%')
+              </if>
+              <if test="maxPrice != null">
+                  and price &lt;= #{maxPrice}
+              </if>
+          </where>
+      </select>
+  </mapper>
+  ```
+  **ItemRepository**
+  ```java
+  @Slf4j
+  @Repository
+  @RequiredArgsConstructor
+  public class ItemRepository {
+      private final ItemMapper itemMapper;
+      @Override
+      public Item save(Item item) {
+          log.info("itemMapper class={}", itemMapper.getClass()); // 프록시 확인
+          itemMapper.save(item);
+          return item;
+      }
+      @Override
+      public void update(Long itemId, ItemUpdateDto updateParam) {
+          itemMapper.update(itemId, updateParam);
+      }
+      @Override
+      public Optional<Item> findById(Long id) {
+          return itemMapper.findById(id);
+      }
+      @Override
+      public List<Item> findAll(ItemSearchCond cond) {
+          return itemMapper.findAll(cond);
+      }
+  }
+  ```
+  </div>
+  </details>
+
+<br>
+
+#### JPA, Spring Data JPA, QueryDSL의 조합
+
+**참고: [적용 플젝(레포): v1~v3](https://github.com/BH946/LePl_Spring/tree/kbh/lepl/src/main/java/com/lepl/Repository/member), [적용 플젝(서비스): v1~v2](https://github.com/BH946/LePl_Spring/tree/kbh/lepl/src/main/java/com/lepl/Service/member)**
+
+**Spring Data JPA를 바로 사용 vs 중간에 어댑터 추가하여 추상화 = 단순ver vs 어댑터 추가ver**
+
+- **단순ver**은 Spring Data JPA 구현체를 바로 사용하므로 **JpaRepository를 상속받는 인터페이스만 만들어**서 바로 사용하면 된다. 인터페이스 바로 사용이 가능한 이유는 **스프링이 프록시 구현체를 만들**어 주기 때문이다.<br>예시: `public interface MemberRepository extends JpaRepository<Item, Long> { }`
+
+- **어댑터 추가ver**은 중간에 **인터페이스를 도입**하는 방식이다!<br>레포지토리 추상화를 통해서 서비스단의 코드 변경없이 레포지토리단만 수정하는 효과!!
+
+- **트레이드 오프 -> 구조의 안정성 vs 단순한 구조와 개발 편리성**
+
+  - **어댑터 추가ver** : DI, OCP를 지키기 위해 어댑터를 도입하고, 더 많은 코드를 유지한다.
+  - **단순ver** : 어댑터를 제거하고 구조를 단순하게 가져가지만, DI, OCP를 포기하고, ItemService 코드를 직접 변경한다.
+
+  <details><summary><b>트레이드 오프 유지보수 관점 (자세히) -> 결론: 단순ver 을 기본 사용 (주관적 생각)</b></summary>
+  <div markdown="1">
+  - **추상화를 시킬수록** 당연히 서비스단을 고칠필요 없이 레포지토리만 고치면 되는 큰 **장점**이 있다 (DI, OCP를 지킬 수 있겠지)
+  - 근데, **단점**으로는 추상화 자체에도(인터페이스 도입) 큰 비용이 발생한다. 코드 조금 추가한다고 생각하면 바보다. 구조가 한단계 커지는건데 개발자의 경우 해당 레포지토리를 수정하려고 찾아가다보면 구조가 많으니까 코드 한줄 수정하는게 훨씬 오래걸릴 수 있다. 비용이 크다는 거다.
+  - **반대로, 추상화없이 단순**하게 바로 레포지토리를 서비스단에서 가져와 사용한 경우에 **장점**으로는 굉장히 직관적이므로 바로 레포지토리로 들어가서 코드 한줄 수정 쉽게 가능하므로 비용을 크게 단축시킬 수 있다! 
+  - 근데, 서비스단의 로직이 많이 변경될 수 있어서 (DI, OCP를 지킬 수 없는거지) 이 **단점**도 감안해야한다.
+  - 그렇기에 프로젝트 마다 잘 선택해야하는 트레이드 오프 부분이라 볼 수 있겠다.
+  - **결론적으로 권장 방안은?**
+    - 누가봐도 대규모 프로젝트이고 구조적으로 개선해야할 일들이 많다면 추상화를 선택한다. 
+    - 다만, 그런 상태가 아니거나 선택하기 애매하거나 할 때는 추상화를 선택하지 않고 오로지 **최대한 빠르게 개발하는걸 권장(=단순ver)**한다. 이후에 리팩토링 하면서 추상화가 꼭 필요하다면 그때 도입해도 되니까! 이게 빨리빨리 개발해야하는 우리에게 좀 더 실용적이라 판단이 된다. (feat:김영한 강사님 생각)
+    - QueryDSL도 마찬가지로 단순ver처럼 따로 구현해서 바로 가져와 사용하겠다!
+  </div>
+  </details>
+
+<br>
+
+**단순ver 사용한 예시** -> **JPA+Spring Data JPA+QueryDSL** 의 모습을 소개할거고, Spring Data JPA만 사용할거면 나머지는 빼고 개발하는식으로 원하는데로 하면 됨<br>**1+1개의 파일 활용:** SpringDataJpaItemRepository 인터페이스 + ItemQueryRepository 클래스 + JpaRepository 인터페이스 (이건 부트가 제공!)
+
+<details><summary><b>이 방법의 동작구조(그림)</b></summary>
+<div markdown="1"><br>
+<img src="https://github.com/user-attachments/assets/eab41981-fd80-42b4-956f-b186f2581cd9" alt="image" style="zoom:80%;" /><br>
+<img src="https://github.com/user-attachments/assets/b3bcbe64-5cb5-431b-98eb-ee8457635ca7" alt="image" style="zoom:80%;" /><br><br>
+**QueryDSL까지 합류한다면?**
+<img src="https://github.com/user-attachments/assets/d745de16-af58-4e9d-830a-211a84be0e4f" alt="image" style="zoom:80%;" />
+</div>
+</details>
+
+- **사용흐름**
+
+  1. `SpringDataJpaItemRepository 인터페이스` 를 추가하여 JpaRepository 인터페이스를 상속하자 -> Spring Data Jpa 사용 목적!
+
+  2. `ItemQueryRepository 클래스` 를 추가하여 복잡한 쿼리(+동적) 이곳에서 처리하자!
+
+     - QueryDSL -> JPQL -> SQL 변환
+
+     - **라이브러리 추가 방법**
+
+       - 자동 생성 Q클래스(QueryDSL의 사용타입)를 gradle clean으로 제거 및 gradle 에 라이브러리 추가
+
+       - ```groovy
+         //Querydsl 추가 - 스프링 2.x
+         implementation 'com.querydsl:querydsl-jpa'
+         annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jpa"
+         annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+         annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+         
+         //Querydsl 추가 - 스프링 3.x
+         implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+         annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
+         annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+         annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+         
+         //Querydsl 추가, 자동 생성된 Q클래스 gradle clean으로 제거
+         clean {
+         	delete file('src/main/generated')
+         }
+         ```
+
+     - **사용할 때 Q클래스 import 필수!!**
+
+       - `import static hello.itemservice.domain.QItem.*;`
+       - Q클래스 위치: build/generated/sources/annotaionProcessor 하위
+
+  3. 마지막으로 서비스단에서 SpringDataJpaItemRepository, ItemQueryRepository 를 가져와 사용하면 성공!
+
+     - 이처럼 단순ver은 굉장히 구조가 단순하다.
+
+  4. 만약, 일반 JPA도 추가하고 싶다면 단순ver 취지에 맞게 ItemQueryRepository 처럼 바로 추가 레포지토리 클래스를 만들어서 사용하자~!
+
+  <details><summary><b>전체코드</b></summary>
+  <div markdown="1"><br>
+  **SpringDataJpaItemRepository 인터페이스**
+  ```java
+  /**
+   * CRUD 는 기본으로 제공
+   * 아래 메소드들은 "쿼리 메서드"
+   */
+  public interface SpringDataJpaItemRepository extends JpaRepository<Item, Long> {
+    //변환 JQPL : select i from Item i where i.name like ?
+    List<Item> findByItemNameLike(String itemName);
+    //변환 JQPL : select i from Item i where i.price <= ?
+    List<Item> findByPriceLessThanEqual(Integer price);
+    //쿼리 메서드 (아래 메서드와 같은 기능 수행)
+    List<Item> findByItemNameLikeAndPriceLessThanEqual(String itemName, Integer price);
+    //쿼리 직접 실행 -> 수동 JPQL 작성 지원
+    @Query("select i from Item i where i.itemName like :itemName and i.price <= :price")
+    List<Item> findItems(@Param("itemName") String itemName, @Param("price") Integer price);
+  }
+  ```
+  **ItemQueryRepository 클래스** -> JPAQueryFactory 필수 사용!<br>그리고 동적 쿼리 위해 BooleanExpression 조건문 클래스 사용한 예시이다.
+  ```java
+  import static hello.itemservice.domain.QItem.*;
+  @Repository
+  public class ItemQueryRepositoryV2 {
+      private final JPAQueryFactory query;
+  //
+      public ItemQueryRepositoryV2(EntityManager em) {
+          this.query = new JPAQueryFactory(em);
+      }
+      // 자동생성 Q클래스 덕분에 item 이 바로 사용 가능
+      public List<Item> findAll(ItemSearchCond cond) {
+          return query.select(item)
+                  .from(item)
+                  .where(
+                          likeItemName(cond.getItemName()),
+                          maxPrice(cond.getMaxPrice())
+                  )
+                  .fetch();
+      }
+  //
+      private BooleanExpression likeItemName(String itemName) {
+          if (StringUtils.hasText(itemName)) {
+              return item.itemName.like("%" + itemName + "%");
+          }
+          return null;
+      }
+      private BooleanExpression maxPrice(Integer maxPrice) {
+          if (maxPrice != null) {
+              return item.price.loe(maxPrice);
+          }
+          return null;
+      }
+  }
+  ```
+  **서비스단 예시 코드**
+  ```java
+  @Service
+  @RequiredArgsConstructor
+  @Transactional
+  public class ItemService {
+      private final SpringDataJpaItemRepository springDataJpaItemRepository;
+      private final ItemQueryRepositoryV2 itemQueryRepositoryV2;
+  //
+      public Item save(Item item) {
+          return springDataJpaItemRepository.save(item);
+      }
+      public void update(Long itemId, ItemUpdateDto updateParam) {
+          Item findItem = springDataJpaItemRepository.findById(itemId).orElseThrow();
+          findItem.setItemName(updateParam.getItemName());
+          findItem.setPrice(updateParam.getPrice());
+          findItem.setQuantity(updateParam.getQuantity());
+      }
+      public Optional<Item> findById(Long id) {
+          return springDataJpaItemRepository.findById(id);
+      }
+      public List<Item> findItems(ItemSearchCond cond) {
+          return itemQueryRepositoryV2.findAll(cond);
+      }
+  }
+  ```
+  </div>
+  </details>
+
+ <br>
+
+**어댑터 추가ver 를 사용한 2가지 예시 -> 결론: 첫번째 방식 선호!**
+
+**(1) 첫번째 예시 -> 본인은 이게 더 직관적이라 생각**<br>**3+1개의 파일 활용:** ItemRepository인터페이스, JpaItemRepositoryV2 클래스, SpringDataJpaItemRepository 인터페이스 + JpaRepository 인터페이스 (이건 부트가 제공!)
+
+<details><summary><b>이 방법의 동작구조(그림)</b></summary>
+<div markdown="1"><br>
+<img src="https://github.com/user-attachments/assets/9ad62419-38b1-429c-a36f-55ad47f2ee94" alt="image" style="zoom:80%;" />
+</div>
+</details>
+
+- **사용흐름**
+
+  1. `ItemRepository 인터페이스` 를 추가하여 인터페이스 도입! (어댑터 역할) -> **아무것도 상속받지 않는다!!!**
+  2. `JpaItemRepositoryV2 클래스` 를 추가하여 ItemRepository인터페이스를 구현한다. 단, 이때 아래 SpringDataJpaItemRepository(=Spring Data JPA) 를 가져와 사용함!!
+     - 여기서 레포 구현체를 만들때 JPA + Spring Data JPA 를 사용하게 된다!
+  3. `SpringDataJpaItemRepository 인터페이스` 를 추가하여 JpaRepository 인터페이스를 상속하자 -> Spring Data Jpa 사용 목적!
+  4. 마지막으로 서비스단에서 ItemRepository 를 가져와 사용하면 성공!
+
+  <details><summary><b>전체코드</b></summary>
+  <div markdown="1"><br>
+  **ItemRepository 인터페이스**
+  ```java
+  public interface ItemRepository {
+      Item save(Item item);
+      void update(Long itemId, ItemUpdateDto updateParam);
+      Optional<Item> findById(Long id);
+      List<Item> findAll(ItemSearchCond cond);
+  }
+  ```
+  **JpaItemRepositoryV2 클래스**
+  ```java
+  @Repository
+  @Transactional
+  @RequiredArgsConstructor
+  public class JpaItemRepositoryV2 implements ItemRepository {
+      private final SpringDataJpaItemRepository repository;
+  //
+      @Override
+      public Item save(Item item) {
+          return repository.save(item);
+      }
+      @Override
+      public void update(Long itemId, ItemUpdateDto updateParam) {
+          Item findItem = repository.findById(itemId).orElseThrow();
+          findItem.setItemName(updateParam.getItemName());
+          findItem.setPrice(updateParam.getPrice());
+          findItem.setQuantity(updateParam.getQuantity());
+      }
+      @Override
+      public Optional<Item> findById(Long id) {
+          return repository.findById(id);
+      }
+  //
+      //QueryDSL 사용하지 않았을 때 동적 쿼리 구현 방식
+      @Override
+      public List<Item> findAll(ItemSearchCond cond) {
+          String itemName = cond.getItemName();
+          Integer maxPrice = cond.getMaxPrice();
+          if (StringUtils.hasText(itemName) && maxPrice != null) {
+  //            return repository.findByItemNameLikeAndPriceLessThanEqual("%" + itemName + "%", maxPrice);
+              return repository.findItems("%" + itemName + "%", maxPrice);
+          } else if (StringUtils.hasText(itemName)) {
+              return repository.findByItemNameLike("%" + itemName + "%");
+          } else if (maxPrice != null) {
+              return repository.findByPriceLessThanEqual(maxPrice);
+          } else {
+              return repository.findAll();
+          }
+      }
+  }
+  ```
+  **SpringDataJpaItemRepository 인터페이스**
+  ```java
+  /**
+   * CRUD 는 기본으로 제공
+   * 아래 메소드들은 "쿼리 메서드"
+   */
+  public interface SpringDataJpaItemRepository extends JpaRepository<Item, Long> {
+    //변환 JQPL : select i from Item i where i.name like ?
+    List<Item> findByItemNameLike(String itemName);
+    //변환 JQPL : select i from Item i where i.price <= ?
+    List<Item> findByPriceLessThanEqual(Integer price);
+    //쿼리 메서드 (아래 메서드와 같은 기능 수행)
+    List<Item> findByItemNameLikeAndPriceLessThanEqual(String itemName, Integer price);
+    //쿼리 직접 실행 -> 수동 JPQL 작성 지원
+    @Query("select i from Item i where i.itemName like :itemName and i.price <= :price")
+    List<Item> findItems(@Param("itemName") String itemName, @Param("price") Integer price);
+  }
+  ```
+  **서비스단 예시코드**
+  ```java
+  @Service
+  @RequiredArgsConstructor
+  public class ItemService {
+      private final ItemRepository itemRepository;
+      public Item save(Item item) {
+          return itemRepository.save(item);
+      }
+      public void update(Long itemId, ItemUpdateDto updateParam) {
+          itemRepository.update(itemId, updateParam);
+      }
+      public Optional<Item> findById(Long id) {
+          return itemRepository.findById(id);
+      }
+      public List<Item> findItems(ItemSearchCond cond) {
+          return itemRepository.findAll(cond);
+      }
+  }
+  ```
+  </div>
+  </details>
+
+<br>
+
+**(2) 두번째 예시 -> [레포지토리 챕터에서 정리한 내용](https://bh946.github.io/knowledge/CHECK_LIST_SPRING/#%EB%A0%88%ED%8F%AC%EC%A7%80%ED%86%A0%EB%A6%ACdao)**<br>**3+1개의 파일 활용:** MemberRepository 인터페이스 + MemberRepositoryCustom 인터페이스 + MemberRepositoryCustomImpl 클래스 의 조합 + JpaRepository 인터페이스 (이건 부트가 제공!)
+
+- **인터페이스 도입은 동일하되 JPA 사용 로직을 인터페이스로 따로 추가한 구조!**<br>여기선 대표 인터페이스(=1번 예시 그림으로 보면 SpringDataJpaItemRepository인터페이스)가 2개의 인터페이스를 상속(=Spring Data Jpa, 일반 Jpa)하는 구조
+
+  - 자바는 상속되는 인터페이스들의 메소드 시그니처들이 자동 제공되니까 이런 구조가 가능
+  - 물론, 메소드 오버라이딩으로 구현은 필수니까 구현체도 따로 만듬 
+
+- **사용흐름**
+
+  1. `MemberRepository 인터페이스` 를 추가 -> 서비스 계층에서 사용하게 될 본체! (1번과 비교하면 SpringDataJpaItemRepository 를 의미!)
+     - **여기서 2개의 인터페이스를 상속: JpaRepository, MemberRepositoryCustom**
+       - JpaRepository<Member, Long> 인터페이스가 바로 Spring Data JPA 이다. (부트가 제공)
+       - MemberRepositoryCustom 인터페이스가 바로 일반 JPA 이다. (우리가 만듬!!)
+  2. `MemberRepositoryCustom 인터페이스` 를 추가 -> 일반 JPA 사용 목적
+  3. `MemberRepositoryCustomImpl` 를 추가 -> MemberRepositoryCustom 의 구현체!
+  4. 마지막으로 서비스단에서 MemberRepository 를 가져와 바로 사용하면 적용 성공!
+
+  <details><summary><b>전체코드</b></summary>
+  <div markdown="1"><br>
+  ```java
+  /**
+   * MemberRepository 인터페이스 -> 서비스 계층에서 사용하게 될 본체
+   * 여기서 2개의 인터페이스를 상속 받는다.
+   * - JpaRepository<Member, Long> 이 바로 Spring Data JPA 이다.
+   * - MemberRepositoryCustom 이 바로 일반 JPA 이다. 
+   */
+  public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
+    //CRUD 자동 제공
+  }
+  /**
+   * MemberRepositoryCustom 인터페이스 -> 일반 JPA로 커스텀
+   */
+  public interface MemberRepositoryCustom {
+    Member findOne(Long id);
+    Member findByUid(String uid);
+    List<FindMemberResponseDto> findAllWithPage(int pageId);
+  }
+  /**
+   * MemberRepositoryCustomImpl 클래스 -> 일반 JPA로 커스텀 구현체
+   * - save() 주석 -> JpaRepository 꺼 사용하려고
+   * - @Override -> 인터페이스 구현 때 당연히 필수 키워드
+   */
+  @Repository
+  @RequiredArgsConstructor // 생성자 주입 + 엔티티매니저 주입 제공
+  public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
+    private final EntityManager em;
+    /**
+     * save, findOne, findByUid, findAllWithPage
+     */
+  //  public void save(Member member) {
+  //    if (member.getId() == null) {
+  //      em.persist(member); // db 저장
+  //    }
+  //  }
+    @Override
+    public Member findOne(Long id) {
+      return em.find(Member.class, id);
+    }
+    @Override
+    public Member findByUid(String uid) {
+      List<Member> findMembers = em.createQuery("select m from Member m where m.uid = :uid",
+              Member.class)
+          .setParameter("uid", uid)
+          .getResultList(); // List로 반환 받아야 null처리가 쉬움
+      return findMembers.isEmpty() ? null : findMembers.get(0);
+    }
+    @Override
+    public List<FindMemberResponseDto> findAllWithPage(int pageId) {
+      int offset = (pageId - 1) * 10;
+      int limit = 10;
+      List<Object[]> objects = em.createNativeQuery("select m.member_id, m.nickname, e.level " +
+              "from (select * from member order by member_id desc limit " + offset + "," + limit + ") m "
+              +
+              "inner join character c on m.character_id=c.character_id " +
+              "inner join exp e on c.exp_id=e.exp_id;")
+          .getResultList();
+      return objects.stream()
+          .map(o -> new FindMemberResponseDto((Long) o[0], (String) o[1], (Long) o[2]))
+          .collect(Collectors.toList());
+    }
+  }
+  ```
+  </div>
+  </details>
+
+<br><br>
+
+### 트랜잭션 전파 + 주의사항
+
+**(1)트랜잭션 AOP 주의 사항 - 프록시 내부 호출**
+
+![image](https://github.com/user-attachments/assets/d8d35f31-ee92-45d3-a174-ed6126163647) 
+
+![image](https://github.com/user-attachments/assets/40872f1f-626b-4c61-8759-6a901c07e1dc)   
+
+- "클라요청" -> "프록시 호출" -> "실제 트랜잭션 호출" 순서가 일반적인데,
+- "클라요청" -> "실제 트랜잭션 호출" 인 경우를 마주칠 수 있다. => **3. 트랜잭션 적용X**
+  - 자바 문법상 `internal();` 은 `this.internal();` 로 호출하므로 이런 경우가 생긴다.
+
+<img src="https://github.com/user-attachments/assets/d7c6149e-4dfb-489d-a978-d9db1d460b7c" alt="image" style="zoom:50%;" /> 
+
+- 가장 간단한 해결방안은 **"internal 메소드를 별도의 클래스로 분리"**
+
+  - 예로 `static class` 로 `InternalService` 를 하나 만들어서 `internal()` 메소드 구현
+
+  - 사용할때 `InternalService.internal();` 형태로 사용함으로써 `this` 문제 해결 완!
+
+![image](https://github.com/user-attachments/assets/9c2e6fc2-e9af-4d5a-8ba8-77b115148b40) 
+
+**(2)트랜잭션 AOP 주의 사항 - 트랜잭션 적용 범위**
+
+- 클래스 레벨에 “트랜잭션 적용”시 스프링은 **public 메서드만** 트랜잭션 적용하도록 기본 설정
+  - 물론, 설정 변경 가능하다.
+
+**(3)트랜잭션 AOP 주의 사항 - 초기화 시점**
+
+- @PostConstruct로 선언된곳에 @Transactional 선언시 트랜잭션은 미적용
+  - WHY?? **초기화코드(@PostConstruct)가 먼저 호출되고 그 다음 트랜잭션 AOP가 적용되기 때문이다. 따라서 초기화 시점에 해당 메서드는 트랜잭션 흭득 불가.**
+  - 해결법?? **@EventListener(ApplicationReadyEvent.class) 사용**
+
+<br>
+
+레포1, 레포2 에서 각각 트랜잭션 사용 및 이 둘의 데이터가 연관된다면? **데이터 정합성 문제**가 발생
+
+서비스에만 트랜잭션 사용시 **데이터 정합성 해결** -> 레포 하나라도 롤백이면 전부 롤백되니까.
+
+**이때 자동 사용된 개념이 “스프링 트랜잭션 전파”** 이고, 굳이 **독립적으로 트랜잭션** 사용하겠다 한다면 **REQUIRES_NEW** 옵션을 사용해서 처리가능. -> **기본값은 REQUIRED**
+
+- 트랜잭션이 이미 진행중인데 추가로 수행한다면?? -> 이 경우 어떻게 동작할지 결정하는 것을 **“트랜잭션 전파(propagation)”**
+- 여러 트랜잭션들이 중복되어 사용된다면 이들을 구분짓기 위해 **“물리,논리 트랜잭션” 개념** 사용
+  - **모든 트랜잭션 매니저(물리,논리=외부,내부)를 커밋해야 물리 트랜잭션이 커밋된다. 하나의 트랜잭션 매니저라도 롤백하면 물리 트랜잭션은 롤백된다.**
+  - **트랜잭션 참여 : 외부 트랜잭션과 내부 트랜잭션이 하나의 물리 트랜잭션으로 묶이는 것**
+  - **같은 물리 트랜잭션 사용 == 같은 동기화 커넥션 사용**
+  - <img src="https://github.com/BH946/bh946.github.io/assets/80165014/1bd94b66-7022-47a1-a4a3-eaa68bfb6e90" alt="image" style="zoom: 80%;" />  
+
+**스프링 트랜잭션 전파 - 트랜잭션 두 번 사용 할 때??**
+
+- **(1) 트랜잭션을 순차적으로 2번 사용은?**
+  - **"같은 커넥션(=conn0)"**를 사용 + **"다른 프록시 커넥션"**을 사용.
+  - ![image](https://github.com/user-attachments/assets/dd3045ba-bea1-48b5-a718-f0c5c0becb07) 
+- **(2) 트랜잭션이 순차가 아닌 중복되게 사용하면? (커밋)**  
+  아래 코드처럼 "외부 시작 -> 내부 시작,커밋 -> 외부 커밋" 라면?
+  - 신규 트랜잭션 이라면 -> 커밋O
+  - 신규 트랜잭션 아니라면 -> 커밋X (신규가 젤 외부니까 거기서 커밋1번 해야지!!!)
+  - ![image](https://github.com/user-attachments/assets/82493805-7bd4-4042-bb43-1e7f1ff0ef52) 
+  - ![image](https://github.com/user-attachments/assets/c7d58ced-b0c2-4bcc-955a-1fdb102a2038) 
+  - ![image](https://github.com/user-attachments/assets/d58018d7-b26a-4645-a0a7-c9e0c764a77a) 
+  - ![image](https://github.com/user-attachments/assets/6855dc0c-1bf1-4996-9b3d-16e3df0879a9) 
+- **(3) 트랜잭션이 순차가 아닌 중복되게 사용하면? (롤백)**  
+  - 내부 롤백은 내부적으로 따로 롤백 마킹
+    - 외부 커밋 시점에 이를 확인해서 롤백 -> **rollbackOnly 설정을 확인**
+  - 이때, **UnexpectedRollbackException** 런타임 예외를 추가로 던진다.
+    - **롤백은 중요한 일**이므로 이런 예외를 추가로 던진다.
+- **(4) 트랜잭션이 순차가 아닌 중복되게 사용하면? (REQUIRES_NEW)**  
+  - REQUIRES_NEW 라는 옵션을 사용하면 **"외부 트랜잭션과 내부 트랜잭션을 분리 가능"**
+  - 즉, **독립적인** 트랜잭션이 2개 생기는 것이며 2개가 **동시에 사용**되는 것 -> 정확히는 1개씩 커넥션이 순차적으로 처리 된다.
+
+**그럼 독립적으로 트랜잭션을 사용하는 경우는 뭐가 있을까??**
+
+(1)기본값: 트랜잭션 그대로 전파 사용은 @Transactional의 `Propagation.REQUIRED` 속성
+
+(2)트랜잭션 독립 사용은 @Transactional의 `Propagation.REQUIRED_NEW` 속성
+
+- 사례1는 **결제 처리와 알림**이다. 결제가 성공하면 알림을 보낼건데, 알림 전송 실패하더라도 결제는 성공적으로 이루어져야 한다. 이것도 충분히 가능하다. -> 이게 실제 서비스에서 고려할 만한 부분인 것 같다.
+
+- 사례2은 **배치 작업 및 상태 업데이트**다. 대량 데이터를 처리하는 배치 로직에서 "상태 업데이트"를 독립 트랜잭션으로 실행해서 롤백을 당해도 상태는 업데이트 할 수 있는 방안이다.
+
+
+```java
+@Transactional
+public void processBatch(List<Data> dataList) {
+  for (Data data : dataList) {
+      try {
+          // 데이터 처리
+          processData(data);
+          statusUpdateService.updateStatus(data.getId(), "Processed");
+      } catch (Exception e) {
+          // 처리 중 오류가 발생해도 상태 업데이트는 독립적으로 진행
+          statusUpdateService.updateStatus(data.getId(), "Failed");
+      }
+  }
+}
+
+-------------------------------
+    
+@Transactional(propagation = Propagation.REQUIRES_NEW)
+public void updateStatus(Long dataId, String status) {
+// 상태 업데이트
+	statusRepository.updateStatus(dataId, status);
+}
+```
+
+<br><br>
+
+### Oracle+Orange, H2, MySQL
+
+참고: 테스트용 메모리DB가 아닌 실제 DB를 사용할 경우 **반드시 DB를 실행해서 오픈해야 함!**
+
+H2와 MySQL 사용은 너무 간단하기도 하고 많이 했어서 생략! (**자세한건 application.yml 챕터 참고!**)
+
+**Oracle은 build.gradle에 라이브러리 추가해서 연동하는건 H2나 MySQL처럼 간단하지만, Oracle 자체를 다운받아서 실행하는게 좀 난항이 많다.**
+
+**웬만하면 전부 관리자로 설치 ㄱㄱ**
+
+**용어 참고**
+
+- **HOST** : IP나 도메인을 가진 장치(컴퓨터).
+- **CLIENT** : HOST중에 정보를 요청하는 장치(컴퓨터).
+- **SERVER** : 요청받은 정보를 제공하는 장치(컴퓨터).
+- **오라클에서의 서버** : 오라클 데이터베이스가 설치된 장치(컴퓨터).
+- **오라클에서의 클라이언트** : 네트워크를 통해서 데이터베이스를 제어하기 위한 소프트웨어(SQL Plus, SQL Developer, TOAD)를 사용하는 장치(컴퓨터).
+
+- 오라클 버전별 특징도 다르니 주의
+  - **시퀀스와 트리거**: 구버전 오라클이나 특정 요구사항에 따라 사용.
+  - **IDENTITY 컬럼**: 오라클 12c 이상에서 지원, 더 간편하게 사용할 수 있음.
+
+<br>
+
+**오라클 필수 개념**<br>[문서 참고](https://okky.kr/questions/206807)
+
+- **Oracle Server**는 말 그대로 서버 쪽의 Oracle DB고, **Oracle Client**는 이 Oracle Server(DB)에 접속하는 용도이다. Java의 경우 JDBC를 제공하기에 바로 Oracle 접속이 가능했던 것이다.
+
+- **Orange(Tool)** 의 경우 이 Oracle Client를 이용해서 연동한다고 볼 수 있다! (주로 32bit 활용)
+
+  <details><summary><b>문서속 내용 참고</b></summary>
+  <div markdown="1"><br>
+  **오라클 DBM 클라이언트에는 오라클 DBM 서버에 접속할 수 있는 프로그램들이 내장**되어 있습니다. 그런데, **Java 에서는 DB 에 상관없이 JDBC 라는 드라이버를 통해 직접 DB 에 연결**하는 표준을 가지고 있습니다. 오라클도 이 JDBC 드라이버를 제공하고 있는 것입니다. 즉, **Oracle Clinet 의 접속 관련 부분이 JDBC 에 이미 구현**되어 있고, 그 외 SQL*PLUS 같은 툴들은 없습니다. JDBC 을 내장해서 관리하는 것이 구현된 것이 SQLDeveloper (Java로 만듦) 이구요. 단순히 Java 환경에서는 JDBC 만 있으면 되므로 Oracle client 는 필요없고, Java 가 아닌 토트, 오렌지 등에서는 Oracle Clinet 가 있어야 하는 거구요. 일부 툴에서는 Oracle Client 와 같이 많은 것을 설치해야만 사용 가능하지만, 일부 툴은 **Oracle instant client 와 같이 설치 없이 간단한 설정 만으로 접속을 가능하게 해주는 JDBC 와 같은 것으로 연결이 가능**합니다. 토드 최신 버젼 등은 지원할 겁니다. (12년 전 자료. 지금은 대부분 지원)
+  </div>
+  </details>
+
+**오라클 설치**<br>[문서 참고](https://velog.io/@yeoonnii/Oracle-%EC%98%A4%EB%9D%BC%ED%81%B4-19c-%EC%84%A4%EC%B9%98%EB%8B%A4%EC%9A%B4%EB%A1%9C%EB%93%9C#%EC%84%A4%EC%B9%98-%EC%A4%91-%EC%98%A4%EB%A5%981--ins-20802-oracle-database-configuration-assistant%EC%9D%84%EB%A5%BC-%EC%8B%A4%ED%8C%A8%ED%96%88%EC%8A%B5%EB%8B%88%EB%8B%A4)
+
+- 설치버전: Oracle(19LTS) + Oracle Client(11) + Orange(7) -> 아마도 Client, Orange는 32bit
+
+  <details><summary><b>오라클 설치 자세히</b></summary>
+  <div markdown="1">
+  - [Oracle Software Delivery Cloud](https://edelivery.oracle.com/osdc/faces/SoftwareDelivery) 에서 oracle database download 검색 + oracle database client download 검색 -> 19c, 11 버전 설치!!
+    - <img src="https://github.com/user-attachments/assets/3175e10e-37b0-4de3-81ed-e419eeb1f4f9" alt="image" style="zoom: 80%;" /> 
+    - 소프트웨어만 설치로 간단히 설치 후 **Database Configuration Assistant 실행(=dbca)**
+      - "관리자권한" cmd-dbca실행: db 이름 STR, SGA(1024),PGA(128) 에서 에러. 메모리 확인이 왜 안 된다지?!
+      - `dbca -J-Doracle.assistants.dbca.validate.ConfigurationParams=false` 로 dbca 실행 시 해결!!!
+      - 계정 비밀번호 oracle로 설정 했음
+  - **sqlplus**
+    - lsnrctl status 로 리스너 확인 - 잘 연결되어 있는 상태
+    - sqlplus / as sysdba 로 db 접속 (sysdba는 root 권한)
+    - select instance_name from v$instance; 로 db 잘 생성 되었나 db명 체크
+    - exit 로 탈출
+    - **db start?**
+      - sqlplus / as sysdba 로 root로 접속 후
+      - startup 로 db 실행
+      - lsnrctl start 로 리스너 실행!
+    - **db stop?**
+      - lsnrctl stop 로 외부 접속 가능하게 해주는 리스너 종료
+      - sqlplus / as sysdba 로 root로 접근 후 
+      - shutdown immediate 로 db 종료
+    - **services.msc 윈도우 서비스 화면 이동**
+      - 오라클이 자동으로 실행되는 (리붓마다) 방지하기 위해 여기서 "수동"으로 바꾸기
+      - 따로 만들어둔 **dbstart.bat** 파일로 오라클 필요 때 마다 실행하는 식으로 바꾸자.
+      - ```
+        //dbstart.bat 소스 -> 주석 다 지우기!
+        //STR, Listener 필수 구동
+        net start OracleServiceSTR
+        net start OracleOraDB19Home1TNSListenerLISTENERR
+        ```
+        - OracleServiceSTR -> DB STR 기동!
+        - OracleOraDB19Home1TNSListenerLISTENERR -> 리스너 기동!
+      - <img src="https://github.com/user-attachments/assets/2f179e6e-b465-474e-8ebe-c1670cae6a82" alt="image" style="zoom:80%;" /> 
+    - **오라클 삭제는 오라클 홈 디렉토리에 deinstall로 삭제하는거니까 주의**
+  </div>
+  </details>
+
+**오렌지 설치**<br>[Orange 공홈](https://www.warevalley.com/ko/support/download-list) 에서 설치!! -> Oracle Server, Oracle Client, 64 or 32bit 지원유무 구분하여 설치!<br>본인은 32bit dbau(유니코드) 버전 dba - DBA Edition 설치 했음 (client를 32bit 설치해서 그랬을거임)
+
+- 참고로 dba 버전은 체험용으로 1달인가? 만 무료ㅜㅜ
+
+  <details><summary><b>오렌지 설치 자세히</b></summary>
+  <div markdown="1">
+  - **[추가 오렌지 참고 문서](https://m.blog.naver.com/skeletonflower/222147717396), [추가 참고+instance client 활용ver](https://hoing.io/archives/153#__70)**
+    - instance client 활용 ver은 Oracle(19LTS) + Oracle Client(11) + Orange(7) 조합과 다른 방식일거다.<br>다음에 할 일 있으면 하고! 지금은 11버전 client 설치하는 방식으로 성공 했다.
+  - **Oracle Client 에러 참고**
+    - Oracle Base: C:\developer\app\oracle-client
+    - Oracle Home: C:\developer\app\oracle-client\product\11.2.0\client_1
+    - **sibar 에러 ORA-12560: TNS:프로토콜 어댑터 오류 뜸. 환장하겠네;**
+      - 리스너가 문제 있을 시 뜨는 오류라 하나보다. [해결 문서](https://200-rush.tistory.com/entry/ORA-12560-Listener)
+      - 현재 오라클 서버, 클라이언트 모두 설치했기에 sqlplus가 서버꺼인지 클라꺼인지 확인필요.
+        - virtualbox 리눅스로 했으면 오라클 서버 따로 구동했으니 이런 에러도 안떳을텐데 ㅠ
+        - **환경변수에 보면 "클라"께 위로 우선순위 되어있다 (PATH경로). "서버"를 위로 올리자.**
+      - <img src="https://github.com/user-attachments/assets/b230f2da-7f14-47ff-b09f-3e6b3e7177db" alt="image" style="zoom:80%;" />
+  -  **내 컴퓨터 (윈도우) 의 오라클 CLIENT의 TNSNAMES.ORA 파일의 TNS 정보 <-> ORACLE DATABASE 서버(LINUX.난 윈도우.)가 (LISTENER) 연결되어야한다.**
+    - port=1521, ip=?
+    - 오라클 CLIENT 설치된 서버의 tnsnames.ora 수정!!
+      - ```
+        TNS별칭 =
+          (DESCRIPTION =
+            (ADDRESS = (PROTOCOL = TCP)(HOST = 오라클 db 서버 ip)(PORT = db port))
+            (CONNECT_DATA =
+              (SERVER = DEDICATED)
+              (SERVICE_NAME = db sid)
+            )
+          )
+        ```
+      - ```
+        // 해당 내용 추가
+        STR =
+          (DESCRIPTION =
+            (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.??.??)(PORT = 1521))
+            (CONNECT_DATA =
+              (SERVER = DEDICATED)
+              (SERVICE_NAME = STR)
+            )
+          )
+        ```
+    - 이러면 이제 오렌지 TNS에 뜬다!! 물론, ORA-28040 에러 도함꼐 ㅋㅋㅋ
+      - Oracle Database, Oracle Database Client 둘의 버전이 맞지 않아서 뜨는 오류!
+      - Oracle Database쪽의 sqlnet.ora 를 수정하자.
+      - ```
+        # sqlnet.ora 파일 수정 (추가)
+        
+        SQLNET.ALLOWED_LOGON_VERSION_CLIENT = 10
+        SQLNET.ALLOWED_LOGON_VERSION_SERVER = 10
+        ```
+  - **참고 설정과 팁 - 오렌지)**
+    - 한번에 조회되는 SQL 길이 늘이기 -> 값이 너무 길면 중간에 잘리는 현상 방지
+      - Tools -> Orange Options -> Common -> Session -> Array Size, Long 수정 (5000,10000쯤?)
+    - 한번에 조회하는 row 수 늘리기 
+      - Tools -> Orange Options -> SQL Tool -> General -> Initial Fetch , Next Fetch 수정
+      - 또한 Fetch as Need 체크박스 해제하면 그냥 전체 row건이 항상 조회!
+    - 단축키
+      - sql 실행 : ctrl + enter  
+        전체 실행 : F5
+      - 주석처리 : ctrl + -  
+        주석처리 해제 : ctrl + shift + -
+      - sql문 재배치 : (드래그)ctrl + shift +f
+      - 저장 : ctrl + s  
+        불러오기 : ctrl + o  
+        새로운 탭 : ctrl + t
+      - 모두 소문자 : ctrl + u   
+        모두 대문자 : ctrl + shift + u
+      - Logon 창 띄우기 : ctrl + n 
+        - 계정 변경 (계정마다 소유의 테이블이 다르기 때문)
+        - 한번 맺었던 세션은 위에 남아있음
+  </div>
+  </details>
+
 <br>
 
 <br>
@@ -4628,103 +5646,501 @@ tasks.named('test') {
 
 <br>
 
-## 참고
+## 참고 지식
 
-사용한 로그인 구현 방식도 정리했음..
+**여러가지**
 
 <br><br>
 
-### "로그인 구현 방식"의 기본 지식
+### "로그인 인증 방식"
 
-AOP챕터에서 ArgumentResolver 관련 코드 보면 거기도 로그인 로직 코드 있으니 참고!
+#### (1) Session(서버 메모리) 방식
 
-- Login.java(인터페이스) -> @Login 애노테이션 생성
+**AOP챕터의 -ArgumentResolver 예시 코드의 로그인 로직 참고**
+
+동작흐름: HTTP 요청 -> WAS -> 필터 -> 서블릿 -> 인터셉터1 -> 인터셉터2 -> 컨트롤러
+
+interceptor 먼저 수행 후 -> argumentresolver 수행 순서
+
+<br>
+
+#### (2) JWT(토큰) -> Spring Security 사용 (코드포함)
+
+<details><summary><b>Spring Security??</b></summary>
+<div markdown="1">
+- `Spring` 내에서 `Filter` 를 기반으로 동작한다. 즉, `Http Request` 가 `Dispatcher Servlet` 에 도착하기 이전, `Spring Security` 가 제공하는 기능을 활용하여, 인증 혹은 인가에 대한 사전 검증을 진행한다.
+- **참고: HTTP 요청 -> WAS -> 필터 -> 서블릿 -> 인터셉터1 -> 인터셉터2 -> 컨트롤러**
+- **주요기능** -> [참고 문서](https://velog.io/@beberiche/Spring-Spring-Security-%EC%A3%BC%EC%9A%94-%EA%B8%B0%EB%8A%A5%EA%B3%BC-%EC%B2%98%EB%A6%AC-%EA%B3%BC%EC%A0%95-%EC%82%B4%ED%8E%B4%EB%B3%B4%EA%B8%B0)
+  1. **UserDetails 인터페이스** -> 인증, 인가(권한부여) 기능 제공
+     - 실무 관례: UserDetails 상속받는 CustomUserDetails 클래스 만들어 사용
+     - getAuthorities() : 계정의 권한 목록을 리턴한다.
+     - getPassword() : 계정의 비밀번호를 리턴한다.
+     - getUsername() : 계정의 고유한 값을 리턴한다. (중복 없는 이메일, PK)
+     - isAccountNonExpired() : 계정의 만료 여부를 리턴한다.
+     - isAccountNonLocked() : 계정의 잠김 여부를 리턴한다.
+     - isEnabled() : 계정의 활성화 여부를 리턴한다.
+     - 기본 제공 메서드 말고, 커스텀하여 추가 메서드 예시? getEmail() 이런거!
+  2. **UserDetailsService 인터페이스** -> 사용자 정보 조회 위한 서비스 단
+     - loadUserByUsername(String token) : 사용자의 토큰에서 `claim` 정보를 기반으로, 사용자를 조회하여, 조회된 정보를 기반으로 `UserDetails` 인스턴스를 생성한다.
+       - claim 정보란 JWT의 사용자 정보인 키-값 쌍 데이터!
+  3. **Authentication 인터페이스** -> 사용자 정보와 권한 담음
+     - 동작 과정을 보면 알지만 UsernamePasswordAuthenticationToken, UserDetails를 다 가지게 된다.
+  4. **AuthenticationProvider 인터페이스** -> `authenticate()` 와 `supports()` 메서드를 오버라이드
+     - authenticate() : 실제 인증 로직 구현이 이루어지는 메서드이고, `UsernamePasswordAuthenticationToken` 로 토큰을 만들며, 이 토큰 클래스는 `UserDetails` 클래스를 기반으로 `Authentication ` 객체로 반환 한다.
+     - supports() : 현재 `Provider` 클래스가 특정 타입의 `Authentication` 객체를 지원하는 여부를 알려주는 메서드이다. 예로, 인증객체(=authentication)가 특정 인증 타입(=UsernamePasswordAuthenticationToken)을 지원하는지 판별
+       - **예시 코드:** `return UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication);`
+  5. **AuthenticationManager** -> `AuthenticationProvider` 구현체를 관리
+     - 여러 Provider 구현체를 AuthenticationManager 에 담아 두면 상황에 따라 필요한 Provider 구현체를 불러오는 것이 가능하다.
+  6. **SecurityContext** -> 인증 정보를 서버 내에서 보관 및 `@AuthenticationPrincipal`을 사용하여 인증 정보를 가져올 수 있다
+     - 동작 과정을 보면 알지만 Authentication를 포함하는 구조다.
+  7. **GrandAuthority** -> 현재 사용자가 가진 권한을 의미 (권한 확인에 사용)
+     - 예로 ROLE_USER, ROLE_ADMIN 등을 정의하거나 체크할 수 있다.
+</div>
+</details>
+
+<details><summary><b>Spring Security 처리과정</b></summary>
+<div markdown="1"><br>
+<img src="https://github.com/user-attachments/assets/f9f565fd-2380-4e9b-9307-2c5a9baaf1f3" alt="image" style="zoom:80%;" /><br>
+1. 사용자가 로그인 정보와 함께 인증 요청을 진행한다.
+2. `AuthenticationFilter` 가 해당 요청에 대하여 `UsernamePasswordToken` 객체를 생성한다.
+3. `AuthenticationManager` 에, 해당 `UsernamePassowordToken` 객체를 전달한다.
+4. `AuthetincationManager` 는 전달된 `UsernamePassowordToken` 객체의 인증을 지원하는 `AuthenticationProvider` 를 찾아, 인증을 요구한다.
+5. `AutheticationProvider` 는 `authenticate()` 메서드를 호출하여, 인증 로직이 수행되도록 한다. 인증 로직의 경우 서비스마다 차이는 있겠으나, 공통적인 수행 방식은 다음과 같다.
+   - `UserDetailsService` 에서 해당 `token` 값의 `claims` 정보를 기반으로 해당하는 사용자를 찾는다.
+   - 인증 과정을 수행한 후, 성공적으로 인증이 되었다면 해당 사용자 객체 정보를 기반으로 `UserDetails` 객체를 생성하여 반환한다.
+   - 인증이 완료된 `UserDetails` 객체를 기반으로, 사용자 정보 및 권한 정보가 담긴 `Authentication` 객체를 생성한다.
+   - `Authentication` 객체를 `SecurityContext` 에 저장한다. 향후 `Controller` 에서 사용자 정보나 권한 정보가 필요한 경우, `@AuthenticationPrincipal` 등을 사용하여, 필요한 객체 정보를 불러올 수 있다.
+</div>
+</details>
+
+<details><summary><b>Spring Security 장점</b></summary>
+<div markdown="1">
+- **간편한 인증 및 인가**: 기본적인 인증 및 인가 기능이 내장
+- **자동 세션 관리:** 간단한 코드 설정으로 로그인 시 자동으로 세션을 관리하고, 로그아웃 시 세션을 무효화
+- **CSRF 보호:** 기본적으로 CSRF 공격에 대한 보호 기능이 제공
+  - CSRF(크로스 사이트 요청 위조, Cross-Site Request Forgery) 공격은 공격자가 사용자의 인증된 세션을 이용해, 사용자가 의도하지 않은 요청을 전송하게 만드는 공격 방식
+- **비밀번호 암호화:** PasswordEncoder로 간단히 비밀번호 암호화
+</div>
+</details>
+
+**예전버전 -> 현재버전 바뀐점들 많다!! [공문 참고](https://spring.io/blog/2022/02/21/spring-security-without-the-websecurityconfigureradapter)**
+
+- 예전 버전은 `WebSecurityConfigurerAdapter`가 `Deprecated` 되었으니 `SecurityFilterChain`를 `Bean`으로 등록해서 사용하는 방식을 써라. 
+
+- mvcMatchers가 없어지고 requestMatchers 로 바뀜 -> 내부에 new MvcRequestMatcher() 또는 new AntPathRequestMatcher() 조합을 사용해야지만 함!
+
+- authorizeHttpRequest가 없어지고 authorizeHttpRequests 로 바뀜
+
+- 예전이랑 코드가 많이 바꼈기 때문에 **공식문서 꼭 잘 참고! (테스트 코드도 제공!)**
+
+<br>
+
+**LEPL플젝에 적용해보기 (위 Spring Security 처리과정 그림 꼭 참고)**<br>**사용파일:** ApiConfigV2.java, MemberDetail.java, MemberDetailService.java, CustomAuthenticationFilter.java, CustomAuthenticationToken.java, CustomAuthenticationProvider.java, CustomAuthenticationSuccessHandler.java, CustomAuthenticationFailureHandler.java
+
+기존 세션방식에서 직접 구현한 `Login`, `LoginMemberArgumentResolver`, `MemberCheckInterceptor` 클래스 같은 것 들이 필요없어 짐! 대신 웹이아닌 API이다 보니 커스텀할 클래스도 좀 더 많긴 하다.
+
+`implementation 'org.springframework.boot:spring-boot-starter-security'` 의존성 추가 하면 바로 인증 필요로 접속 막힘 (기본값 username:user, password:콘솔창에 UUID)
+
+특히 LEPL에 적용하려면... 웹 말고 API 방식 사용! (JWT)
+
+- uid를 username로, password는 `""`로 빈값으로 통일함!<br>참고: 스프링 시큐리티는 기본적으로 Form 인증 방식을 채택 -> 우리 플젝은 API 이므로 json데이터 매핑위해 커스텀 필수! (그래서 추가 커스텀 파일 굉장히 많은 것!)
+
+  - 물론,,,,,,  커스텀Filter를 Bean등록하는데 오류 터지는 중 ㅠㅠ<br>**AOP프록시에서 문제가 있었고, scurity패키지 부분은 제외해서 해결!**
+
+  - 컨틀롤러에 login, logout 부분은 없애야 할걸?! 이미 커스텀 필터로 다 했고, 성공핸들러와 실패핸들러도 직접 커스텀 다 했으니까!! 반환도 직접 다 했고!
+
+    - 실제로, 로그인 부분은 애초에 컨트롤러 있어도 그쪽은 타질 않음. 필터에서 이미 뺏어서 다 처리했기 때문!!
+
+    - 로그아웃도 추가하면 애초에 필터에서 컨트롤러가기전에 먼저 뺏는거라 잘 처리됨!
+
+      - **Logout 기능을 활성화하면 LogoutFilter 가 생김 (코드1줄!)**
+
+      - 해당 필터 내부에는 이미 로그아웃 핸들러도 존재 -> 아래 다 자동!~!!
+
+        1. 세션 무효화 핸들러
+
+        2. 인증토큰, SecurityContext 삭제 핸들러
+
+        3. 쿠키정보 삭제 핸들러
+
+  - 마지막으로 @Login 애노테이션으로 memberId (세션에 저장된) 를 가져오는것처럼<br>**@AuthenticationPrincipal 로 바로 가져와 사용 가능!**
+
+- API 기반의 애플리케이션에서 Spring Security로 로그인과 로그아웃을 처리할 때는 `formLogin`이나 `logout` 설정을 사용하지 않고, 주로 **JWT**나 **OAuth2** 같은 토큰 기반 인증 방식을 사용
+
+  - 웹의 경우: formLogin(로그인페이지), loginProcessingUrl(로그인 처리 페이지), defaultSuccessUrl(성공시 이동페이지) 등등 이런식으로 구성!!! -> [참고 문서](https://velog.io/@wooyong99/Spring-Security)
+  - **API는 JWT, OAuth2 같은 토큰을 활용하므로 방식이 다름 -> [참고 문서](https://padosol.tistory.com/69)**
+    - API 기반 개발했고, 자세한 내용은 **전체 코드의 주석+참고 문서+Spring Security 처리과정 그림** 을 보면 이해할 수 있을것이다!
+
+  <details><summary><b>전체 코드</b></summary>
+  <div markdown="1"><br>
+  **build.gradle**
+  ```groovy
+  //Spring Security
+  implementation 'org.springframework.boot:spring-boot-starter-security'
+  implementation "org.springframework.security:spring-security-web"
+  implementation "org.springframework.security:spring-security-config"
+  ```
+  **ApiConfigV2.java**
   ```java
-  @Target(ElementType.PARAMETER) // 파라미터에 사용
-  @Retention(RetentionPolicy.RUNTIME) // RUNTIME 까지 살아남게 설정
-  public @interface Login {
+  /**
+   * Spring Security 쓸거면??
+   * 1. build.gradle 에 주석해제해서 라이브러리 다운
+   * 2. security 패키지 파일 주석 전부 해제 (개노가다;;)
+   */
+  @Configuration // 설정 파일임을 알림
+  @EnableWebSecurity // Spring Security
+  @RequiredArgsConstructor
+  @Slf4j
+  public class ApiConfigV2 {
+    private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
+    private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
+    private final AuthenticationConfiguration authenticationConfiguration;
+    private final HandlerMappingIntrospector introspector;
+    private final MemberDetailService detailService;
+    /**
+     * Spring Security의 앞단 설정을 할수 있다.
+     * debug, firewall, ignore등의 설정이 가능
+     * 단 여기서 resource에 대한 모든 접근을 허용하는 설정할수도 있는데
+     * 그럴경우 SpringSecuity에서 접근을 통제하는 설정은 무시해버린다.
+     */
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+      return (web) -> {
+        web
+            .ignoring()
+            .requestMatchers(new AntPathRequestMatcher("/h2-console/**")
+            );
+      };
+    }
+  //
+    /**
+     * Spring Security 기능 설정을 할수 있다.
+     * 특정 리소스에 접근하지 못하게 하거나 반대로 로그인, 회원가입 페이지외에 인증정보가 있어야
+     * 접근할 수 있도록 설정할 수 있다.
+     * 특정 리소스의 접근허용 또는 특정 권한 요구,로그인, 로그아웃, 로그인,로그아웃 성공시 Event
+     * 등의 설정이 가능하다.
+     */
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+      // csrf는 브라우저 없이 API 개발은 jwt같은 인증방식을 사용해서 굳이 필요가 없다고 한다.
+      // 요청에 대한 설정
+      // permitAll시 해당 url에 대한 인증정보를 요구하지 않는다.
+      // authenticated시 해당 url에는 인증 정보를 요구한다.(로그인 필요)
+      // hasAnyRole시 해당 url에는 특정 권한 정보를 요구한다.
+      // resources에 대해 접근혀용을 해야지 브라우저에서 로그인없이 js파일이나 css파일에 접근할 수 있다.
+      http
+          .csrf(csrf -> csrf
+              .ignoringRequestMatchers(new AntPathRequestMatcher("/**"))
+          ) //전체 경로에 csrf 비활성화
+          .authorizeHttpRequests(authorize -> authorize
+              .requestMatchers(new MvcRequestMatcher(introspector,"/api/v1/members/**")).permitAll()
+              .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll() // 정적 자원
+              .anyRequest().authenticated()
+          )
+          .addFilterBefore(ajaxAuthenticationFilter(),
+              UsernamePasswordAuthenticationFilter.class) // 필터 가로채기!
+          .logout(logout -> logout
+              .logoutUrl("/api/v1/members/logout")
+              .logoutSuccessHandler((request, response, authentication) -> {
+                response.setStatus(HttpStatus.OK.value());
+                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                response.getWriter().print("로그아웃 성공");
+              }) // 로그아웃 성공 핸들러 (간단히 추가)
+          );
+      return http.build();
+    }
+  //
+    @Bean
+    public CustomAuthenticationFilter ajaxAuthenticationFilter() throws Exception {
+      CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter();
+      customAuthenticationFilter.setAuthenticationManager(authenticationManager()); //manager 등록
+      customAuthenticationFilter.setAuthenticationSuccessHandler(customAuthenticationSuccessHandler);
+      customAuthenticationFilter.setAuthenticationFailureHandler(customAuthenticationFailureHandler);
+  //
+      //Form Login 방식은 기본적으로 DelegatingSecurityContextRepository 가 설정되어 있어서 REST API 방식을 위해 아래 추가
+      //RequestAttributeSecurityContextRepository 는 세션을 저장 하지 않기 때문에 로그인 후 API 요청시 Anonymous 토큰이 생성되게 됩니다.
+      //HttpSessionSecurityContextRepository 는 빈 세션을 만들 뿐! (어차피 토큰 사용할거라 빈 상태로 놔둘거임)
+      customAuthenticationFilter.setSecurityContextRepository(
+          new DelegatingSecurityContextRepository(
+              new RequestAttributeSecurityContextRepository(),
+              new HttpSessionSecurityContextRepository()
+          ));
+      System.out.println("test5");
+      return customAuthenticationFilter;
+    }
+  //
+    @Bean
+    public AuthenticationManager authenticationManager() throws Exception {
+      return authenticationConfiguration.getAuthenticationManager();
+    }
+  //
+    @Bean
+    public PasswordEncoder passwordEncoder(){
+      return new BCryptPasswordEncoder(); //provider 에서 사용 위해 빈 등록
+    }
   }
   ```
-
-* 컨트롤러 - ArgumentResolver 활용해서 @Login으로 바로 Member 객체 가져오기
-
+  **MemberDetail.java**
   ```java
-  @GetMapping("/")
-  public String homeLoginV3ArgumentResolver(@Login Member loginMember, Model model) {
-      //세션에 회원 데이터가 없으면 home
-      if (loginMember == null) {
-          return "home";
+  @Data
+  public class MemberDetail implements UserDetails {
+    private Member member;
+    public MemberDetail(Member member) {
+      this.member = member;
+    }
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+      // 특별한 권한 시스템을 사용하지 않을경우 -> role
+      return Collections.EMPTY_LIST;
+    }
+    @Override
+    public String getPassword() {
+      return "";
+    }
+    @Override
+    public String getUsername() {
+      return member.getUid();
+    }
+    // 계정 만료여부 제공
+    // 특별히 사용을 안할시 항상 true를 반환하도록 처리
+    @Override
+    public boolean isAccountNonExpired() {
+      return true;
+    }
+    // 계정 비활성화 여부 제공
+    // 특별히 사용 안할시 항상 true를 반환하도록 처리
+    @Override
+    public boolean isAccountNonLocked() {
+      return true;
+    }
+    // 계정 인증 정보를 항상 저장할지에 대한 여부
+    // true 처리할시 모든 인증정보를 만료시키지 않기에 주의해야한다.
+    @Override
+    public boolean isCredentialsNonExpired() {
+      return false;
+    }
+    // 계정의 활성화 여부
+    // 딱히 사용안할시 항상 true를 반환하도록 처리
+    @Override
+    public boolean isEnabled() {
+      return true;
+    }
+  }
+  ```
+  **MemberDetailService.java**
+  ```java
+  @Service
+  @RequiredArgsConstructor
+  public class MemberDetailService implements UserDetailsService {
+    private final MemberRepository repository;
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+      Member member = repository.findByUid(username);
+      if(member == null)
+        throw new UsernameNotFoundException("계정을 찾을 수 없습니다.");
+      return new MemberDetail(member);
+    }
+    /**
+     * 위에서 비밀번호는 사용안하냐고 물을수 있다.
+     * 보통 Database에 비밀번호를 암호화 해서 저장하므로 Database에서 해당 정보를 찾을때 ID값과 암호화된 비밀번호를
+     * 비교해가면서 찾는것보다 먼저 ID값으로 먼저 찾고 비밀번호를 복호화해서 비교하는게 더 빠르고 정확하다.
+     * 때문에 대부분 회원가입할때 ID 중복을 확인하는 이유가 ID값으로 찾았을때 여러개의 계정정보가 검색되면 어떤 계정으로 인증을 해야할지 알수없기 때문.
+     */
+  }
+  ```
+  **CustomAuthenticationFilter.java**
+  ```java
+  public class CustomAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
+    private ObjectMapper objectMapper = new ObjectMapper();
+    public CustomAuthenticationFilter() {
+      // url과 일치하면 해당 필터가 가로채서 동작!
+      super(new AntPathRequestMatcher("/api/v1/members/login"));
+      System.out.println("test2");
+    }
+  //
+    @Override
+    public Authentication attemptAuthentication(HttpServletRequest request,
+        HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
+      // POST 인지 확인
+      System.out.println("test1");
+      if (!"POST".equals(request.getMethod())) {
+        throw new IllegalStateException("Authentication is not supported, no post");
       }
-      //세션이 유지되면 로그인으로 이동
-      model.addAttribute("member", loginMember);
-      return "loginHome";
+      // body를 login 정보에 매핑
+      LoginDto loginDto = objectMapper.readValue(request.getReader(), LoginDto.class);
+      // id, password cehck
+      if (loginDto.getUid().isEmpty()) {
+        throw new IllegalArgumentException("username or password is empty, no uid");
+      }
+      // 인증 되지 않은 토큰 생성 (나중에 인증)
+      CustomAuthenticationToken token = new CustomAuthenticationToken(
+          loginDto.getUid(),
+          "" // uid만 사용하므로 password 생략
+      );
+      // manager 가 인증 처리하게 위임
+      Authentication authentication = getAuthenticationManager().authenticate(token);
+      return authentication;
+    }
+  //
+    @Data
+    public static class LoginDto {
+      private String uid;
+    }
   }
   ```
-
-* 인터셉터 - URL 접근시 전부 회원인증 여부 체크(공통관리)를 인터셉터로 확인
-
+  **CustomAuthenticationToken.java**
+  ```java
+  public class CustomAuthenticationToken extends AbstractAuthenticationToken {
+    private static final Long serialVersionUID = SpringSecurityCoreVersion.SERIAL_VERSION_UID;
+    private final Object principal; //사용자 식별 정보(ex: username, id)
+    private Object credentials; //사용자 인증 정보(ex: password, token)
+    //인증 전 생성자
+    public CustomAuthenticationToken(Object principal, Object credentials) {
+      super(null); //인증전이라 role X
+      this.principal = principal;
+      this.credentials = credentials;
+      setAuthenticated(false); //인증되지 않은 상태로 설정 (오버라이딩한 자식 메소드임)
+    }
+    //인증 후 생성자
+    public CustomAuthenticationToken(Object principal, Object credentials,
+        Collection<? extends GrantedAuthority> authorities) {
+      super(authorities); //role 등록 -> 이 플젝은 role 미사용이긴 함!
+      this.principal = principal;
+      this.credentials = credentials;
+      super.setAuthenticated(true); //인증된 상태로 설정 (부모)
+    }
+  //
+    @Override
+    public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
+      //애초에 true 로 설정할 일이 없어서 조건문 추가 위해 Override
+      Assert.isTrue(!isAuthenticated, "Cannot set this token to trusted - use constructor which takes a GrantedAuthority list instead");
+      super.setAuthenticated(false);
+    }
+    @Override
+    public void eraseCredentials() {
+      super.eraseCredentials(); //인증 정보 지우기
+      this.credentials = null;
+    }
+    @Override
+    public Object getCredentials() {
+      return this.credentials;
+    }
+    @Override
+    public Object getPrincipal() {
+      return this.principal;
+    }
+  }
+  ```
+  **CustomAuthenticationProvider.java**
+  ```java
+  @Component
+  @RequiredArgsConstructor
+  public class CustomAuthenticationProvider implements AuthenticationProvider {
+    private final MemberDetailService memberDetailService;
+  //  private final PasswordEncoder passwordEncoder; // 원래 여기서 password 복화해 해서 비교!
+  //
+    @Override
+    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+      String username = authentication.getName();
+      String password = (String) authentication.getCredentials();
+      MemberDetail entity = (MemberDetail) memberDetailService.loadUserByUsername(username);
+      return new CustomAuthenticationToken(entity, null, entity.getAuthorities());
+    }
+    @Override
+    public boolean supports(Class<?> authentication) {
+      return authentication.equals(CustomAuthenticationToken.class);
+    }
+  }
+  ```
+  **CustomAuthenticationSuccessHandler.java**
   ```java
   @Slf4j
-  public class LoginCheckInterceptor implements HandlerInterceptor {
-  
-      @Override
-      public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-  
-          String requestURI = request.getRequestURI();
-  
-          log.info("인증 체크 인터셉터 실행 {}", requestURI);
-  
-          HttpSession session = request.getSession(); 
-  
-          if (session == null || session.getAttribute(SessionConst.LOGIN_MEMBER) == null) {
-              log.info("미인증 사용자 요청");
-              //로그인으로 redirect
-              response.sendRedirect("/login?redirectURL=" + requestURI);
-              return false;
-          }
-  
-          return true;
-      }
+  @Component
+  public class CustomAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
+    private ObjectMapper objectMapper = new ObjectMapper();
+    //Rest API 이기 때문에 redirect 처리를 하지 않고 response 에 바로 값
+    @Override
+    public void onAuthenticationSuccess(HttpServletRequest request,
+        HttpServletResponse response,
+        Authentication authentication) throws IOException {
+      System.out.println("test3");
+      MemberDetail member = (MemberDetail) authentication.getPrincipal();
+  //
+      response.setStatus(HttpStatus.OK.value());
+      response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+  //    objectMapper.writeValue(response.getWriter(), member);
+      objectMapper.writeValue(response.getWriter(), SUCCESS_LOGIN);
+    }
   }
   ```
-
-* WebMvcOnfigurer 적용 - 인터셉터와 ArgumentResolver 를 설정해야 적용이 됨
-
+  **CustomAuthenticationFailureHandler.java**
   ```java
-  @Configuration
-  public class WebConfig implements WebMvcConfigurer {
-  
-      @Override
-      public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-          resolvers.add(new LoginMemberArgumentResolver());
+  @Slf4j
+  @Component
+  public class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler {
+    private ObjectMapper objectMapper = new ObjectMapper();
+    @Override
+    public void onAuthenticationFailure(HttpServletRequest request,
+        HttpServletResponse response,
+        AuthenticationException exception) throws IOException {
+      String errMsg = "Invalid Username or Password";
+      response.setStatus(HttpStatus.UNAUTHORIZED.value());
+      response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+  //
+      if(exception instanceof BadCredentialsException) {
+        errMsg = "Invalid Username or Password";
+      } else if(exception instanceof DisabledException) {
+        errMsg = "Locked";
+      } else if(exception instanceof CredentialsExpiredException) {
+        errMsg = "Expired password";
       }
-  
-      @Override
-      public void addInterceptors(InterceptorRegistry registry) {
-          registry.addInterceptor(new LoginCheckInterceptor())
-                  .order(2)
-                  .addPathPatterns("/**") // 인증O
-                  .excludePathPatterns("/", "/members/add", "/login", "/logout",
-                          "/css/**", "/*.ico", "/error"); // 인증X
-      }
+      objectMapper.writeValue(response.getWriter(), errMsg);
+    }
   }
   ```
-
-* 세션 타임아웃은 글로벌 설정으로 이미 1800(30분)으로 적용되어 있는것같아서 수정할 필요 없어보임.<br>
-  그래도 설정이 눈에 보이게끔 server.servlet.session.timeout=1800 // 분단위. 이렇게 놔둬.
-
-* 쿠키 id는 SessionConst.java 만들어서 상수로 등록 권장. 자주쓰니까
-
-  * String타입인 "SESSION_NAME_LOGIN" 이런 상수가 저장된 파일일 뿐
-
+  **Controller.java**
+  ```java
+  /**
+   * 일정 조회(3) - 모든 Lists(=하루단위 일정모음) 조회 -> 해당 회원꺼만
+   */
+  //아래 코드는 기존 argumentresolver 사용해서 @Login 으로 memberId 겟!
+  @GetMapping(value = "/member/all")
+  public ResponseEntity<List<ListsResDto>> findAllWithMemberTask(@Login Long memberId) {
+    List<Lists> listsList = listsService.findAllWithMemberTask(memberId);
+    if (listsList.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+    }
+    List<ListsResDto> result = listsList.stream()
+        .map(o -> new ListsResDto(o))
+        .collect(Collectors.toList());
+    return ResponseEntity.status(HttpStatus.OK).body(result);
+  }
+  //
+  //아래 코드는 Spring Security 사용하여 @Login 대신 memberId를 가져온 코드
+  @GetMapping(value = "/member/all")
+  public ResponseEntity<List<ListsResDto>> findAllWithMemberTask(@AuthenticationPrincipal
+      MemberDetail memberDetail) {
+    Long memberId = memberDetail.getMember().getId();
+    List<Lists> listsList = listsService.findAllWithMemberTask(memberId);
+    if (listsList.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+    }
+    List<ListsResDto> result = listsList.stream()
+        .map(o -> new ListsResDto(o))
+        .collect(Collectors.toList());
+    return ResponseEntity.status(HttpStatus.OK).body(result);
+  }
+  ```
+  </div>
+  </details>
 
 <br><br>
 
 ### "파일 업로드, 다운로드" 기본 지식
 
-* **파일은 "스토리지"** 저장, 경로와 이름 등 정보**(EX: Item)는 "DB"** 저장
+* **파일은 "스토리지"** 저장, 경로와 이름 등 **정보(EX: Item)는 "DB"** 저장
 * **Item** - uploadFileName, storeFileName 는 필수 저장
-  * uploadFileName(업로드 파일명), storeFileName(서버에 저장된 파일명) 둘 다 DB에 기록해놔야 함
+  * uploadFileName(=업로드 파일명), storeFileName(=서버에 저장된 파일명) 둘 다 DB에 기록해놔야 함
   * 업로드 파일명들은 사람마다 중복될 수 있으며, 서버 파일명은 중복되면 안돼서 UUID 같은걸로 지정하기에 "둘 다 기록"
 * **ItemForm** - Item의 Dto 용으로 만들어서 Form 데이터를 받는 도메인을 만들어줘야 함
   * 여기선 `MultipartFile` 타입을 사용해 데이터 받을거라 Item 에선 할 수 없기에 만들어줌
@@ -4733,247 +6149,67 @@ AOP챕터에서 ArgumentResolver 관련 코드 보면 거기도 로그인 로직
 * **컨트롤러에서..**
   * `@GetMapping("/images/{filename}")` : \<img> 태그로 **이미지를 조회**할 때 사용
     * UrlResource 로 이미지 파일을 읽어서 @ResponseBody 로 이미지 바이너리를 반환
-    * 경로에 "file:" 을 넣어야 내부저장소 경로를 접근하는 것 (스토리지에 파일 있으니까!)
+    * **경로에 "file:"** 을 넣어야 **내부저장소 경로**를 접근하는 것 (스토리지에 파일 있으니까!)
       * 이 부분을 통해 **"경로 설정" 을 꼭 해줘야 정상 접근**
   * `@GetMapping("/attach/{itemId}")` : **파일을 다운로드** 할때 실행
     * "/attach/{itemId}" - \<a> 태그 "href" 활용해 "파일명" 을 눌러서 접근하게 한 URL 경로
       * 파일 다운로드시 권한 체크같은 복잡한 상황까지 가정해서 이미지 id 를 요청하도록 함
     * 파일 다운이 되려면 반환할때 **"헤더" 가 필수**
     * 파일 다운로드시에는 고객이 업로드한 파일 이름으로 다운로드 하는게 좋다. 
-      * Content-Disposition 해더에 `attachment; filename="업로드 파일명"`
+      * Content-Disposition 헤더에 `attachment; filename="업로드 파일명"`
+
+<br><br>
+
+### TCP, UDP 통신(+ 멀티스레드)
+
+**[bchat 프로젝트](https://github.com/BH946/bchat) 참고 -> 코드와 기능개발.md**
+
+HTTP 통신은 Spring 프로젝트 했던 모든게 HTTP 통신이었고 TCP, UDP를 알아보자
+
+- 참고) 개념적으로 OSI 7계층 생각해보면??
+  - HTTP가 응용계층이고 하위가 TCP, UDP전송계층이라서 분류하기 애매하다. 
+  - 따라서 HTTP는 단기적인 TCP 커넥션을 하고 종료한다고 생각하자.
+- TCP는 1:1 양방향 통신(EX: 실시간 채팅), UDP는 1:N 통신으로 전달순서 보장X (EX: 라디오)
+  - 참고 문서: [UDP개념 예제](https://coding-factory.tistory.com/271), **[TCP개념 예제 - 그림 꼭 참고!!](https://coding-factory.tistory.com/270)**
+- 자바 Socket라이브러리는 네트워크 부분의 끝 부분으로써 읽기/쓰기 인터페이스 제공<br>Spring에도 TCP와 UDP 지원 라이브러리가 있다.
+  - 웹소켓은?? 클라가 웹이면 웹소켓을 사용하자!
+  - WebSocket(웹소켓) 통신은 클라이언트와 서버(브라우저와 서버)를 연결하고 실시간으로 통신이 가능하도록 하는 첨단 기술 (HTTP는 실시간X. 물론 http polling 로 가능은 함)
+
+<br>
+
+**프로젝트에 TCP, UDP 를 적용하려면 아래를 알아두자. (JAVA 기준)**
+
+- TCP통신의 경우: **클라이언트의 소켓 <-> 서버의 accept() 메서드에 의해 반환 된 소켓** 과 스트림 통신
+
+  - Socket 클래스(=위 두 소켓을 의미), ServerSocket 클래스(=서버 단에서 외롭게 존재하는 1개의 소켓)
+
+- UDP통신의 경우: **하나의 소켓이 송신, 수신에 둘 다 사용 가능**
+
+  - DatagramSocket 클래스(=소켓), DatagramPacket 클래스(=데이터 관련)
+  - UDP도 수신이 가능! 연결지향형이 아니라고 해서 송신만 하는건 아니다.
+
+- **TCP, UDP 두 통신의 "서버는 항상 구동상태로써 클라 요청 무한 대기" 가 기본이다.**
+
+  - TCP로 구현한 채팅방 예시
+
+    - (서버) 채팅방 만든 방장은? ServerSocket 이 구동하며 accept()로 클라 소켓(=Socket) 만들려고 무한 대기 -> 클라 마다 새로운 Socket 생성! (멀티스레드 중요!!)
+
+    - (클라) 채팅방 입장 유저는? Socket 를 서버에 요청해서 반환 받은 Socket을 사용
+    - Socket 이 만들어진 순간 "클라<->서버" 실시간 연결!<br>이제 송, 수신 자유롭게 할 수 있다.
+
+  - UDP로 구현한 회원가입, 로그인 예시
+    - (서버) 회원가입, 로그인 응답은? receive()로 클라 요청을 무한 대기
+    - (클라) 회원가입, 로그인 요청은? send()로 서버로 요청
+    - 당연히 클라에서 receive()로 성공, 실패 응답을 반환 받을 수 있다.
+  - TCP를 보면 여러 Thread가 생성 되는데(채팅 참여자가 N명 이니까) 송, 수신 순서도 중요한 멀티스레드 상황이라 **volatile 키워드로 교통정리 필수!**
+
+<br>
+
+**프로젝트에 왜 멀티스레드를 적용??**
+
+- 애초에 클라 컴퓨터, 서버 컴퓨터 따로 구동해야하는데 그냥 한개의 컴퓨터에서 구현했기에 "서버에서 무한정 대기 Thread" 를 계속 구동하며 **main Thread 와 별개로 처리**할 목적
+- TCP 서버에서 반환한 소켓들이 각각 new Thread 들이고 다들 실시간 채팅을 송, 수신 해야하기에 **다들 수신을 무한정 대기하는게 필수**라 멀티스레드는 필수!
 
 <br>
 
 <br>
-
-## 그외  정리아직안한 것들..
-
-**리소스 정리(close)** 는 필수고 **"역순"**으로 할 것
-
-**커넥션 풀**은 **실무**에서 무조건 사용, **성능테스트**를 통해 결정하는편, `hikariCP` 를 **기본으로 스프링 부트가 사용중**(커넥션풀 오픈소스)
-
-- hikariCP 는 DataSource 인터페이스의 구현체이고, **DataSource**는 자동으로 **application.yml** 같은 설정파일의 DB정보(URL,ID,PW 등)을 읽기 때문에 해당 설정파일을 잘 작성하면 된다.
-
-앱에서 DB 접근시 **커넥션**뿐만 아니라 DB 내부에서는 **"세션"** 생성 -> **세션이 SQL 실행**
-
-기본적으로 **언체크(런타임) 예외를 사용**하자(**문서화 필수!**) 
-
-- 예외변환은 `throw new 커스텀예외(e);` 처럼 현재 error를 담는 e를 꼭 생성자 매개변수에 넘겨줘야 하위의 에러내용들을 다 기록하므로 이부분 주의! 
-- JDBC 사용하는경우 **JdbcTemplate** 를 사용한다면, 이런 예외랑 커넥션 동기화 등등 다양한것을 한번에 제공
-
-트랜잭션 -> @Transactional 을 계속 사용
-
-[스프링 DB 1편 - 데이터 접근 핵심 원리](https://github.com/BH946/spring-first-roadmap/tree/main/spring_study_6/jdbc)
-
-
-
-
-
-[스프링 DB 2편 - 데이터 접근 활용 기술](https://github.com/BH946/spring-first-roadmap/tree/main/spring_study_7/itemservice-db)
-
-- 데이터접근기술들 여기서 간단한 문법,동작방식 참고 - **스프링 JdbcTemplate, MyBatis, JPA, 스프링 데이터 JPA, Querydsl**
-
-컴포넌트 스캔? 스프링 빈 자동 등록? 수동 등록?
-
-- 컴포넌트 스캔을 전체 범위로 설정하여 @Repo... @Serv... 등 스캔하여 스프링빈 자동 등록되게 하는 방식과
-
-- 컴포넌트 스캔을 컨트롤러 범위정도로 한정하여 @Controller 를 제외한 레포,서비스 등은 스프링빈 수동 등록(@Import(설정파일)) 하게 하는 방식이 있단걸 기억.
-- 테스트분리 : **프로필**을 사용하여 프로필 이름 "local" 일 때 "자동 데이터 생성" 빈을 등록 가정,  
-  - **테스트 코드에선 프로필을 local 이외로 설정**하면 "자동 데이터 생성" 빈이 등록되지 않으니까 **"테스트 분리"가 성공적!**
-  - `@PostConstruct` 보다 `@EventListener` 를 사용 추천 (좀 더 타이밍이 안전)
-
-
-
-Dto는 제일 하위에서 가지는 계층에 두자
-
-ItemRepository의 구현체가 아니라 인터페이스를 테스트하는게 좋다 -> 다른 구현체들에도 동일하게 테스트 적용이 가능하므로
-
-테이블의 기본 키를 선택하는 전략은 크게 2가지 -> 자연 키(주민번호), 대리 키(auto_increment)
-
-- **대리 키를 권장 -> 변화하는 비지니스 환경 때문**
-
-- table 생성때 대리 키 생성 예시
-  - h2 : bigint generated by default as identity 사용
-  - mysql : auto increment 사용
-
-sql문에 별칭(as)를 자주 사용(이름 맞추기위해)
-
-
-
-**테스트에서 매우 중요한 원칙**
-
-- 테스트는 다른 테스트와 격리해야 한다.
-- 테스트는 반복해서 실행할 수 있어야 한다.
-- **이를 트랜잭션으로 한방에 해결**
-
-H2는 Java 만들어진 DB이다. 따라서 메모리모드를 지원한다.
-
-테스트 - 임베디드 모드 DB
-
-- 임베디드모드(메모리모드)를 사용하기 위해 Datasource를 새로 만들어 스프링 빈에 등록한다. -> JVM에 DB를 만들어 사용
-  - `src/test/resources/schema.sql` 에 원하는 create table 을 작성 (메모리DB는 OFF시 데이터X라서)
-- 그런데 스프링부트는 테스트의 설정파일에 datasource관련 주석처리한다?? 바로 임베디드 모드(메모리모드)를 자동 사용! (매우간편)
-  - create table 도 설정파일에 추가하면 매우쉽게 가능
-
-
-
-JPA와 객체 그래프 탐색
-
-- 객체는 기본적으로 객체 그래프로 전부 탐색이 가능해야한다.
-- SQL문은 외래 키 사용했을때 딱 거기까지 범위만 탐색이 가능하다.
-- JPA는 객체처럼 전부 탐색이 가능하게 해준다.
-
-JPA 엔티티는 기본생성자 필수~!
-
-@Controller, @Service, @Repository, @Entity 는 기본적으로 컴포넌트 스캔의 대상이 되어서 **스프링 빈에 자동 등록**된다.
-
-- **@Controller는 MVC 기능을 추가 제공한다.**
-
-- **@Repository는 예외 변환 AOP의 적용 대상이 된다.**
-  - 스프링 예외 추상화를 사용할 수 있게 된다.
-
-
-
-SpringDataJPA -> 간단한 건 쿼리메서드, 복잡한 건 @Query 권장
-
-- 해당 라이브러리에 **JDBC, 하이버네이트, JPA 도 전부 포함**된다.
-
-
-
-QueryDSL 은 지금 이정도만 알아두자 -> 조건문에 BooleanExpression 클래스를 활용
-
-```java
-@Override
-public List<Item> findAll(ItemSearchCond cond) {
-
-    String itemName = cond.getItemName();
-    Integer maxPrice = cond.getMaxPrice();
-
-    return query
-        .select(item)
-        .from(item)
-        .where(likeItemName(itemName), maxPrice(maxPrice))
-        .fetch();
-}
-
-private BooleanExpression likeItemName(String itemName) {
-    if (StringUtils.hasText(itemName)) {
-        return item.itemName.like("%" + itemName + "%");
-    }
-    return null;
-}
-
-private BooleanExpression maxPrice(Integer maxPrice) {
-    if (maxPrice != null) {
-        return item.price.loe(maxPrice);
-    }
-    return null;
-}
-```
-
-
-
-**그래서 데이터접근 결론으로 무엇을 추천하는가??**
-
-- **JPA, 스프링 데이터 JPA, Querydsl 을 기본으로 사용**
-  - 어댑터 추가ver, 단순ver 은 상황에 맞게 선택!
-  - 상관없다면?? **단순ver을 사용**하자 -> **스프링데이터JPA + QueryDSL** 를 기본으로 잡자!
-- **복잡한 쿼리가 잘 해결이 안될때 해당 부분은 JdbcTemplate이나 MyBatis를 함께 사용**
-  - JPA랑 JDBC는 트랜잭션 매니저가 다를텐데 어떡하나??
-  - `JpaTransactionManager` 가 대부분 기능들을 제공해서 괜찮다고 한다.
-  - 단, JPA 플러시 타이밍에 주의
-
-
-
-**트랜잭션 AOP 주의 사항 - 프록시 내부 호출**
-
-- "클라요청" -> "프록시 호출" -> "실제 트랜잭션 호출" 순서가 일반적인데,
-- "클라요청" -> "실제 트랜잭션 호출" 인 경우를 마주칠 수 있다. **=> 트랜잭션 적용X**
-  - 자바 문법상 `internal();` 은 `this.internal();` 로 호출하므로 이런 경우가 생긴다.
-- 가장 간단한 해결방안은 **"internal 메소드를 별도의 클래스로 분리"**
-
-**트랜잭션 AOP 주의 사항 - 트랜잭션 적용 범위**
-
-- 클래스 레벨에 "트랜잭션 적용"시 스프링은 **public 메서드**만 트랜잭션 적용하도록 기본 설정
-  - 물론, 설정 변경 가능하다.
-
-**트랜잭션 AOP 주의 사항 - 초기화 시점**
-
-- @PostConstruct로 선언된곳에 @Transactional 선언시 트랜잭션은 미적용
-  - WHY?? **초기화코드(@PostConstruct)가 먼저 호출되고 그 다음 트랜잭션 AOP가 적용되기 때문이다. 따라서 초기화 시점에 해당 메서드는 트랜잭션 흭득 불가.**
-  - 해결법?? **@EventListener(ApplicationReadyEvent.class) 사용**
-
-
-
-레포1, 레포2 에서 각각 트랜잭션 사용 및 이 둘의 데이터가 연관된다면? 데이터 정합성 문제가 발생
-
-서비스에만 트랜잭션 사용시 데이터 정합성 해결 -> 레포 하나라도 롤백이면 전부 롤백되니까.
-
-다만, 이때 자동 사용된 개념이 "스프링 트랜잭션 전파" 이고, 굳이 독립적으로 트랜잭션 사용하겠다 한다면 REQUIRES_NEW 옵션을 사용하는것. -> 참고로 REQUIRED 옵션으로 기본값 설정되어있음
-
-**스프링 트랜잭션 전파**
-
-- 트랜잭션이 이미 진행중인데 추가로 수행한다면?? -> 이 경우 어떻게 동작할지 결정하는 것을 **"트랜잭션 전파(propagation)"**
-- 여러 트랜잭션들이 중복되어 사용된다면 이들을 구분짓기 위해 "물리,논리 트랜잭션" 개념 사용
-  - **모든 트랜잭션 매니저(물리,논리=외부,내부)를 커밋해야 물리 트랜잭션이 커밋된다. 하나의 트랜잭션 매니저라도 롤백하면 물리 트랜잭션은 롤백된다.**
-  - **트랜잭션 참여 : 외부 트랜잭션과 내부 트랜잭션이 하나의 물리 트랜잭션으로 묶이는 것**
-  - **같은 물리 트랜잭션 사용 == 같은 동기화 커넥션 사용**
-  - <img src="https://github.com/BH946/bh946.github.io/assets/80165014/1bd94b66-7022-47a1-a4a3-eaa68bfb6e90" alt="image" style="zoom: 80%;" />  
-
-**스프링 트랜잭션 전파 - 트랜잭션 두 번 사용**
-
-- **(1) 순차적으로 2번 사용은?**
-  - **"같은 커넥션(=conn0)"**를 사용, **"다른 프록시 커넥션"**을 사용.
-- **(2) 트랜잭션이 순차가 아닌 중복되게 사용하면? (커밋)**  
-  아래 코드처럼 "외부 시작 -> 내부 시작,커밋 -> 외부 커밋" 라면?
-  - 신규 트랜잭션 이라면 -> 커밋O
-  - 신규 트랜잭션 아니라면 -> 커밋X
-- **(3) 트랜잭션이 순차가 아닌 중복되게 사용하면? (롤백)**  
-  - 내부 롤백은 내부적으로 따로 롤백 마킹
-    - 외부 커밋 시점에 이를 확인해서 롤백 -> **rollbackOnly 설정을 확인**
-  - 이때, **UnexpectedRollbackException** 런타임 예외를 추가로 던진다.
-    - **롤백은 중요한 일**이므로 이런 예외를 추가로 던진다.
-- **(4) 트랜잭션이 순차가 아닌 중복되게 사용하면? (REQUIRES_NEW)**  
-  - REQUIRES_NEW 라는 옵션을 사용하면 **"외부 트랜잭션과 내부 트랜잭션을 분리 가능"**
-  - 즉, **독립적인** 트랜잭션이 2개 생기는 것이며 2개가 **동시에 사용**되는 것 -> 정확히는 1개씩 커넥션 순차적으로 처리 된다.
-
-스프링 트랜잭션 전파에 다양한 옵션들이 있지만 주로 **"REQUIRED, REQUIRES_NEW" 옵션**만 사용해서 2개만 기억해두자. -> 참고로 REQUIRED 는 기본값!
-
-참고로 메모리db 사용시 create table도 자동으로 jpa가!
-
-- db처리는 트랜잭션이 필수니까 “서비스 단”에서 보통 트랜잭션을 사용한다. 테스트 코드를 작성할때도 사용하고있다.. 그럼 트랜잭션이 겹칠테고 전파로 인해 기존 사용중인 트랜잭션을 그대로 사용하는것도 안다. 
-
-- **그럼 독립적으로 트랜잭션을 사용하는 경우는 뭐가 있을까??**
-
-  (1)기본값: 트랜잭션 그대로 전파 사용은 @Transactional의 `Propagation.REQUIRED` 속성
-
-  (2)트랜잭션 독립 사용은 @Transactional의 `Propagation.REQUIRED_NEW` 속성
-
-  - 사례1는 **결제 처리와 알림**이다. 결제가 성공하면 알림을 보낼건데, 알림 전송 실패하더라도 결제는 성공적으로 이루어져야 한다. 이것도 충분히 가능하다. -> 이게 실제 서비스에서 고려할 만한 부분인 것 같다.
-
-  - 사례2은 **배치 작업 및 상태 업데이트**다. 대량 데이터를 처리하는 배치 로직에서 "상태 업데이트"를 독립 트랜잭션으로 실행해서 롤백을 당해도 상태는 업데이트 할 수 있는 방안이다.
-
-    ```java
-    @Transactional
-    public void processBatch(List<Data> dataList) {
-      for (Data data : dataList) {
-          try {
-              // 데이터 처리
-              processData(data);
-              statusUpdateService.updateStatus(data.getId(), "Processed");
-          } catch (Exception e) {
-              // 처리 중 오류가 발생해도 상태 업데이트는 독립적으로 진행
-              statusUpdateService.updateStatus(data.getId(), "Failed");
-          }
-      }
-    }
-    
-    -------------------------------
-        
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void updateStatus(Long dataId, String status) {
-    // 상태 업데이트
-    	statusRepository.updateStatus(dataId, status);
-    }
-    ```
-
