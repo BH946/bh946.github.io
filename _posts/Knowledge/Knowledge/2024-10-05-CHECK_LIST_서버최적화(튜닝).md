@@ -179,7 +179,6 @@ public Long updateTotalCount() { return itemRepository.findTotalCount(); }
 </div>
 </div>
 </details>
-
 <br><br>
 
 ### db 테스트 특징
@@ -309,6 +308,8 @@ public Long updateTotalCount() { return itemRepository.findTotalCount(); }
 
 ### 튜닝 체크리스트
 
+**+) [데이터 모델 설계 품질 자가진단](https://blog.naver.com/cjsong/222910170620), [SQL문 품질 자가진단](https://blog.naver.com/PostView.naver?blogId=cjsong&logNo=222910186677&categoryNo=13&parentCategoryNo=0&viewDate=&currentPage=2&postListTopCurrentPage=1&from=postView)**
+
 <details><summary><b>SQL 튜닝 프레임워크(체계, 구조, 틀) -> 절대 이게 무조건 맞다는건 아님. 보통의 기준일 뿐!</b></summary>
 <div markdown="1"><br>
 **(액세스하는 데이터양 기준)소량 데이터? 부분범위 처리 가능? 기준**
@@ -332,6 +333,7 @@ public Long updateTotalCount() { return itemRepository.findTotalCount(); }
   - 통계정보 수집 정책
 </div>
 </details>
+
 <details><summary><b>자주 사용 힌트 목록</b></summary>
 <div markdown="1">
 - 힌트에 **오류**가 있으면 **SQL Server는 컴파일 에러, 오라클은 그냥 실행(무시)**
@@ -584,7 +586,6 @@ public Long updateTotalCount() { return itemRepository.findTotalCount(); }
 </table>
 </details>
 
-
 <details><summary><b>"전체범위 처리", "부분범위 처리" 구분</b></summary>
 <div markdown="1"><br>
 **가공이 있냐 없냐로 구분하자!**
@@ -602,26 +603,21 @@ public Long updateTotalCount() { return itemRepository.findTotalCount(); }
 
 **OR 보다는 AND 사용, distinct 는 가급적 사용X**: distinct는 내부적 정렬연산 발생
 
-**where 조건에는 가급적 Index 컬럼 사용 권장**
-
-<details><summary><b>Index 사용 주의점 -> 자세한건 개념정리 챕터 참고</b></summary>
-<div markdown="1"><br>
-**참고 문헌:[인덱스 사용](https://jie0025.tistory.com/509)**
-1. 인덱스는 **열 단위에 생성**
-2. 인덱스는 **WHERE 절에서 사용되는 열에 생성**
-3. WHERE 절에 사용되는 열이라도 자주 사용해야 가치가 있음 (당연한 말)
-4. 데이터 중복도가 높은 열에는 인덱스를 만들어도 효과가 없음 **(선택도가 높은 경우는 효과 없음)**
-5. **외래키를 설정한 열**에는 **자동으로 외래키 인덱스가 생성**됨
-6. **조인에 자주 사용되는 열**에는 인덱스를 생성하는 것이 좋음 (기본으로 생성해주는 db도 있음)
-7. **데이터 변경(삽입, 수정, 삭제) 작업이 얼마나 자주 일어나는지 고려**해야 함 (인덱스 효율 때문)
-8. 단일 테이블에 인덱스가 많으면 속도가 느려질 수있다. (**테이블당 4~5개 권장**)
-9. **클러스터형 인덱스는 테이블당 하나만** 생성할 수 있음
-10. 테이블에 클러스터형 인덱스가 아예 없는 것이 좋은 경우도 있음
-11. 사용하지 않는 인덱스는 제거
-12. 복합 인덱스는 **WHERE절에서 OR조건이 아니라 AND 조건일 때** 사용하는 것이 좋음
-13. [복합 인덱스의 컬럼 순서 결정법](https://khdscor.tistory.com/51)
+<details><summary><b>where 조건 컬럼 Index 권장 -> Index 사용 주의점(참고용)</b></summary>
+<div markdown="1">
+1. 인덱스는 **WHERE 절에서 사용되는 열에 생성**
+2. WHERE 절에 사용되는 열이라도 자주 사용해야 가치가 있음 (당연한 말)
+3. 데이터 중복도가 높은 열에는 인덱스를 만들어도 효과가 없음 **(선택도가 높은 경우는 효과 없음)**
+4. **외래키를 설정한 열**에는 **자동으로 외래키 인덱스가 생성**됨 (보통 지원하는 편)
+5. **데이터 변경(삽입, 수정, 삭제) 작업이 얼마나 자주 일어나는지 고려**해야 함 (인덱스 효율 때문! 굉장히 중요)
+6. 단일 테이블에 인덱스가 많으면 속도가 느려질 수있다. (**테이블당 4~5개 권장**)
+7. **클러스터형 인덱스는 테이블당 하나만** 생성할 수 있음
+8. 테이블에 클러스터형 인덱스가 아예 없는 것이 좋은 경우도 있음
+9. 사용하지 않는 인덱스는 제거 (당연한 말, 인덱스도 많은 비용이 발생)
+10. 복합 인덱스는 **WHERE절에서 OR조건이 아니라 AND 조건일 때** 사용하는 것이 좋음 (당연히 OR 조건은 인덱스 안타니까)
 </div>
 </details>
+
 
 **UPDATE 대신 CASE 문 사용, 배치 모드로 Delete, Update (=DML) 작업 지향!**
 
@@ -630,14 +626,12 @@ public Long updateTotalCount() { return itemRepository.findTotalCount(); }
 **Truncate & Insert**
 
 - **delete** **보다** **truncate** **가 빠름**
-- 대량의 데이터 갱신 때는 차라리 **CTAS(+nologging)로 복제** 후 기존 테이블 **truncate 하고 insert 하자.**
+- **대량의 데이터 갱신** 때 **CTAS(+nologging)로 복제** 후 기존 테이블 **truncate 하고 insert 하자.**
 - **인덱스**도 제거 했다가 DML 후 **재생성**이 더 빠를 수 있음.
 
 **조인을 내포한 Update는 merge into문 사용 권장**
 
-**클러스터링 팩터(=군집성 계수)가 좋은 인덱스를 사용하면 버퍼 피닝 효과로 I/O를 줄일 수 있다. -> 인덱스 잘 고르기**
-
-함수를 풀어서 **조인문이나 스칼라 서브쿼리**로 변경하는 것이 **함수 호출 부하를 최소화** -> 즉, 근본적인 해결법: **One SQL**
+**클러스터링 팩터(=군집성 계수)가 좋은 인덱스를 사용하면 버퍼 피닝 효과로 I/O를 줄일 수 있다.<br>-> 인덱스 잘 고르기**
 
 **바인드 변수로 하드파싱 최소화 + 앱 커서 캐싱으로 Parse Call 최소화(이건 자동이니 개념 잘 알자)**
 
@@ -645,23 +639,24 @@ public Long updateTotalCount() { return itemRepository.findTotalCount(); }
 
 - 수행빈도가 낮고 한 번 수행할 때 수십 초 이상 수행 SQL
 
-- Distinct value가 작고, 값 분포가 균일하지 않을 때
+- Distinct Value(NDV)가 작고, 값 분포가 균일하지 않을 때
 
-`select id컬럼` 보다 `select *(=전체컬럼)`라면 데이터 정렬 시 소트 공간 사용량, 네트워크 사용량 더 많음
+`select id컬럼` 가 `select *(=전체컬럼)` 보다 데이터 정렬 시 소트 공간 사용량(PGA), 네트워크 사용량 더 많음
 
-- 단, 블록 단위 I/O 이므로 Table Full Scan과 Index Scan 둘 다 **동일**
+- 단, 블록 단위 I/O 이므로 Table Full Scan과 Index Scan 량은 둘 다 **동일**
+- 물론, select절 컬럼이 인덱스에 모두 있으면 Table Scan은 없겠지~
 
-**리버스 키 인덱스** – **블록 경합 해소**에 도움 (인접된 값을 멀리 분산 시키는 특성 )
+**리버스 키 인덱스**는 **블록 경합 해소**에 도움 (=**인접된 값을 멀리 분산** 시키는 특성 )
 
 - '11112' 와 '11113' 은 연속된 값이지만 적용 시 '21111' 과 '31111' 이 되어 **분산**
 - 대량 데이터가 지속적으로 증가하는 '판매주문' 테이블의 일련번호를 생성했다면<br>최근 데이터는 유사한 값을 가질테고, 해당 부분에 액세스가 집중되는 경합 문제
 - 리버스 키 인덱스 적용 시 이를 해결하여 **랜덤 액세스의 효율이 향상**
 
-**IOT(테이블), 클러스터형 인덱스** – 테이블을 인덱스 구조로 관리(정렬기준 정의)
+**IOT(테이블), 클러스터형 인덱스**는 테이블을 인덱스 구조로 관리(정렬기준 정의)
 
-- 리프블록에 rowId가 아닌 실제 데이터를 저장 -> 테이블 랜덤 액세스가 발생X
+- 리프블록에 rowId가 아닌 실제 데이터를 저장 -> **테이블 랜덤 액세스가 발생X**
 
-**비트맵 인덱스** - 각 value마다 비트맵을 만들고, leaf node에 <컬럼,비트맵>을 저장
+**비트맵 인덱스**는 각 value마다 비트맵을 만들고, leaf node에 <컬럼,비트맵>을 저장
 
 - rowId가 아닌 각 키 값에 대한 비트맵을 저장 -> 테이블 랜덤 액세스 이점은 없다
 - **Distinct Value가 적을수록 적은 공간을 사용하므로 이점 (분포도가 나쁜 컬럼에 좋음)**
@@ -678,7 +673,6 @@ public Long updateTotalCount() { return itemRepository.findTotalCount(); }
 - **부분범위 처리** 가능하면 **order by, group by쪽** 컬럼을 인덱스 추가 고려하자 (**소트생략** 하자는 것) -> **부분범위 처리=소트연산 생략**임!
   - 번외) **push_pred**로 건건이 뷰안에 조인조건절 넣어서 부분범위 처리 성공하게 하는법?
     - 예로 group by는 당연히 전체범위를 읽어 그룹핑을 할텐데 인덱스를 사용해서 부분범위 처리를 했다. 근데, 이를 인라인뷰에 작성하고 메인쿼리와 조인을 하면 "뷰머징"으로 인해 소트가 발생한다.(아마 인덱스 적용이 안되어서 ) 이를 부분범위 처리 하려면?<br>답: `nl조인+no_merge push_pred` -> 뷰를 독립적으로 실행할 때처럼 부분범위 처리가 가능
-
 
 **IN 조건은 '=' 또는 '필터' 로 처리!**
 
@@ -726,8 +720,8 @@ public Long updateTotalCount() { return itemRepository.findTotalCount(); }
 
 - union all 사용 시 sql문이 2개로 나뉘어서 **인덱스도 2번 접근**
 
-**소트 튜닝 요약(1~5) – 이걸 해야 “부분범위처리”도 가능**
-
+<details><summary><b>소트 튜닝 요약(1~5) – 이걸 해야 “부분범위처리”도 가능</b></summary>
+<div markdown="1">
 1. **데이터 모델 측면에서의 검토**
    - 잘 정규화된 모델을 통합해버려서 원하는 데이터를 위해 빈번히 group by를 해야 한다면 성능이 좋을 리 없다.
    - **이처럼 group by, union, distinct 가 많은 경우 정규화가 잘 되지 않았음을 암시한다**
@@ -759,6 +753,10 @@ public Long updateTotalCount() { return itemRepository.findTotalCount(); }
    - 예로 야간에 트랜잭션 없을 때 수동으로 크기 조정해서 작업 수행이 효과적일 수 있다.
    - `alter session set work_area_size_policy = manual;` // 기존엔 auto가 기본값 (자동 관리)
    - `alter session set sort_area_size = 10485760;`
+</div>
+</details>
+
+함수를 풀어서 **조인문이나 스칼라 서브쿼리**로 변경하는 것이 **함수 호출 부하를 최소화**<br>-> 즉, 근본적인 해결법: **One SQL**
 
 **데이터베이스 Call 최소화 + 고급 SQL 활용(One SQL)**
 
@@ -838,22 +836,166 @@ public Long updateTotalCount() { return itemRepository.findTotalCount(); }
 
 <br><br>
 
-### 경험한(할) 튜닝 예시?? -> 아직 NONONO!@!@!#!#@!
+### 경험한(할) 튜닝 예시?? -> 계속 갱신
 
-**Index Range Scan 대신 Table Full Scan이 더 나은 성능을 보일 때 예시?**
+**[LEPL 플젝](https://github.com/BH946/LePl_Spring/tree/kbh)에서 튜닝 일화**
 
-Index Range Scan의 데이터 분포가 굉장히 많다면, 거의 모든 데이터를 조회하는 것이기 때문에 차라리 인덱스 없이 Table Full Scan이 더 빠를 수 있습니다.
+1. **페이징 튜닝 -> 가장 먼저 서브쿼리를 통해서 커버링 인덱스로 페이징. 그리고 그 결과와 기존 테이블을 조인시켜서 ‘인덱스에 포함되지 않은 칼럼’을 가져옴**
 
-애초에 인덱스 접근 후 실제 테이블까지 접근해서 데이터가져오니까 바로 테이블 접근 하는게 빠르겠지.
+   - **페이징 + 캐시 예시 2개**
 
+     <details><summary><b>(1)회원 랭킹 보여주는 페이지(정렬필수) -> 30분 마다 갱신</b></summary>
+     <div markdown="1"><br>
+     **레포지토리**<br>
+     - **서브쿼리에 인덱스로 member 테이블을 빠르게 조회 (정렬 된)**<br>
+       * 서브쿼리, limit, offset 사용 위해 Native Query 사용<br>
+     - 이후 기존 테이블과 조인해서 결과 반환<br>
+     <div markdown="1">
+     ```java
+     //Limit, Offset -> SQL
+     List<Object[]> objects = em.createNativeQuery(
+     "select m.member_id, m.nickname, e.level " + 
+     "from (select * from member order by member_id desc limit " + offset + "," + limit + ") m " +
+     "inner join character c on m.character_id=c.character_id " +
+     "inner join exp e on c.exp_id=e.exp_id;")
+     .getResultList();
+     ```
+     </div>
+     **서비스**<br>
+     - 30분 마다 갱신이라 **@CacheEvict, @Cacheable, @Scheduled로 충분**<br>
+     - 페이지별로(pageId) 묶어서 캐시 관리가 좋아서 이렇게 진행. (게시물마다 하는건 너무 많은 캐시 메모리 사용?) + 캐시사이즈 설정<br>
+     <div markdown="1">
+     ```java
+     /** 회원 최신순 조회 + 캐시 */
+     @Cacheable(value = "members", key = "#pageId") // [캐시 없으면 저장] 조회
+     public List<FindMemberResponseDto> findAllWithPage(int pageId) {
+         return memberRepository.findAllWithPage(pageId);
+     }
+     // 캐시에 저장된 값 제거 -> 30분 마다 실행하겠다.
+     // 초(0-59) 분(0-59) 시간(0-23) 일(1-31) 월(1-12) 요일(0-6) (0: 일, 1: 월, 2:화, 3:수, 4:목, 5:금, 6:토)
+     @Scheduled(cron = "00 30 * * * *") // 30분 00초 마다 수행
+     @CacheEvict(value = "members", allEntries = true)
+     public void initCacheMembers() {
+     }
+     ```
+     </div>
+     </div>
+     </details>
+     <details><summary><b>(2)게시물 10개씩 출력하는 페이지(홈페이지) -> 수정, 삭제, 추가에 갱신</b></summary>
+     <div markdown="1"><br>
+     **레포지토리**<br>
+     - 서브쿼리 사용할 필요 없어서 바로 JPQL의 페이징 기법 활용 -> 이 또한, 인덱스 사용<br>
+     <div markdown="1">
+     ```java
+     //setFirstResult(), setMaxResults() -> JPQL
+     public List<Item> findAllWithPage(int pageId) {
+       return em.createQuery("select i from Item i" +
+                             " order by i.id desc", Item.class)
+           .setFirstResult((pageId-1)*10)
+           .setMaxResults(10) // 개수임!!
+           .getResultList();
+     }
+     ```
+     </div>
+     **서비스 -> 여기선 이게 중요!!**<br>
+     - 페이지별로 url(?page=1) 접근하면 해당 페이지별로 데이터를 가져올거고 이 데이터를 **@CachePut로 기록하고, @Cacheable로 조회, 삭제는 @CacheEvict**<br>
+       - 만약 게시물 삭제되면 애초에 게시물No(순번)이 갱신되어야해서 그냥 @CacheEvict로 삭제후 다시 기록하면 됨.<br>
+       - 게시물 수정이면 @CachePut으로 해당 PageId 부분만 갱신하면 됨. 게시물 개수는 그대로니까!<br>
+     - 페이지별로(pageId) 묶어서 캐시 관리가 좋아서 이렇게 진행. (게시물마다 하는건 너무 많은 캐시 메모리 사용?) + 캐시사이즈 설정<br>
+     <div markdown="1">
+     ```java
+     // page 단위로(key) 캐시 기록 -> 참고 : value 로 꼭 캐시 영역을 지정해줘야 함
+     @Cacheable(value = "posts", key = "#pageId") // [캐시 없으면 저장] 조회
+     public List<Item> findAllWithPage(int pageId) {
+         return itemRepository.findAllWithPage(pageId);
+     }
+     // page 단위로(key) 캐시 기록 -> 참고 : value 로 꼭 캐시 영역을 지정해줘야 함
+     @CachePut(value = "posts", key = "#pageId") // [캐시에 데이터 있어도] 저장
+     public List<Item> updateAllWithPage(int pageId) {
+         // pageId 로 간단히 캐시 업데이트용 함수
+         return itemRepository.findAllWithPage(pageId); // 반환값을 캐시에 기록하기 때문에 만든 함수
+     }
+     // 캐시에 저장된 값 제거
+     @CacheEvict(value="posts", allEntries = true)
+     public void initCachePosts(){}
+     // totalCount 이름으로 캐시 메모리에 기록 [캐시 없으면 저장] 조회
+     @Cacheable(value = "totalCount")
+     public Long findTotalCount() { return itemRepository.findTotalCount(); }
+     // [캐시에 데이터 있어도] 저장
+     @CachePut(value = "totalCount")
+     public Long updateTotalCount() { return itemRepository.findTotalCount(); }
+     ```
+     </div>
+     </div>
+     </details>
 
+2. **인덱스 튜닝 -> 인덱스 추가와 인덱스 사용 위해 컬럼가공 제거**
 
-+아래 내용은 나중에 DB튜닝 정리할 때 함께 고려하려고 적어둔거임.
-in절은 or절과 거의 동일하게 동작하던걸로 기억한다. 특히 SQL 튜닝관점에서는 OR Expansion, IN-List Iterator 로 union all 형태로 동작 시킨다. 수직적 탐색이 그만큼 발생할거고.
-단순 정렬문제면 서브쿼리로 먼저구하고 + 인덱스 활용하면 효과적이지만, 중복제거는 인덱스를 쓴다해도 FULL SCAN일거다. (물론, UIQUE INDEX 사용 시 빠르다지만 전체 컬럼에 쓸것도 아니잖아?)
+   - **findByCurrent(), findByDateWithMemberTask(), findOneWithMemberTask() 함수**
 
-- 실제 SQL이라면 select c from character c, member m where m.id = :memberId 이런 느낌이었을거다. from절에서 두개 조인 전부 하고 where절에서 필터링 되는..
-  - 물론 나라면 select c from character c, (select * from member where m.id = :memberId) 이런 형태로 튜닝할거 같긴 하다만.
+     <details><summary><b>findByCurrent 함수 튜닝</b></summary>
+     <div markdown="1"><br>
+     튜닝: memberId, l.listsDate 인덱스 추가 + 인덱스 사용 위해 날짜컬럼 함수 제거(=컬럼가공 제거 `FORMATDATETIME` 함수 제거)
+     ```sql
+     -- 튜닝 전
+     select * from lists
+     where member_id = 1 and formatdatetime(lists_date, 'yyyy-MM-dd') = '2023-11-26';
+     -- 튜닝 후
+     select * from lists
+     where member_id = :memberId and listsDate = :curDate
+     ```
+     </div>
+     </details>
+
+3. **Update 튜닝(JPA) -> 더티체킹 대신 "벌크연산"**
+
+   - **쿼리 여러개에서 1개로 변경**
+
+     <details><summary><b>TaskServiceV2.java 에 updateAll() 추가</b></summary>
+     <div markdown="1"><br>
+     in 절로 task_id 값 비교 + start~end 날짜들 내용(content) 일괄 수정
+     ```java
+     public void updateAll(List<Task> taskList, String content, LocalDateTime startTime, LocalDateTime endTime) {
+         startTime = startTime.toLocalDate().atTime(0, 0, 0);
+         endTime = endTime.toLocalDate().atTime(23, 59, 59);
+         List<Long> idList = taskList.stream().map(o -> o.getId()).collect(Collectors.toList());
+         int updatedCount = em.createQuery(
+             "update Task t set t.content = :content" +
+             " where t.startTime >= :startTime and t.endTime <= :endTime" +
+             " and t.id in :idList")
+             .setParameter("content", content)
+             .setParameter("idList", idList)
+             .setParameter("startTime", startTime)
+             .setParameter("endTime", endTime)
+             .executeUpdate();
+         System.out.println("Updated count: " + updatedCount); // 업데이트된 개수 확인
+     	em.clear(); //이거 필수! 까먹었었네
+     }
+     ```
+     </div>
+     </details>
+
+<br>
+
+**[SECRET](https://github.com/BH946/secret-art-typing-gallery) 플젝에서 튜닝 일화**
+
+1. 페이지 조회 성능 개선 방안 → Auto Increment vs **No 필드 사용 때**
+
+   - 간단한 조회는 Auto Increment 로 효과적이지만, 확장성을 따져 봤을 때 No 필드도 효과적
+
+   - 테이블에 No속성을 추가 + 해당 인덱스에만 desc 사용을 추천!<br>-> 인덱스 재정렬 비용만 생각하면 됨!
+     - 예로 게시물 추가 시: 테이블엔 그냥 추가만하면 됨(비용 약함) + 인덱스 재정렬 비용
+     - 예로 게시물 삭제 시: 테이블엔 그냥 삭제하면 됨(비용 약함) + 인덱스 재정렬 비용
+       - **No가 중간에 숫자 몇개 생략**되어도 사용자 입장에서 거리감 없어서 그냥 삭제 굿!
+     - 예로 게시물 수정 시: 데이터 접근 비용 말고는 없음(비용 매우약함)
+
+<br>
+
+**[BCHAT](https://github.com/BH946/bchat) 플젝에서 튜닝 일화**
+
+1. 메시지 이전 대화 출력 개선 방안 -> **테이블 파티셔닝**
+   - 보통 시간별 파티셔닝을 사용해 하루 단위로 메시지를 저장하거나, 사용자별 파티셔닝을 통해 유저 ID에 따라 데이터를 분할
+   - 여기선 유저ID에 따라 파티셔닝 (귀찮아서 안했던가?)
 
 <br><br>
 
