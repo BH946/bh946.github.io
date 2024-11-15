@@ -607,17 +607,17 @@ public Long updateTotalCount() { return itemRepository.findTotalCount(); }
 <div markdown="1">
 1. 인덱스는 **WHERE 절에서 사용되는 열에 생성**
 2. WHERE 절에 사용되는 열이라도 자주 사용해야 가치가 있음 (당연한 말)
-3. 데이터 중복도가 높은 열에는 인덱스를 만들어도 효과가 없음 **(선택도가 높은 경우는 효과 없음)**
-4. **외래키를 설정한 열**에는 **자동으로 외래키 인덱스가 생성**됨 (보통 지원하는 편)
-5. **데이터 변경(삽입, 수정, 삭제) 작업이 얼마나 자주 일어나는지 고려**해야 함 (인덱스 효율 때문! 굉장히 중요)
-6. 단일 테이블에 인덱스가 많으면 속도가 느려질 수있다. (**테이블당 4~5개 권장**)
-7. **클러스터형 인덱스는 테이블당 하나만** 생성할 수 있음
-8. 테이블에 클러스터형 인덱스가 아예 없는 것이 좋은 경우도 있음
-9. 사용하지 않는 인덱스는 제거 (당연한 말, 인덱스도 많은 비용이 발생)
-10. 복합 인덱스는 **WHERE절에서 OR조건이 아니라 AND 조건일 때** 사용하는 것이 좋음 (당연히 OR 조건은 인덱스 안타니까)
+3. 데이터 중복도가 높은 열에는 인덱스를 만들어도 효과가 없음 **(선택도가 높은 경우는 효과 없음. 극단적으로 NDV가 1이면 굳이 인덱스로 스캔 할 필요가 있냐는 것)**
+4. Index Skip Scan은 인덱스 선행컬럼 NDV적고(=선택도높고), 후행컬럼 NDV많을 때(선택도작을 때) 효과적(=in-list와 동작 유사)
+5. **외래키를 설정한 열**에는 **자동으로 외래키 인덱스가 생성**됨 (보통 지원하는 편)
+6. **데이터 변경(삽입, 수정, 삭제) 작업이 얼마나 자주 일어나는지 고려**해야 함 (인덱스 효율 때문! 굉장히 중요)
+7. 단일 테이블에 인덱스가 많으면 속도가 느려질 수있다. (**테이블당 4~5개 권장**)
+8. **클러스터형 인덱스는 테이블당 하나만** 생성할 수 있음
+9. 테이블에 클러스터형 인덱스가 아예 없는 것이 좋은 경우도 있음
+10. 사용하지 않는 인덱스는 제거 (당연한 말, 인덱스도 많은 비용이 발생)
+11. 복합 인덱스는 **WHERE절에서 OR조건이 아니라 AND 조건일 때** 사용하는 것이 좋음 (당연히 OR 조건은 인덱스 안타니까)
 </div>
 </details>
-
 
 **UPDATE 대신 CASE 문 사용, 배치 모드로 Delete, Update (=DML) 작업 지향!**
 
@@ -838,7 +838,7 @@ public Long updateTotalCount() { return itemRepository.findTotalCount(); }
 
 ### 경험한(할) 튜닝 예시?? -> 계속 갱신
 
-**[LEPL 플젝](https://github.com/BH946/LePl_Spring/tree/kbh)에서 튜닝 일화**
+**[LEPL](https://github.com/BH946/LePl_Spring/tree/kbh) 플젝에서 튜닝 일화**
 
 1. **페이징 튜닝 -> 가장 먼저 서브쿼리를 통해서 커버링 인덱스로 페이징. 그리고 그 결과와 기존 테이블을 조인시켜서 ‘인덱스에 포함되지 않은 칼럼’을 가져옴**
 
@@ -944,6 +944,9 @@ public Long updateTotalCount() { return itemRepository.findTotalCount(); }
      select * from lists
      where member_id = :memberId and listsDate = :curDate
      ```
+     **튜닝 전과 후 사진**<br>
+     <img src="https://github.com/user-attachments/assets/154b067b-6a0e-4923-9180-412b9e735802" alt="findByCurrent 인덱스적용전" style="zoom:80%;" /><br>
+     <img src="https://github.com/user-attachments/assets/048e2f5e-f678-4e43-a168-963ec8b3e1ae" alt="findByCurrent 인덱스적용후" style="zoom:80%;" />
      </div>
      </details>
 
@@ -972,6 +975,9 @@ public Long updateTotalCount() { return itemRepository.findTotalCount(); }
      	em.clear(); //이거 필수! 까먹었었네
      }
      ```
+     **튜닝 전과 후**<br>
+     <img src="https://github.com/user-attachments/assets/98969fa9-b667-4267-9041-da9eca365e3a" alt="더티체킹 (쿼리수차이)" style="zoom:80%;" /><br>
+     <img src="https://github.com/user-attachments/assets/faa1f1d4-cb49-43b7-997a-581d64b70a18" alt="더티체킹 대신 벌크연산 적용(쿼리수차이)" style="zoom:80%;" />
      </div>
      </details>
 
@@ -995,7 +1001,94 @@ public Long updateTotalCount() { return itemRepository.findTotalCount(); }
 
 1. 메시지 이전 대화 출력 개선 방안 -> **테이블 파티셔닝**
    - 보통 시간별 파티셔닝을 사용해 하루 단위로 메시지를 저장하거나, 사용자별 파티셔닝을 통해 유저 ID에 따라 데이터를 분할
-   - 여기선 유저ID에 따라 파티셔닝 (귀찮아서 안했던가?)
+   - 여기선 유저ID에 따라 파티셔닝(귀찮아서 안했던가? 담에 파티셔닝 해보자~!)
+
+<br>
+
+<details><summary><b>SQL튜닝사례 PDF</b></summary>
+<div markdown="1">
+1. **온라인 SQL 튜닝 사례**
+   - 불충분한 인덱스 컬럼 구성 -> **해결: 인덱스 컬럼 수정**
+     - 필터 조건을 인덱스에 추가함으로써 테이블 블록 액세스 량 323K -> 5693블록으로 크게 감소!
+     - **튜닝 전) 센터일괄출금관리_PK: 자동이체종류코드, 센터컷처리일자, 일괄출금관리번호**
+     - <img src="https://github.com/user-attachments/assets/679065ab-33a2-4aff-b762-c8e44accf3c5" alt="image" style="zoom:80%;" />
+     - **튜닝 후) 센터일괄출금관리\_IX03\_TMP: 자동이체종류코드, 카드원장조회일련번호, 센터컷처리일자**
+     - <img src="https://github.com/user-attachments/assets/1caff89a-e4bd-4ea7-b258-ebc889a336b7" alt="image" style="zoom:80%;" />  
+   - 선택적 조건절 이슈와 최적화 -> **해결: 원하는 인덱스 사용하도록 최적화 로직을 분기**
+     - 참고: 오라클의 `||` 은 concat임 (문자 붙이기)<br>`like 'ab' || '%'` 는 인덱스 가능, `like '%' || 'ab' || '%'` 는 인덱스 불가능!
+     - 문제: BIC사용여부 컬럼 외 모두 선택적인데, 운영DB를 확인 시 지연 발생은 주로 BIC코드 값이 입력된 경우 -> 그런데, 인덱스는 IX02가 사용 되는 문제 (PK인덱스가 훨씬 효과적)
+     - PK인덱스 사용 시 테이블 블록 엑세스 량 58752 -> 520블록으로 크게 감소!
+     - **튜닝 전)** 
+     - <img src="https://github.com/user-attachments/assets/eed6d393-4a34-4bc2-957d-7fa9dabea236" alt="image" style="zoom:80%;" />
+     - **튜닝 후) 인라인뷰가 튜닝POINT**
+     - <img src="https://github.com/user-attachments/assets/0164fe8a-163f-4b3b-9a3c-507c6da6fdbb" alt="image" style="zoom:80%;" /> 
+   - INDEX SKIP SCAN 기능을 활용한 최적화 -> **해결: 인덱스의 2번째 이후 조건절을 액세스로 사용**
+     - 상황: **어음발행취소일자(between 사용)** 컬럼 조건으로 액세스 범위를 크게 줄일 수 있는데 액세스 조건이 아닌 **필터 조건**으로 사용 중<br>어음발행취소일자 컬럼이 있는 인덱스는 **외상매출채권원장_IX05( 어음상품코드 ,어음발행취소일자)가 유일 -> IX07 인덱스는 애초에 해당 컬럼이 없음**
+     - **주의: 해당 테이블에 인덱스가 이미 많아서 기존 인덱스 활용을 위해 SKIP SCAN 유도**
+     - **튜닝 전)**
+     - <img src="https://github.com/user-attachments/assets/a62a4458-42d9-4c5b-8fdc-7e53779cd399" alt="image" style="zoom:80%;" /> 
+     - **튜닝 후) 어음상품코드 컬럼 조건값이 없더라도, 실데이터를 확인해 보면 이 값이 7개만 존재하므로(즉, ‘스킵’을 7번만 수행하면 되므로) SKIP SCAN의 비효율적 측면은 크지 않음!**
+     - <img src="https://github.com/user-attachments/assets/92b254c5-1d98-488b-bc32-63c9d03b76e6" alt="image" style="zoom:80%;" />  
+   - 데이터 분포 변화를 고려한 최적화 -> **해결: 소트생략 튜닝과 신규 인덱스**
+     - 상황: 넓은 범위 조건 데이터를 액세스 해야 하는데, **자료상태구분코드 컬럼**으로 액세스 범위를 줄일 수 있지만 적절한 인덱스가 없고 ORDER BY로 **SORT 연산**도 발생
+     - <img src="https://github.com/user-attachments/assets/de0eb088-5012-439a-98be-382aba3f8e92" alt="image" style="zoom:80%;" /> 
+     - **첫 번째 튜닝 방안: 부분 범위 처리 -> 불충분한 개선**<br>인라인 뷰로 PK인덱스 사용 + rownum으로 COUNT (STOPKEY) 유도<br>단, 자료상태구분코드 컬럼은 여전히 필터로 처리 중이라 액세스 범위가 N차 조회 시 큼
+     - <img src="https://github.com/user-attachments/assets/b96fb74f-bb22-4a5c-aa0d-7f93b1607edb" alt="image" style="zoom:80%;" />  
+     - **두 번째 튜닝 방안: 신규 인덱스 -> 그림의 화살표(=액세스 범위)가 충분히 개선**<br>조회 조건과 부분범위 처리 한번에 다 해결 (필터 조건이 액세스 조건으로!)
+     - <img src="https://github.com/user-attachments/assets/03e6e64f-792d-4801-8932-d98d33b9a9be" alt="image" style="zoom:80%;" /> 
+   - 정렬 회피 방안으로 부분범위 처리 유도 -> **해결: 소트생략 튜닝(index_desc)**
+     - 내부적으로 조건에 해당하는 모든 로우를 액세스한 후 FETCH -> 전체범위 처리 상태
+     - 결과 로우를 100건씩 실행/조회하는 경우라면(=**페이징 처리** 하는 경우라면), **부분범위 처리를 통해 성능 개선**이 가능
+     - **튜닝 전) 아래 예시는 FETCH 제한 건수가 100을 가정**
+     - <img src="/images/2024-10-05-CHECK_LIST_서버최적화(튜닝)/image-20241115205219544.png" alt="image-20241115205219544" style="zoom:80%;" />
+     - **튜닝 후) 인덱스 구성 컬럼 참고 -> index_desc로 소트생략 가능**
+     - <img src="/images/2024-10-05-CHECK_LIST_서버최적화(튜닝)/image-20241115205439173.png" alt="image-20241115205439173" style="zoom:80%;" /> 
+   - 최종 데이터 1건 추출 로직 개선 -> **해결: 소트생략 튜닝(index_desc)**
+     - 데이터 1건 추출하는데 데이터를 모두 액세스하고 정렬 해야하는 상황
+     - **튜닝 전) 1건 추출을 위해 인덱스 로우504K건, 블록2687건 액세스**
+     - <img src="https://github.com/user-attachments/assets/c4a6613b-53b9-4917-837a-bea65bfdc853" alt="image" style="zoom:80%;" />
+     - <img src="https://github.com/user-attachments/assets/cda1078a-dd78-40c0-9fe3-4a37127bb5a9" alt="image" style="zoom:80%;" />  
+     - **튜닝 후) 앞의 사례처럼 PK 인덱스를 index_desc 힌트로 해결**
+     - <img src="https://github.com/user-attachments/assets/469f9e17-55df-49bb-9861-e1287939ab78" alt="image" style="zoom:80%;" /> 
+2. **배치 튜닝 사례**
+   - SNAPSHOT TOO OLD 에러 해소 -> UNDO 관련 에러
+     - 해당 에러는 데이터 손실과는 관련이 없어서 안전한 오류지만, 직면 시 쿼리 진행이 멈춤
+     - UNDO 영역은 시스템공용 공간이라서 보통 3시간 경과하면 해당 영역(블록)을 재사용(덮어씌움) 할 수 있음
+     - <img src="https://github.com/user-attachments/assets/8c041b2a-74ac-448b-9ad5-f4cd90950e00" alt="image" style="zoom:80%;" /> 
+     - **튜닝 전)**
+     - <img src="https://github.com/user-attachments/assets/54241d1c-723a-41e0-8b7d-57f67f1ff8bf" alt="image" style="zoom:80%;" /> 
+     - **튜닝 후) 참고로 더 다양한 배치 성능 개선 방법들이 존재**
+     - <img src="https://github.com/user-attachments/assets/0361d5bd-b512-49ea-8cd1-873b9fa8d6e7" alt="image" style="zoom:80%;" /> 
+   - 대량 SQLIO 호출 부하 개선 -> **해결: 메인 쿼리와 서브쿼리를 머지**
+     - 메인쿼리 결과 건수 약 65만건 인데, **서브쿼리가 해당 건수 만큼 반복 호출로 3000초** 소요<br>참고: 순수 메인쿼리 수행 시간은 80초, 나머지 2920초는 서브쿼리 호출 시간
+     - **튜닝 전) 65만 번의 Call, Fetch...**
+     - <img src="https://github.com/user-attachments/assets/cae8e5a4-a1ce-440e-ab06-09e11861fea5" alt="image" style="zoom:80%;" /> 
+     - **튜닝 후) 65만 번의 Call, Fetch가 없어짐!**
+     - <img src="https://github.com/user-attachments/assets/8a493420-9d07-4761-9c3c-f5cb7183df76" alt="image" style="zoom:80%;" /> 
+   - ORA_HASH를 통한 효율적 배치 작업 분할 -> 해시 값 생성 함수
+     - 음.. ORA_HASH  를 잘 모르겠음
+     - 상황: 배치 처리를 위한 **데이터 분할 로직이 먼저 사용되지 않아서** 데이터 액세스 량이 많고, 인라인뷰 T는 인덱스 만으로 액세스 가능한데 **FULL(T) 힌트**로 항상 전체 테이블 액세스
+     - **튜닝 전)**
+     - <img src="https://github.com/user-attachments/assets/12e34ffa-502a-432d-81f0-165a046e6f21" alt="image" style="zoom:80%;" />
+     -  **튜닝 후) ora_hash조건절을 인라인뷰 T로 옮김 + INDEX_FFS(T) 힌트**
+     - <img src="https://github.com/user-attachments/assets/ec69e520-2ad9-40fb-bf45-b58ed8fc2f23" alt="image" style="zoom:80%;" /> 
+   - 병렬 전체 스캔을 통한 대량처리 개선 -> **해결: full, parallel, use_hash, pq_distribute 힌트**
+     - 상황: 최종 데이터가 100만건 이상인데, 대량 데이터 처리에 **부적합한 인덱스**와 **NL 조인** 사용함
+     - **튜닝 전)**
+     - <img src="https://github.com/user-attachments/assets/3bb7e949-d9b6-4b4a-a289-9aa6b3cb008a" alt="image" style="zoom:80%;" /> 
+     - **튜닝 후) 테이블/파티션을 병렬로 전체 스캔**
+     - <img src="https://github.com/user-attachments/assets/123ba34a-bb03-4456-b3d7-6f228ac9ffd5" alt="image" style="zoom:80%;" /> 
+</div>
+</details>
+
+<details><summary><b>클러스터링 팩터 PDF</b></summary>
+<div markdown="1">
+- **성능이슈**
+  - <img src="https://github.com/user-attachments/assets/36dcd807-f4c2-4605-bf3c-92fa23521bc7" alt="image" style="zoom:80%;" /><br><img src="https://github.com/user-attachments/assets/60a09bb5-65e0-4303-93b0-b1dc87f90eca" alt="image" style="zoom:80%;" /><br><img src="https://github.com/user-attachments/assets/0e5938b1-c826-4f95-a639-2c19b73119bd" alt="image" style="zoom:80%;" /><br><img src="https://github.com/user-attachments/assets/c705cf91-e041-4b4a-a575-cf525ab334fa" alt="image" style="zoom:80%;" />
+- **해결방안**
+  - <img src="https://github.com/user-attachments/assets/44696412-4ab1-41d8-9d6c-614acd718c4b" alt="image" style="zoom:80%;" /> 
+</div>
+</details>
 
 <br><br>
 
