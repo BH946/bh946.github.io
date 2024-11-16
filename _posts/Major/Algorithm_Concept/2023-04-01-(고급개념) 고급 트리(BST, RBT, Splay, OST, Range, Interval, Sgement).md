@@ -22,6 +22,14 @@ typora-root-url: ../../..
 
 * 해당 트리들은 직접 구현해볼 생각이고, 코드들은 "고급 트리 구현" 게시물에서 확인
 * **[고급 트리 구현](https://bh946.github.io/algorithmtest/(%EA%B5%AC%ED%98%84)-%EA%B3%A0%EA%B8%89-%ED%8A%B8%EB%A6%AC-%EA%B5%AC%ED%98%84(BST,-RBT,-Splay,-OST,-Range,-Interval,-Sgement)/)**
+* **예시 문제**
+  * **[이진 검색 트리1(순회)](https://www.acmicpc.net/problem/5639)**
+  * **[이진 검색 트리2(순열)](https://www.acmicpc.net/problem/8916)**
+  * **[이진 검색 트리3(RBT)](https://www.acmicpc.net/problem/1539)**
+  * **[이진 탐색 트리(RBT)](https://www.acmicpc.net/problem/2957)**
+  * **[구간 합 구하기(Segment)](https://www.acmicpc.net/problem/2042)**
+  * https://m.blog.naver.com/bh_algo/223577906978
+
 
 <br><br>
 

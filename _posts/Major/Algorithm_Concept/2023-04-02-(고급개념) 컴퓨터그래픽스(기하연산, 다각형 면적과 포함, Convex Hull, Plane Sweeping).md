@@ -24,6 +24,14 @@ typora-root-url: ../../..
 * 다각형 면적과 포함 계산
 * 볼록 외피(Convex Hull)
 * 평면 소거법(Plane Sweeping) => 직사각형 합집합의 면적
+* **예시 문제**
+  * **[CCW](https://www.acmicpc.net/problem/11758)**
+  * **[선분 교차 2](https://www.acmicpc.net/problem/17387)**
+  * **[다각형의 면적](https://www.acmicpc.net/problem/2166)**
+  * **[지민이의 테러(다각형의 포함)](https://www.acmicpc.net/problem/1688)**
+  * **[볼록 껍질(외피)](https://www.acmicpc.net/problem/1708)**
+  * **[직사각형의 합집합(평면 소거법)](https://www.acmicpc.net/problem/2185)**
+
 
 <br><br>
 
