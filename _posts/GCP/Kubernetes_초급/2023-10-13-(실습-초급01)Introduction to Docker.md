@@ -103,7 +103,7 @@ typora-root-url: ../../..
 
 Create a `Dockerfile` : **cat 명령어**로 도커파일 생성
 
-```cmd
+```bash
 cat > Dockerfile <<EOF
 # Use an official Node runtime as the parent image -> 기본 상위 이미지 지정
 FROM node:lts
@@ -126,7 +126,7 @@ EOF
 
 Create a `aap.js` : **cat 명령어**로 app.js 생성
 
-```cmd
+```bash
 cat > app.js <<EOF
 const http = require('http');
 
