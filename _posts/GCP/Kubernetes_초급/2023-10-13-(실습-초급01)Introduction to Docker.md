@@ -37,6 +37,13 @@ typora-root-url: ../../..
   - Google Cloud의 도구 및 런타임과 통합되어 있어서 CI/CD 도구(Google Cloud Build, Google Cloud Run 등)를 파이프라인 구축 가능!
   - **CI 자동화 예로 Github에 Trigger 발생 시 Google Cloud Build가 감지하여 Artifact Registry에 Docker Image를 빌드**
 - **도커 컨테이너, 도커 이미지 용어 잘 구분**
+- Google Cloud Platform (GCP) : 클라우드 서비스 관리 제공
+- Compute Engine : VM 생성 및 관리 제공
+- Google Kubernetes Engine (GKE) : Google Cloud가 제공하는 **Kubernetes 관리형 서비스**
+- Kubernetes : 오픈 소스 **컨테이너 오케스트레이션 플랫폼**
+- Cloud Functions & Cloud Run :  **Cloud Functions는 이벤트 기반 함수 실행을 위한 서버리스 컴퓨팅**이고, **Cloud Run은 컨테이너를 서버리스 방식으로 실행하는 것**
+- Cloud Storage : 클라우드가 제공하는 저장소 (public, private 다 가능) - Buckets
+- 등등..
 
 <br>
 

@@ -12,9 +12,7 @@ typora-root-url: ../../..
 
 
 
-# Use Google Cloud Console, Cloud Shell
-
-**첫번째 실습은 `Google Cloud Console, Cloud Shell` 을 사용해서 `Bucket, VM, IAM` 을 생성해보고 권한에 따른 접근을 확인해보는 실습입니다.**
+**첫번째 실습은** `Google Cloud Console, Cloud Shell` **을 사용해서** `Bucket, VM, IAM` **을 생성해보고 권한에 따른 접근을 확인해보는 실습입니다.**
 
 **아래 4개의 Task를 해결하면서 간접적으로 경험해 봅시다.**
 
@@ -28,13 +26,15 @@ typora-root-url: ../../..
 * Use the Cloud Console and Cloud Shell to `create buckets and VMs and service accounts`
 * Perform `other commands in Cloud Shell`
 
-<br><br>
+<br>
+
+<br>
 
 ## Task 1. Google Cloud Console 탐색하기
 
-**`Google Cloud Console`은 Google Cloud의 모든 리소스와 서비스를 관리하는 데 사용되는 웹 기반 인터페이스입니다. 이 과제에서는 Google Cloud Console로 Bucket, VM, IAM 을 생성해봅니다.**
+`Google Cloud Console`**은 Google Cloud의 모든 리소스와 서비스를 관리하는 데 사용되는 웹 기반 인터페이스입니다. 이 과제에서는 Google Cloud Console로 Bucket, VM, IAM 을 생성해봅니다.**
 
-<br>
+<br><br>
 
 ### 1. Google Cloud Console 접속
 
@@ -42,7 +42,7 @@ typora-root-url: ../../..
 
 ![image-20230621003916367](/images/2023-06-20-(실습01)Use Google Cloud Console & Cloud Shell/image-20230621003916367.png) 
 
-<br>
+<br><br>
 
 ### 2. Create A Bucket
 
@@ -65,11 +65,11 @@ typora-root-url: ../../..
 
 ![image-20230621004938410](/images/2023-06-20-(실습01)Use Google Cloud Console & Cloud Shell/image-20230621004938410.png) 
 
-<br>
+<br><br>
 
 ### 3. Create A VM
 
-**Google Compute Engine은 Google의 데이터 센터와 네트워크에서 실행되는 가상 머신을 서비스로 제공합니다. `Google Kubernetes Engine(=GKE)`은 아키텍처의 구성요소로 Compute Engine을 사용하므로 Compute Engine에 대해 알아봅니다.**
+**Google Compute Engine은 Google의 데이터 센터와 네트워크에서 실행되는 가상 머신을 서비스로 제공합니다.** `Google Kubernetes Engine(=GKE)`**은 아키텍처의 구성요소로 Compute Engine을 사용하므로 Compute Engine에 대해 알아봅니다.**
 
 * **Navigation menu > Compute Engine > VM instances** 에서 Create instance
   * **Name** 은 `first-vm` 로 임의로 설정
@@ -90,11 +90,11 @@ typora-root-url: ../../..
 **HTTP 트래픽을 허용한 결과**
 
 * 응답 없음이 아닌 연결 거부로 정상임을 알 수 있음
-* "연결거부"의 경우 VM에 대한 HTTP 트래픽을 위해 열려 있는 방화벽 포트가 있지만 거기에서 실행 중인 웹 서버가 없기 때문에 발생!!
+* **"연결거부"**의 경우 VM에 대한 HTTP 트래픽을 위해 열려 있는 방화벽 포트가 있지만 거기에서 실행 중인 **웹 서버(앱)**가 없기 때문에 발생!!
 
 ![image-20230621015712647](/images/2023-06-20-(실습01)Use Google Cloud Console & Cloud Shell/image-20230621015712647.png) 
 
-<br>
+<br><br>
 
 ### 4. Create an IAM service account
 
@@ -104,7 +104,7 @@ typora-root-url: ../../..
   * Name : `test-service-account` 로 설정
 * **Grant this service account access to project** 설정에서 **Basic > Editor** 권한을 적용 후 **Create**
 * 생성 후에 우리가 만든 `test-service-account` 의 오른쪽에 **Dot(...) 클릭 >  Manage keys**
-  * **ADD Key > CREATE > JSON > CREATE** 실행시 자동으로 해당 JSON 다운
+  * **ADD Key > CREATE > JSON > CREATE** 실행시 자동으로 해당 JSON 다운 (계정 인증에 필수!)
 
 <br>
 
@@ -112,11 +112,13 @@ typora-root-url: ../../..
 
 ![image-20230621010623462](/images/2023-06-20-(실습01)Use Google Cloud Console & Cloud Shell/image-20230621010623462.png) 
 
-<br><br>
+<br>
+
+<br>
 
 ## Task 2. Cloud Shell 탐색하기
 
-**`Cloud Shell` 은 Google Cloud Console 내에 내장된 Interactive Shell 환경입니다. 이 과제에서는 Cloud Shell로 Bucket, VM, IMA을 생성해봅니다. 아래는 Cloud Shell의 제공 기능입니다.**
+`Cloud Shell` **은 Google Cloud Console 내에 내장된 Interactive Shell 환경입니다. 이 과제에서는 Task1 과제를 Cloud Shell로 Bucket, VM, IAM 생성해봅니다. 아래는 Cloud Shell의 제공 기능입니다.**
 
 - Temporary Compute Engine VM
 - Command-line access to the instance through a browser
@@ -130,15 +132,17 @@ typora-root-url: ../../..
 - Web preview functionality
 - Built-in authorization for access to resources and instances
 
-<br>
+<br><br>
 
 ### 1. Open Cloud Shell
 
 **아래 그림의 오른쪽 상단에 아이콘이 존재**
 
+**존재하지 않는다면 검색 창에 Cloud Shell을 검색하여 오픈!**
+
 ![image-20230621011045090](/images/2023-06-20-(실습01)Use Google Cloud Console & Cloud Shell/image-20230621011045090.png) 
 
-<br>
+<br><br>
 
 ### 2. 환경설정 및 credentials file 등록
 
@@ -152,13 +156,12 @@ MY_REGION=us-central1
 
 <br>
 
-**Task1에서 만든 IAM 서비스 계정의 작업 증명 파일을 등록**
+**Task1에서 만든 IAM 서비스 계정의 작업 증명 파일(JSON)을 등록**
 
 * Cloud Shell 의 **Dot(...) > Upload** 를 통해서 JSON 파일을 업로드
   * 이때, JSON파일 구분쉽게 `credentials.json` 파일명으로 바꿔서 업로드!
 * **만약 업로드를 안한다면??**
-  * 아래에서 Cloud Shell로 "버킷"을 만들때 no configured credentials(자격증명없음) 이라는 오류를 발생한다.
-  * 사실 여기서 현재 account는 OWNER 일텐데 왜 이렇게 뜨는지는 잘 모르겠다.
+  * 아래에서 Cloud Shell로 "버킷"을 만들때 no configured credentials(자격증명 없음) 이라는 오류가 발생한다.
 
 <br>
 
@@ -166,11 +169,11 @@ MY_REGION=us-central1
 
 ![image-20230621011843671](/images/2023-06-20-(실습01)Use Google Cloud Console & Cloud Shell/image-20230621011843671.png) 
 
-<br>
+<br><br>
 
 ### 3. gsutil-Create A Second Cloud Storage Bucket In Cloud Shell
 
-**`Cloud Shell` 에 세팅을 끝내놨으니 이번엔 Google Console이 아니고 여기에서 바로 "버킷, 가상머신" 을 만들어보겠습니다.**
+`Cloud Shell` **에 세팅을 끝내놨으니 이번엔 Google Console이 아니고 여기에서 바로 "버킷, 가상머신" 을 만들어보겠습니다.**
 
 * `gsutil mb gs://$MY_BUCKET_NAME_2` 명령어 사용 및 **Authorize**
   * mb : make bucket
@@ -182,7 +185,7 @@ MY_REGION=us-central1
 
 ![image-20230621012357942](/images/2023-06-20-(실습01)Use Google Cloud Console & Cloud Shell/image-20230621012357942.png) 
 
-<br>
+<br><br>
 
 ### 4. gcloud-Create A Second VM In Cloud Shell
 
@@ -214,15 +217,15 @@ gcloud compute instances create $MY_VMNAME \
 
 **첫번째 VM과는 다르게 따로 HTTP 트래픽 허용을 안한 두번째 VM**
 
-* "연결거부"가 아닌 "응답없음" 이 발생하는게 정상
+* "연결거부"가 아닌 **"응답없음"** 이 발생하는게 정상
 
 ![image-20230621015925419](/images/2023-06-20-(실습01)Use Google Cloud Console & Cloud Shell/image-20230621015925419.png) 
 
-<br>
+<br><br>
 
 ### 5. gcloud-Create A Second IAM service account
 
-**아래 명령어 사용!!**
+**IAM 생성 위해 아래 명령어 사용!!**
 
 ```bash
 gcloud iam service-accounts create test-service-account2 --display-name "test-service-account2"
@@ -230,7 +233,7 @@ gcloud iam service-accounts create test-service-account2 --display-name "test-se
 
 <br>
 
-**Project Viewer 권한을 부여**
+**생성된 서비스 계정에 Project Viewer 권한을 부여**
 
 ```bash
 gcloud projects add-iam-policy-binding $GOOGLE_CLOUD_PROJECT --member serviceAccount:test-service-account2@${GOOGLE_CLOUD_PROJECT}.iam.gserviceaccount.com --role roles/viewer
@@ -242,13 +245,15 @@ gcloud projects add-iam-policy-binding $GOOGLE_CLOUD_PROJECT --member serviceAcc
 
 ![image-20230621020402942](/images/2023-06-20-(실습01)Use Google Cloud Console & Cloud Shell/image-20230621020402942.png) 
 
-<br><br>
+<br>
+
+<br>
 
 ## Task 3. Cloud Shell에서 Cloud Storage 작업하기
 
-**`Cloud Storage` 는 Google Cloud의 객체 스토리지 서비스입니다. 이 과제에서는 Google이 제공해주는 이미지를 Cloud Shell과 Bucket에 저장 및 사용법을 배워봅니다.**
+`Cloud Storage` **는 Google Cloud의 객체 스토리지 서비스입니다. 이 과제에서는 Google이 제공해주는 이미지를 Cloud Shell과 Bucket에 저장 및 사용법을 배워봅니다.**
 
-<br>
+<br><br>
 
 ### 1. 구글에서 제공하는 "고양이" 이미지 저장
 
@@ -275,7 +280,7 @@ gsutil cp gs://$MY_BUCKET_NAME_1/cat.jpg gs://$MY_BUCKET_NAME_2/cat.jpg
 
 ![image-20230621022547543](/images/2023-06-20-(실습01)Use Google Cloud Console & Cloud Shell/image-20230621022547543.png) 
 
-<br>
+<br><br>
 
 ### 2. Cloud Storage 접근 권한 확인
 
@@ -348,13 +353,13 @@ cat acl-2.txt
 ]
 ```
 
-<br>
+<br><br>
 
 ### 3. Service Account 변경
 
 **Cloud Shell에서 계정을 바꾼후 권한에 맞게 "이미지" 접근의 가능여부를 확인하는게 목적이다.**
 
-`gcloud config list` 를 통해서 현재 account 를 확인
+`gcloud config list` 를 통해서 현재 account(계정) 를 확인
 
 ```bash
 // 결과
@@ -374,7 +379,7 @@ Your active configuration is: [cloudshell-16441]
 
 <br>
 
-`gcloud auth activate-service-account --key-file credentials.json` 로 아까 `credentials.json` 으로 파일 업로드한것으로 변경
+`gcloud auth activate-service-account --key-file credentials.json` 로 아까 `credentials.json` 으로 파일 업로드한 것으로 변경
 
 다시 `gcloud config list` 를 통해서 현재 account 를 확인   
 => **처음에 Task1 에서 만든 계정으로 변경됨**
@@ -396,7 +401,7 @@ Your active configuration is: [cloudshell-16441]
 
 <br>
 
-**이번에는 `gcloud auth list` 를 통해서 권한 계정 리스트를 확인**
+**이번에는** `gcloud auth list` **를 통해서 권한 계정 리스트를 확인**
 
 * 아래는 예시일 뿐이고, 권한 계정들을 확인 가능
 
@@ -408,7 +413,7 @@ To set the active account, run:
     $ gcloud config set account `ACCOUNT`
 ```
 
-<br>
+<br><br>
 
 ### 4. 권한 여부에 따른 "이미지" 접근 가능성
 
@@ -443,25 +448,27 @@ Operation completed over 1 objects/81.7 KiB.
 
 **"버킷1" 의 이미지를 접근하기 위해 "개인"인 owner 로 변경하려면 아래 명령어를 수행**
 
-* **`gcloud config set account [USERNAME]` 단, USERNAME은 사용자의 NAME을 의미**
+* `gcloud config set account [USERNAME]` **단, USERNAME은 사용자의 NAME을 의미**
 * 이후 똑같이 "버킷1" 의 이미지를 접근시 정상 구동
 
 <br>
 
 **"버킷1" 의 이미지를 인증되지 않은 모든 사람들이 접근가능하게 하는것은??**
 
-**`gsutil iam ch allUsers:objectViewer gs://$MY_BUCKET_NAME_1`** 
+`gsutil iam ch allUsers:objectViewer gs://$MY_BUCKET_NAME_1` 
 
 * 참고: Cloud Storage에서 공개 웹사이트 콘텐츠를 호스팅하기 위한 적절한 설정입니다.
 * 따라서 해당 "버킷1" 스토리지에 "이미지" URL을 웹에 접근하면 접속이 가능합니다.
 
-<br><br>
+<br>
+
+<br>
 
 ## Task 4. Cloud Shell 코드 에디터 탐색하기
 
-**`Cloud Shell에는 코드 에디터 기능` 이 내장되어 있습니다. 이 과제에서는 Cloud Shell의 코드 에디터를 사용하여 코드를 작성하고 실행하는 방법을 배웁니다.**
+`Cloud Shell에는 코드 에디터 기능` **이 내장되어 있습니다. 이 과제에서는 Cloud Shell의 코드 에디터를 사용하여 코드를 작성하고 실행하는 방법을 배웁니다.**
 
-<br>
+<br><br>
 
 ### 1. Open Code Editor
 
@@ -472,7 +479,7 @@ Operation completed over 1 objects/81.7 KiB.
 * 파일 중에서 `cleanup.sh` 파일을 `echo Finished cleanup!` 로 수정하고, 
 * 다시 **Cloud Shell** 에서 `cd orchestrate-with-kubernetes` 로 경로 접근 및 `cat cleanup.sh` 로 파일을 열어서 `Finished cleanup!` 가 정상 출력되는지 확인할 수 있다.
 
-<br>
+<br><br>
 
 ### 2. index.html 생성
 
@@ -494,7 +501,7 @@ Operation completed over 1 objects/81.7 KiB.
 </body></html>
 ```
 
-<br>
+<br><br>
 
 ### 3. SSH - nginx 설치
 
@@ -519,14 +526,19 @@ gcloud compute scp index.html first-vm:index.nginx-debian.html --zone=us-central
 
 <br>
 
-**마지막으로 생성한 nginx-debian.html을 `nginx` 웹 서버의 문서 루트인 /var/www/html로 파일을 복제합니다.**
+**마지막으로 생성한 nginx-debian.html을** `nginx` **웹 서버의 문서 루트인 /var/www/html로 파일을 복제합니다.**
 
 **이후 "이미지" 링크가 아닌, first-vm 의 External IP 로 접근하면 "고양이" 이미지가 존재하는 웹을 볼 수 있습니다.**
 
-<br><br>
+- 물론, 원하는 입맛대로 nginx를 설정하여 리버스 프록시로 로드밸런싱을 적용하거나
+- 웹 서버 루트인 /var/www/html 기본 경로를 바꾸는 등은 자유롭게 테스트!
+
+<br>
+
+<br>
 
 ## 마무리
 
-**실습을 해보니 `Google Cloud Storage Bucket, Google Cloud VM (가상 머신), Cloud Shell` 각각은 저장소들이 존재했고, 특히 Cloud Shell은 임시 저장소 및 영구 저장소가 있는데 임시 저장소 부분은 일정시간이 지나면 사라진다는 것을 기억하자.**
+`Google Cloud Storage Bucket, Google Cloud VM (가상 머신), Cloud Shell` **각각은 저장소들이 존재했고, 특히 Cloud Shell은 임시 저장소 및 영구 저장소가 있는데 임시 저장소 부분은 일정시간이 지나면 사라진다는 것을 기억하자.**
 
 **모두 저장 기능을 제공하지만, 그 용도와 저장 위치, 데이터 접근 방식 등에 있어서 각기 달랐다. 사용자가 필요로 하는 기능과 목적에 따라 적절한 서비스를 선택하여 사용하자.**

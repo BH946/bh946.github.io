@@ -12,9 +12,7 @@ typora-root-url: ../../..
 
 
 
-# Working with Cloud Build
-
-**두번째 실습은 `Cloud Build`와 `빌드 구성 파일` 또는 `Dockerfile` 을 사용해서 `Docker 컨테이너 이미지` 를 빌드를 해보고 `Container Registry` 에 업로드 해보겠습니다.**
+**두번째 실습은** `Cloud Build`**와** `빌드 구성 파일` **또는** `Dockerfile` **을 사용해서** `Docker 컨테이너 이미지` **를 빌드를 해보고** `Container Registry` **에 업로드 해보겠습니다.**
 
 **아래 4개의 Task를 해결하면서 간접적으로 경험해 봅시다.**
 
@@ -25,7 +23,9 @@ typora-root-url: ../../..
 * Use **Cloud Build** to build and push **containers**
 * Use **Container Registry** to store and deploy **containers**
 
-<br><br>
+<br>
+
+<br>
 
 ## Task 1. 필요한 API 확인하기
 
@@ -41,15 +41,17 @@ typora-root-url: ../../..
 
 ![image-20230621214125654](/images/2023-06-20-(실습02)Working with Cloud Build/image-20230621214125654.png) 
 
-<br><br>
+<br>
+
+<br>
 
 ## Task 2. DockerFile과 Cloud Build를 이용한 컨테이너 빌드하기
 
 이 태스크에서는 **DockerFile을 생성하고 이를 Cloud Build의 빌드 구성 스크립트로 사용하여 컨테이너를 빌드**합니다. 또한, 간단한 셸 스크립트(`quickstart.sh`)를 생성하여 컨테이너 내의 애플리케이션을 대표합니다.
 
-<br>
+<br><br>
 
-### 1. quickstart.sh, dockerfile 생성
+### 1. quickstart.sh(실행파일), dockerfile 생성
 
 * **Cloud Shell**에서 `nano quickstart.sh` 명령어를 실행하여 **nano text editor**로 접근 및  `quickstart.sh` 파일을 생성합니다.
 
@@ -65,7 +67,7 @@ typora-root-url: ../../..
 * 마찬가지로 **editor**에서 다음의 내용을 추가합니다.
 
   * alpine : use Alpine Linux base image.
-  * COPY quickstart.sh / : 이미지의 디렉토리 '/' 에 `quickstart.sh` 스크립트 추가
+  * COPY quickstart.sh / : 이미지의 디렉토리 '/' 에 `quickstart.sh` 스크립트 복제
   * CMD ["/quickstart.sh"] : 컨테이너가 생성 및 실행될 때 `quickstart.sh` 실행되게 설정
 
   ```dockerfile
@@ -76,7 +78,7 @@ typora-root-url: ../../..
 
 * `chmod +x quickstart.sh` 명령어를 실행하여 `quickstart.sh` 스크립트를 실행 가능하게 만듭니다.
 
-<br>
+<br><br>
 
 ### 2. docker 컨테이너 이미지 생성
 
@@ -92,13 +94,15 @@ typora-root-url: ../../..
 
 ![image-20230621220114338](/images/2023-06-20-(실습02)Working with Cloud Build/image-20230621220114338.png) 
 
-<br><br>
+<br>
+
+<br>
 
 ## Task 3. 빌드 구성 파일과 Cloud Build를 이용한 컨테이너 빌드하기
 
 **Cloud Build**는 **커스텀 빌드 구성 파일**도 지원합니다. 이 과제에서는 커스텀 YAML 형식의 빌드 파일을 Cloud Build와 함께 사용하여 기존 Docker 컨테이너를 통합합니다.
 
-<br>
+<br><br>
 
 ### 1. 실습 파일 다운로드
 
@@ -123,9 +127,9 @@ typora-root-url: ../../..
   * 이 파일은 **Cloud Build**가 **Docker**를 사용하여 **현재 로컬 디렉토리의 Dockerfile** 사양을 사용하여 이미지를 빌드하고 gcr.io/$PROJECT_ID/quickstart-image로 태그를 지정하도록 지시합니다.
   * ($PROJECT_ID)는 Cloud Build에서 프로젝트로 자동으로 채워지는 대체 변수입니다. 연결된 프로젝트의 ID 이미지를 **Container Registry**로 푸시합니다.
 
-<br>
+<br><br>
 
-### 빌드
+### 2. 빌드
 
 * `gcloud builds submit --config cloudbuild.yaml .` 명령어를 실행하여 `cloudbuild.yaml` 을 빌드 구성 파일로 사용하여 Cloud Build를 시작합니다.
 
@@ -141,18 +145,20 @@ typora-root-url: ../../..
 
 ![image-20230621221551515](/images/2023-06-20-(실습02)Working with Cloud Build/image-20230621221551515.png) 
 
-<br><br>
+<br>
+
+<br>
 
 ## Task 4. 빌드 구성 파일과 Cloud Build를 이용한 컨테이너 빌드 및 테스트하기
 
-사용자 지정 빌드 구성 파일의 진정한 힘은 단순히 컨테이너를 빌드하는 것 외에도 다른 작업을 병렬 또는 순서대로 수행할 수 있는 기능입니다. 새로 빌드된 컨테이너에서 테스트를 실행하고 다양한 대상으로 푸시하고 심지어 Kubernetes Engine에 배포할 수도 있습니다. 
+**사용자 지정 빌드 구성 파일(yaml)**의 진정한 힘은 단순히 컨테이너를 빌드하는 것 외에도 다른 작업을 병렬 또는 순서대로 수행할 수 있는 기능입니다. 새로 빌드된 컨테이너에서 테스트를 실행하고 다양한 대상으로 푸시하고 심지어 Kubernetes Engine에 배포할 수도 있습니다. 
 
 이 실습에서는 빌드한 컨테이너를 테스트하고 그 결과를 호출 환경에 보고하는 빌드 구성 파일과 같은 간단한 예를 살펴보겠습니다.
 
 <br>
 
 * Cloud Shell에서 `cd ~/ak8s/Cloud_Build/b` 명령어를 실행하여 이번 실습에 필요한 샘플 파일이 있는 디렉토리로 이동합니다.
-  * Task 3과 달리 이번엔 /b 경로이며 cloudbuild.yaml 파일이 서로 다름을 알고 넘어가자.
+  * Task 3과 달리 이번엔 /b 경로이며 cloudbuild.yaml 파일이 서로 다름을 알고 넘어갑시다.
 
 * `cat cloudbuild.yaml` 명령어를 실행하여 `cloudbuild.yaml` 파일의 내용을 확인합니다.
 
@@ -193,32 +199,10 @@ typora-root-url: ../../..
 
 ![image-20230621223216249](/images/2023-06-20-(실습02)Working with Cloud Build/image-20230621223216249.png) 
 
-<br><br>
-
-## 마무리
-
-아래는 마지막 Task 4 실습하면서 궁금점을 chatgpt 한테 물어본 내용입니다.
+<br>
 
 <br>
 
-두 번째 액션에서 'fail'을 넣어 테스트 실패를 모방했지만, Cloud Storage의 Bucket이 생성된 것을 확인했다는 점이 이해하기 어려울 수 있습니다. 이에 대해 설명드리겠습니다.
+## 마무리
 
-
-
-구글 클라우드(Google Cloud)의 서비스는 각각 독립적으로 동작합니다. 즉, 하나의 액션이 실패하거나 문제가 발생하더라도 다른 액션이나 서비스는 정상적으로 동작할 수 있습니다. 따라서, 빌드 프로세스에서 두 번째 액션이 실패해도 Cloud Storage의 Bucket이 생성되는 것은 의도된 동작입니다.
-
-
-
-'gcloud builds submit' 명령이나 ''빌드 구성 파일''을 사용하여 Google Cloud Build를 실행하면, 각 액션은 독립적인 단계로 실행됩니다. 첫 번째 액션은 Docker 이미지를 빌드하고 레지스트리에 업로드하며, 두 번째 액션은 해당 이미지를 실행하여 'quickstart.sh' 스크립트를 실행합니다.
-
-
-
-첫 번째 액션에서는 Docker 이미지를 빌드하고 레지스트리에 업로드하지만, 빌드가 실패하거나 에러가 발생한다면 해당 이미지는 생성되지 않습니다. 따라서, 이미지는 확인할 수 없을 것입니다.
-
-
-
-하지만 두 번째 액션은 이미지 실행 단계이기 때문에, 이미지의 존재 여부와는 관계없이 해당 단계의 스크립트가 실행됩니다. 그래서 Cloud Storage의 Bucket이 생성된 것을 확인할 수 있는 것입니다.
-
-
-
-따라서, Cloud Storage의 Bucket은 빌드 프로세스 중간에 생성되기 때문에 첫 번째 액션의 이미지 생성 여부와는 독립적입니다.
+생략

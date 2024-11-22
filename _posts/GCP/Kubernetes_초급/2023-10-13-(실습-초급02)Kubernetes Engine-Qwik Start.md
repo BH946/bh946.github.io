@@ -30,6 +30,7 @@ typora-root-url: ../../..
 ## Task 1. Set a default compute zone
 
 * **Node(컴퓨팅리소스-VM) -> Pod(컨테이너 실행시킴), Container(어플리케이션)**
+* `Region > Zone > Cluster > Node > Pod` **형태의 포함 관계를 가짐.**
 * **쿠버네티스 클러스터(=아래그림 전체)**
 
 ![image](https://github.com/BH946/bh946.github.io/assets/80165014/c68de552-2acf-429e-a82a-22f8c56fdff1) 

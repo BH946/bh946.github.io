@@ -12,9 +12,7 @@ typora-root-url: ../../..
 
 
 
-# Deploying Google Kubernets Engine
-
-**세번째 실습은 `Google Cloud Console` 을 통해 `Cluster` 를 빌드를 해보고 `Pod` 를 배포한 후 `Workload, Pod` 를 자세히 살펴보겠습니다.**
+**세번째 실습은** `Google Cloud Console` **을 통해** `Cluster` **를 빌드를 해보고** `Pod` **를 배포한 후** `Workload, Pod` **를 자세히 살펴보겠습니다.**
 
 **아래 4개의 Task를 해결하면서 간접적으로 경험해 봅시다.**
 
@@ -26,7 +24,9 @@ typora-root-url: ../../..
 * Use the **Google Cloud Console** to **deploy** a `Pod`
 * Use the **Google Cloud Console** to **examine** the `cluster and Pods`
 
-<br><br>
+<br>
+
+<br>
 
 ## Task 1. GKE 클러스터 배포
 
@@ -52,7 +52,9 @@ typora-root-url: ../../..
 
 ![image-20230623174730458](/images/2023-06-20-(실습03)Deploying Google Kubernetes Engine/image-20230623174730458.png) 
 
-<br><br>
+<br>
+
+<br>
 
 ## Task 2. GKE 클러스터 수정
 
@@ -73,7 +75,9 @@ typora-root-url: ../../..
 
 ![image-20230623175151254](/images/2023-06-20-(실습03)Deploying Google Kubernetes Engine/image-20230623175151254.png) 
 
-<br><br>
+<br>
+
+<br>
 
 ## Task 3. 샘플 워크로드 배포
 
@@ -95,13 +99,15 @@ typora-root-url: ../../..
 
 ![image-20230623175941422](/images/2023-06-20-(실습03)Deploying Google Kubernetes Engine/image-20230623175941422.png) 
 
-<br><br>
+<br>
+
+<br>
 
 ## Task 4. Google Cloud Console에서 워크로드 세부사항 확인
 
 이 과제에서는 **Google Cloud Console에서 GKE 워크로드의 세부사항을 직접 확인**합니다.
 
-<br>
+<br><br>
 
 ### 1. 워크로드 세부사항
 
@@ -120,7 +126,7 @@ typora-root-url: ../../..
 * `YAML` 탭을 클릭합니다. 
   * 이 화면은 이 샘플 워크로드를 정의하고 완전히 구성하는 데 필요한 모든 구성 요소와 YAML 파일이 제공됩니다.
 
-<br>
+<br><br>
 
 ### 2. Pod 세부사항
 
@@ -131,13 +137,13 @@ typora-root-url: ../../..
 
 * `YAML`탭을 클릭하여 Pod 구성에 대한 자세한 YAML 파일을 확인합니다.
 
-<br><br>
+<br>
+
+<br>
 
 ## 마무리
 
-**Cluster, Pod, Workload, Node, Cluster Standard 모드 이렇게 5가지가 궁금했고 이것들의 개념만 간략히 정리하겠습니다.**
-
-**참고로 쿠버네티스는 컨테이너 단위가 아닌 포드 단위로 클러스터를 관리하며, 포드는 한개 이상의 컨테이너 그룹을 의미합니다.  **
+**쿠버네티스는 컨테이너 단위가 아닌 포드 단위로 클러스터를 관리하며, 포드는 한개 이상의 컨테이너 그룹을 의미합니다.  **
 
 **따라서 가장 작은 단위이므로 하나의 포드는 온전한 하나의 애플리케이션이 됩니다.**
 
@@ -153,7 +159,7 @@ typora-root-url: ../../..
   * k8s은 Pod를 일일이 관리하는 노동을 보완하기위해서 Pod 집합을 관리하기 위한 **Workload Resources**를 사용합니다. 
   * 각 Resource는 Pod가 지정한 상태와 일치하는지 확인합니다.
   * Workload resources
-    * ReplicaSet의 상위개념인 Deployment를 사용하는것이 권장되고 있고,
+    * ReplicaSet의 상위개념인 **Deployment**를 사용하는것이 권장되고 있고,
     * Cron과 같은 작업도 이곳에서 진행
 
 * 마지막 Cluster Standard는 GKE 모드 유형(Autopilot, Standard) 중 1가지입니다.

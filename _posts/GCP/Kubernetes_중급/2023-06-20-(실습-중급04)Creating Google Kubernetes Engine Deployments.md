@@ -12,11 +12,9 @@ typora-root-url: ../../..
 
 
 
-# Deploying Google Kubernets Engine
+**네번째 실습은** `Cloud Shell` **을 많이 활용하며, 직접** `Deployment Manifests` **를 작성해서** `클러스터` **배포를 합니다. 또한,** `Pod 수동 스케일링`**이나** `롤아웃, 롤백`**을 경험해봅니다.**   
 
-**네번째 실습은 `Cloud Shell` 을 많이 활용하며, 직접 `Deployment Manifests` 를 작성해서 `클러스터` 배포를 합니다. 또한, `Pod 수동 스케일링`이나 `롤아웃, 롤백`을 경험해봅니다.**   
-
-**그리고 `서비스 유형`을 정의해보는 경험을 하고, `Canary`를 배포해봅니다.**
+**그리고** `서비스 유형`**을 정의해보는 경험을 하고,** `Canary`**를 배포해봅니다.**
 
 **아래 5개의 Task를 해결하면서 간접적으로 경험해 봅시다.**
 
@@ -29,13 +27,15 @@ typora-root-url: ../../..
 * Trigger deployment **rollout** (rolling update to new version) and **rollbacks**
 * Perform a **Canary deployment**
 
-<br><br>
+<br>
+
+<br>
 
 ## Task 1. 배포 매니페스트 생성 및 클러스터에 배포
 
 이 과제에서는 클러스터 내의 **Pod**에 대한 **배포 매니페스트**를 생성합니다.
 
-<br>
+<br><br>
 
 ### 1. GKE 클러스터 연결
 
@@ -64,8 +64,7 @@ typora-root-url: ../../..
 
     ![image-20230623201405477](/images/2023-06-20-(실습04)Creating Google Kubernetes Engine Deployments/image-20230623201405477.png) 
 
-
-<br>
+<br><br>
 
 ### 2. 배포 매니페스트 생성 및 배포
 
@@ -99,13 +98,15 @@ typora-root-url: ../../..
 
 ![image-20230623201642016](/images/2023-06-20-(실습04)Creating Google Kubernetes Engine Deployments/image-20230623201642016.png) 
 
-<br><br>
+<br>
+
+<br>
 
 ## Task 2. 배포에서 Pod 수동 스케일링
 
 Kubernetes에서는 특정 Pod를 원하는 수의 인스턴스로 스케일링할 수 있습니다.
 
-<br>
+<br><br>
 
 ### 1. Google Cloud Console 에서 Pod 스케일링
 
@@ -114,7 +115,7 @@ Kubernetes에서는 특정 Pod를 원하는 수의 인스턴스로 스케일링�
 
 ![image-20230623202209646](/images/2023-06-20-(실습04)Creating Google Kubernetes Engine Deployments/image-20230623202209646.png) 
 
-<br>
+<br><br>
 
 ### 2. Cloud Shell에서 Pod 스케일링
 
@@ -123,13 +124,15 @@ Kubernetes에서는 특정 Pod를 원하는 수의 인스턴스로 스케일링�
 
 ![image-20230623202310572](/images/2023-06-20-(실습04)Creating Google Kubernetes Engine Deployments/image-20230623202310572.png) 
 
-<br><br>
+<br>
+
+<br>
 
 ## Task 3. 배포 롤아웃 및 롤백 트리거
 
 배포의 롤아웃은 배포의 Pod 템플릿이 변경될 때만 트리거됩니다. 이 작업에서는 배포 롤아웃을 트리거하고 롤백을 트리거합니다.
 
-<br>
+<br><br>
 
 ### 1. Trigger a deployment rollout
 
@@ -153,7 +156,7 @@ Kubernetes에서는 특정 Pod를 원하는 수의 인스턴스로 스케일링�
 
 ![image-20230623202900984](/images/2023-06-20-(실습04)Creating Google Kubernetes Engine Deployments/image-20230623202900984.png) 
 
-<br>
+<br><br>
 
 ### 2. Trigger a deployment rollback
 
@@ -177,13 +180,15 @@ Kubernetes에서는 특정 Pod를 원하는 수의 인스턴스로 스케일링�
 
 ![image-20230623203133504](/images/2023-06-20-(실습04)Creating Google Kubernetes Engine Deployments/image-20230623203133504.png) 
 
-<br><br>
+<br>
+
+<br>
 
 ## Task 4. 매니페스트에서 서비스 유형 정의
 
-**이 과제에서는 애플리케이션으로의 인바운드 트래픽(=외부에서 가상서버 내부로 데이터 접근)을 제어하는 `서비스` 를 생성하고 확인합니다. 서비스는 `ClusterIP, NodePort, LoadBalancer 유형` 으로 구성할 수 있습니다.**
+**이 과제에서는 애플리케이션으로의 인바운드 트래픽(=외부에서 가상서버 내부로 데이터 접근)을 제어하는** `서비스` **를 생성하고 확인합니다. 서비스는** `ClusterIP, NodePort, LoadBalancer 유형` **으로 구성할 수 있습니다.**
 
-**실습으로는 `LoadBalancer` 를 알아보겠습니다.**
+**실습으로는** `LoadBalancer` **를 알아보겠습니다.**
 
 <br>
 
@@ -219,7 +224,9 @@ Kubernetes에서는 특정 Pod를 원하는 수의 인스턴스로 스케일링�
 
 ![image-20230623203816221](/images/2023-06-20-(실습04)Creating Google Kubernetes Engine Deployments/image-20230623203816221.png) 
 
-<br><br>
+<br>
+
+<br>
 
 ## Task 5. Canary 배포
 
@@ -295,9 +302,11 @@ Kubernetes에서는 특정 Pod를 원하는 수의 인스턴스로 스케일링�
 
 ![image-20230623205936518](/images/2023-06-20-(실습04)Creating Google Kubernetes Engine Deployments/image-20230623205936518.png) 
 
-<br><br>
+<br>
 
-# 마무리
+<br>
+
+## 마무리
 
 **이번 실습에서는 "Service, Container의 Image" 와 "Session Affinity" 개념을 정리해보겠습니다.**
 
@@ -306,12 +315,10 @@ Kubernetes에서는 특정 Pod를 원하는 수의 인스턴스로 스케일링�
   * 이번 실습에서는 배포한 Pod 내에 컨테이너속에 nginx 이미지를 가지고 있었습니다.
 
 * **Service는 일반적으로 외부에서 접근을 위해서 사용됩니다.**
-
   * Pod의 IP 주소에 외부에서 직접 접근하려면 서비스를 생성하여 Pod의 IP를 노출시키는 편입니다.
-
+  
 * **마지막 Session Affinity 개념이 여기서 제일 중요한 개념입니다.**
-
-  * "세션 어피니티(Session Affinity)"는 특정 클라이언트의 모든 요청이 항상 동일한 Pod에 연결되도록 하는 설정입니다. 이 설정이 없으면, 각 요청은 개별적으로 처리되어 일반 nginx 배포 또는 nginx-canary 배포 중 어느 것에든 연결될 수 있습니다.
+* "세션 어피니티(Session Affinity)"는 특정 클라이언트의 모든 요청이 항상 동일한 Pod에 연결되도록 하는 설정입니다. 이 설정이 없으면, 각 요청은 개별적으로 처리되어 일반 nginx 배포 또는 nginx-canary 배포 중 어느 것에든 연결될 수 있습니다.
   * 이렇게 다른 버전 간에 전환될 가능성이 있는 것은, canary 릴리스에서 기능적인 변화가 큰 경우 문제를 일으킬 수 있습니다. 이를 방지하기 위해, 클라이언트의 첫 요청이 모든 후속 연결에 사용될 Pod를 결정해야 하는 경우, 서비스의 사양에서 sessionAffinity 필드를 **ClientIP**로 설정할 수 있습니다.
-
-  * 즉, "서비스의 사양에서 sessionAffinity 필드를 ClientIP로 설정할 수 있습니다."는 클라이언트의 IP를 기반으로 세션 어피니티를 설정하여, 특정 클라이언트의 모든 요청이 동일한 Pod에 연결되도록 할 수 있다는 것을 의미합니다. 이렇게 하면 클라이언트의 첫 번째 요청이 결정한 Pod가 모든 후속 연결에도 사용됩니다.
+  
+* 즉, "서비스의 사양에서 sessionAffinity 필드를 ClientIP로 설정할 수 있습니다."는 **클라이언트의 IP를 기반으로 세션 어피니티를 설정하여, 특정 클라이언트의 모든 요청이 동일한 Pod에 연결되도록 할 수 있다는 것을 의미**합니다. 이렇게 하면 클라이언트의 첫 번째 요청이 결정한 Pod가 모든 후속 연결에도 사용됩니다.

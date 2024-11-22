@@ -12,9 +12,7 @@ typora-root-url: ../../..
 
 
 
-# Configuring Persistent Storage for Google Kubernetes Engine
-
-**다섯번째 실습은 `PersistentVolume(=PV)` 및 `PersistentVolumeClaim(=PVC)`을 설정합니다. 해당 내용들은 스토리지 관련 내용입니다.**
+**다섯번째 실습은** `PersistentVolume(=PV)` **및** `PersistentVolumeClaim(=PVC)`**을 설정합니다. 해당 내용들은 스토리지 관련 내용입니다.**
 
 **Persistent Storage 는 영구 스토리지를 의미합니다.**
 
@@ -30,7 +28,9 @@ typora-root-url: ../../..
 * Mount `Google Cloud persistent disk PVCs` as **volumes in StatefulSets**
 * Verify the connection of Pods in StatefulSets to particular PVs as the Pods are stopped and restarted
 
-<br><br>
+<br>
+
+<br>
 
 ## Task 1. Create PVs and PVCs
 
@@ -39,7 +39,7 @@ PVC를 만들면, Kubernetes가 자동으로 PV를 생성하도록 트리거하�
 
 **따라서 이 과제에서는 PVC를 생성하는 실습을 진행합니다.**
 
-<br>
+<br><br>
 
 ### 1. GKE 클러스터 연결
 
@@ -68,7 +68,7 @@ PVC를 만들면, Kubernetes가 자동으로 PV를 생성하도록 트리거하�
 
     ![image-20230623201405477](/images/2023-06-20-(실습05)Configuring Persistent Storage for Google Kubernetes Engine/image-20230623201405477.png) 
 
-<br>
+<br><br>
 
 ### 2. PVC 매니페스트 생성 및 적용
 
@@ -95,7 +95,7 @@ PVC를 만들면, Kubernetes가 자동으로 PV를 생성하도록 트리거하�
 
   * 다시 `kubectl get persistentvolumeclaim` 를 통해서 생성된 스토리지를 확인합니다.
 
-  - PVC는 hello-web-disk라는 이름의 30GB PVC를 생성하며, 이는 한 번에 하나의 노드에서 읽기-쓰기 볼륨으로 마운트할 수 있습니다.
+  - PVC는 hello-web-disk라는 이름의 30GB PVC를 생성하며, 이는 **한 번에 하나의 노드에서 읽기-쓰기 볼륨으로 마운트**할 수 있습니다.
 
   - 아래는 적용된 yaml 파일 내용입니다.
 
@@ -112,7 +112,9 @@ PVC를 만들면, Kubernetes가 자동으로 PV를 생성하도록 트리거하�
           storage: 30Gi
     ```
 
-<br><br>
+<br>
+
+<br>
 
 ## Task 2. Mount and verify Google Cloud persistent disk PVCs in Pods
 
@@ -120,7 +122,7 @@ PVC를 만들면, Kubernetes가 자동으로 PV를 생성하도록 트리거하�
 
 **또한, 마운트 이후에는 영구적인지 테스트를 진행합니다.**
 
-<br>
+<br><br>
 
 ### 1. Mount the PVC to a Pod
 
@@ -128,7 +130,7 @@ PVC를 만들면, Kubernetes가 자동으로 PV를 생성하도록 트리거하�
 
   * 매니페스트 파일 `pod-volume-demo.yaml` 은 nginx 컨테이너를 배포하고, pvc-demo-volume(=PV)을 Pod에 연결하고 해당 볼륨을 nginx 컨테이너 내부의 /var/www/html 경로에 마운트합니다. 
 
-  * 컨테이너 내부의 이 디렉터리에 저장된 파일은 영구 볼륨에 저장되며 Pod와 컨테이너가 종료되고 다시 생성되더라도 지속됩니다.
+  * 컨테이너 내부의 이 디렉터리에 저장된 파일은 **영구 볼륨에 저장**되며 Pod와 컨테이너가 종료되고 다시 생성되더라도 지속됩니다.
 
     ```yaml
     kind: Pod
@@ -166,7 +168,7 @@ PVC를 만들면, Kubernetes가 자동으로 PV를 생성하도록 트리거하�
   exit
   ```
 
-<br>
+<br><br>
 
 ### 2. Test the persistence of the PV
 
@@ -188,13 +190,15 @@ PVC를 만들면, Kubernetes가 자동으로 PV를 생성하도록 트리거하�
   exit
   ```
 
-<br><br>
+<br>
+
+<br>
 
 ## Task 3. Create StatefulSets with PVCs
 
 **이 과제에서는 StatefulSet에서 PVC를 사용합니다. StatefulSet은 Pod에 고유한 식별자를 부여하는점을 제외하면, 기존 배포와 유사합니다.**
 
-<br>
+<br><br>
 
 ### 1. Create a StatefulSet
 
@@ -264,17 +268,18 @@ PVC를 만들면, Kubernetes가 자동으로 PV를 생성하도록 트리거하�
   statefulset.apps "statefulset-demo" created
   ```
 
-<br>
+<br><br>
 
 ### 2. StatefulSets 에서 Pod를 확인
 
 * `kubectl describe statefulset statefulset-demo` 로 StatefulSet 세부사항을 볼 수 있습니다.
 * `kubectl get pods` 과 `kubectl get pvc` 를 통해서 Pod, PVC 를 전부 볼 수 있습니다.
+  
   * `kubectl describe pvc hello-web-disk-statefulset-demo-0` 로 특정 PVC를 선택해서 세부사항을 더 자세히 볼 수 있습니다.
   * Pod가 3개 존재해야하며, PVC는 기존꺼와 합해서 4개가 존재해야 합니다.
     * 참고로 StatefulSet이므로 Pod 3개 복제가 각각 따로 구분되게 존재함을 알 수 있습니다.
     * 아래 결과를 확인하세요.
-
+  
 * **결과모습**
 
   ```bash
@@ -292,7 +297,9 @@ PVC를 만들면, Kubernetes가 자동으로 PV를 생성하도록 트리거하�
   hello-web-disk-st...-demo-2   Bound     pvc-a526ecdf-...34   30Gi    RWO
   ```
 
-<br><br>
+<br>
+
+<br>
 
 ## Task 4. Verify the persistence of Persistent Volume connections to Pods managed by StatefulSets
 
@@ -331,7 +338,9 @@ PVC를 만들면, Kubernetes가 자동으로 PV를 생성하도록 트리거하�
 
 ![image-20230623224230462](/images/2023-06-20-(실습05)Configuring Persistent Storage for Google Kubernetes Engine/image-20230623224230462.png) 
 
-<br><br>
+<br>
+
+<br>
 
 # 마무리
 
