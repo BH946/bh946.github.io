@@ -27,10 +27,10 @@ typora-root-url: ../../..
 
 ## import 기능 사용 허용법
 
-**만약 import가 사용이 안된다면 package.json의 설정을 수정해주면 된다.**
+**만약 import가 사용이 안 된다면 package.json의 설정을 수정해주면 된다.**
 
-* `"type":"module"` 로 설정하면 import 기능 사용 가능
-* `"type":"commonjs"` 는 NodeJS의 기본값이며 즉, 기본적으로 CommonJS를 따른다.  
+* `"type":"module"`로 설정하면 import 기능 사용 가능
+* `"type":"commonjs"`는 NodeJS의 기본값이며 즉, 기본적으로 CommonJS를 따른다.  
   require을 사용한다.
 
 

@@ -1,6 +1,6 @@
 ---
 title: "[체크리스트] DevOps"
-categories : [Knowledge]
+categories : [CheckList]
 tag : [spring, 스프링, 스프링부트, DevOps]
 toc: true
 toc_sticky: true

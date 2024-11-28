@@ -19,4 +19,4 @@ typora-root-url: ../../..
 
 **말 그대로 생성자 에러!!, 생성자를 고치거나 기본 생성자 추가하자!**
 
-**@NoArgsConstructor 같은 기본생성자 어노테이션도 제공**
+**@NoArgsConstructor 같은 기본 생성자 어노테이션도 제공**

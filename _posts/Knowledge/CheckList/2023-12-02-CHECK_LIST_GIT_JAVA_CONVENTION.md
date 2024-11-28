@@ -1,6 +1,6 @@
 ---
 title: "[체크리스트] 컨벤션(자바, 깃, 등등)"
-categories : [Knowledge]
+categories : [CheckList]
 tag : [spring, 스프링, 스프링부트, 자바 컨벤션, 깃 컨벤션]
 toc: true
 toc_sticky: true
