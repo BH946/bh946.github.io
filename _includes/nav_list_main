@@ -11,20 +11,20 @@
             📂 <span style="font-family:'Cafe24Oneprettynight';">전체 글 수</style> <span style="font-family:'Coming Soon';">{{sum}}</style> <span style="font-family:'Cafe24Oneprettynight';">개</style> 
       </li>
       <li>
-        <span class="nav__sub-title">REVISE/KNOWLEDGE</span>
-            <ul>
-                {% for category in site.categories %}
-                    {% if category[0] == "Revise" %}
-                        <li><a href="/categories/revise" class="">수정전 ({{category[1].size}})</a></li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
+        <span class="nav__sub-title">KNOWLEDGE</span>
             <ul>
                 {% for category in site.categories %}
                     {% if category[0] == "Knowledge" %}
                         <li><a href="/categories/knowledge" class="">Knowledge(지식) ({{category[1].size}})</a></li>
                     {% endif %}
                 {% endfor %}
+            </ul>
+            <ul>
+              {% for category in site.categories %}
+                  {% if category[0] == "CheckList" %}
+                      <li><a href="/categories/checklist" class="">CheckList(개발 체크리스트) ({{category[1].size}})</a></li>
+                  {% endif %}
+              {% endfor %}
             </ul>
             <ul>
               {% for category in site.categories %}
