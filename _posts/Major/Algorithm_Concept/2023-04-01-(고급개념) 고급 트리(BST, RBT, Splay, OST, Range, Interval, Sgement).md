@@ -28,7 +28,6 @@ typora-root-url: ../../..
   * **[이진 검색 트리3(RBT)](https://www.acmicpc.net/problem/1539)**
   * **[이진 탐색 트리(RBT)](https://www.acmicpc.net/problem/2957)**
   * **[구간 합 구하기(Segment)](https://www.acmicpc.net/problem/2042)**
-  * https://m.blog.naver.com/bh_algo/223577906978
 
 
 <br><br>
