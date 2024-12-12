@@ -1,5 +1,5 @@
 ---
-title: "InvalidDataAccessApiUsageException - Spring"
+title: "TooManyActualInvocations - Spring"
 categories : [Err]
 tag : [spring, 스프링, 스프링부트]
 toc: true
