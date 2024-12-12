@@ -1,5 +1,5 @@
 ---
-title: "[Error] Spring-JdbcSQLNonTransientConnectionException"
+title: "JdbcSQLNonTransientConnectionException - Spring"
 categories : [Err]
 tag : [spring, 스프링, 스프링부트]
 toc: true
@@ -12,8 +12,6 @@ typora-root-url: ../../..
 ---
 
 
-
-# Error
 
 `org.h2.jdbc.JdbcSQLNonTransientConnectionException: Connection is broken: "java.net.ConnectException: Connection refused: connect: localhost" [90067-214]`
 

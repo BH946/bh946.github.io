@@ -1,5 +1,5 @@
 ---
-title: "[Error] Spring-IllegalStateException"
+title: "IllegalStateException - Spring"
 categories : [Err]
 tag : [spring, 스프링, 스프링부트]
 toc: true
@@ -12,8 +12,6 @@ typora-root-url: ../../..
 ---
 
 
-
-# Error
 
 `java.lang.IllegalStateException : No primary or single unique constructor found for class [xxx]`
 

@@ -1,5 +1,5 @@
 ---
-title: "[Error] Spring-TemplateInputException"
+title: "TemplateInputException - Spring"
 categories : [Err]
 tag : [spring, 스프링, 스프링부트]
 toc: true
@@ -12,8 +12,6 @@ typora-root-url: ../../..
 ---
 
 
-
-# Error
 
 `org.thymeleaf.exceptions.TemplateInputException: Error resolving template [/spring/swagger/swagger], template might not exist or might not be accessible by any of the configured Template Resolvers`
 

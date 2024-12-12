@@ -1,5 +1,5 @@
 ---
-title: "[Error] Spring-NoClassDefFoundError"
+title: "NoClassDefFoundError - Spring"
 categories : [Err]
 tag : [spring, 스프링, 스프링부트]
 toc: true
@@ -12,8 +12,6 @@ typora-root-url: ../../..
 ---
 
 
-
-# Error
 
 `java.lang.NoClassDefFoundError...` 관련 에러
 

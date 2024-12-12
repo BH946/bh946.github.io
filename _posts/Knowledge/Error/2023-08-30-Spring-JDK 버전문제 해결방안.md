@@ -1,5 +1,5 @@
 ---
-title: "[Error] Spring-JDK 버전문제 해결방안"
+title: "Spring-JDK 버전문제 해결방안"
 categories : [Err]
 tag : [spring, 스프링, 스프링부트, jdk, java, version, 버전문제]
 toc: true
@@ -12,8 +12,6 @@ typora-root-url: ../../..
 ---
 
 
-
-# Error
 
 `No active profile set, falling back to 1 default profile: "default"` 등등...
 
