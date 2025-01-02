@@ -11,7 +11,7 @@ sidebar:
 
 
 
-## TIP
+## TIPa
 
 **pip 최신 업데이트 방법** : cmd창 관리자권한으로 실행후 **python -m pip install --upgrade pip** 입력
 
