@@ -1,6 +1,6 @@
 ---
 title:  "[Java 기본 원리] Java란 무엇인가? C언어와 비교해보자"
-categories : [Java]
+categories : Java
 tag : [java, jvm, oop, programming-language, Java 동작 원리, 자바 동작 원리, 자바]
 toc: true
 toc_sticky: true
