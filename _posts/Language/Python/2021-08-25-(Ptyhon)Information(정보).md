@@ -6,7 +6,9 @@ toc: true
 toc_sticky: true
 author_profile: false
 sidebar:
-   nav: "docs"
+  nav: "docs"
+typora-root-url: ../../..
+published: true
 ---
 
 
