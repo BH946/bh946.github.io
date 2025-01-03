@@ -1,5 +1,5 @@
 ---
-title:  "[Python]Basic(기초문법) - 추가정리(최신2)"
+title:  "[Python] Basic(기초문법) 재정리 - 최신ver(2)"
 categories : PY
 tag : [파이썬, 문법]
 toc: true
@@ -11,17 +11,17 @@ sidebar:
 
 
 
-**Python 추가로 정리하고 싶은 문법들 작성 - Class, Numpy, Pandas**
+**Python의 클래스와 데이터 분석을 위한 Class, NumPy, Pandas 을 정리한다.**
 
 <br>
 
 <br>
 
-## 클래스 (Class)
+## 클래스(Class) 기본 구조  🔍
 
-**사용자 정의 클래스에서 나누기 연산 위해 파이썬 3에서는 연산자 메서드가 변경 됨**
+**버전 별 나누기 연산 바뀐점 참고**
 
-- 파이썬 2에서는 나누기 연산을 위해 `__div__` 메서드를 사용했지만, 파이썬 3부터는 `__truediv__`를 사용합니다.
+- 파이썬 2에서는 나누기 연산을 위해 `__div__` 메서드를 사용했지만, 파이썬 3부터는 `__truediv__`를 사용!
 
   ```python
   class MyNumber:
@@ -33,9 +33,11 @@ sidebar:
           return self.value / other.value
   ```
 
+<br>
+
 **클래스의 기본 구성 요소**
 
-- **생성자** (`__init__`): 객체가 생성될 때 호출되는 메서드로, 초기화를 담당합니다.
+- **생성자** (`__init__`): 객체가 생성될 때 호출되는 메서드로, 초기화를 담당
 
   ```python
   class Car:
@@ -44,16 +46,18 @@ sidebar:
           self.speed = speed
   ```
 
-- **인스턴스 변수**: 각 객체마다 별도로 유지되는 변수로, `self`를 통해 접근합니다.
+- **인스턴스 변수**: 각 객체마다 별도로 유지되는 변수로, `self`를 통해 접근
 
   ```python
   def upSpeed(self, value):
       self.speed += value
   ```
 
+<br>
+
 **특수 메서드와 속성**
 
-- `__dict__`: 객체의 속성 정보를 딕셔너리 형태로 반환합니다.
+- `__dict__`: 객체의 속성 정보를 딕셔너리 형태로 반환
 
   ```python
   car = Car('red')
@@ -61,7 +65,7 @@ sidebar:
   # 출력: {'color': 'red', 'speed': 0}
   ```
 
-- `__str__`: 객체를 문자열로 표현할 때 사용하는 메서드입니다.
+- `__str__`: 객체를 문자열로 표현할 때 사용하는 메서드
 
   ```python
   class Car:
@@ -73,9 +77,11 @@ sidebar:
   # 출력: Car(color=red, speed=0)
   ```
 
+<br>
+
 **접근 제어**
 
-- **프라이빗 변수**: 변수 이름 앞에 `__`를 붙여서 사용하며, 클래스 외부에서 접근할 수 없습니다.
+- **프라이빗 변수**: 변수 이름 앞에 `__`를 붙여서 사용하며, 클래스 외부에서 접근할 수 없다.
 
   ```python
   class BankAccount:
@@ -86,9 +92,13 @@ sidebar:
           self.__balance += amount
   ```
 
+<br>
+
 **상속과** `super()`
 
-- 자식 클래스에서 부모 클래스의 생성자나 메서드를 호출할 때 `super()`를 사용합니다.
+- 자식 클래스에서 부모 클래스의 생성자나 메서드를 호출할 때 `super()`를 사용
+
+- 상속은 괄호안에 넣어서 적용
 
   ```python
   class Vehicle:
@@ -104,11 +114,13 @@ sidebar:
 
   - 만약 자식 클래스에서 생성자를 정의하지 않으면 부모 클래스의 생성자가 자동으로 호출됩니다.
 
+<br>
+
 **불변 객체와 문자열**
 
-- 파이썬에서 문자열은 **불변 객체**입니다. 즉, 생성된 후 값을 변경할 수 없습니다.
+- 파이썬에서 문자열은 **불변 객체**로써 생성된 후 값을 변경할 수 없다.
 
-- 동일한 문자열 리터럴은 메모리 절약을 위해 같은 객체를 참조합니다.
+- 동일한 문자열 리터럴은 메모리 절약을 위해 같은 객체를 참조
 
   ```python
   a = "hello"
@@ -124,9 +136,9 @@ sidebar:
 
 `ndarray`**: NumPy의 핵심 자료구조**
 
-- `ndarray`는 N차원 배열 객체로, 동일한 타입의 요소로 구성됩니다.
+- `ndarray`는 N차원 배열 객체로, 동일한 타입의 요소로 구성
 
-- **리스트와 유사하지만, 더 빠르고** 메모리를 효율적으로 사용하며, 벡터화 연산을 지원합니다.
+- **리스트와 유사하지만, 더 빠르고** 메모리를 효율적으로 사용하며, 벡터화 연산을 지원
 
   ```python
   import numpy as np
@@ -134,17 +146,19 @@ sidebar:
   arr = np.array([1, 2, 3])
   ```
 
+<br>
+
 `ndarray`**의 주요 속성**
 
-- `shape`: 배열의 차원 크기를 튜플로 반환합니다.
+- `shape`: 배열의 차원 크기를 튜플로 반환
 
-- `ndim`: 배열의 차원 수를 반환합니다.
+- `ndim`: 배열의 차원 수를 반환
 
-- `dtype`: 배열 요소의 데이터 타입을 반환합니다.
+- `dtype`: 배열 요소의 데이터 타입을 반환
 
-- `itemsize`: 배열 요소 하나의 바이트 크기를 반환합니다.
+- `itemsize`: 배열 요소 하나의 바이트 크기를 반환
 
-- `size`: 배열 전체 요소의 개수를 반환합니다.
+- `size`: 배열 전체 요소의 개수를 반환
 
   ```python
   arr = np.array([[1, 2], [3, 4]])
@@ -155,15 +169,17 @@ sidebar:
   print(arr.size)      # 출력: 4
   ```
 
+<br>
+
 **배열 생성**
 
-- `np.array()`: 리스트나 튜플을 배열로 변환합니다.
+- `np.array()`: 리스트나 튜플을 배열로 변환
 
-- `np.arange()`: 지정된 범위의 수열을 생성합니다.
+- `np.arange()`: 지정된 범위의 수열을 생성
 
-- `np.linspace()`: 시작과 끝을 지정하여 일정한 간격으로 수열을 생성합니다.
+- `np.linspace()`: 시작과 끝을 지정하여 일정한 간격으로 수열을 생성
 
-- `np.logspace()`: 로그 스케일로 수열을 생성합니다.
+- `np.logspace()`: 로그 스케일로 수열을 생성
 
   ```python
   np.array([1, 2, 3])            # array([1, 2, 3])
@@ -172,11 +188,13 @@ sidebar:
   np.logspace(0, 2, 5)           # array([  1. ,   3.16227766,  10. ,  31.6227766, 100. ])
   ```
 
+<br>
+
 **배열 형태 변경**
 
-- `reshape()`: 배열의 형태를 변경합니다.
+- `reshape()`: 배열의 형태를 변경
 
-- `flatten()`: 다차원 배열을 1차원으로 평탄화합니다.
+- `flatten()`: 다차원 배열을 1차원으로 평탄화
 
   ```python
   arr = np.arange(10).reshape(2, 5)
@@ -190,13 +208,15 @@ sidebar:
   # 출력: [0 1 2 3 4 5 6 7 8 9]
   ```
 
+<br>
+
 **인덱싱과 슬라이싱**
 
-- **기본 인덱싱**: 리스트와 유사하게 인덱스를 사용합니다.
+- **기본 인덱싱**: 리스트와 유사하게 인덱스를 사용
 
-- **슬라이싱**: `[start:stop:step]` 형식으로 부분 배열을 가져옵니다.
+- **슬라이싱**: `[start:stop:step]` 형식으로 부분 배열을 가져옴
 
-- **다차원 인덱싱**: 쉼표를 사용하여 각 차원에 대한 인덱스를 지정합니다.
+- **다차원 인덱싱**: 쉼표를 사용하여 각 차원에 대한 인덱스를 지정
 
   ```python
   arr = np.arange(10).reshape(2, 5)
@@ -211,9 +231,11 @@ sidebar:
   #  [6 7]]
   ```
 
+<br>
+
 **논리적 인덱싱**
 
-- 조건을 만족하는 요소를 선택할 수 있습니다.
+- 조건을 만족하는 요소를 선택할 수 있다.
 
   ```python
   ages = np.array([18, 25, 30, 21])
@@ -229,7 +251,7 @@ sidebar:
 
 **Pandas의 핵심 자료구조**
 
-- `Series`: 1차원 배열로, 인덱스를 가집니다.
+- `Series`: 1차원 배열로, 인덱스를 가짐
 
   ```python
   import pandas as pd
@@ -243,7 +265,7 @@ sidebar:
   # dtype: int64
   ```
 
-- `DataFrame`: 2차원 데이터 구조로, 행과 열에 인덱스를 가집니다.
+- `DataFrame`: 2차원 데이터 구조로, 행과 열에 인덱스를 가짐
 
   ```python
   data = {
@@ -259,6 +281,8 @@ sidebar:
   # 2  Charlie   35
   ```
 
+<br>
+
 **데이터 불러오기**
 
 - **CSV 파일 읽기**
@@ -272,6 +296,8 @@ sidebar:
   ```python
   df = pd.read_csv('data.csv', index_col=0)
   ```
+
+<br>
 
 **데이터 선택**
 
@@ -305,6 +331,8 @@ sidebar:
     df.iloc[:, 0]           # 모든 행의 첫 번째 열
     ```
 
+<br>
+
 **데이터 추가**
 
 - **열 추가**
@@ -312,6 +340,8 @@ sidebar:
   ```python
   df['salary'] = [50000, 60000, 70000]
   ```
+
+<br>
 
 **데이터 분석**
 
@@ -333,6 +363,8 @@ sidebar:
     np.std(df['age'])               # NumPy 표준편차
     ```
 
+<br>
+
 **날짜 데이터 다루기**
 
 - **날짜 형식 변환**
@@ -349,6 +381,8 @@ sidebar:
   df['day'] = df['date'].dt.day
   ```
 
+<br>
+
 **데이터 그룹핑**
 
 - `groupby()`
@@ -357,12 +391,14 @@ sidebar:
   grouped = df.groupby('month').mean()
   ```
 
-- 최대 또는 최소 값 찾기
+- **최대 또는 최소 값 찾기**
 
   ```python
   max_value = grouped['sales'].max()
   max_month = grouped[grouped['sales'] == max_value]
   ```
+
+<br>
 
 **데이터 필터링**
 
@@ -371,6 +407,8 @@ sidebar:
   ```python
   high_salary = df[df['salary'] > 60000]
   ```
+
+<br>
 
 **결손값 처리**
 
@@ -398,6 +436,8 @@ sidebar:
     - `how`: 제거 조건 (`'any'`는 하나라도 결손값이면 제거, `'all'`은 모두 결손값일 때 제거)
     - `inplace`: 원본 데이터프레임을 수정할지 여부
 
+<br>
+
 **데이터 구조 변경**
 
 - **피벗 테이블**
@@ -409,6 +449,8 @@ sidebar:
   - `index`: 행 인덱스로 사용할 열
   - `columns`: 열 이름으로 사용할 열
   - `values`: 값으로 사용할 열
+
+<br>
 
 **데이터 합치기**
 
@@ -430,6 +472,8 @@ sidebar:
   - `how`: 조인 방식 (`'inner'`, `'outer'`, `'left'`, `'right'`)
   - `on`: 공통 열 이름
 
+<br>
+
 **데이터 정렬**
 
 - `sort_values()`
@@ -438,3 +482,4 @@ sidebar:
   df_sorted = df.sort_values(by='age', ascending=True)  # 오름차순 정렬
   df_sorted = df.sort_values(by='salary', ascending=False)  # 내림차순 정렬
   ```
+

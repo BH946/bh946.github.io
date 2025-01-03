@@ -1,5 +1,5 @@
 ---
-title:  "[Python]Web_Scraping(Selenium, Requests, BeautifulSoup)"
+title:  "[Python] 웹 크롤링 따라하기(Selenium, Requests, BeautifulSoup)"
 categories : PY
 tag : [python, 웹스크래핑, 웹파싱, bs4, headless]
 toc: true
@@ -11,7 +11,9 @@ sidebar:
 
 
 
-**=> 정적, 동적 인터넷 파싱 및 동작법을 설명한다.**
+**Python으로 정적, 동적 인터넷 크롤링 하는법을 살펴보자!**
+
+<br>
 
 <br>
 
@@ -19,39 +21,37 @@ sidebar:
 
 **사용자가 접근하는 것처럼 보이게 하는 방법**
 
-* 예로 쿠팡의 경우 유저가아니면 접근 못함.
+예로 쿠팡의 경우 유저가 아니면 접근 못함.
 
 <br>
-
-### 가져오는 법
 
 **1. 구글에 user agent string을 검색해서 what is my user agent? 들어간다.**
 
-**2. 안에 있는 user agent를 복사한다. 그리고 나서**
+**2. 안에 있는 user agent를 복사한다. 그리고 나서 headers = {"User-Agent":"복붙"}**
 
-**3. url = "http://nadocoding.tistory.com"**
+**예시 코드**
 
-**4. headers = {"User-Agent":"복붙"}**
-
-**5. res = requests.get(url, headers=headers) 이렇게 3문장!**
-
-<br><br>
-
-## 1. 셀레니움(Selenium), BeautifulSoup => 동적
-
-=> 주관적인 내 경험들만 작성. (자세히는 관련 공식문서 참고)
+```python
+headers = {
+'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36'
+}
+```
 
 <br>
 
+<br>
+
+## 1. 셀레니움(Selenium), BeautifulSoup => 동적 웹
+
 ### Selenium, BeautifulSoup 준비물
 
-```python
+```text
 1. 크롬 드라이버 다운
 2. pip install selenium
 3. pip install bs4
 ```
 
-<br>
+<br><br>
 
 ### Selenium, BeautifulSoup 사용법
 
@@ -208,8 +208,7 @@ browser.quit() # 전체 종료
   search_Label[i].click()
   ```
 
-
-<br>
+<br><br>
 
 ### 부가정보) 1. 셀레니움_헤드리스(Selenium_Headless)
 
@@ -244,7 +243,7 @@ browser.maximize_window() # 전체화면(추천)
 # => 기본적으로 여기까지는 코드 전부 작성추천
 ```
 
-<br>
+<br><br>
 
 ### 부가정보) 2. 셀레니움_스크롤(ActionChains)
 
@@ -342,7 +341,9 @@ print("스크롤 완료")
 browser.get_screenshot_as_file("google_movie.png")
 ```
 
-<br><br>
+<br>
+
+<br>
 
 ## 2. 리퀘스트(Requests), BeautifulSoup => 정적
 
@@ -354,7 +355,7 @@ browser.get_screenshot_as_file("google_movie.png")
   * 400대 : 코드문제
   * 500대 : 서버문제
 
-<br>
+<br><br>
 
 ### Requests 준비물
 
@@ -363,7 +364,7 @@ browser.get_screenshot_as_file("google_movie.png")
 2. pip install bs4
 ```
 
-<br>
+<br><br>
 
 ### Requests 사용법(나중에 합치고 수졍)
 
@@ -452,8 +453,9 @@ url = a['href'] # str 형식으로 나옴(dict형식을 key값으로 접근한�
   search = search.replace('-', '') # '-'을 전부 없애줌.
   ```
 
+<br>
 
-<br><br>
+<br>
 
 ## 3. Selenium(셀레니움) + Requests 같이 사용한 응용방식
 
@@ -461,13 +463,13 @@ url = a['href'] # str 형식으로 나옴(dict형식을 key값으로 접근한�
 
 * 셀레니움으로 로그인 => 로그인 기록을 Requests에 적용해서 응용하는 방식 사용하자.
 
-<br>
+<br><br>
 
 ### 응용 준비물
 
 **Selenium, Requests 에서 필요했던 준비물들 import 똑같이 하기.**
 
-<br>
+<br><br>
 
 ### 응용 방법
 
@@ -511,13 +513,15 @@ url = a['href'] # str 형식으로 나옴(dict형식을 key값으로 접근한�
 
 **3. 저장한 s를 이용해 s.get(url) 형식으로 접근하면 로그인 필요한 페이지 접근 가능.(끝)**
 
-<br><br>
+<br>
+
+<br>
 
 ## 4. bs4 (BeautifulSoup) - "lxml파서 사용"
 
 * 위에선 계속 html파서 사용했었음.
 
-<br>
+<br><br>
 
 ### 파서의 종류
 
@@ -590,7 +594,7 @@ url = a['href'] # str 형식으로 나옴(dict형식을 key값으로 접근한�
     print(rank2.a.get_text())
     ```
 
-<br>
+<br><br>
 
 ### 1. 웹툰(예시)
 
@@ -642,7 +646,7 @@ print("전체 점수 : ", total_rates)
 print("평균 점수 : ", total_rates / len(cartoons))
 ```
 
-<br>
+<br><br>
 
 ### 2. 쿠팡(예시)
 
@@ -734,7 +738,7 @@ for i in range(1, 6):
     ... 생략..
 ```
 
-<br>
+<br><br>
 
 ### 3. 다음 - 영화
 

@@ -1,6 +1,6 @@
 ---
 layout: single
-title:  "[Python]OpenCV정리(이미지&영상 처리 라이브러리)"
+title:  "[Python] OpenCV정리(이미지&영상 처리 라이브러리)"
 categories: PY
 tag: [python, OpenCV]
 toc: true
@@ -30,16 +30,16 @@ sidebar:
       font-weight: bold;
       padding: 8px;
     }
-
+    
     table.dataframe td {
       text-align: center;
       padding: 8px;
     }
-
+    
     table.dataframe tr:hover {
       background: #b8d1f3; 
     }
-
+    
     .output_prompt {
       overflow: auto;
       font-size: 0.9rem;

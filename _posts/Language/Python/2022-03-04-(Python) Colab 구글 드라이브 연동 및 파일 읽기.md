@@ -1,5 +1,5 @@
 ---
-title:  "[Python]Colab 정리"
+title:  "[Python] Colab 구글 드라이브 연동 및 파일 읽기"
 categories : PY
 tag : [코랩, Colab, ipynb, python가상환경]
 toc: true
@@ -11,13 +11,11 @@ sidebar:
 
 
 
-## Colab(코랩)
-
-* 홈페이지에서 파이썬을 실행할 수 있게 지원해주는 사이트(주피터와 같은 맥락)
+**Google Colab은 웹 브라우저에서 Python을 실행할 수 있게 해주는 클라우드 기반 Jupyter Notebook 환경이다**
 
 <br>
 
-#### 한글이 제대로 나오지 않는 경우?
+**참고: 한글이 제대로 나오지 않는 경우?**
 
 **주석 해제후 실행**
 
@@ -30,13 +28,13 @@ plt.rc('font', family='NanumBarunGothic')
 
 <br>
 
-#### 구글 드라이브 연동
-
-* Colab은 기본적으로 Colab 라이브러리를 포함하고 있다.
-
 <br>
 
-**Colab이 아닌 IDE인 경우 pip 필요**
+## Google Drive 연동
+
+**Colab은 기본적으로 Colab 라이브러리를 포함하고 있다.**
+
+**IDE에서 사용시 설치 필요**
 
 ```python
 !python -m pip install -U google-colab
@@ -44,47 +42,44 @@ plt.rc('font', family='NanumBarunGothic')
 
 <br>
 
-**1. 사용법(자신의 구글 드라이브에 직접 csv 파일 업로드 한 경우**)
+**연동 방법 1: 직접 코랩에 업로드한 파일 접근**
 
 ```python
+# 드라이브 마운트
 from google.colab import drive
 drive.mount('/content/gdrive/')
 ```
 
 ```python
-path_dataset = "/content/gdrive/MyDrive/....." # 구글 드라이브 경로이다
-filename= "부산교통공사_시간대별 승하차인원_20210801.csv"
-
+# 파일 읽기
+path_dataset = "/content/gdrive/MyDrive/....."
+filename = "example.csv"
 my_df = pd.read_csv(path_dataset + filename)
-print(my_df.head(10))
 ```
 
 <br>
 
-**2. 사용법(구글 드라이브로 공유된 파일을 접근하기)**
+**연동 방법 2: 구글 드라이브의 공유 파일을 코랩에 업로드**
 
-* drive 객체 만들기
+* **drive 객체 만들기**
 
   ```python
   # 아래 코드는 공유 파일을 사용하기 위한 코드 이니 그대로 사용하시면 됩니다.
   
-  # pyDrive 설치
   # !pip install -U -q PyDrive
   from pydrive.auth import GoogleAuth
   from pydrive.drive import GoogleDrive
   from google.colab import auth
   from oauth2client.client import GoogleCredentials
   
-  # Authenticate and create the PyDrive client
+  # 인증
   auth.authenticate_user()
   gauth = GoogleAuth()
   gauth.credentials = GoogleCredentials.get_application_default()
   drive = GoogleDrive(gauth)
   ```
 
-<br>
-
-* 구글 드라이브로 공유된 파일 공유해서 가져오기
+* **구글 드라이브로 공유된 파일 가져오기**
 
   ```python
   # 구글드라이브 id를 찾아서 아래 코드에 대입하여 실행시키시기 바랍니다

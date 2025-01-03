@@ -1,6 +1,6 @@
 ---
 layout: single
-title:  "[Python]Practice_pandas_and_matplotlib(활용편)"
+title:  "[Python] Practice_pandas_and_matplotlib(활용편)"
 categories: PY
 tag: [python, 예제, pandas, matplotlib]
 toc: true
@@ -30,16 +30,16 @@ sidebar:
       font-weight: bold;
       padding: 8px;
     }
-
+    
     table.dataframe td {
       text-align: center;
       padding: 8px;
     }
-
+    
     table.dataframe tr:hover {
       background: #b8d1f3; 
     }
-
+    
     .output_prompt {
       overflow: auto;
       font-size: 0.9rem;
@@ -115,7 +115,7 @@ C:\Users\Nadocoding\anaconda3\lib\site-packages\openpyxl\styles\stylesheet.py:22
     .dataframe tbody tr th {
         vertical-align: top;
     }
-
+    
     .dataframe thead th {
         text-align: right;
     }
@@ -308,7 +308,7 @@ C:\Users\Nadocoding\anaconda3\lib\site-packages\openpyxl\styles\stylesheet.py:22
     .dataframe tbody tr th {
         vertical-align: top;
     }
-
+    
     .dataframe thead th {
         text-align: right;
     }
@@ -493,7 +493,7 @@ df_w
     .dataframe tbody tr th {
         vertical-align: top;
     }
-
+    
     .dataframe thead th {
         text-align: right;
     }
@@ -1037,7 +1037,7 @@ df
     .dataframe tbody tr th {
         vertical-align: top;
     }
-
+    
     .dataframe thead th {
         text-align: right;
     }
@@ -1123,7 +1123,7 @@ df
     .dataframe tbody tr th {
         vertical-align: top;
     }
-
+    
     .dataframe thead th {
         text-align: right;
     }
@@ -1252,7 +1252,7 @@ df
     .dataframe tbody tr th {
         vertical-align: top;
     }
-
+    
     .dataframe thead th {
         text-align: right;
     }
@@ -1320,7 +1320,7 @@ df
     .dataframe tbody tr th {
         vertical-align: top;
     }
-
+    
     .dataframe thead th {
         text-align: right;
     }

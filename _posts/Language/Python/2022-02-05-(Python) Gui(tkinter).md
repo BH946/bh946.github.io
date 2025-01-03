@@ -1,5 +1,5 @@
 ---
-title:  "[Python]GUI(tkinter)"
+title:  "[Python] GUI(tkinter)"
 categories : PY
 tag : [파이썬, tkinter, gui]
 toc: true
@@ -11,27 +11,29 @@ sidebar:
 
 
 
-## GUI(구이)
+**GUI는 그래픽 사용자 인터페이스(Graphic User Interface) 이며, 이를 지원하는 모듈은 여러개가 있는데 그 중 tkinter 를 배워보자!**
 
-* tkinter 라이브러리 사용
+<br>
 
-* 속성들 간단히 정리
+**참고**
 
-  * padx, pady, width, height 의 차이는 크기가 다름(상대, 절대)
+* padx, pady, width, height 의 차이는 크기가 다름(상대, 절대)
 
-  * pack()은 그냥 중앙에 차례로 위치했다면, grid(row, column)을 통해 위치를 지정 가능
+* pack(), grid(row, column) 등 다양한 배치 방식 지원
 
-    ```python
-    # side 위치, fill 가득채우기, expand 전체 채우기
-    pack(side="top") # 이런식으로 속성넣어서 위치 지정도 가능하다는 점.
-    frame_burger.pack(side="left", fill="both", expand=True)
-    ```
+  ```python
+  # side 위치, fill 가득채우기, expand 전체 채우기
+  pack(side="top") # 이런식으로 속성넣어서 위치 지정도 가능하다는 점.
+  frame_burger.pack(side="left", fill="both", expand=True)
+  ```
 
-  * +로 columnspan등은 grid에서 옆에 열과 합침.
+* columnspan 같은 건 grid에서 옆에 열과 합침
 
-  * root.quit로 간단히 종료
+* root.quit로 간단히 종료
 
-<br><br>
+<br>
+
+<br>
 
 ## 1. create_frame
 
@@ -74,7 +76,9 @@ root = Tk() # 이것만 입력시 빈 창 실행
   root.mainloop() # 마지막에 작성해주자.
   ```
 
-<br><br>
+<br>
+
+<br>
 
 ## 2. button(버튼)
 
@@ -127,7 +131,9 @@ btn1.pack() # 그냥 중앙에 적용해줌.
   btn7.pack()
   ```
 
-<br><br>
+<br>
+
+<br>
 
 ## 3. label(라벨)
 
@@ -159,7 +165,9 @@ label1.pack()
   btn.pack()
   ```
 
-<br><br>
+<br>
+
+<br>
 
 ## 4. text, entry
 
@@ -197,7 +205,9 @@ def btncmd():
 btn = Button(root, text="클릭", command=btncmd)
 btn.pack()
 ```
-<br><br>
+<br>
+
+<br>
 
 ## 5. listbox
 
@@ -237,7 +247,9 @@ def btncmd():
 btn = Button(root, text="클릭", command=btncmd)
 btn.pack()
 ```
-<br><br>
+<br>
+
+<br>
 
 ## 6. checkbox
 
@@ -268,7 +280,9 @@ def btncmd():
 btn = Button(root, text="클릭", command=btncmd)
 btn.pack()
 ```
-<br><br>
+<br>
+
+<br>
 
 ## 7. radiobutton
 
@@ -311,7 +325,9 @@ def btncmd():
 btn = Button(root, text="클릭", command=btncmd)
 btn.pack()
 ```
-<br><br>
+<br>
+
+<br>
 
 ## 8. combobox
 
@@ -342,7 +358,9 @@ def btncmd():
 btn = Button(root, text="선택", command=btncmd)
 btn.pack()
 ```
-<br><br>
+<br>
+
+<br>
 
 ## 9. progressbar
 
@@ -393,7 +411,9 @@ btn.pack()
   btn.pack()
   ```
 
-<br><br>
+<br>
+
+<br>
 
 ## 10. menu(우리가 아는 메뉴탭)
 
@@ -458,7 +478,9 @@ menu.add_cascade(label="View", menu=menu_view)
 ```python
 root.config(menu=menu)
 ```
-<br><br>
+<br>
+
+<br>
 
 ## 11. messagebox(메세지박스)
 
@@ -515,7 +537,9 @@ Button(root, command=retrycancel, text="재시도 취소").pack()
 Button(root, command=yesno, text="예 아니오").pack()
 Button(root, command=yesnocancel, text="예 아니오 취소").pack()
 ```
-<br><br>
+<br>
+
+<br>
 
 ## 12. frame(레이아웃같은 느낌이라 생각)
 
@@ -538,7 +562,9 @@ frame_drink.pack(side="right", fill="both", expand=True)
 Button(frame_drink, text="콜라").pack()
 Button(frame_drink, text="사이다").pack()
 ```
-<br><br>
+<br>
+
+<br>
 
 ## 13. scrollbar(스크롤바)
 
@@ -565,7 +591,9 @@ listbox.pack(side="left")
 
 scrollbar.config(command=listbox.yview)
 ```
-<br><br>
+<br>
+
+<br>
 
 ## 14. grid(그리드)
 
@@ -640,7 +668,9 @@ btn_0.grid(row=5, column=0, columnspan=2, sticky=N+E+W+S, padx=3, pady=3) # colu
 btn_point.grid(row=5, column=2, sticky=N+E+W+S, padx=3, pady=3)
 ```
 
-<br><br>
+<br>
+
+<br>
 
 ## 15. 간단한 메모장 만들기
 
@@ -693,13 +723,11 @@ root.config(menu=menu)
 root.mainloop()
 ```
 
-<br><br>
-
-## GUI를 활용한 간단한 프로젝트
-
-* 따로 따로 단계별로 보는것이다.
+<br>
 
 <br>
+
+## GUI를 활용한 간단한 프로젝트
 
 ### 1. create_layout
 
@@ -798,7 +826,7 @@ root.resizable(False, False) # 창 크기 고정
 root.mainloop()
 ```
 
-<br>
+<br><br>
 
 ### 2. basic_function
 
@@ -857,7 +885,7 @@ def start():
         return
 ```
 
-<br>
+<br><br>
 
 ### 3. merge_images
 
@@ -896,7 +924,7 @@ def merge_image():
     msgbox.showinfo("알림", "작업이 완료되었습니다.")
 ```
 
-<br>
+<br><br>
 
 ### 4. apply_options
 

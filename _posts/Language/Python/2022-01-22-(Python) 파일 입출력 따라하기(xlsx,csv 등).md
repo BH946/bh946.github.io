@@ -1,5 +1,5 @@
 ---
-title:  "[Python]File_IO(xlsx,csv 등)"
+title:  "[Python] 파일 입출력 따라하기(xlsx,csv 등)"
 categories : PY
 tag : [파이썬, os, workbook, pandas]
 toc: true
@@ -11,10 +11,16 @@ sidebar:
 
 
 
+**파이썬으로 파일 입출력을 해보자. csv, xlsx 등 다양한 파일들의 입출력을 배워보자.**
+
+<br>
+
+<br>
+
 ## csv, xlsx등 파일 입출력(관리)
 
 
-### 1. OS
+### 1. OS 모듈
 
 #### OS 모듈 준비물
 
@@ -123,10 +129,10 @@ os.remove(r"C:\Users\..경로...\product_jinnyhands.xlsx") # 삭제
      print("product_jinnyhands.xlsx 없음.")
   ```
 
-<br>
+<br><br>
 
 
-### 2. Workbook(엑셀.Xlsx을 주로)
+### 2. Workbook(xlsx) 모듈
 
 #### Workbook 준비물
 
@@ -214,10 +220,9 @@ wb.close()
   for i in range(1, ws.max_row+1): # 이런식으로 응용. (1행 부터 마지막행 접근 i)
   ```
 
+<br><br>
 
-<br>
-
-### 3. CSV
+### 3. CSV 모듈
 
 #### CSV 준비물
 
@@ -338,17 +343,19 @@ for page in range(1,5):
         writer.writerow(data) # 데이터 쓰기
 ```
 
-<br>
+<br><br>
 
-### 4. Pandas(판다스) - xlsx(엑셀), csv 둘다 활용
-
-* 다양한 데이터 형식(주로 데이터프레임)
+### 4. Pandas(xlsx,csv) 모듈
 
 #### pandas 준비물
 
-```python
+**외부 모듈 설치**
+
+```bash
 pip install pandas
 ```
+
+<br>
 
 **기본 import**
 
@@ -483,6 +490,8 @@ union_commute = pd.concat([P, S], ignore_index = True) # pd.concat을 이용해 
 union_commute = union_commute.drop_duplicates() # drop_duplicates메소드를 이용해 중복값 제거를 할 수 있다.
 ```
 
+<br>
+
 **INTERSECTION(교집합)**
 
 * pd.concat은 outer로 join이 기본값으로 되어있으므로 합집합이 나온다.(outer:합집합, inner:교집합) 따라서 join을 inner로 바꿔주거나, merge함수를 사용해주면 된다.(merge의 기본값은 inner)
@@ -493,6 +502,8 @@ union_commute = union_commute.drop_duplicates() # drop_duplicates메소드를 �
 intersection_commute = pd.merge(P, S)
 ```
 
+<br>
+
 **DIFFERENCE(차집합)**
 
 * isin메소드 이용
@@ -502,9 +513,11 @@ P_only = P[P.index.isin(S.index) == False]
 S_only = S[S.index.isin(P.index) == False]
 ```
 
-<br><br>
+<br>
 
-## Workbook() 이용한 엑셀파일 자세히 설명,,
+<br>
+
+## Workbook() 자세히 따라하기
 
 ### 1. create_file
 

@@ -1,5 +1,5 @@
 ---
-title:  "[Python]GUI(PYQT5_추천)"
+title:  "[Python] GUI(PYQT5_추천)"
 categories : PY
 tag : [파이썬, pyqt, gui]
 toc: true
@@ -11,7 +11,7 @@ sidebar:
 
 
 
-## GUI(구이)
+**PyQt5를 활용한 GUI 개발 방법과 QT Designer를 이용한 디자인 제작을 알아보자**
 
 * PYQT5 라이브러리 사용
   * QT 디자이너 프로그램을 활용해 GUI를 제작하기 편하다는 큰 장점!!
@@ -19,21 +19,17 @@ sidebar:
   * .UI -> .PY 파일로 변환
   * PY 파일로 변환된 파일로 코딩(PYQT5 코드 변경)
 
-참고 사이트 : https://www.youtube.com/watch?v=rHDWnfsJP4A
+<br>
 
-<br><br>
+<br>
 
 ## 1. QT 디자이너
 
-* 구글에서 검색후 간단히 설치
+1. 구글에서 검색후 간단히 설치
 
-<br>
+2. 드래그 앤 드롭으로 GUI 제작
 
-### 드래그 앤 드롭으로 GUI 제작
-
-* 말 그대로 UI를 꾸미면 되고, 간단해서 설명이 필요없다.
-
-<br>
+<br><br>
 
 ### 함수연결
 
@@ -43,28 +39,32 @@ sidebar:
 * 버튼같은 곳에 클릭후 드래그앤 드롭으로 공란에 끌어다 준다.
 * 함수를 설정해준다(예 : click()에 start()함수 새로 edit해서 적용)
 
-<br>
+<br><br>
 
 ### 저장(Save as)
 
 * Ui로 저장을 하게된다.
 
-<br>
+<br><br>
 
 ### UI -> PY 변환
 
-* cmd -> cd를 통한 경로 접근 -> pyuic5 -x 파일이름.ui -o 파일이름.py
+* cmd -> cd를 통한 경로 접근 -> `pyuic5 -x 파일이름.ui -o 파일이름.py`
 * PYQT5로 변경된 코드를 볼 수 있다!!
 
-<br><br>
+<br>
 
-## 2. 파일이름_starter.py
+<br>
 
-* **starter파일을 만들어서 이 파일로 우리가 만든 GUI를 실행한다**
+## 2. 시작 파일 생성
+
+**starter.py파일을 만들어서 이 파일로 우리가 만든 GUI를 실행한다**
+
+**단, from automatic import Ui_MainWindow 부분 반드시 수정 필요!**
 
 ```python
 import sys
-from automatic import Ui_MainWindow # 수정부분(from뒤에 QT로 만든 파일이름을 적어주면 됨)
+from automatic import Ui_MainWindow # 수정 부분(from뒤에 QT로 만든 파일이름을 적어주면 됨)
 from PyQt5 import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
@@ -96,9 +96,9 @@ sys.exit(app.exec_())
 
 <br><br>
 
-## 코드 수정(QT에서 만든 함수추가)
+### 코드 수정(QT에서 만든 함수 추가)
 
-* 이부분을 하지않고 starter파일 실행시 에러
+이 부분을 하지않고 starter파일 실행시 에러
 
 ```python
 # QT디자이너로 만든 파일이름.py의 코드를 수정

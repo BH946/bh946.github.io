@@ -1,5 +1,5 @@
 ---
-title:  "[Python]Basic(기초문법)"
+title:  "[Python] Basic(기초문법)"
 categories : PY
 tag : [파이썬, 문법]
 toc: true

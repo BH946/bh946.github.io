@@ -1,5 +1,5 @@
 ---
-title:  "[Python]Graph_matplotlib(networkx+numpy+pandas)"
+title:  "[Python] Graph_matplotlib(networkx+numpy+pandas)"
 categories : PY
 tag : [파이썬, 그래프]
 toc: true
@@ -11,27 +11,30 @@ sidebar:
 
 
 
-## matplotilib, networkx, numpy, Pandas 라이브러리
+**matplotilib, networkx, numpy, Pandas 라이브러리 간략히 소개**
 
 * **matplotilib라이브러리를 통해 그래프를 시각화해서 보여줄 수 있다.**
   * 좀더 진보된 라이브러리를 원한다면, seaborn 등을 참고하면 좋다.
+  * **자세히 정리한 링크: [Matplotlib정리(그래프 데이터 시각화 라이브러리)](https://bh946.github.io/py/(Python)Matplotlib%EC%A0%95%EB%A6%AC(%EA%B7%B8%EB%9E%98%ED%94%84-%EB%8D%B0%EC%9D%B4%ED%84%B0-%EC%8B%9C%EA%B0%81%ED%99%94-%EB%9D%BC%EC%9D%B4%EB%B8%8C%EB%9F%AC%EB%A6%AC)/)**
 * **networkx라이브러리를 통해 그래프를 시각화해서 보여줄 수 있다.**
   * **노드** : 값, **에지** : 경로(연결선), **차수** : input&output하는 경로수
   * 방향 그래프, 무방향 그래프, 가중치 그래프..등등 정말 다양함.
   * pandas -> networkx ? : nx.from_pandas_edgelist(~~) 이용
-  
-* **numpy라이브러리를 통해 복잡한 수치연산을 수행할 수 있다.(선형대수 라이브러리)**
+* **numpy라이브러리를 통해 복잡한 수치 연산을 수행할 수 있다.(선형대수 라이브러리)**
   * 연산에 numpy를 이용, C언어로 구현됨
-  * 이미 경험한 pandas와 matplotlib의 기반으로 사용될 수 도 있다. 예로, 라이브러리를 사용하면 numpy의 행렬을 pandas데이터로 변환할 수 있다.
+  * 이미 경험한 pandas와 matplotlib의 기반으로 사용될 수 도 있다. 
+    * 예로, numpy의 행렬을 pandas데이터로 변환할 수 있다.
   * 기본적으로 Numpy는 배열/행렬(array) 단위로 데이터를 기본으로합니다. 따라서 1d, 2d, 3d(d는 차원으로써 dimention의 약어)에 기반한 배열 연산을 수행합니다.
-  * 매우 방대하기 때문에, 자세히 알고 싶다면 책을 따로 사서 볼 것.
+  * 매우 방대하기 때문에, 자세히 알고 싶다면 따로 공부
 * **pandas라이브러리는 우리가아는 데이터프레임을 의미(df)**
+  * **자세히 정리한 링크: [Pandas정리(데이터 분석 라이브러리)](https://bh946.github.io/py/(Python)Pandas%EC%A0%95%EB%A6%AC(%EB%8D%B0%EC%9D%B4%ED%84%B0-%EB%B6%84%EC%84%9D-%EB%9D%BC%EC%9D%B4%EB%B8%8C%EB%9F%AC%EB%A6%AC)/)**
+
 
 <br>
 
 **준비물**
 
-```python
+```bash
 pip install -U matplotlib
 pip install networkx
 pip install numpy
@@ -48,7 +51,9 @@ import networkx as nx
 import numpy as np
 import pandas as pd # pandas의 경우 보통 pd로 이름변경해서 사용하는것이 관례임
 ```
-<br><br>
+<br>
+
+<br>
 
 ## 1. 사용법(matplotlib)
 
@@ -110,7 +115,9 @@ ax.set_title("시간대별 승하차 인원") # 그래프의 제목
 ```python
 plt.savefig("bar_chart.png")
 ```
-<br><br>
+<br>
+
+<br>
 
 ## 2. 사용법(networkx)
 
@@ -241,7 +248,9 @@ list(G.successors('A'))
 # A의 predecessors nodes
 list(G.predecessors('A'))
 ```
-<br><br>
+<br>
+
+<br>
 
 ## 3. 사용법(numpy)
 
@@ -301,7 +310,9 @@ print(R_and_S) # 배열의 관계 즉, 논리합을 알 수 있다.
 print(R) # 배열 초기화 한값으로 나타냄(T/F)
 print(R.astype(int)) # 배열 int형으로 나타냄(1/0)
 ```
-<br><br>
+<br>
+
+<br>
 
 ## 4. 사용법(pandas)
 
@@ -411,7 +422,7 @@ writer = pd.ExcelWriter('product_jinnyhands.xlsx') # 이때 엑셀 만들어짐.
 md.to_excel(writer, index = False) # 엑셀에 데이터 삽입
 writer.save() # 엑셀 데이터 저장
 ```
-<br>
+<br><br>
 
 ### 집합 연산
 

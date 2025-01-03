@@ -1,6 +1,6 @@
 ---
 layout: single
-title:  "[Python]Matplotlib정리(그래프 데이터 시각화 라이브러리)"
+title:  "[Python] Matplotlib정리(그래프 데이터 시각화 라이브러리)"
 categories: PY
 tag: [python, Matplotlib]
 toc: true

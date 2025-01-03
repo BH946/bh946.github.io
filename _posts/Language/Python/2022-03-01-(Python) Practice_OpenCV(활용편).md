@@ -1,6 +1,6 @@
 ---
 layout: single
-title:  "[Python]Practice_OpenCV(활용편)"
+title:  "[Python] Practice_OpenCV(활용편)"
 categories: PY
 tag: [python, opencv예제]
 toc: true
@@ -30,16 +30,16 @@ sidebar:
       font-weight: bold;
       padding: 8px;
     }
-
+    
     table.dataframe td {
       text-align: center;
       padding: 8px;
     }
-
+    
     table.dataframe tr:hover {
       background: #b8d1f3; 
     }
-
+    
     .output_prompt {
       overflow: auto;
       font-size: 0.9rem;
