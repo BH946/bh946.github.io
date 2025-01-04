@@ -1,5 +1,5 @@
 ---
-title:  "[Python]Various_Modules(다양한 모듈)"
+title:  "[Python] Various_Modules(다양한 모듈)"
 categories : PY
 tag : [python, modules, time, datetime, automation, 파이썬, 모듈, 자동화, 시간]
 toc: true
