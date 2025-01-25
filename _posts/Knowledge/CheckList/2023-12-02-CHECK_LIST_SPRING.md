@@ -6178,6 +6178,9 @@ interceptor 먼저 수행 후 -> argumentresolver 수행 순서
 
 ### TCP, UDP 통신(+ 멀티스레드)
 
+참고) Java NIO로 TCP 통신 예제도 있다 [참고문서](https://velog.io/@appti/java.nio-qrmmy51p)  
+원래 기존 I/O는 스레드가 Block 되므로 불가능 했지만, New I/O에선 Non-Blocking을 제공해서 가능!
+
 **[bchat 프로젝트](https://github.com/BH946/bchat) 참고 -> 코드와 기능개발.md**
 
 HTTP 통신은 Spring 프로젝트 했던 모든게 HTTP 통신이었고 TCP, UDP를 알아보자
