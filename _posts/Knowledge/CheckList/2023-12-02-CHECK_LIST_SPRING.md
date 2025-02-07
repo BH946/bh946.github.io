@@ -846,6 +846,8 @@ typora-root-url: ../../..
 
 **따라서 인터페이스 사용을 추천한다!**
 
+**단, 아래 예시 코드는 어댑터추가ver-type2이고, 본인은 보통 단순ver을 사용!**
+
 <details><summary><b>예시 코드 보기 - 레포지토리</b></summary>
 <div markdown="1"><br>
 **MemberRepository 인터페이스 + MemberRepositoryCustom 인터페이스 + MemberRepositoryCustomImpl 클래스 의 조합**<br>
@@ -924,6 +926,20 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
 <br>
 
 **레포에서 em.createQuery()**할때 `.getResultList();` 로 반환받는게 null처리 용이!! (보통 하나를 받더라도 이걸로 하는 중!)
+
+**Spring Data JPA를 사용해보면 Optional<>** 로 반환하므로 `orElse(null)` 또는 `orElseThrow(new ... )` 등 이런식으로 사용하기!  
+=> 물론, **Member** 이런식으로 반환타입써서 해주면 Optional<>로 반환 안함!  
+
+**RequestDto, ResponseDto**는 주로 컨트롤러 단에서 내부 엔티티 보호 목적으로 사용!!  
+따라서 **"미리 요청,응답 양식이 있는게 아니라면"** 컨트롤러 단 개발할 때 Dto 고려ㄱ  
+=> 보통 본인은 정해둔 요청 양식없이 바로 해버려서 이런흐름: 요청은 예상해서 Dto로 바로 엔티티 static create매개변수로 사용 기기 + 응답은 컨트롤러때 static class ㄱㄱㄹ  
+그리고 **TDD엔 그냥 내부 엔티티로 바로 테스트**하면 되는데 굳이 Dto쓰려다보니 Dto하나 수정에 수정파일이 넘 많아지네. 그래서 이 부분 참고하라고 작성함.
+
+일반 JPA를 사용할 때는 서비스 계층의 @Transactional 범위 내에서 동작하지만, **Spring Data JPA는 각 메서드가 독립적인 트랜잭션**으로 실행될 수 있어 차이가 발생!  
+=> EntityManager는 **트랜잭션 범위의 영속성 컨텍스트**를 사용  
+=> 서비스 계층에서 @Transactional이 있으면 그 트랜잭션 내에서 동작  
+=> EntityManager 사용하려면 당연히 @Transactional이 필요  
+=> 참고 TDD 코드 플젝: [entertainment 플젝](https://github.com/BH946/entertainment/tree/backend/entertainment/src/test/java/com/cafe24/entertainment/Repository/CardReadingRepositoryTest.java)
 
 **JPQL 은 아래 정리한 주제에서 참고**
 
@@ -4218,7 +4234,7 @@ public void updateStatus(Long dataId, String status) {
 
 <br><br>
 
-### Oracle+Orange, H2, MySQL
+### Oracle+Orange, H2, MySQL (비교)
 
 참고: 테스트용 메모리DB가 아닌 실제 DB를 사용할 경우 **반드시 DB를 실행해서 오픈해야 함!**
 
@@ -4250,9 +4266,43 @@ H2와 MySQL 사용은 너무 간단하기도 하고 많이 했어서 생략! (**
 
   <details><summary><b>문서속 내용 참고</b></summary>
   <div markdown="1"><br>
-  **오라클 DBM 클라이언트에는 오라클 DBM 서버에 접속할 수 있는 프로그램들이 내장**되어 있습니다. 그런데, **Java 에서는 DB 에 상관없이 JDBC 라는 드라이버를 통해 직접 DB 에 연결**하는 표준을 가지고 있습니다. 오라클도 이 JDBC 드라이버를 제공하고 있는 것입니다. 즉, **Oracle Clinet 의 접속 관련 부분이 JDBC 에 이미 구현**되어 있고, 그 외 SQL*PLUS 같은 툴들은 없습니다. JDBC 을 내장해서 관리하는 것이 구현된 것이 SQLDeveloper (Java로 만듦) 이구요. 단순히 Java 환경에서는 JDBC 만 있으면 되므로 Oracle client 는 필요없고, Java 가 아닌 토트, 오렌지 등에서는 Oracle Clinet 가 있어야 하는 거구요. 일부 툴에서는 Oracle Client 와 같이 많은 것을 설치해야만 사용 가능하지만, 일부 툴은 **Oracle instant client 와 같이 설치 없이 간단한 설정 만으로 접속을 가능하게 해주는 JDBC 와 같은 것으로 연결이 가능**합니다. 토드 최신 버젼 등은 지원할 겁니다. (12년 전 자료. 지금은 대부분 지원)
+  **오라클 DBM 클라이언트에는 오라클 DBM 서버에 접속할 수 있는 프로그램들이 내장**되어 있습니다. 그런데, **Java 에서는 DB 에 상관없이 JDBC 라는 드라이버를 통해 직접 DB 에 연결**하는 표준을 가지고 있습니다. 오라클도 이 JDBC 드라이버를 제공하고 있는 것입니다. 즉, **Oracle Clinet 의 접속 관련 부분이 JDBC 에 이미 구현**되어 있고, 그 외 SQL*PLUS, orange 같은 툴들은 없습니다. JDBC 을 내장해서 관리하는 것이 구현된 것이 SQLDeveloper (Java로 만듦) 이구요. 단순히 Java 환경에서는 JDBC 만 있으면 되므로 Oracle client 는 필요없고, Java 가 아닌 토트, 오렌지 등에서는 Oracle Clinet 가 있어야 하는 거구요. 일부 툴에서는 Oracle Client 와 같이 많은 것을 설치해야만 사용 가능하지만, 일부 툴은 **Oracle instant client 와 같이 설치 없이 간단한 설정 만으로 접속을 가능하게 해주는 JDBC 와 같은 것으로 연결이 가능**합니다. 토드 최신 버젼 등은 지원할 겁니다. (12년 전 자료. 지금은 대부분 지원)
   </div>
   </details>
+
+<br>
+
+**오라클 vs MySQL 간단 비교**
+
+MySQL의 Database 단위로 만들어서 접속하는것과 오라클에 하나의 DB에 접속해서 User단위로 만들어 사용하는것과 유사  
+=> 오라클 DB는 각 사용자 별로 테이블, 인덱스, 뷰 등의 **객체가 따로 생성**
+
+1. MySQL
+
+   - 물리적으로 분리된 여러 데이터베이스 생성 가능
+
+   - DATABASE = SCHEMA 개념 사용
+
+2. Oracle
+
+   - 하나의 큰 데이터베이스 인스턴스 사용
+   - USER = SCHEMA 개념 사용
+   - **또한, 너무 메모리 사용이 큼. "대기업"이 선호하지 "중소는 MySQL 사용!"**
+
+**명령어로 참고 오라클 - sql*plus**
+
+```sql
+-- db 서버(STR)와 리스너 실행 필수
+sqlplus username/password            -- 일반 접속 (본인: testUser/1234)
+sqlplus / as sysdba                 -- SYSDBA로 접속 (대장)
+sqlplus /nolog                      -- DB 접속없이 SQL*Plus 실행[1][3]
+show user							-- 현재 사용자 확인
+SELECT name FROM v$database;         -- 데이터베이스 이름 확인 (본인: STR)
+SELECT table_name FROM user_tables;  -- 현재 사용자의 테이블 확인
+EXIT 또는 QUIT   -- SQL*Plus 종료[3]
+```
+
+<br>
 
 **오라클 설치**<br>[문서 참고](https://velog.io/@yeoonnii/Oracle-%EC%98%A4%EB%9D%BC%ED%81%B4-19c-%EC%84%A4%EC%B9%98%EB%8B%A4%EC%9A%B4%EB%A1%9C%EB%93%9C#%EC%84%A4%EC%B9%98-%EC%A4%91-%EC%98%A4%EB%A5%981--ins-20802-oracle-database-configuration-assistant%EC%9D%84%EB%A5%BC-%EC%8B%A4%ED%8C%A8%ED%96%88%EC%8A%B5%EB%8B%88%EB%8B%A4)
 
