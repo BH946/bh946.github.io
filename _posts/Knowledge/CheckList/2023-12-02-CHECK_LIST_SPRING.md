@@ -930,7 +930,7 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
 **Spring Data JPA를 사용해보면 Optional<>** 로 반환하므로 `orElse(null)` 또는 `orElseThrow(new ... )` 등 이런식으로 사용하기!  
 => 물론, **Member** 이런식으로 반환타입써서 해주면 Optional<>로 반환 안함!  
 
-**RequestDto, ResponseDto**는 주로 컨트롤러 단에서 내부 엔티티 보호 목적으로 사용!!  
+**RequestDto, ResponseDto**는 주로 컨트롤러 단에서 내부 엔티티 보호 목적으로 사용!!+JsonIgnore문제에도 자유롭다!(DTO Lazy강제초기화 필수)  
 따라서 **"미리 요청,응답 양식이 있는게 아니라면"** 컨트롤러 단 개발할 때 Dto 고려ㄱ  
 => 보통 본인은 정해둔 요청 양식없이 바로 해버려서 이런흐름: 요청은 예상해서 Dto로 바로 엔티티 static create매개변수로 사용 기기 + 응답은 컨트롤러때 static class ㄱㄱㄹ  
 그리고 **TDD엔 그냥 내부 엔티티로 바로 테스트**하면 되는데 굳이 Dto쓰려다보니 Dto하나 수정에 수정파일이 넘 많아지네. 그래서 이 부분 참고하라고 작성함.
