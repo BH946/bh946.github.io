@@ -10,7 +10,7 @@ sidebar:
 typora-root-url: ../../..
 ---
 
-<br>
+
 
 **Spring + Spring Boot + JPA + Spring Data JPA + MyBatis + Thymeleaf + DB(H2, MySQL, Oracle) 등 활용한 개발 경험**
 
@@ -6363,7 +6363,7 @@ DB 행에 Lock을 거는 것은 애플리케이션 단이든 데이터베이스(
 [개념확립 하기 좋은 문서](https://ksh-coding.tistory.com/125#3.%20%EB%8F%99%EC%8B%9C%EC%84%B1%20%EB%AC%B8%EC%A0%9C%EB%A5%BC%20%ED%95%B4%EA%B2%B0%ED%95%98%EB%8A%94%20%EB%B0%A9%EB%B2%95%20(feat.%203%EA%B0%80%EC%A7%80%20Lock)-1)
 
 결론: 실무에선 DB Lock을 좀 더 사용.   
-Synchronized는 하나의 프로세스에서만 동시성 제어하므로 여러 서버에서 하나의 DB에 접속하는건 동시성 제어가 불가함.  
+Synchronized(스레드에 락 검)는 하나의 프로세스에서만 동시성 제어하므로 여러 서버에서 하나의 DB에 접속하는건 동시성 제어가 불가함.  
 따라서 DB 단에서 해결할 수 있는 DB Lock을 활용! (Spring에서 애노테이션으로 간편히 제공 중)
 
 <br><br>
