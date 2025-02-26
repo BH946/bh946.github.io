@@ -329,14 +329,18 @@ class TarotCard(models.Model):
 
 - 다른 템플릿들이 base.html을 상속받아 content 블록을 채우는 방식
 
-- 템플릿 태그 설명:
+- 템플릿 태그 설명:  
 
+  {% raw %}
+  
   ```xml
   {% extends %} - 템플릿 상속
   {% block %} - 자식 템플릿이 채울 수 있는 영역 정의
   {% csrf_token %} - CSRF 보안 토큰
   {{ form.as_p }} - 폼 필드를 p 태그로 감싸서 렌더링
   ```
+  
+  {% endraw %}
 
 ```python
 # tarot/web/views.py
