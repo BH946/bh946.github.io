@@ -18,6 +18,8 @@ Spring의 MVC 패턴으로만 쭉 백엔드 개발 연습을 했는데, Python�
 
 <br>
 
+{% raw %}
+
 1. **Django의 핵심 특징**
 
    사용 예시: 콘텐츠 관리 시스템(CMS), 전자상거래 플랫폼, 데이터 기반 앱
@@ -331,8 +333,6 @@ class TarotCard(models.Model):
 
 - 템플릿 태그 설명:  
 
-  {% raw %}
-  
   ```xml
   {% extends %} - 템플릿 상속
   {% block %} - 자식 템플릿이 채울 수 있는 영역 정의
@@ -340,7 +340,6 @@ class TarotCard(models.Model):
   {{ form.as_p }} - 폼 필드를 p 태그로 감싸서 렌더링
   ```
   
-  {% endraw %}
 
 ```python
 # tarot/web/views.py
@@ -892,3 +891,4 @@ curl localhost:8000 # index 페이지 접근
 
 스프링 테스트코드처럼.. 있나 쳌쳌
 
+{% endraw %}
