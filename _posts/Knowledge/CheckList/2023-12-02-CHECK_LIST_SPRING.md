@@ -4707,6 +4707,101 @@ tasks.named('test') {
 * text/html, application/json 같은 content-type 을 의미
 * **요청때나 응답할때나 body를 사용할때는 필수로 존재 및 서로 맞게 요청해야 함**
 
+<br>
+
+**API URI 설계에는 "리소스"가 중요하다. "행위"는 메서드(get, post 등)로 구분하자.**  
+**단, 실무에서는 행위(동사)를 URI에 작성해야 할 때도 좀 있는데 이를 "컨트롤 URI"라 부른다.**
+
+<details><summary><b>HTTP로 클라이언트 -> 서버 데이터 전송 4가지 상황 (참고: 전달 방식은 크게 2가지-쿼리 파라미터, 메시지 바디)</b></summary>
+<div markdown="1"><br>
+1. **정적** 데이터 조회 -> 쿼리 파라미터 미사용
+   - 이미지, 정적 텍스트 문서
+2. **동적** 데이터 조회 -> 쿼리 파라미터 사용
+   - 주로 검색, 게시판 목록에서 정렬 필터(검색어)
+3. **HTML Form**을 통한 데이터 전송 -> GET은 쿼리 파라미터로, POST는 메시지 바디로 자동 작성!
+   - 회원 가입, 상품 주문, 데이터 변경 
+   - Content-Type: application/x-www-form-urlencoded
+     - form의 내용을 메시지 바디를 통해서 전송(POST로 해보면 나옴)
+     - 전송 데이터를 url encoding 처리
+       - 예) abc김 -> abc%EA%B9%80
+   - Content-Type: multipart/form-data
+     - 파일 업로드 같은 바이너리 데이터 전송시 사용
+     - 다른 종류의 여러 파일과 폼의 내용 함께 전송 가능(그래서 이름이 multipart)
+4. **HTTP API**를 통한 데이터 전송 -> 이하 동문
+   - 회원 가입, 상품 주문, 데이터 변경
+   - 서버 to 서버, 앱 클라이언트, 웹 클라이언트(Ajax)
+   - Content-Type: application/json
+</div>
+</details>
+
+<details><summary><b>HTTP API 설계 2가지로 "컬렉션 기반"과 "스토어 기반" (+HTML FORM)</b></summary>
+<div markdown="1"><br>
+**크게 2가지로 "컬렉션 기반"과 "스토어 기반"으로 나눠볼 수 있다. (대부분 컬렉션 방식 씀)**<br>
+**HTML FORM 방식은 애초에 GET, POST만 지원한다. (PUT기반 아니니까 컬렉션이지)**
+<br>
+**1. API 설계 - 컬렉션 기반(POST)**
+- 회원 목록 /members -> GET  
+  회원 등록 /members -> POST  
+  회원 조회 /members/{id} -> GET  
+  **회원 수정 /members/{id} -> PATCH, PUT, POST**  
+  회원 삭제 /members/{id} -> DELETE
+  - **회원 수정에 개념적으론 PATCH 사용이 제일 좋다.**
+- 클라이언트는 등록될 리소스의 URI를 모른다.
+  - 회원 등록 /members -> POST
+  - POST /members
+- **서버가 새로 등록된 리소스 URI를 생성**해준다.
+  - HTTP/1.1 201 Created   
+    Location: /members/100
+- 컬렉션(Collection)
+  - 서버가 관리하는 리소스 디렉토리
+  - 서버가 리소스의 URI를 생성하고 관리
+  - 여기서 **컬렉션은 /members**
+<br>
+**2. API 설계 - 스토어 기반(PUT)**
+- 파일 목록 /ﬁles -> GET  
+  파일 조회 /ﬁles/{ﬁlename} -> GET  
+  파일 등록 /ﬁles/{ﬁlename} -> PUT  
+  파일 삭제 /ﬁles/{ﬁlename} -> DELETE  
+  파일 대량 등록 /ﬁles -> POST
+- 클라이언트가 리소스 URI를 알고 있어야 한다.
+  - 파일 등록 /ﬁles/{ﬁlename} -> PUT
+  - PUT /ﬁles/star.jpg
+- **클라이언트가 직접 리소스의 URI를 지정**한다.
+- 스토어(Store)
+  - 클라이언트가 관리하는 리소스 저장소
+  - 클라이언트가 리소스의 URI를 알고 관리
+  - 여기서 **스토어는 /ﬁles**
+<br>
+**3. HTML FORM 사용 - GET, POST**
+- 회원 목록     /members -> GET  
+  **회원 등록 폼 /members/new -> GET**  
+  **회원 등록     /members/new, /members -> POST**  
+  회원 조회     /members/{id} -> GET  
+  회원 수정 폼 /members/{id}/edit -> GET  
+  회원 수정     /members/{id}/edit, /members/{id} -> POST  
+  회원 삭제     /members/{id}/delete -> POST
+  - URI 안바뀌는 /members/new 방식을 좀 더 선호하고, /members로 등록하는 사람도 있음.
+  - GET, POST만 지원하니까 이런 제약을 해결하고자 동사를 사용한 **컨트롤 URI 방식도 많이 사용.**
+<br>
+**참고 문서: https://restfulapi.net/resource-naming**
+- 문서(document)
+  - 단일 개념(파일 하나, 객체 인스턴스, 데이터베이스 row)
+  - 예) /members/100, /ﬁles/star.jpg
+- 컬렉션(collection) -> **주로 이 방식만 접할거임.ㅇㅇ.**
+  - 서버가 관리하는 리소스 디렉터리
+  - 서버가 리소스의 URI를 생성하고 관리
+  - 예) /members
+- 스토어(store) 
+  - 클라이언트가 관리하는 자원 저장소
+  - 클라이언트가 리소스의 URI를 알고 관리
+  - 예) /ﬁles
+- 컨트롤러(controller), 컨트롤 URI
+  - 문서, 컬렉션, 스토어로 해결하기 어려운 추가 프로세스 실행
+  - 동사를 직접 사용
+  - 예) /members/{id}/delete
+</div>
+</details>
+
 <br><br>
 
 ### (2) Thymeleaf 문법
@@ -6237,7 +6332,7 @@ interceptor 먼저 수행 후 -> argumentresolver 수행 순서
 
 <br><br>
 
-### TCP, UDP 통신(+ 멀티스레드)
+### TCP, UDP 통신(+멀티스레드) - 소켓,웹소켓,http
 
 참고) Java NIO로 TCP 통신 예제도 있다 [참고문서](https://velog.io/@appti/java.nio-qrmmy51p)  
 원래 기존 I/O는 스레드가 Block 되므로 불가능 했지만, New I/O에선 Non-Blocking을 제공해서 가능!
@@ -6249,11 +6344,29 @@ HTTP 통신은 Spring 프로젝트 했던 모든게 HTTP 통신이었고 TCP, UD
 - 참고) 개념적으로 OSI 7계층 생각해보면??
   - HTTP가 응용계층이고 하위가 TCP, UDP전송계층이라서 분류하기 애매하다. 
   - 따라서 HTTP는 단기적인 TCP 커넥션을 하고 종료한다고 생각하자.
+  - **(정정) HTTP1.1(우리가 주로 사용하는) 버전과 HTTP2 버전은 TCP 사용하고, HTTP3 버전은 UDP를 사용함.**
 - TCP는 1:1 양방향 통신(EX: 실시간 채팅), UDP는 1:N 통신으로 전달순서 보장X (EX: 라디오)
   - 참고 문서: [UDP개념 예제](https://coding-factory.tistory.com/271), **[TCP개념 예제 - 그림 꼭 참고!!](https://coding-factory.tistory.com/270)**
-- 자바 Socket라이브러리는 네트워크 부분의 끝 부분으로써 읽기/쓰기 인터페이스 제공<br>Spring에도 TCP와 UDP 지원 라이브러리가 있다.
-  - 웹소켓은?? 클라가 웹이면 웹소켓을 사용하자!
-  - WebSocket(웹소켓) 통신은 클라이언트와 서버(브라우저와 서버)를 연결하고 실시간으로 통신이 가능하도록 하는 첨단 기술 (HTTP는 실시간X. 물론 http polling 로 가능은 함)
+- **소켓이란?** 
+  - 계층별 각 프로토콜은 일종의 통신 규약일뿐, **프로토콜 구현을 위해 안에 들어갈 구체적인 구현부**인 함수가 필요할텐데 소켓에서 이러한 함수들의 body를 제공함
+  - **TCP/IP 4계층에서 소켓은 전송 계층 위에 놓이며 프로토콜 제어를 위한 코드를 제공**
+  - **즉, 소켓은 엔드포인트다. 통신의 양끝단.**   
+    통신할 때 인터넷은 소켓을 찾아 **연결**하고 **데이터를 송수신**
+  - <img src="https://github.com/user-attachments/assets/995e4a8b-4878-48fb-b8a7-ead00785f059" alt="Image" style="zoom:50%;" /> 
+  - 자바 Socket라이브러리는 네트워크 부분의 끝 부분으로써 읽기/쓰기 인터페이스 제공<br>Spring에도 TCP와 UDP 지원 라이브러리가 있다.
+
+- **웹소켓은??** **클라이언트가 웹이면 웹소켓을 사용하자!?** [참고문서](https://velog.io/@rhdmstj17/%EC%86%8C%EC%BC%93%EA%B3%BC-%EC%9B%B9%EC%86%8C%EC%BC%93-%ED%95%9C-%EB%B2%88%EC%97%90-%EC%A0%95%EB%A6%AC-2)
+  - WebSocket(웹소켓) 통신은 **http에서 실시간 통신을 할 수 없다는 문제를 해결하기 위해 나온 첨단 기술** (HTTP는 실시간X. 물론 http polling 로 가능은 함)
+  - **웹 소켓은 HTTP 레이어에서 작동하는 소켓으로 TCP/IP 소켓의 레이어가 다르다!**  
+    앞에서 언급한 소켓과 여기서 언급하는 웹소켓의 차이를 분명히 알고 가자.
+  - **웹에서 실시간 통신을 해야하는 상황에서 잘 쓰이는 프로토콜 중 하나이며 HTTP 레이어 위에서 작동!**
+  - 웹소켓 이전의 비슷한 기술: http폴링, http스트리밍
+- **소켓 vs 웹소켓 vs http**
+  - (내생각)**http**는 TCP 위에서 동작하는건 알텐데 왜 얜 단방향 구조인가 생각해보면 7계층에서 그렇게 만드는것 같음. http가 상태없고 비연결성이게 만들려고 일부러 그랬을 듯.
+  - **소켓**으로 채팅 프로그램 [bchat 프로젝트](https://github.com/BH946/bchat) 만든거 생각해보면 HTTP 사용한거 아니잖아. **웹소켓** 사용했으면 HTTP사용하니까 Swing(구이)말고 "브라우저에서 TCP 통신"으로 채팅 웹 만들었겠지.
+    - 특히나 URL도 다름: `http://www.sample.com/` 과 같은 형식이 아니라 `ws://www.sample.com/` 과 같은 형식
+    - 자바의 기본 소켓은 net에 있는 Socket라이브러리고, 웹 소켓은 websocket라이브러리.
+
 
 <br>
 
