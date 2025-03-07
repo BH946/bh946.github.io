@@ -12,7 +12,23 @@ typora-root-url: ../../..
 
 
 
-**Spring + Spring Boot + JPA + Spring Data JPA + MyBatis + Thymeleaf + DB(H2, MySQL, Oracle) 등 활용한 개발 경험**
+**Spring + Spring Boot + JPA + Spring Data JPA + MyBatis + Thymeleaf + DB(H2, MySQL, Oracle) 등 활용한 개발 경험**  
++) Eclipse, STS, 전자정부프레임워크
+
+<br>
+
+**헷갈리는 스프링, 스프링부트 프로젝트 생성과 JAR, WAR**
+
+- Spring Framework 는 사이트 제공은 없고, STS3이나 직접 디렉토리 구조를 구성!  
+  - 디렉토리 구조가 "**스프링부트+JSP+WAR**" 구조와 비슷 -> `src/main/webapp/WEB-INF/jsp`
+  - 템플릿 엔진(View)에서 JSP를 사용
+- Spring Boot 는 [start.spring.io](http://start.spring.io/) 이나 IDE(이클립스, STS 등)로 플젝 생성  
+  - 디렉토리 구조가 "타임리프" 사용에 맞는 구조 -> **webapp부분 없고 java, resources가 끝!**
+  - 템플릿 엔진(View)에서 타임리프를 사용(오피셜)
+    - **외부 라이브러리(임베디드-톰캣-JSP 라이브러리) 사용시 JSP 사용가능**
+      - WAR인데 JAR 실행처럼 IDE에서 내부톰캣으로 바로 실행도 되는 장점!
+    - 스프링부트에서 JSP사용할거면 WAR 형식 사용을 추천.(JAR는 좀 복잡)
+- 참고: 원래 WAR는 따로 WAS(톰캣)을 구동후 위에 돌려야 하고, JAR는 JVM위에서 바로 돌릴수 있다.
 
 <br>
 
@@ -21,7 +37,9 @@ typora-root-url: ../../..
 
 > 주로 IntelliJ + Gradle 사용 중
 
-<details><summary><b>실제 빌드와 실행 둘 다 IntelliJ 로 설정 (실행 속도가 더 빠름) + "코드 컨벤션" + "자바 버전 설정"</b></summary><br>
+<details><summary><b>실제 빌드와 실행 둘 다 IntelliJ 로 설정 (실행 속도가 더 빠름. 주의: 부트 3.2부터는 Gradle로 하자) + "코드 컨벤션" + "자바 버전 설정"</b></summary><br>
+참고: 스프링부트 3.2부터는 IntelliJ IDEA로 빌드와 실행 설정하면 에러가 발생. 따라서 Gradle을 사용해서 빌드하고 실행하자. (첨 빌드는 느릴지라도 Gradle 캐시를 하므로 2번째 부턴 빠름)
+<br>
 <b>Settings → gradle 검색 → IntelliJ IDEA로 설정 (빌드툴, 실제 실행 설정)</b>
 <img src="https://github.com/user-attachments/assets/9f087f29-4dba-4d9e-9c33-42b15a449a03"/><br><br>
 <b>Settings → Editor → Code Style → 구글 컨밴션 적용 (Ctrl+I, Ctrl+L 로 빠르게 정렬)</b><img src="https://github.com/user-attachments/assets/ddd01a9d-5c01-4ab0-9435-dc15a697e63f"/><br><br>
@@ -35,10 +53,12 @@ typora-root-url: ../../..
     <li>Maven(빌드 툴)은 <b>pom.xml</b>에서 라이브러리 설정</li>
     <li>Gradle(빌드 툴)은 <b>build.gradle</b>에서 라이브러리 설정</li>
     <li>이클립스(IDE)에서 빌드 툴 사용안했을 때는 직접 jar파일 집어 넣었었음.(전통)</li>
+    <li>인텔리J(IDE)에서도 가능할거임. 물론, 어느 IDE든 "빌드 툴에 의존성 추가"가 간편!</li>
 </ul>
 </details>
 
-- 특히 web 라이브러리 없으면 바로 종료되기 때문에, Spring을 사용한다면 이때 `ApplicationRunner` 구현체로 자바코드 실행하는게 보통
+
+- 특히 starter-web 라이브러리 없으면 바로 종료되기 때문에, Spring을 사용한다면 이때 `ApplicationRunner` 구현체로 자바코드 실행하는게 보통
 
   <details><summary><b>build.gradle 설정 예시 (+플러그인)</b></summary>
   <div markdown="1"><br>
@@ -142,8 +162,112 @@ typora-root-url: ../../..
 
 <br>
 
-**IntelliJ 단축키**
+**이클립스에서 스프링 플젝보면 Explorer source폴더가 두개가 있는 이유가 뭘까?**
 
+- **물리적 위치는 동일**하지만, **폴더별 역할이 다름!**
+- 패키지모양을 담은 폴더는 **컴파일 대상** 폴더이고, 그냥 일반폴더는 **컴파일하지않는** static 리소스를 보통 담는다.
+
+<details><summary><b>Eclipse+Spring Tools 플러그인 / STS3,4 => 맘 편히 STS4 사용을 권장!</b></summary>
+<div markdown="1"><br>
+**참고문서: [STS3,4 설치와 환경설정](https://www.snugarchive.com/blog/sts-setup/), [이클립스 설치와 환경설정](https://www.snugarchive.com/blog/java-eclipse-setup/), [아파치 설치와 환경설정](https://www.snugarchive.com/blog/apache-tomcat-setup/)**<br>
+**"Eclipse엔 Spring Tools 이란 플러그인을 추가"**하거나 아예 Spring 개발용으로 개발된 이클립스인 **"STS IDE"**를 사용함.<br>
+1. **이클립스 기반인 STS IDE 사용의 경우: [STS 설치 문서](https://spring.io/tools)**
+   JSP, JS 사용할거면 Help > Eclipse Marketplace > JAVA EE 플러그인 설치는 필요함 (**웹 개발 도구 추가ver!** )<br>
+   **STS3도 Boot 지원. 근데 STS4 만큼 최신 Boot 지원은 아님.**  <br>
+   단, STS4의 경우 legacy가 지원 안되는것 같아서 얘는 오히려 STS3 플러그인도 추가 설치해야 legacy도 사용 가능. (물론, 부트만 쓸거면 상관 없겠지만!)<br>
+   **=> 따라서 spring legacy project 랑 spring boot(starter) project 둘다 쓰려면 STS3을 쓰거나, 최신 Boot 사용을 위해 STS4를 쓰되 STS3 플러그인까지 설치하자.**<br>
+   **=> 중요: STS4에서 STS3을 사용하려면 반드시 STS4.14.1 + STS3.9.22 Add-On For STS4(플러그인) 버전을 사용할 것. (스프링은 STS4를 권장하므로 이제 이전버전 지원안하거든)**<br><br>
+   spring starter project 로 생성 시 spring init 사이트에서 부트 플젝 생성하던것처럼 라이브러리도 다 추가하고 손 쉽게 가능!! -> [생성모습](https://euni8917.tistory.com/199)<br><br>
+   **JS 환경설정 필요: STS4 의 경우 JAVA EE 플러그인 설치 완료 가정**
+   - Window > Preferences > General > Editors > File Associations로 이동합니다.<br>
+     'File types'에 *.js를 추가합니다.<br>
+     'Associated editors'에서 'Generic Text Editor'를 기본값(default)으로 설정합니다.
+2. **이클립스에서 STS 플러그인 설치하는 경우: [이클립스 설치 문서](https://www.eclipse.org/downloads/packages/)**
+   Eclipse IDE for Java Developers(=JAVA SE) 는 일반 자바 개발에 설치하고, 보통 이 경우 **웹 개발 용인 Eclipse IDE for Enterprise Java and Web Developers(=JAVA EE) 로 설치!**<br>
+   => Standard가 JAVA SE이고, JAVA EE나 JAVA ME(Micro.작은)는 JAVA SE 기반으로 만든 플랫폼.<br><br>
+   STS 플러그인은 Help > Eclipse Marketplace > 에서 끝이 RELEASE로 끝나는 최상단의 3버전과 4버전을 설치 (STS3, 4 둘다 사용하려고!)<br>
+   **=> 중요: STS4에서 STS3을 사용하려면 반드시 STS4.14.1 + STS3.9.22 Add-On For STS4 버전을 사용할 것. (스프링은 STS4를 권장하므로 이제 이전버전 지원안하거든)**<br><br>
+   **특히, 이클립스 버전도 STS 프러그인 지원하는지 잘 맞춰줘야함. 이클립스 조차 JDK호환 버전이 다를수 있음 ㅠ (이래서 걍 STS4 IDE 이런거 쓰는데 편해..)**<br>
+   => 아래 사진은 STS3 플러그인이 제공하는 STS4 플러그인 버전과 이클립스 버전을 알려줌.<br>
+   <img src="https://github.com/user-attachments/assets/2720f436-db1d-4795-b33a-cc177252d4fa" alt="Image" style="zoom:80%;" /> <br>
+   **이클립스 필수 고려할 환경 설정~! (STS IDE도 이클립스랑 유사해서 이거처럼ㄱㄱ)**
+   - **IDE가 사용할 JVM 설정하기:  IDE에게 어떤 버전의 JVM을 사용할지 알려주기.**<br>
+     **IDE(이클립스)가 사용할 jdk이지 프로젝트에서 사용할 jdk가 아님. 서로 독립임**
+     1. 'eclipse.ini' 파일을 텍스트 편집기로 엽니다.
+     2. 파일속 -vmargs 바로 위에 다음 두 줄을 추가합니다:
+        -vm<br>
+        C:\Program Files\Java\jdk-17\bin<br><br>
+        이미 적혀있던건 이거였다: plugins/org.eclipse.justj.openjdk.hotspot.jre.full.win32.x86_64_21.0.6.v20250130-0529/jre/bin
+   - 워크스페이스(workspace=작업폴더) 지정하기
+     - File > Switch Workspace > Other
+   - 롬복(Lombok) 플러그인 설치하기
+     - 맨날 부트에서 의존성으로 받았는데 그 롬복 말하는거.
+   - 폰트 설정하기
+     1. Window > Preferences > General > Appearance > Colors and Fonts로 이동합니다.
+     2. "Basic" 폴더에서 "Text Font"를 선택합니다.
+     3. "Edit" 버튼을 클릭하여 원하는 폰트를 선택합니다.
+   - 인코딩(encoding) 방식 변경하기
+     1. Window > Preferences > General > Workspace로 이동합니다.
+     2. Text file encoding 항목을 UTF-8로 변경합니다. (보통 이미 UTF-8임.)
+     3. CSS, HTML, JSP 등 웹 파일의 인코딩 방식도 Window > Preferences > Web 에서 UTF-8로
+   - 기본 브라우저 변경하기: 이클립스는 기본 내장 브라우저 사용해서 외부로 바꿔주기
+     1. Window > Preferences > General > Web Browser로 이동합니다.
+     2. "Use external web browser"를 선택합니다.
+     3. 원하는 브라우저를 선택합니다.
+     4. 목록에 없는 경우 "New"를 클릭하여 추가할 수 있습니다.
+   - 퍼스펙티브(perspective) 설정하기: 이클립스를 열면 개발 목적에 맞게 미리 준비된 전체 영역이 보임.
+     - 전체 퍼스펙티브 옵션 보기: 주황색 박스 왼쪽의 'Open Perspective'를 선택
+     - **본인은 JAVA EE 환경 + GIT + Debug 세팅**
+   - **실제 자주 사용하던건?**  
+     Project->Build Auto : 저장마다 .class 생성<br>
+     Open Perspective → Debug, Git, Java 등 화면 구성<br>
+     New Java Project → JDK17 사용<br>
+     참고) zip 파일 import로 압축 풀 필요 없이 간단히 프로젝트 추가 가능<br>
+     참고) 이클립스가 혹시 JDK버전 문제로 실행 안될 땐 'eclipse.ini' 도 고려<br>
+     참고) 기본 내장 브라우저 사용 시 Window > Preferences > General > Web Browser
+3. **추가 정보: 톰캣 설치해야겠죵?** -> `C:\Program Files\Apache Software Foundation\Tomcat 10.0` 본인은 예전에 톰캣10 설치해뒀길래 이거 그대로 사용하겠음.
+   물론, Spring Boot는 내장 톰캣지원함. STS4는 Spring Boot를 지원하니까 당연히 내장 톰캣도 가능!!<br><br>
+   **톰캣 필수 고려할 환경 설정~!**
+   - 서버테스트
+     - 로컬: 톰캣 > bin > startup.bat
+     - IDE: [Window] - [Preferences] - [Server] - [Runtime Environments]<br>
+       또는 이클립스 하단에 있는 `Servers` 뷰에서 파란색 링크
+     - 참고) Spring Boot 사용 시 내장 톰캣있음! spring-web라이브러리에 포함! **단, JSP는 꼭 따로 임베디드 톰캣 JSP 라이브러리를 추가해줘야 정상 동작!**
+   - 포트 번호 변경
+     - 로컬: 톰캣 > conf > server.xml 에서 설정
+     - IDE: Servers 항목을 더블 클릭하여 Overview 에서 설정
+</div>
+</details>
+
+<details><summary><b>Eclipse의 실행환경 설정과 우선순위(JDK) - 초기 설정에 참고</b></summary>
+<div markdown="1"><br>
+Project->Build Auto : 저장마다 .class 생성<br>
+Open Perspective → Debug, Git, Java 등 화면 구성<br>
+New Java Project → JDK17 사용<br>
+참고) zip 파일 import로 압축 풀 필요 없이 간단히 프로젝트 추가 가능<br>
+참고) 이클립스가 혹시 JDK버전 문제로 실행 안될 땐 'eclipse.ini' 도 고려<br>
+참고) 기본 내장 브라우저 사용 시 Window > Preferences > General > Web Browser<br>
+<br>
+**이클립스는 다음과 같은 우선순위로 실행 환경을 결정합니다:**<br>
+=> 참고1: 이클립스가 구동되기 위한 jvm인 jdk21이랑 플젝에서 사용중인 jdk17이랑 독립.<br>
+=> 참고2: 프로젝트 우클릭 → `Properties > Java Compiler`로 이동해서 컴파일러 level부터 꼭 체크!
+1. 프로젝트별 설정 - 빌드 경로(`Java Build Path`)에 설정된 JRE/JDK.<br>  
+   +) Gradle/Maven 등 빌드 도구에 명시된 JDK. => build.gradle 같은거.<br>
+   프로젝트를 우클릭하고 `Properties > Java Build Path > Libraries` 에서 `JRE System Library`를 선택한 후 `Edit` 버튼을 클릭<br>
+   build.gradle도 당연히 jdk 버전 맞춰야겠지?
+2. 이클립스의 기본 Execution Environment 설정.<br>
+   `Window > Preferences > Java > Installed JREs` 에서 확인. 기본값이 무엇인지.  
+   본인의 경우 jre(jdk21)이 체크. 이걸 뭐.. jdk17로 바꾸던지 아래 javase-17항목에서 jdk21대신 jdk17로 바꾸던지. **(물론, 건드릴 필요없이 걍 1단계에서 끝남.)**<br>
+   `Window > Preferences > Java > Installed JREs > Execution Environments` 에서 17이면 JavaSE-17 항목에 연결된 JRE/JDK 체크
+3. 최종적으로 시스템 PATH 변수에 등록된 Java 버전.<br>
+   이건 그 시스템 환경변수에서 등록한거 말함.
+</div>
+</details>
+
+<br>
+
+<details><summary><b>IntelliJ 단축키</b></summary>
+<div markdown="1"><br>
 * `Alt + Insert` : getter, setter, constructor 등 자동 생성
 * **`Ctrl + Alt + O` : 사용안하는 import 자동 정리(제거 등)**
   * **`Ctrl + Alt + L` : 자동 정렬 -> Google Java Convention이나 Default 로 사용중**
@@ -156,6 +280,50 @@ typora-root-url: ../../..
 * `Shift + F6` : 변수명을 한번에 바꿀 때 사용
 * `Alt + 1 ` : 왼쪽 프로젝트 폴더 구조 열기
 * `Alt + F12` : 터미널 창 열기
+</div>
+</details>
+
+<details><summary><b>Eclipse 단축키(키맵)</b></summary>
+<div markdown="1"><br>
+- **코드 실행 및 프로젝트 관리**
+  - 실행하기: Ctrl + F11
+  - 프로젝트 실행하기: Ctrl + Alt + R
+  - 프로젝트 속성으로 이동하기: Alt + Enter
+  - 디버그 모드로 실행: F11
+- **코드 편집**
+  - 패키지 임포트 및 정리하기: Ctrl + Shift + O
+  - 추천 리스트 받기: Ctrl + Space
+  - 주석 처리/제거하기: Ctrl + / 또는 Ctrl + Shift + /
+  - 자동 정렬하기: Ctrl + Shift + F
+  - 들여쓰기/내어쓰기: Tab ↔ Shift + Tab
+  - 코드 한 줄 위/아래로 이동하기: Alt + ↑ ↔ Alt + ↓
+  - 특정 함수 위치로 이동하기: F3
+  - 화면 확대/축소하기: Ctrl + + ↔ Ctrl + -
+- **리팩토링 및 코드 생성**
+  - 세터(Setter) 생성하기: Alt + Shift + S, R
+  - 생성자(Constructor) 생성하기: Alt + Shift + S, O
+  - 인터페이스 만들기: Alt + Shift + T, I
+  - 메서드 추출: Alt + Shift + M
+  - 변수 추출: Alt + Shift + L
+  - 클래스 이름 변경: Alt + Shift + R
+- **네비게이션**
+  - 이전/다음 화살표 위치로 가기: Alt + ← ↔ Alt + →
+  - 패키지 복사하기: F2
+  - 파일 간 전환: Ctrl + E
+  - 메서드 간 이동: Ctrl + O
+- **검색 및 찾기**
+  - 파일 찾기: Ctrl + Shift + R
+  - 전체 검색: Ctrl + H
+  - 선언부로 이동: F3 또는 Ctrl + 클릭
+- **편집기 관리**
+  - 편집기 전체화면 전환: Ctrl + M
+  - 다음 편집기로 전환: Ctrl + F6
+  - 편집기 닫기: Ctrl + W
+- **기타**
+  - 빠른 수정: Ctrl + 1
+  - 오류 수정 제안: Ctrl + .
+</div>
+</details>
 
 <br>
 
@@ -5809,6 +5977,211 @@ tasks.named('test') {
 ```
 </div>
 </details>
+
+<br>
+
+<br>
+
+## JSP 로 웹 개발 TIP
+
+>  스프링 부트 + 타임리프 조합으로 이미 웹 개발을 하여 어느정도 지식이 있다고 가정한다.
+
+일반 순수자바나 순수스프링이 아닌 **"스프링부트 + JSP" 경험**을 작성하고자 한다.
+
+참고로 jQuery 를 많이 사용하기에 jQuery 공식홈페이지 보는것도 추천! (Ajax, 엘리먼트 등에 많이 활용)  
+리액트 이런거 사용하는게 아니면 JSP+jQuery+Ajax 방식은 기본.
+
+<br><br>
+
+### (1) 구조 분석
+
+>  구조 비교에 참고한 문헌: [일반 부트와 구조 비교](https://backendcode.tistory.com/121#google_vignette)
+
+**스프링 부트에서 "타임리프"와 "JSP" 접근 비교:** 
+
+- 타임리프?
+  - 웹 브라우저 -> 톰캣(서블릿 컨테이너) -> 스프링 컨테이너 순으로 이동하여,  
+    Controller를 찾고 있으면 viewResolver로 화면에 응답.
+  - 이때, templates/hello.html 처럼 Thymeleaf 템플릿 엔진 처리가 **"기본 경로"**로 가능!
+- JSP?
+  - 웹 접근은 위와 동일하다. 
+  - 단, **"JSP 템플릿 엔진 처리"**를 따로 라이브러리로 설치해야하고 **"경로도 설정"**해야 한다.
+
+<br>
+
+**왼쪽 스프링부트+JSP / 오른쪽 일반 스프링부트 구조 비교: src/main/webapp/WEB-INF 가 있음!**
+
+![Image](https://github.com/user-attachments/assets/65986172-ecce-4a97-9912-1ac386b40341)  ![Image](https://github.com/user-attachments/assets/d3f7731a-54e9-4aa0-a3c5-3c133c887ea2) 
+
+<br><br>
+
+### (2) 실행 과정
+
+**3가지만 지키자:** 
+
+- JAR는 골치아파서 JSP엔 WAR 사용! -> 어차피 내장 톰캣으로 IDE 실행 되더라! 의문이긴 한데.
+
+- 의존성: 
+
+  - implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'
+  - 이거 추가 안하면, jsp용 톰캣이없어서 jsp 접근시 걍 파일설치로 뜸.
+
+- application.properties: 
+
+  - spring.mvc.view.prefix=/WEB-INF/views/   
+    spring.mvc.view.suffix=.jsp
+
+  - WEB-INF 하위 경로는 클라 URL로 접근 안된다. 서버에서만 접근 가능하다. (보안위해)
+
+  - 그래서 서버(스프링)한테 경로를 알려주는것! (예상이지만 원래는 /templates 일 듯)
+
+![Image](https://github.com/user-attachments/assets/c5f41f27-f2af-4e23-acd0-a25c18a6214d) 
+
+**컨트롤러 코드보면 기존 스프링부트(+타임리프)로 개발한거랑 다를게 없음! 편.안.**
+
+ ![Image](https://github.com/user-attachments/assets/c599c025-c601-4128-96ce-d0e9c66d0c08) 
+
+<br><br>
+
+### (3) JSP 문법
+
+**스크립트 요소**: JSP에서 자바 코드를 작성하는 곳 = 스크립트릿(Scriptlet)
+
+- 형식: `<% 자바 코드 %>`
+- 지역변수이며, 메서드 선언은 불가능(불가능이였던가?)
+
+**선언문**: 변수나 메서드를 선언하는 곳.
+
+- 형식: `<%! 자바 코드 %>`
+
+- JSP -> 서블릿 변환될 때 클래스, 멤버로 변환
+
+**표현식**: 값을 웹 브라우저에 출력할 때 사용하는 곳
+
+- 형식: `<%= 자바 코드 %>`
+- 세미콜론(;)을 붙이지 않는다.
+
+**주석 두 가지 방식:**
+
+- 형식1: `<!-- HTML 주석 -->`
+- HTML 주석: 브라우저 소스 보기에서 보임
+- 형식2: `<%-- JSP 주석입니다 --%>`
+  - JSP 주석 (브라우저 출력되지 않음)
+
+**지시어**: JSP 페이지의 전반적인 처리 방식을 설정
+
+- 형식: `<%@ 자바 코드 %>`
+
+- | 지시어  | 설명                      | 예시                                                |
+  | ------- | ------------------------- | --------------------------------------------------- |
+  | page    | 페이지 설정 정보          | `<%@ page contentType="text/html; charset=UTF-8"%>` |
+  | include | 다른 파일 포함            | `<%@ include file="header.jsp" %>`                  |
+  | taglib  | 태그 라이브러리 사용 선언 | `<%@ taglib uri="..." prefix="c"%>`                 |
+
+**액션태그**: JSP 문서 내에서 간단하게 다양한 구현을 할 수 있도록 만든 태그
+
+- 형식: `<jsp:?>`
+
+- | 액션 태그       | 설명                                |
+  | --------------- | ----------------------------------- |
+  | jsp:include     | 다른 페이지를 현재 페이지에 포함    |
+  | jsp:forward     | 현재 페이지에서 다른 페이지로 이동  |
+  | jsp:useBean     | 자바 빈 객체 생성                   |
+  | jsp:setProperty | 자바 빈 객체의 프로퍼티 값을 설정   |
+  | jsp:getProperty | 자바 빈 객체의 프로퍼티 값을 가져옴 |
+
+- 헷갈리는 부분 체크: `include` 의 경우 -> [지시어 include, 액션태그 include 동작차이](https://doublesprogramming.tistory.com/64)
+
+  - 예로 footer에 "저작권표시"는 정적으로써 지시어 include 사용하면 될거다.
+  - "현재 시간"은 해당 파일이 실행될 때 나타내줘야 하니까 동적으로써 액션태그 사용!
+    - 즉, 모듈화할 때 사용한다.(웹 특정 영역을 독립된 파일로 나눈다공)
+
+**내장객체**: JSP에서는 별도의 선언 없이 사용할 수 있는 내장 객체가 있다.
+
+- `request`: 클라이언트 요청 정보를 담고 있는 객체
+- `response`: 클라이언트에게 응답을 보내기 위한 객체
+- `out`: 출력 스트림을 통해 데이터를 출력하기 위한 객체
+- `session`: 세션 정보를 저장하고 관리하는 객체
+- `application`: 웹 애플리케이션 전체에서 공유되는 데이터를 저장하는 객체
+
+**JSTL**: 자주 사용하는 로직(조건문, 반복문 등)을 태그 형태로 제공하는 JSP 표준 태그 라이브러리
+
+- | 태그 라이브러리     | URI                                      | prefix(접두어) | 주요 기능                           |
+  | ------------------- | ---------------------------------------- | -------------- | ----------------------------------- |
+  | Core(가장많이 사용) | `http://java.sun.com/jsp/jstl/core`      | `c`            | 조건문, 반복문, 변수 선언, URL 처리 |
+  | Formatting          | `http://java.sun.com/jsp/jstl/fmt`       | fmt            | 숫자, 날짜, 시간 포맷 및 국제화     |
+  | Functions           | `http://java.sun.com/jsp/jstl/functions` | fn             | 문자열 처리 함수 제공               |
+  | XML                 | `http://java.sun.com/jsp/jstl/xml`       | x              | XML 문서 처리                       |
+  | SQL                 | `http://java.sun.com/jsp/jstl/sql`       | sql            | JSP 내에서 SQL 처리                 |
+
+```jsp
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>JSP Example</title>
+</head>
+<body>
+
+<!-- 선언부(선언만 가능) -->
+<%! String name = "김철수"; %>
+<%! 
+    public String greeting(String name) {
+        return "안녕하세요, " + name + "님!";
+    }
+%>
+
+<!-- 스크립트릿 + 내장객체(request) -->
+<%
+    String userName = request.getParameter("user");
+    if(userName == null) {
+        userName = "손님";
+    }
+%>
+
+<h2>환영합니다!</h2>
+
+<!-- 표현식 -->
+<p><%= greeting(userName) %></p>
+
+<!-- 액션 태그 -->
+<jsp:include page="footer.jsp" />
+```
+
+```jsp
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<html>
+<body>
+<h2>안녕하세요 테스트 입니다.</h2>
+<!-- 컨트롤러에서 모델에 담긴 변수명 'custNm' -->
+<c:choose>
+    <c:when test="${custNm == '홍길동'}">
+        홍길동님 환영합니다.
+    </c:when>
+
+    <c:when test="${custNm == '이순신'}">
+        이순신님 환영합니다.
+    </c:when>
+
+    <c:otherwise>
+        등록되지 않은 사용자입니다.
+    </c:otherwise>
+</c:choose>
+</body>
+</html>
+```
+
+<br>
+
+<br>
+
+## 전자정부프레임워크4.2 학습하기
+
+공식홈페이지에 좋은 가이드 파일들을 제공하므로 해당 가이드를 보고 학습하자.  
+기존 인프런에서 공부한 스프링으로 웹 개발한 지식과 비교해 보는것도 좋겠다.
+
+
 
 <br>
 
