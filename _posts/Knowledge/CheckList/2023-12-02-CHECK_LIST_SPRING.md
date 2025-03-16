@@ -56,9 +56,9 @@ typora-root-url: ../../..
     <li>인텔리J(IDE)에서도 가능할거임. 물론, 어느 IDE든 "빌드 툴에 의존성 추가"가 간편!</li>
 </ul>
 </details>
-
-
 - 특히 starter-web 라이브러리 없으면 바로 종료되기 때문에, Spring을 사용한다면 이때 `ApplicationRunner` 구현체로 자바코드 실행하는게 보통
+
+- 아래 jUnit은 Boot기준이고 순수 스프링은 SpringJUnit4ClassRunner와 ContextConfiguration를 사용
 
   <details><summary><b>build.gradle 설정 예시 (+플러그인)</b></summary>
   <div markdown="1"><br>
@@ -111,10 +111,9 @@ typora-root-url: ../../..
   ```
   </div>
   </details>
-
-  <details><summary><b>Spring+JUnit 버전별로 라이브러리 추가 주의(Spring2+JUnit4, Srping3+JUnit5)</b></summary>
+  <details><summary><b>SpringBoot+jUnit 버전별로 라이브러리 추가 주의(Spring2+JUnit4, Srping3+JUnit5)</b></summary>
   <div markdown="1"><br>
-  **(1) Spring 2.xx + JUnit4(Test Code)**<br>
+  **(1) SpringBoot 2.xx + JUnit4(Test Code)**<br>
   * `build.gradle`
   <div markdown="1">
   ```groovy
@@ -135,7 +134,7 @@ typora-root-url: ../../..
   }
   ```
   </div>
-  **(2) Spring 3.xx + JUni5(Test Code)**
+  **(2) SpringBoot 3.xx + JUni5(Test Code)**
   * H2 사용시 반드시 버전 업그레이드 + 자바 17이상
   * RunWith, JUnit4 등록이 없어졌다고 보면 됨.
   * `build.gradle`
@@ -263,7 +262,6 @@ New Java Project → JDK17 사용<br>
    이건 그 시스템 환경변수에서 등록한거 말함.
 </div>
 </details>
-
 <br>
 
 <details><summary><b>IntelliJ 단축키</b></summary>
@@ -282,7 +280,6 @@ New Java Project → JDK17 사용<br>
 * `Alt + F12` : 터미널 창 열기
 </div>
 </details>
-
 <details><summary><b>Eclipse 단축키(키맵)</b></summary>
 <div markdown="1"><br>
 - **코드 실행 및 프로젝트 관리**
@@ -292,8 +289,9 @@ New Java Project → JDK17 사용<br>
   - 디버그 모드로 실행: F11
 - **코드 편집**
   - 패키지 임포트 및 정리하기: Ctrl + Shift + O
+    - 아직 임포트가 부족하다면: 이클립스 상단에 Project > Clean
   - 추천 리스트 받기: Ctrl + Space
-  - 주석 처리/제거하기: Ctrl + / 또는 Ctrl + Shift + /
+  - 주석 처리/제거하기: Ctrl + / (=JAVA) 또는 Ctrl + Shift + / (=XML,JSP)
   - 자동 정렬하기: Ctrl + Shift + F
   - 들여쓰기/내어쓰기: Tab ↔ Shift + Tab
   - 코드 한 줄 위/아래로 이동하기: Alt + ↑ ↔ Alt + ↓
@@ -729,11 +727,12 @@ New Java Project → JDK17 사용<br>
 - **컬렉션(List같은)은 필드**에서 초기화 하자
   - 코드간결, **null 문제에서 안전**
   - ex: `private List<Task> tasks = new ArrayList<>();`
-- 의존성 주입(DI)은 필드 주입대신에 **생성자 주입을 사용**하자. 
-  - 즉, DI 중 @Autowired를 이용한 Field Injection보다는  
+- 의존성 주입(DI)은 필드 주입이나 setter 주입 대신에 **생성자 주입을 사용**하자. 
+  - 즉, DI 중 @Resource, @Autowired를 이용한 Field Injection보다는  
     **@RequiredArgsConstructor와 final**을 이용한 **Constructor Injection**을 사용하자
   - **@RequiredArgsConstructor는 “final 붙은 필드를 인자로 받는 생성자"를 자동 생성**
     - ex: `private final ExpService expService` 선언만 해도 바로 사용 가능!
+  - **주의**: 객체에 관한 생성자 1개일때 Spring 4.3이후부턴 자동으로 @Autowired 가 붙어서 위 방식을 사용한거지만 여러 생성자를 사용할 경우는 무슨 생성자에 생성자 주입을 사용할지 선택해서 @Autowired를 꼭 붙여줘야 함.
 
 <br>
 
@@ -1317,14 +1316,16 @@ public void initCacheMembers() {
 
 <br>
 
+**반환타입 void일 때: 자동으로 뷰리졸버는 요청URL과 동일한 뷰를 탐색해서 반환! (직접 String반환 안해도!)**
+
 **보통 @RestController + @RequestMapping + @RequiredArgsConstructor 조합 사용**
 
 - @RequiredArgsConstructor 은 이미 언급해서 생략
 
 - @RestController 는 API에 필수(+**@ResponseBody도 포함**해서 예로 Json 반환 자동)
 
-- @RequestMapping("api/v1/members") 는 전역 주소
-  - @PostMapping, @GetMapping -> 주로 사용
+- @RequestMapping("api/v1/members") 는 전역 주소 -> GET, POST 둘다 한번에 지원
+  - @PostMapping, @GetMapping -> 주로 사용 (좀 더 유지보수하기 좋을듯?)
   - @RequestBody, @ResponseBody : HttpEntity 처럼 **HTTP 메시지 컨버터**가 **HTTP 메시지 바디**의 내용을 우리가 원하는 문자나 객체(DTO) 등으로 자동 변환
 
   - 요청(ex:json)엔 @RequestBody, 응답엔 @ResponseBody!!
@@ -6178,10 +6179,2737 @@ tasks.named('test') {
 
 ## 전자정부프레임워크4.2 학습하기
 
-공식홈페이지에 좋은 가이드 파일들을 제공하므로 해당 가이드를 보고 학습하자.  
-기존 인프런에서 공부한 스프링으로 웹 개발한 지식과 비교해 보는것도 좋겠다.
+공식홈페이지에 좋은 가이드 파일들을 제공하므로 해당 가이드를 보고 학습하자.
+
+추가로 현재 4.3도 출시되어서 4.3Dev(개발용) 이클립스가 있음.(2025-03)
+
+**학습후 느낀점:**
+
+일단 MVC패턴으로 egovframe라이브러리 사용하여 레포, 서비스를 만드는건 필수이고..   
+Spring Data JPA도 사용해도 될것 같기도 하고(물론, crudRepository를 우선 써야할것 같다만..) + 일단 JPA보단 MyBatis(egovframe있으+DBIO Editor활용!)를 많이 사용하는것 같아 보이니 이거 쓰는게 나을것 같긴 하다만,,  
+DB는 뭘 써도 상관없어 보이고  
+어느정도 SpringBoot2.x 사용해도 괜찮은것 같음. 꼭 XML로 빈을 전부 등록하며 이럴 필요없이 Boot로 애노테이션 활용하여 자바코드로 간단히 해도 딱히 지침에 위반될것 같진 않는..?    
+검색은 ajax써서 자동완성기능 해보는거 좋아 보임.  
+로그인쪽(게시판 등?) "공통기능" 이용 + Spring Security도 표준프레임워크로 [security](https://arckwon.tistory.com/entry/%EC%A0%84%EC%9E%90%EC%A0%95%EB%B6%80%ED%94%84%EB%A0%88%EC%9E%84%EC%9B%8C%ED%81%AC-%EC%8A%A4%ED%94%84%EB%A7%81%EC%8B%9C%ED%81%90%EB%A6%AC%ED%8B%B0-%EB%A1%9C%EA%B7%B8%EC%9D%B8-%EC%A0%81%EC%9A%A912), [암호화](https://arckwon.tistory.com/entry/%EC%A0%84%EC%9E%90%EC%A0%95%EB%B6%80%ED%94%84%EB%A0%88%EC%9E%84%EC%9B%8C%ED%81%AC-DB%EC%A0%91%EC%86%8D%EC%A0%95%EB%B3%B4-%EC%95%94%ED%98%B8%ED%99%94-crypto-%EC%84%9C%EB%B9%84%EC%8A%A4), [공문](https://www.egovframe.go.kr/wiki/doku.php?id=egovframework:rte4.0:fdl:server_security) 참고!   
+01.개발환경_교육교재.pdf에 Jenkins(CI)설치 사용, 형상관리(SVN, GIT-설명은 안보임. 어차피 GIT은 잘 아니까 뭐) 도 있으니 이걸로 하면 되겠고..   
+Spring Batch는 간단히 웹하나 만들어서 HTTP로 트리거줘서 egovframe껄로 같이 구현해둬도 좋을듯.
+
+마지막으로 플젝할때 easycompany 해답 참고해서 하면 좋을듯!  
+플젝 진행해보면서 나한테 맞는 쳌리 만들기
+
+이클림스:live플러그인, 실행빨리하는 단축키?, 자동완성..플러그인이있는건지..  
+**빈 등록이든 뭐든 설정**엔 어노테이션과 XML혼합해서 사용 당연히 가능. **부트는 어노테이션 기반 설정을 주로 쓰되 특정 상황에선 XML도 잘 사용.(부트인데.. 원래하던 어노테이션 꼭 많이쓰자 그냥!)**  
+**Validation**은 기존에 했던것도 좋지만 이번엔 Jakarta Commons 써보기.(XML이네. +검증 메시지.)  
+=> @Validation 이런걸 안쓸 뿐이지 bindingresult 다 쓰네 뭐 ㅇㅇ. 비슷하네역시. 기존이랑.   
+=> 까먹지말고 JSP 클라에도 Valid적용!  
+**Exception**은 API아닌 JSP고 부트쓰긴 하지만 /error 이 기능말고 XML+AOP로 해보장.  
+=> 그럼 **AOP**는 Exception뿐만아니라 메소드시간구하는 것도 XML로 같이 해보자.   
+=> EgovAbstractServiceImpl의 processException, leaveaTrace도 활용하자!  
+**국제화메시지, 로그인, ajax(자동완성)**은 여기서 한걸로 하자~ -> 로그인은 나랑 똑같을거같기도? 세션이라  
+=> 이부분은 "실행환경 - 화면처리(Presentation)" + easycompany 보는게 나을것 같음    
+**로그레벨**은 xml말고 properties에서 해도 충분할 듯!(부트 사용시)  
+**페이징**은 Pagination Tag 정리한 공.문 꼭 참고
+
+<br><br>
+
+### 프레임워크 환경(아키텍처), 적용지침
+
+<details><summary><b>재사용 방식의 발전 흐름: 소스 재사용 -> 재사용 메소드 -> 재사용 객체 -> 디자인 패턴 -> 프레임워크</b></summary>
+<div markdown="1">
+- 소스 재사용 예: 클래스 A에서 ‘Date’를 ‘String’으로 변환하는 코딩을 해놓았다고 한다면 클래스 B에서 동일한 로직이 필요해서 클래스A에서 해당부분을 복사해서 사용할 수 있습니다. (진짜 코드를 복붙)
+- 재사용 메소드 예: C언어에서 라이브러리로 만들어 재사용하는것 처럼, 유사한 기능을 모아 하나의 클래스에 정의해 놓으면 메소드 라이브러리로 구성되며 해당 라이브러리를 가져와서 재사용 가능. 이후에 JDK내용이 바뀌거나 향상된 기능을 제공하고 싶을 경우에도 해당 메소드만 수정하여 제공하면 됨
+- 재사용 객체 예: 앞이랑 유사한데 이건 객체 지향 언어에서 새로 소개된 방식임. Person 클래스의 printBirthDate()의 내용이 변경되면 이를 상속 받고 있는 Client, Employee의 printBirthDate()도 자동적으로 변경
+- 디자인 패턴 예: "클래스의 재사용 방식"이 객체의 수직적인 재사용에 초점을 맞추었다면 "디자인 패턴"은 상황적인 문제를 해결하여 주는 재사용 방식. 즉, 공통적인 로직 문제에 대한 일반화된 해결 
+  - 상황: DB를 관계형이나 txt, xml 등으로 저장하고 싶을때 -> Adapter패턴을 활용!
+  - Adapter패턴으로 객체를 DB에 저장하거나 운영 시스템에 다양한 SW에 Adapter패턴을 적용(꼭 DB저장이 아니여도 Adapter 패턴을 쓸 수 있다는거). 단지 동일한 패턴 하에서 유사한 역할을 하고 있을 뿐임.
+- 프레임워크 예: 디자인 패턴을 전체적인 앱 시스템에서 보면 부분적인 해결책일 뿐임. 전체적인 관점에서 통합하여 애플리케이션의 설계 및 구현 틀을 제공하는 것이 프레임워크
+</div>
+</details>
+
+<details><summary><b>전자정부프레임워크로 개발자는 비즈니스 로직 개발에만 전념한다는 장점</b></summary>
+<div markdown="1"><br>
+<img src="https://github.com/user-attachments/assets/5efb9915-7170-4edf-a373-a8e9af76908d" alt="Image" style="zoom:80%;" /><br>  
+**프레임워크(Spring) VS 전자정부 표준프레임워크**<br>
+<img src="https://github.com/user-attachments/assets/b1e67524-b5b5-4b09-826e-1ba6481f0dc5" alt="Image" style="zoom:80%;" /> 
+</div>
+</details>
+<details><summary><b>표준프레임워크는 "실행,개발,관리,운영" 4개의 환경과 "모바일, 공통컴포넌트"로 구성</b></summary>
+<div markdown="1"><br>
+<img src="https://github.com/user-attachments/assets/4ac6060d-de89-438b-9005-b55a31ff681a" alt="Image" style="zoom:80%;" /><br> **표준프레임워크 실행환경**<br>
+<img src="https://github.com/user-attachments/assets/18e66285-25bd-446a-b204-fb3ab69d4b45" alt="Image" style="zoom:80%;" /><br>
+**표준프레임워크 개발환경**<br>
+<img src="https://github.com/user-attachments/assets/da0e76ab-8bc2-4869-b5c6-db45164bac52" alt="Image" style="zoom:80%;" /><br>
+**표준프레임워크 관리환경**<br>
+<img src="https://github.com/user-attachments/assets/7e167e44-8cfa-42ab-af5c-8f4b92c70638" alt="Image" style="zoom:80%;" /><br>
+**표준프레임워크 운영환경**<br>
+<img src="https://github.com/user-attachments/assets/b9aca047-073b-40ae-91a4-eb990daa61fe" alt="Image" style="zoom:80%;" /><br>
+**공통컴포넌트**<br>
+<img src="https://github.com/user-attachments/assets/25aa899f-6100-48a7-a58f-3f154e0678ba" alt="Image" style="zoom:80%;" /><br>
+**모바일 표준프레임워크**<br>
+<img src="https://github.com/user-attachments/assets/9feaf183-2d6a-43bc-b4bc-023f851b0c6d" alt="Image" style="zoom:80%;" />
+</div>
+</details>
+<details><summary><b>표준프레임워크 개발(iBatis) 예시 - 전체흐름+코드 </b></summary>
+<div markdown="1"><br>
+<img src="https://github.com/user-attachments/assets/d26f7392-1a4b-4f63-b577-4318aba5a4e3" alt="Image" style="zoom:80%;" /><br>
+<img src="https://github.com/user-attachments/assets/e6a9ad68-7331-4fc5-97f5-8c80c2ed65f8" alt="Image"  /><br>
+<img src="https://github.com/user-attachments/assets/56b598b8-6519-438b-ac1e-62e91dbc75c5" alt="Image" style="zoom:80%;" /><br>
+<img src="https://github.com/user-attachments/assets/dc4a9bcf-4750-413c-9c69-40baa5d54df7" alt="Image" style="zoom:80%;" /><br>
+<img src="https://github.com/user-attachments/assets/51357a57-d2b8-498b-a1f3-6387554fcdc1" alt="Image" style="zoom:80%;" /><br>
+<img src="https://github.com/user-attachments/assets/485a5494-3979-418d-9d6c-dacbea9d5086" alt="Image" style="zoom:80%;" /><br>
+<img src="https://github.com/user-attachments/assets/3a68ca81-4f03-44c8-bbc3-57e89ab50a3d" alt="Image" style="zoom:80%;" /><br>
+<img src="https://github.com/user-attachments/assets/86dbb1c2-eb44-4b01-a37e-4af59a217fe8" alt="Image" style="zoom:80%;" /><br>
+<img src="https://github.com/user-attachments/assets/60af2603-d44a-45d8-8cb4-546ad8b8768b" alt="Image" style="zoom:80%;" /> 
+</div>
+</details>
+<details><summary><b>적용 지침서 보기: 공홈>알림마당>관련참고문서>정보시스템 구축 발주자를 위한 표준프레임워크 적용가이드</b></summary>
+<div markdown="1">
+- 권고사항: 
+  - 수정없이 사용: "실행환경", "모바일표준프레임워크" 
+  - 수정가능: "개발환경"(다른 상용 솔루션 조합도 가능), "운영환경 및 공통컴포넌트"
+- **기본 2가지 적용 확인:**
+  1. 표준프레임워크 실행환경의 정상적인 설치 여부 점검
+     - 운영서버(WAS)의 "[웹어플리케이션 루트 디렉토리]/WEB-INF/lib/" 폴더에 "org.egovframe.rte"로 시작하는 .jar 파일이 존재하는지 확인  
+       **=> 즉, egovframe 라이브러리 사용하는지 체크**
+  2. 실제 소스코드에서 실행환경이 활용되고 있는지 점검
+     - import org.egovframe.rte 검색되는지 체크
+     - EgovAbstractDAO(EgovAbstractMapper) 와 EgovAbstractServiceImpl(또는 AbstractServiceImpl) 클래스를 상속한 구문이 존재하는지 체크
+       - (예: public class NotificationDAO extends EgovAbstractDAO)
+       - (예: public class NotificationServiceImpl extends EgovAbstractServiceImpl)
+- 상세한 적용 확인:
+  1. 아키텍처 규칙 
+     - Annotation 기반 Spring MVC 준수 : **@Controller 및 @RequestMapping**을 통한 URL mapping 활용 (View 부분과 model(business logic 및 data) 부분을 controller를 통해 분리) 
+     - Annotation 기반 layered architecture 준수 : 화면처리, 업무처리, 데이터처리에 부분에 대하여 각각 **@Controller, @Service, @Repository** 활용 (인접 layer간 호출만 가능) 
+     - 업무처리를 담당하는 서비스 클래스(@Service)는 **EgovAbstractServiceImpl**(또는 AbstractServiceImpl)을 확장하고 업무에 대한 특정 인터페이스를 구현하여야 함 
+     - 데이터처리를 담당하는 DAO 클래스(@Repository)는 EgovAbstractDAO(iBatis) 또는 **EgovAbstractMapper**(MyBatis)를 상속하여야 함 (**Hibernate/JPA를 적용한 경우는 예외**이며 자세한 사항은 하단 ‘데이터처리 규칙’ 참조) 
+  2. 데이터처리 규칙 
+     - Data Access 서비스 준수 : 데이터처리 부분은 iBatis 활용 (SqlMapClientDaoSupport 를 상속한 EgovAbstractDAO 활용) 또는 MyBatis 활용 (SqlSessionDaoSupport를 상속 한 **EgovAbstractMapper** 활용)<br>※ MyBatis의 경우 **Mapper interface 방식**으로 사용가능(권장)하며, 이 경우는 **interface 상에 @Mapper를 지정**하여 사용되어야 함 
+     - ORM 서비스 준수 : 데이터처리 부분은 Hibernate/JPA 적용 (DAO에서 SessionFactory 또는 EntityManagerFactory 설정을 통해 HibernateTemplate/JpaTemplate를 활용하거나, HibernateDaoSupport/JpaDaoSupport를 상속하여 활용) 
+     - Data 서비스 준수 : 데이터 처리 부분은 다양한 persistence store(Big Data, NoSQL 등)를 지원하기 위한 Spring Data 적용 (**DAO에서 CrudRepository를 상속하는 interface 방식의 Repository를 활용**) 
+       - JpaRepository와 다르게 진짜 CRUD만 제공
+  3. 활용 및 확장 규칙 
+     - 표준프레임워크 실행환경 준수 : 표준프레임워크 실행환경은 적극적으로 활용되어야 함 (실행환경 부분 임의 변경 금지) 
+     - 확장 규칙 : 업무 클래스는 org.egovframe.rte 패키지 내에 정의될 수 없음 
+  4. 기타 
+     - 이외에 개발환경, 운영환경 및 공통컴포넌트 부분은 선택적으로 적용 가능하며, 임의 변경 및 확장 가능함 
+     - UI부분에 RIA(Rich Internet Appliation)가 적용되는 경우는 UI Adaptor 또는 RESTful 방식을 적용 활용해야 함
+</div>
+</details>
+
+<br><br>
+
+### 기본 프로젝트 생성
+
+**순수(스프링) Web**은 Maven Install로 WAR 빌드 후 톰캣과 함께 Server 실행이 필요  
+**스프링부트 Web**은 starter-web 있으니까 내장 톰캣으로 바로 실행  
+=> init: Eclipse + Spring Framework(+Boot) + Maven(=Build Tool) + MyBatis + HSQLDB(=테스트용) + 리팩토링{message + Validation + Exception}
+
+- 순수스프링: 
+  - 빈을 XML 에서 설정. 이 빈을 @Resource(name)으로 주입하여 사용
+    - 참고: @Resource(이름기반주입), @Autowired(타입기반주입), setter주입(EX:XML빈에 property사용시 자동setter주입), 생성자주입(제일권장!)
+    - 헷갈리는 Autowired, Qualifier, Resource: **@Autowired**와 함께 @*Qualifier*를 사용하고, **@Resource는** @*Autowired*와 @*Qualifier*를 한번에 간결하게 표현
+  - 테스트 코드엔 이 2가지 사용(jUnit4 기준)  
+    @RunWith(SpringJUnit4ClassRunner.**class**)  
+    @ContextConfiguration(locations= {"/context-helloworld.xml"})
+- 스프링부트:
+  - 빈을 자바코드로 설정 가능 (EX: @Bean). 보통 생성자 주입하여 사용
+  - 테스트 코드엔 이 2가지 사용(jUnit4 기준)   
+    @RunWith(SpringRunner.**class**)  
+    @SpringBootTest
+
+**eclipse 응답없음** 자주 뜬다면? 힙 메모리 사용량이라도.. 최적화하자 ㅠ  
+
+- **주의!!** 윈도우의 경우 알집으로 압축풀면 몇개는 에러뜨는데 그대로 사용시 이클립스가 미쳐 날뛰는걸 확인할 수 있음... 한참 찾았네 ㅠ  
+  bak log파일이 미친듯이 발생하는데, 압축 제대로 안풀려서 미친듯이 충돌 난건가 봄. 에효ㅠㅠ  
+  **7-zip 외부 파일로 압축풀어서 간단히 해결했음!**
+- window>preferences>general>show heap status 체크 -> 메모리 부족하다면?
+- eclipse.ini 파일에서 Xms, Xmx 수정 (최소, 최대 힙 메모리 용량)
+- 추가TIP) 안 사용하는 플젝은 close project / General>Appearance>Theme>Classic, Use mixed fonts and colors for labels 체크X
+
+**pom.xml** - Run As Maven {Build, Clean, Install}: 
+
+- Clean은 target 폴더 삭제랑 이전 빌드내용 삭제
+- Build는 의존성 Install 전까지 (JAR나 WAR패키징 까지)
+- Install은 Build를 포함하여 의존성 Install 까지
+
+**boot의 config 코드 분석? (직접 주석 달음. 주석과 코드 함께 보기)**
+
+<details><summary><b>EgovConfigAspect</b></summary>
+<div markdown="1"><br>
+```java
+package egovframework.example.config;
+import egovframework.example.exception.EgovAopExceptionTransfer;
+import egovframework.example.exception.EgovSampleExcepHndlr;
+import egovframework.example.exception.EgovSampleOthersExcepHndlr;
+import org.egovframe.rte.fdl.cmmn.aspect.ExceptionTransfer;
+import org.egovframe.rte.fdl.cmmn.exception.handler.ExceptionHandler;
+import org.egovframe.rte.fdl.cmmn.exception.manager.DefaultExceptionHandleManager;
+import org.egovframe.rte.fdl.cmmn.exception.manager.ExceptionHandlerService;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.util.AntPathMatcher;
+/*
+Spring 기반의 AOP-예외처리 설정을 위한 클래스
+Transfer, Handler, Manager, Service 등은 egovframe 라이브러리에서 가져옴.
+예외 발생: 애플리케이션에서 예외가 발생하면, Spring의 AOP 설정에 의해 예외 처리기가 호출됩니다.
+예외 처리기 실행: 예외 처리기는 발생한 예외를 처리하고 적절한 응답을 반환합니다.
+예외 전송: ExceptionTransfer 빈은 예외를 전송하는 역할을 하며, 이는 여러 예외 처리 매니저를 통해 이루어집니다.
+ */
+@Configuration //빈 정의 목적
+@EnableAspectJAutoProxy //AspectJ를 사용해 AOP 활성화 (자동 프록시 생성후 Aspect 적용)
+public class EgovConfigAspect {
+	@Bean //스프링 컨테이너에 등록
+	public EgovSampleExcepHndlr egovHandler() {
+		return new EgovSampleExcepHndlr(); //예외 처리기(Handler): 예외처리 후 응답반환
+	}
+	@Bean
+	public EgovSampleOthersExcepHndlr otherHandler() {
+		return new EgovSampleOthersExcepHndlr(); //예외 처리기(Handler): 예외처리 후 응답반환
+	}
+	//AntPathMatcher(URL패턴 매치)하고, 위 예외 처리기 활용1
+	@Bean 
+	public DefaultExceptionHandleManager defaultExceptionHandleManager(AntPathMatcher antPathMatcher, EgovSampleExcepHndlr egovHandler) {
+		DefaultExceptionHandleManager defaultExceptionHandleManager = new DefaultExceptionHandleManager();
+		defaultExceptionHandleManager.setReqExpMatcher(antPathMatcher);
+		defaultExceptionHandleManager.setPatterns(new String[]{"**service.impl.*"});
+		defaultExceptionHandleManager.setHandlers(new ExceptionHandler[]{egovHandler});
+		return defaultExceptionHandleManager;
+	}
+	//AntPathMatcher(URL패턴 매치)하고, 위 예외 처리기 활용2
+	@Bean
+	public DefaultExceptionHandleManager otherExceptionHandleManager(AntPathMatcher antPathMatcher, EgovSampleOthersExcepHndlr othersExcepHndlr) {
+		DefaultExceptionHandleManager defaultExceptionHandleManager = new DefaultExceptionHandleManager();
+		defaultExceptionHandleManager.setReqExpMatcher(antPathMatcher);
+		defaultExceptionHandleManager.setPatterns(new String[]{"**service.impl.*"});
+		defaultExceptionHandleManager.setHandlers(new ExceptionHandler[]{othersExcepHndlr});
+		return defaultExceptionHandleManager;
+	}
+	//예외 전송 서비스 역할, 위 예외 처리 매니저 활용
+	@Bean
+	public ExceptionTransfer exceptionTransfer(
+		@Qualifier("defaultExceptionHandleManager") DefaultExceptionHandleManager defaultExceptionHandleManager,
+		@Qualifier("otherExceptionHandleManager") DefaultExceptionHandleManager otherExceptionHandleManager) {
+		ExceptionTransfer exceptionTransfer = new ExceptionTransfer();
+		exceptionTransfer.setExceptionHandlerService(new ExceptionHandlerService[] {
+			defaultExceptionHandleManager, otherExceptionHandleManager
+		});
+		return exceptionTransfer;
+	}
+	//AOP 기반 예외 전송 설정, 위 예외 전송 서비스 활용
+	@Bean
+	public EgovAopExceptionTransfer aopExceptionTransfer(ExceptionTransfer exceptionTransfer) {
+		EgovAopExceptionTransfer egovAopExceptionTransfer = new EgovAopExceptionTransfer();
+		egovAopExceptionTransfer.setExceptionTransfer(exceptionTransfer);
+		return egovAopExceptionTransfer;
+	}
+}
+```
+</div>
+</details>
+
+<details><summary><b>EgovConfigCommon</b></summary>
+<div markdown="1"><br>
+```java
+package egovframework.example.config;
+import org.egovframe.rte.fdl.cmmn.trace.LeaveaTrace;
+import org.egovframe.rte.fdl.cmmn.trace.handler.DefaultTraceHandler;
+import org.egovframe.rte.fdl.cmmn.trace.handler.TraceHandler;
+import org.egovframe.rte.fdl.cmmn.trace.manager.DefaultTraceHandleManager;
+import org.egovframe.rte.fdl.cmmn.trace.manager.TraceHandlerService;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.MessageSourceAccessor;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import org.springframework.util.AntPathMatcher;
+/*
+Spring 기반의 공통 설정을 위한 클래스입니다. 
+이 클래스는 메시지 소스, 트레이스(Trace) 설정, 그리고 Ant 경로 매처와 같은 공통적인 설정
+LeaveaTrace, Handler, Manager, Service 등은 egovframe 라이브러리에서 가져옴.
+ */
+@Configuration
+public class EgovConfigCommon {
+	//요청 경로를 매칭
+	@Bean
+	public AntPathMatcher antPathMatcher() {
+		return new AntPathMatcher();
+	}
+	//트레이스 정보를 처리기.
+	@Bean
+	public DefaultTraceHandler defaultTraceHandler() {
+		return new DefaultTraceHandler();
+	}
+	//메시지 소스를 제공하며, 여러 리소스 번들 파일에서 메시지를 읽어옴.
+	@Bean
+	public ReloadableResourceBundleMessageSource messageSource() {
+		ReloadableResourceBundleMessageSource reloadableResourceBundleMessageSource = new ReloadableResourceBundleMessageSource();
+		reloadableResourceBundleMessageSource.setBasenames(
+				"classpath:/egovframework/message/message-common",
+				"classpath:/org/egovframe/rte/fdl/idgnr/messages/idgnr",
+				"classpath:/org/egovframe/rte/fdl/property/messages/properties");
+		reloadableResourceBundleMessageSource.setDefaultEncoding("UTF-8");
+		reloadableResourceBundleMessageSource.setCacheSeconds(60); //캐시60초
+		return reloadableResourceBundleMessageSource;
+	}
+	//메시지 소스를 쉽게 접근하게 함. 위 메소드 활용. 
+	@Bean
+	public MessageSourceAccessor messageSourceAccessor() {
+		return new MessageSourceAccessor(this.messageSource());
+	}
+	//AntPathMatcher로 요청 경로 매칭 후 트레이스 정보 처리기를 매칭 
+	@Bean
+	public DefaultTraceHandleManager traceHandlerService() {
+		DefaultTraceHandleManager defaultTraceHandleManager = new DefaultTraceHandleManager();
+		defaultTraceHandleManager.setReqExpMatcher(antPathMatcher());
+		defaultTraceHandleManager.setPatterns(new String[]{"*"});
+		defaultTraceHandleManager.setHandlers(new TraceHandler[]{defaultTraceHandler()});
+		return defaultTraceHandleManager;
+	}
+	//트레이스 서비스 설정. 위 메소드 활용.
+	@Bean
+	public LeaveaTrace leaveaTrace() {
+		LeaveaTrace leaveaTrace = new LeaveaTrace();
+		leaveaTrace.setTraceHandlerServices(new TraceHandlerService[]{traceHandlerService()});
+		return leaveaTrace;
+	}
+}
+```
+</div>
+</details>
+
+<details><summary><b>EgovConfigDatasource</b></summary>
+<div markdown="1"><br>
+```java
+package egovframework.example.config;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
+import javax.sql.DataSource;
+/*
+데이터베이스를 설정 -> HSQL로.
+addScript 메서드를 통해 초기 데이터베이스 스크립트를 실행하여 데이터베이스를 초기화
+ */
+@Configuration
+public class EgovConfigDatasource {
+	@Bean(name="dataSource") //생성된 데이터소스를 빈 등록
+	public DataSource dataSource() {
+	    EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
+	    return builder.setType(EmbeddedDatabaseType.HSQL).addScript("classpath:/db/sampledb.sql").build();
+	}
+}
+```
+</div>
+</details>
+
+<details><summary><b>EgovConfigIdGeneration</b></summary>
+<div markdown="1"><br>
+```java
+package egovframework.example.config;
+import org.egovframe.rte.fdl.idgnr.impl.EgovTableIdGnrServiceImpl;
+import org.egovframe.rte.fdl.idgnr.impl.strategy.EgovIdGnrStrategyImpl;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import javax.sql.DataSource;
+/*
+ID 생성 설정을 위한 클래스
+Egov 프레임워크의 ID 생성기 서비스를 설정하여 애플리케이션에서 사용할 수 있는 고유한 ID를 생성
+아래 메소드의 반환타입 전부 egovframe 라이브러리에서 가져옴.
+ */
+@Configuration
+public class EgovConfigIdGeneration {
+	@Bean
+	public EgovIdGnrStrategyImpl mixPrefixSample() {
+		EgovIdGnrStrategyImpl egovIdGnrStrategyImpl = new EgovIdGnrStrategyImpl();
+		egovIdGnrStrategyImpl.setPrefix("SAMPLE-"); //ID의 접두사
+		egovIdGnrStrategyImpl.setCipers(5); //ID의 숫자부분 길이
+		egovIdGnrStrategyImpl.setFillChar('0'); //ID의 숫자부분 채울 문자
+		return egovIdGnrStrategyImpl;
+	}
+	@Bean(destroyMethod="destroy")
+	public EgovTableIdGnrServiceImpl egovIdGnrService(@Qualifier("dataSource") DataSource dataSource) {
+		EgovTableIdGnrServiceImpl egovTableIdGnrServiceImpl = new EgovTableIdGnrServiceImpl();
+		egovTableIdGnrServiceImpl.setDataSource(dataSource);
+		egovTableIdGnrServiceImpl.setStrategy(mixPrefixSample());
+		egovTableIdGnrServiceImpl.setBlockSize(10);
+		egovTableIdGnrServiceImpl.setTable("IDS"); //ID를 생성할 테이블 이름
+		egovTableIdGnrServiceImpl.setTableName("SAMPLE"); //ID를 생성할 테이블 이름
+		return egovTableIdGnrServiceImpl;	
+	}
+}
+```
+</div>
+</details>
+
+<details><summary><b>EgovConfigMapper</b></summary>
+<div markdown="1"><br>
+```java
+package egovframework.example.config;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.mybatis.spring.SqlSessionFactoryBean;
+import org.mybatis.spring.SqlSessionTemplate;
+import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import javax.sql.DataSource;
+import java.io.IOException;
+/*
+Spring 기반의 MyBatis 설정을 위한 클래스
+ */
+@Configuration
+@MapperScan(basePackages="egovframework.example.sample.service.impl")
+public class EgovConfigMapper {
+	//dataSource 빈을 주입받아 데이터베이스 연결 + MyBatis 설정 파일, 매퍼 파일 위치 지정
+	@Bean
+	public SqlSessionFactoryBean sqlSessionFactory(@Qualifier("dataSource") DataSource dataSource) throws IOException {
+		PathMatchingResourcePatternResolver pmrpr = new PathMatchingResourcePatternResolver();
+		SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
+		sqlSessionFactoryBean.setDataSource(dataSource);
+		sqlSessionFactoryBean.setConfigLocation(pmrpr.getResource("classpath:/egovframework/sqlmap/example/sql-mapper-config.xml"));
+		sqlSessionFactoryBean.setMapperLocations(pmrpr.getResources("classpath:/egovframework/sqlmap/example/mappers/*.xml"));
+		return sqlSessionFactoryBean;
+	}
+	//템플릿화하여 사용
+	@Bean
+	public SqlSessionTemplate sqlSession(SqlSessionFactory sqlSessionFactory) {
+		return new SqlSessionTemplate(sqlSessionFactory);
+	}
+}
+```
+</div>
+</details>
+
+<details><summary><b>EgovConfigProperties</b></summary>
+<div markdown="1"><br>
+```java
+package egovframework.example.config;
+import org.egovframe.rte.fdl.property.impl.EgovPropertyServiceImpl;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import java.util.HashMap;
+import java.util.Map;
+/*
+프로퍼티 서비스 제공하는 클래스. 공통적인 프로퍼티에 좋겠죠?
+EgovPropertyServiceImpl은 egovframe 라이브러리에서 가져옴..
+ */
+@Configuration
+public class EgovConfigProperties {
+	@Bean(destroyMethod="destroy") //빈이 소멸될 때 destroy() 메서드 호출되게 설정
+	public EgovPropertyServiceImpl propertiesService() {
+		Map<String, String> properties = new HashMap<>();
+		properties.put("pageUnit", "10");
+		properties.put("pageSize", "10");
+		EgovPropertyServiceImpl egovPropertyServiceImpl = new EgovPropertyServiceImpl();
+		egovPropertyServiceImpl.setProperties(properties);
+		return egovPropertyServiceImpl; //리턴값을 통해 앱의 다른 부분에서 이 프로퍼티 접근가능
+	}
+}
+```
+</div>
+</details>
+
+<details><summary><b>EgovConfigTransaction</b></summary>
+<div markdown="1"><br>
+```java
+package egovframework.example.config;
+import org.springframework.aop.Advisor;
+import org.springframework.aop.aspectj.AspectJExpressionPointcut;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.interceptor.*;
+import javax.sql.DataSource;
+import java.util.Collections;
+import java.util.HashMap;
+/*
+트랜잭션 설정을 위한 클래스 - 애초에 부트로 @Transcational... 써도 대부분 ㅇㅋ.
+다만, 이 프레임워크대로 여기선 써야지.. (장점:직접 설정한거라 포인트컷 설정이나 예외처리 명시같은게 자유롭)
+ */
+@Configuration
+public class EgovConfigTransaction {
+	//dataSource 주입받아 DB연결 설정
+	@Bean(name="txManager")
+	public DataSourceTransactionManager txManager(@Qualifier("dataSource") DataSource dataSource) {
+		DataSourceTransactionManager dataSourceTransactionManager = new DataSourceTransactionManager();
+		dataSourceTransactionManager.setDataSource(dataSource);
+		return dataSourceTransactionManager;
+	}
+	//트랜잭션을 적용할 메서드에 대한 규칙을 설정 - 트랜잭션 필수사용+예외 시 롤백규칙
+	@Bean
+	public TransactionInterceptor txAdvice(DataSourceTransactionManager txManager) {
+		RuleBasedTransactionAttribute txAttribute = new RuleBasedTransactionAttribute();
+		txAttribute.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+		txAttribute.setRollbackRules(Collections.singletonList(new RollbackRuleAttribute(Exception.class)));
+		HashMap<String, TransactionAttribute> txMethods = new HashMap<String, TransactionAttribute>();
+		txMethods.put("*", txAttribute);
+		NameMatchTransactionAttributeSource txAttributeSource = new NameMatchTransactionAttributeSource();
+		txAttributeSource.setNameMap(txMethods);
+		TransactionInterceptor txAdvice = new TransactionInterceptor();
+		txAdvice.setTransactionAttributeSource(txAttributeSource);
+		txAdvice.setTransactionManager(txManager);
+		return txAdvice;
+	}
+	//트랜잭션 인터셉터를 적용할 포인트컷을 정의 - 특정 패턴의 메서드에 트랜잭션 적용
+	@Bean
+	public Advisor txAdvisor(@Qualifier("txManager") DataSourceTransactionManager txManager) {
+		AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
+		pointcut.setExpression("execution(* egovframework.example.sample..impl.*Impl.*(..))");
+		return new DefaultPointcutAdvisor(pointcut, txAdvice(txManager));
+	}
+}
+```
+</div>
+</details>
+
+<details><summary><b>EgovConfigValidation</b></summary>
+<div markdown="1"><br>
+```java
+package egovframework.example.config;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.validation.Validator;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+/*
+검증 설정을 위한 클래스 - Bean Validation API를 사용하여 검증기를 생성 +  MessageSource 주입 받아 검증 메시지 관리
+ */
+@Configuration
+public class EgovConfigValidation {
+    @Bean
+    public Validator getValidator(@Qualifier("messageSource") MessageSource messageSource) {
+        LocalValidatorFactoryBean localValidatorFactoryBean = new LocalValidatorFactoryBean();
+        localValidatorFactoryBean.setValidationMessageSource(messageSource);
+        return localValidatorFactoryBean;
+    }
+}
+```
+</div>
+</details>
+
+<details><summary><b>EgovConfigWeb</b></summary>
+<div markdown="1"><br>
+```java
+package egovframework.example.config;
+import egovframework.example.pagination.EgovPaginationDialect;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.web.servlet.HandlerExceptionResolver;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
+import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
+import org.springframework.web.servlet.i18n.SessionLocaleResolver;
+import org.thymeleaf.spring5.SpringTemplateEngine;
+import org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver;
+import org.thymeleaf.spring5.view.ThymeleafViewResolver;
+import org.thymeleaf.templatemode.TemplateMode;
+import java.util.List;
+import java.util.Properties;
+/*
+Spring MVC 설정을 위한 클래스
+Thymeleaf 템플릿 엔진 설정, 리소스 핸들러 설정, 인터셉터 설정, 예외 처리 설정 등을 포함
+ */
+@Configuration
+@Import({
+		EgovConfigAspect.class,
+		EgovConfigCommon.class,
+		EgovConfigDatasource.class,
+		EgovConfigIdGeneration.class,
+		EgovConfigMapper.class,
+		EgovConfigProperties.class,
+		EgovConfigTransaction.class,
+		EgovConfigValidation.class
+})
+public class EgovConfigWeb implements WebMvcConfigurer, ApplicationContextAware {
+	private ApplicationContext applicationContext;
+	public void setApplicationContext(final ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
+	}
+	//Thymeleaf 템플릿 파일의 위치와 접미사를 설정
+	@Bean
+	public SpringResourceTemplateResolver templateResolver() {
+		SpringResourceTemplateResolver templateResolver = new SpringResourceTemplateResolver();
+		templateResolver.setApplicationContext(this.applicationContext);
+		templateResolver.setPrefix("classpath:/templates/thymeleaf/"); //기본경로
+		templateResolver.setSuffix(".html"); //확장자
+		templateResolver.setTemplateMode(TemplateMode.HTML);
+		templateResolver.setCacheable(true);
+		return templateResolver;
+	}
+	//Thymeleaf 템플릿 엔진을 설정
+	@Bean
+	public SpringTemplateEngine templateEngine() {
+		SpringTemplateEngine templateEngine = new SpringTemplateEngine();
+		templateEngine.setTemplateResolver(templateResolver());
+		templateEngine.setEnableSpringELCompiler(true);
+		// add custom tag
+		templateEngine.addDialect(new EgovPaginationDialect()); //만든 페이징 기능을 지원
+		return templateEngine;
+	}
+	//Thymeleaf 템플릿을 뷰로 사용
+	@Bean
+	public ThymeleafViewResolver thymeleafViewResolver() {
+		ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();
+		viewResolver.setCharacterEncoding("UTF-8");
+		viewResolver.setTemplateEngine(templateEngine());
+		return viewResolver;
+	}
+	//정적 리소스 파일(CSS, 이미지, 자바스크립트 등)의 경로를 설정
+	@Override
+	public void addResourceHandlers(ResourceHandlerRegistry registry) {
+		registry.addResourceHandler("/css/**").addResourceLocations("classpath:/static/css/");
+        registry.addResourceHandler("/images/**").addResourceLocations("classpath:/static/images/");
+        registry.addResourceHandler("/js/**").addResourceLocations("classpath:/static/js/");
+	}
+	//세션 기반의 로케일(지역?) 리졸버를 설정
+	@Bean
+	public SessionLocaleResolver localeResolver() {
+		return new SessionLocaleResolver();
+	}
+	//URL 파라미터를 통해 로케일을 변경 지원
+	@Bean
+	public LocaleChangeInterceptor localeChangeInterceptor() {
+		LocaleChangeInterceptor interceptor = new LocaleChangeInterceptor();
+		interceptor.setParamName("language");
+		return interceptor;
+	}
+	//인터셉터 등록(요청에 적용) - 로케일 변경 인터셉터를 등록하여 로케일 변경 요청을 처리
+	@Override
+	public void addInterceptors(InterceptorRegistry registry) {
+		registry.addInterceptor(localeChangeInterceptor());
+	}
+	//예외 처리기를 설정하여 예외 발생 시 적절한 응답 - 에러 뷰 매핑
+	@Override
+	public void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> resolvers) {
+		Properties prop = new Properties();
+		prop.setProperty("org.springframework.dao.DataAccessException", "egovSampleError");
+		prop.setProperty("org.springframework.transaction.TransactionException", "egovSampleError");
+		prop.setProperty("org.egovframe.rte.fdl.cmmn.exception.EgovBizException", "egovSampleError");
+		prop.setProperty("org.springframework.security.AccessDeniedException", "egovSampleError");
+		prop.setProperty("java.lang.Throwable", "egovSampleError");
+//
+		Properties statusCode = new Properties();
+		statusCode.setProperty("egovSampleError", "400");
+		statusCode.setProperty("egovSampleError", "500");
+//
+		SimpleMappingExceptionResolver smer = new SimpleMappingExceptionResolver();
+		smer.setDefaultErrorView("egovSampleError");
+		smer.setExceptionMappings(prop);
+		smer.setStatusCodes(statusCode);
+		resolvers.add(smer);
+	}
+}
+```
+</div>
+</details>
+<br><br>
+
+### 개발환경 - Code Generation
+
+말 그대로 소스 코드 자동생성.. WOW  
+
+**예로 CRUD 자동생성을 해보자면?** (완료하면 생성된 샘플을 볼 수 있다.)
+
+1. (HSQL)DB 실행 -> (이클립스)Data Source Explorer 에서 DB Connection에 HSQLDB 우클릭 connect
+
+2. (이클립스)window>Show View>Other.. 선택 후 eGovFrame>Templates 선택
+
+3. 원하는 자동생성 중에 CRUD 선택 후 PUBLIC>SAMPLE>디렉토리 정보.. 하면 끝!
+
+   <img src="https://github.com/user-attachments/assets/c0dbf6f4-2a94-4545-9b3c-44b9be178b2a" alt="Image" style="zoom:80%;" /> 
+
+   실제로 해당 패키지에서 보면 CRUD 생성 됨을 확인. (VO=실제 데이터. 엔티티)
+
+4. src/main/resources 에서 본인 패키지의 mapper-config.xml 파일을 우클릭 > Open With > Other… > mapperConfiguration Editor > OK 후 생성된 Sample_MAPPER.xml 파일을 추가되어 있는지 확인
+
+4. maven clean -> maven install 후 server 실행해보면 잘 구동된 웹 확인 가능
+
+**생성된 파일들 모습**  
+
+SampleDefaultVO는 SampleVO(**"엔티티"**)의 부모클래스, SampleService는 인터페이스, SampleDAO는 eGovFram쪽 상속받아 구현한 **"레포"**, SampleServiceImpl은 위 인터페이스 구현체인 **"서비스"**, SampleController는 **"컨트롤러"**  
++) SampleMapper, mapper-config, Sample_MAPPER는 MyBatis!!
+
+@Resource로 여기선 빈 등록받네. 보통 @Autowired나 생성자주입방식 쓸텐디.. "조사해보자"
+
+<img src="https://github.com/user-attachments/assets/8c36b51e-e8d3-46c1-be24-f1dc5c620719" alt="Image" style="zoom:80%;" /> 
+
+![Image](https://github.com/user-attachments/assets/623bba22-fef4-44d6-9c41-7e239d5648ec) 
+
+<br><br>
+
+### 개발환경 - 테스트, 공통컴포넌트, 템플릿
+
+**플젝>Run As>jUnit Test** or Maven test -> **jUnit4 사용 (JUnit뷰 콘솔에서 결과 확인)**
+
+(아래사진)**Data Source Explorer**에서 간편히 **DB연결 및 테이블 확인** 가능  
+=> DB연결(실행)이 되어야 계층 구조가 나타나며, DB추가는 우클릭 NEW로 간단히 가능(별첨 참고)
+
+- <img src="https://github.com/user-attachments/assets/08b270c7-9195-4c6a-9dd8-8b7d42fb65cb" alt="Image" style="zoom:50%;" /> 
+
+프로젝트 우클릭> New > eGovFrame Common Component > 원하는 **공통 컴포넌트** 선택  
+예로 "게시판, 역할관리 컴포넌트" 선택시 아래 사이트 자동 생성 (Java, DB 소스도 자동!)
+
+- <img src="https://github.com/user-attachments/assets/c94c43b7-e84d-4094-8d69-b0e5c57a43ff" alt="Image" style="zoom: 80%;" />  
+
+eGovFrame>Start>New Template Project 생성,실행 후 "admin / 1" 로그인하면 홈페이지 확인 가능  
+**템플릿 프로젝트는 아래와 같은 기능을 제공!!**
+
+- ![Image](https://github.com/user-attachments/assets/adbcbf81-b4d2-4890-90db-500845262154) 
+
+<br><br>
+
+### 개발환경 - DBIO Editor 실습(EX:MyBatis)
+
+MyBatis는 예전에 토이플젝에 직접 세팅해서 해봄. 여기선 다른점있나?   
+**=> 여기선 XML세팅때 우클릭>NEW>Open With>Other>mapper 에디터 를 활용!**
+
+1. DB실행
+
+2. DBIO 실습(자세히는 PDF)
+
+   - Mapper Configuration 파일 생성(sample_config.xml): 프로젝트 우클릭 > New > mapperConfiguration
+
+   - Mapper 파일 생성(sample_map.xml):  Mapper Configuration Editor > New
+
+   - Mapper 파일 편집 -> mapper 에디터를 활용!  
+     **에디터로 간단히 설정하는데 "xml코드가 자동 생성되는 편리!!"**
+
+     1. Result Map 작성: Mapper Editor> ResultMap 우클릭> Add resultMap
+     2. Query 작성: Mapper Editor> Query 우클릭> Add Select Query
+
+     자동생성 코드 예시(sample_map.xml): 
+
+     ```xml
+     <?xml version="1.0" encoding="UTF-8"?>
+     <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+     <mapper ><resultMap id="resultMap" type="java.lang.String"><result property="deptName" column="DEPT_NAME"/>
+     </resultMap>
+     <select id="selectDept" parameterType="java.lang.String" resultMap="resultMap">
+     SELECT DEPT_NAME
+       FROM PUBLIC.DEPT
+       WHERE DEPT_NO = #{deptNo}
+     </select>
+     </mapper>
+     ```
+3. Query  테스트
+
+   <img src="https://github.com/user-attachments/assets/66c16c69-5daa-4854-9fc4-4df12ad1254e" alt="Image" style="zoom:80%;" /> 
+
+<br><br>
+
+### 실행환경-공통기반(Foundation)
+
+**여기까지 개발환경 PART였고, 아래부턴 실행환경 PART 교육자료이다.**
+
+**개발프레임워크 아키텍처는 항상 기억하고 있자.**
+
+<img src="https://github.com/user-attachments/assets/415e6678-2e01-43ad-9b0f-7a7225464266" alt="Image" style="zoom:80%;" /> 
+
+<img src="https://github.com/user-attachments/assets/8bf68d75-6b56-42e9-8e95-1b0b273d934d" alt="Image" style="zoom:80%;" /> 
+
+<br>
+
+**XML 설정 방식의 Spring Bean vs Annotation로 설정하는 Spring Bean**
+
+- XML
+  - 개발 양식에 맞춰서(물론 제네릭하게! 전자정부라이브러리는 미사용 상태)   
+    EmpService interface, EmpVo class를 만듬 -> DAO, SeriveImpl도 만듬 
+  - text만 할거라 test 하위에 META-INF엔 context-emp xml만들고, test코드엔 EmpServiceTest class 만듬
+    - xml에 빈 등록은 생각보다 간단. 특히, Service의 경우 XmlEmpDAO를 필드로 가지는데 이를위해 Bean등록에 property로 등록해줌. **-> 이게 setter 주입방식**
+      - `property` **태그가 setter 메서드를 자동 호출!**
+    - Test코드엔 순수스프링+JUnit4 사용을 위해 @RunWith와 @ContextConfiguration를 사용 및 @Resource(name="xmlEmpService") 이런식으로 주입했음 -> Autowired해도 잘 돌아갈거임.
+
+- Annotation
+  - Annotation에선 DAO, SeriveImpl에 @Repository, @Service를 사용했고, **@Resource로 필드 주입**했음.
+  - test만 할거라 META-INF엔 context-common xml만들고 컴포넌트 스캔을 지정함. (Boot 썻을땐 Main에서 했던 그것!)
+
+**XML으로 설정해보는 AOP**
+
+- AOP 자바코드를 만들고, XML에서 이 AOP를 빈으로 추가 및 AOP 설정을 함(targetMethod 등)
+- 예제: 코드위주 해석 -> 2개의 핵심 파일인 AdviceUsingXML.java, context-advice.xml
+  - AdviceUsingXML.java 에는 beforeTargetMethod(객체 정보를 로깅로직), afterTargetMethod(실행 완료 로깅로직), afterReturningTargetMethod(결과 값 로깅로직), afterThrowingTargetMethod(예외랩핑-BizException발생로직), aroundTargetMethod(실행시간 측정로직)
+  - context-advice.xml 에는 Pointcut 설정으로 어느 패키지에 AOP적용할지, Aspect설정으로 AdviceUsingXML클래스의 메소드들을 Advice로 등록!
+    - **Before Advice**: 실행 전 로깅
+    - **After Returning Advice**: 정상 실행 후 결과값 로깅
+    - **After Throwing Advice**: 예외 발생 시 `BizException`으로 변환
+    - **After Advice**: 실행 완료 후 로깅
+    - **Around Advice**: 실행 전후 시간을 측정
+- JSP 뷰에 에러를 반환하고 싶다면 -> WEB-INF/config/springmvc/context-servlet.xml 에서 SimpleMappingExceptionResolver 빈을 등록해서 매핑해줄 것
+
+<details><summary><b>AdviceUsingXML.java, context-advice.xml 코드</b></summary>
+<div markdown="1"><br>
+```java
+public class AdviceUsingXML {
+	// TODO [Step 1-6] AdviceUsingXML 작성
+	private static final Logger LOGGER = LoggerFactory.getLogger(AdviceUsingXML.class);
+	public void beforeTargetMethod(JoinPoint thisJoinPoint) {
+		LOGGER.debug("\nAdviceUsingXML.beforeTargetMethod executed.");
+		@SuppressWarnings("unused")
+		Class<? extends Object> clazz = thisJoinPoint.getTarget().getClass();
+		String className = thisJoinPoint.getTarget().getClass().getSimpleName();
+		String methodName = thisJoinPoint.getSignature().getName();
+		// 현재 class, method 정보 및 method arguments 로깅
+		StringBuffer buf = new StringBuffer();
+		buf.append("\n== AdviceUsingXML.beforeTargetMethod : [" + className + "." + methodName + "()] ==");
+		Object[] arguments = thisJoinPoint.getArgs();
+		int argCount = 0;
+		for (Object obj : arguments) {
+			buf.append("\n - arg ");
+			buf.append(argCount++);
+			buf.append(" : ");
+			// commons-lang 의 ToStringBuilder 를
+			// 통해(reflection 을 이용)한 VO 정보 출력
+			buf.append(ToStringBuilder.reflectionToString(obj));
+		}
+		// 대상 클래스의 logger 를 사용하여 method arguments 로깅
+		// 하였음.
+		LOGGER.debug(buf.toString());
+	}
+	public void afterTargetMethod(JoinPoint thisJoinPoint) {
+		LOGGER.debug("AdviceUsingXML.afterTargetMethod executed.");
+	}
+	public void afterReturningTargetMethod(JoinPoint thisJoinPoint, Object retVal) {
+		LOGGER.debug("AdviceUsingXML.afterReturningTargetMethod executed.");
+		@SuppressWarnings("unused")
+		Class<? extends Object> clazz = thisJoinPoint.getTarget().getClass();
+		String className = thisJoinPoint.getTarget().getClass().getSimpleName();
+		String methodName = thisJoinPoint.getSignature().getName();
+		// 현재 class, method 정보 및 method arguments 로깅
+		StringBuffer buf = new StringBuffer();
+		buf.append("\n== AdviceUsingXML.afterReturningTargetMethod : [" + className + "." + methodName + "()] ==");
+		buf.append("\n");
+		// 결과값이 List 이면 size 와 전체 List 데이터를 풀어
+		// reflection 으로 출력 - 성능상 사용 않는 것이 좋음
+		if (retVal instanceof List) {
+			List<?> resultList = (List<?>) retVal;
+			buf.append("resultList size : " + resultList.size() + "\n");
+			for (Object oneRow : resultList) {
+				buf.append(ToStringBuilder.reflectionToString(oneRow));
+				buf.append("\n");
+			}
+		} else {
+		}
+		// 대상 클래스의 logger 를 사용하여 결과값 로깅 하였음.
+		LOGGER.debug(buf.toString());
+		// return value 의 변경은 불가함에 유의!
+	}
+	public void afterThrowingTargetMethod(JoinPoint thisJoinPoint, Exception exception) throws Exception {
+		LOGGER.debug("AdviceUsingXML.afterThrowingTargetMethod executed.");
+		LOGGER.error("에러가 발생했습니다. {}", exception);
+		// 원본 exception 을 wrapping 하고 user-friendly 한메시지를 설정하여 새로운 Exception 으로 re-throw
+		throw new BizException("에러가 발생했습니다.", exception);
+		// 여기서는 간단하게 작성하였지만 일반적으로 messageSource 를 사용한 locale 에 따른 다국어 처리 및 egov.
+		// exceptionHandler
+		// 를 확장한 Biz. (ex. email 공지 등) 기능 적용이 가능함.
+	}
+	public Object aroundTargetMethod(ProceedingJoinPoint thisJoinPoint) throws Throwable {
+		LOGGER.debug("AdviceUsingXML.aroundTargetMethod start.");
+		long time1 = System.currentTimeMillis();
+		Object retVal = thisJoinPoint.proceed();
+		// Around advice 의 경우 결과값을 변경할 수도 있음!
+		// 위의 retVal 을 가공하거나 심지어 전혀 다른 결과값을 대체하여
+		// caller 에 되돌려줄 수 있음
+		long time2 = System.currentTimeMillis();
+		// 메서드 실행 시간을 측정
+		LOGGER.debug("AdviceUsingXML.aroundTargetMethod end. Time({})", (time2 - time1));
+		return retVal;
+	}
+}
+```
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+				http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd">
+	<!-- TODO [Step 1-7] xml 설정 방식의 AOP 설정 -->
+	<!-- 모든 비지니스 메서드(Impl 로 끝나는 모든 class 의 모든 메서드)에 대해 다양한 Advice 기능을 동시에 적용하였음에 유의 -->
+	<bean id="adviceUsingXML"
+		class="egovframework.lab.aop.xml.AdviceUsingXML" />
+	<aop:config>
+		<aop:pointcut id="targetMethod"
+			expression="execution(* egovframework.lab.aop..Xml*Impl.*(..))" />
+		<aop:aspect ref="adviceUsingXML">
+			<aop:before pointcut-ref="targetMethod"
+				method="beforeTargetMethod" />
+			<aop:after-returning pointcut-ref="targetMethod"
+				method="afterReturningTargetMethod" returning="retVal" />
+			<aop:after-throwing pointcut-ref="targetMethod"
+				method="afterThrowingTargetMethod" throwing="exception" />
+			<aop:after pointcut-ref="targetMethod"
+				method="afterTargetMethod" />
+			<aop:around pointcut-ref="targetMethod"
+				method="aroundTargetMethod" />
+		</aop:aspect>
+	</aop:config>
+</beans>
+```
+</div>
+</details>
+
+<br><br>
+
+### 실행환경 - 데이터처리(Persistence)
+
+**데이터 처리에 사용중인 오픈소스**
+
+<img src="https://github.com/user-attachments/assets/df4e2121-c8f1-435b-bac7-5bf858e1f6b0" alt="Image" style="zoom:80%;" /> 
+
+<br>
+
+**알고가자:** 
+
+- DataSource를 빈 등록?
+  - DB와 연동을 위해서는 DataSource가 필수로 필요한데, "스프링 부트"는 dataSource 빈 이름으로 properties를 보고 자동으로 등록!
+  - 반면, "순수 스프링"은 빈 등록도 직접 해줘야 한다.
+- Transaction을 빈 등록?
+  - 트랜잭션도 직접 빈 등록을 하면 다양한 커스텀이 가능! 물론, @Transactional 이 충분히 좋으므로 이걸로 끝내는게 많다.
+  - 직접 빈 등록(EX:트랜잭션 매니저를 등록한 경우)을 한 경우 @Transactional(transactionManager = "txManager") 이런식으로 사용.
+- iBatis를 빈 등록?
+  - EgovAbstractDAO 에선 이 빈을 사용하므로 **필수로 등록**해줘야 한다.
+- Spring에서 제공하는 `PropertyPlaceholderConfigurer`는 **외부 properties 파일을 로드하고, 이를 Bean 설정에서 사용할 수 있도록 해주는 기능**을 담당하는 클래스
+  - 예로 context-common.xml 에서 PropertyPlaceholderConfigurer를 설정 시 "빈 등록xml"에서 &{db.drvier} 이런식 사용!
+
+<br>
+
+**iBatis를 사용한 Persistence  Layer 개발 순서**
+
+1. [iBatis  설정  1]  SQL  Mapping  XML  파일  작성
+   
+   - 실행할  SQL문과  관련  정보  설정
+   - SELECT/INSERT/UPDATE/DELETE,  Parameter/Result  Object,  Dynamic  SQL  등
+   
+2. [iBatis  설정  2]  iBatis  Configuration  XML  파일  작성
+   
+   - iBatis  동작에  필요한  옵션을  설정
+   - \<sqlMap>:  SQL  Mapping  XML  파일의  위치
+     - 최신 스프링은 아래 Bean정의에서 mapperLocations로 \<mapper> 역할까지 포함
+   
+3. **[스프링연동  설정]  SqlMapClientFactoryBean  정의 -> 빈 등록!**  
+   **중요: 여기서 sqlMapClient로 등록한 빈을 EgovAbstractDAO에서 사용!!**
+   
+   - Spring와  iBatis  연동을  위한  설정
+   - 역할)  iBatis  관련  메서드  실행을  위한  **SqlMapClient  객체**를  생성
+   - dataSource:  DB  Connection  생성
+   - configLocation:  iBatis  Configuration  XML  파일의  위치
+   - mappingLocations:  모든  SQL  Mapping  XML  파일을  일괄  지정  가능
+   
+4. DAO  클래스  작성
+
+   • 실행할 SQL문을 호출하기 위한 메서드 구현: SQL Mapping XML 내에 정의한 각 Statement id를 매개변수로 전달
+   •  규칙)  SqlMapClientDaoSupport를  상속하는  **EgovAbstractDAO**  클래스를  상속받아  확장/구현
+
+**코드 모음:**
+
+이 실습의 대표적 생성 빈id: empService, empDAO, sqlMapClient, txManager, dataSource
+
+<details><summary><b>DB연동을 위한 DataSource 부터 - bean id="dataSource</b></summary>
+<div markdown="1"><br>
+{src/test/resources/}META-INF/spring/context-datasource.xml -> DataSource 빈 등록!
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+						http://www.springframework.org/schema/jdbc  http://www.springframework.org/schema/jdbc/spring-jdbc-4.0.xsd">
+	<!-- TODO [Step 1-2] dataSource 설정: 빈 사용 편 -->
+	<!-- &{db.?} 는 .properties에 선언한 변수 가져와 사용한 것! -> PropertyPlaceholderConfigurer를 
+		따로 설정했으므로 가능! Spring에서 제공하는 PropertyPlaceholderConfigurer는 외부 properties 
+		파일을 로드하고, 이를 Bean 설정에서 사용할 수 있도록 해주는 기능을 담당하는 클래스 -->
+	<bean id="dataSource"
+		class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="${db.driver}" />
+		<property name="url" value="${db.dburl}" />
+		<property name="username" value="${db.username}" />
+		<property name="password" value="${db.password}" />
+		<property name="defaultAutoCommit" value="false" />
+		<property name="poolPreparedStatements" value="true" />
+	</bean>
+	<!-- [Step 1-2] dataSource 설정: jdbc의 ebedded-db 사용 편 -->
+	<!-- <jdbc:embedded-database id="dataSource" type="HSQL"> <jdbc:script location= 
+		"META-INF/testdata/sample_schema_hsql.sql"/> </jdbc:embedded-database> -->
+</beans>
+```
+META-INF/spring/context-common.xml -> PropertyPlaceholderConfigurer 설정 (properties 읽기 위해)
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+				http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+	<!-- TODO [Step 1-2] PropertyPlaceholderConfigurer 설정 -->
+	<context:property-placeholder location="classpath:/META-INF/spring/jdbc.properties" />
+	<!-- TODO [Step 1-7] common 설정 확인 -->
+	<!-- MessageSource 설정: 다국어 처리 빈 -->
+	<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<property name="basenames">
+			<list>
+				<value>classpath:/message/message-common</value>
+				<value>classpath:/org/egovframe/rte/fdl/idgnr/messages/idgnr</value>
+				<value>classpath:/org/egovframe/rte/fdl/property/messages/properties</value>
+			</list>
+		</property>
+		<property name="cacheSeconds">
+			<value>60</value>
+		</property>
+	</bean>
+	<!-- 전자정부 TraceHandler 설정 관련: 특정 상황에서 사용자가 핸들러 사용할 수 있게 하는 빈 -->
+	<bean id="leaveaTrace" class="org.egovframe.rte.fdl.cmmn.trace.LeaveaTrace">
+		<property name="traceHandlerServices">
+			<list>
+				<ref bean="traceHandlerService" />
+			</list>
+		</property>
+	</bean>
+	<bean id="traceHandlerService" class="org.egovframe.rte.fdl.cmmn.trace.manager.DefaultTraceHandleManager">
+		<property name="reqExpMatcher">
+			<ref bean="antPathMater" />
+		</property>
+		<property name="patterns">
+			<list>
+				<value>*</value>
+			</list>
+		</property>
+		<property name="handlers">
+			<list>
+				<ref bean="defaultTraceHandler" />
+			</list>
+		</property>
+	</bean>
+	<!-- 경로 패턴 비교용 빈 -->
+	<bean id="antPathMater" class="org.springframework.util.AntPathMatcher" />
+	<bean id="defaultTraceHandler" class="org.egovframe.rte.fdl.cmmn.trace.handler.DefaultTraceHandler" />
+	<!-- 스테레오 타입 Annotation 을 인식하여 Spring bean 으로 자동 등록하기 위한 component-scan 설정 -->
+    <context:component-scan base-package="egovframework"/>
+</beans>
+```
+META-INF/spring/jdbc.properties -> db연동에 사용할 변수 설정
+```properties
+#TODO [Step 1-2] dataSource 설정
+db.driver=org.hsqldb.jdbcDriver
+#db.dburl=jdbc:hsqldb:mem:testdb
+db.dburl=jdbc:hsqldb:hsql://localhost/sampledb
+db.username=sa
+db.password=
+```
+META-INF/spring/context-trasaction.xml -> 여기선 트랜잭션 매니저만 직접 빈 등록(DataSource 연결)
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+	<!-- TODO [Step 1-3] transaction 설정: 여기서는 transaction manager 만을 설정 -->
+	<bean id="txManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+</beans>
+```
+</div>
+</details>
+
+<details><summary><b>IBATIS 연동 설정</b></summary>
+<div markdown="1"><br>
+{src/test/resources/}META-INF/spring/context-sqlMap.xml -> sqlMapClient 빈 등록! (FactoryBean)
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+	<!-- TODO [Step 1-4] Spring 의 iBATIS 연동 설정: 빈 등록 -->
+	<!-- mappingLocations 영역을 주석 해제하여 Spring 의 ResourceLoader 형식으로 패턴 매칭에 의거한 일괄 로딩으로 처리가 가능하다. -->
+	<bean id="sqlMapClient" class="org.egovframe.rte.psl.orm.ibatis.SqlMapClientFactoryBean ">
+		<property name="configLocation"
+			value="classpath:/META-INF/sqlmap/sql-map-config.xml" />
+		<!-- <property name="mappingLocations" value="classpath:/META-INF/sqlmap/mappings/lab-*.xml" 
+			/> -->
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+</beans>
+```
+META-INF/sqlmap/sql-map-config.xml -> iBATIS 연동위한 iBatis  Configuration  XML 설정
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMapConfig PUBLIC "-//ibatis.apache.org//DTD SQL Map Config 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-config-2.dtd">
+<sqlMapConfig>
+	<!-- TODO [Step 1-5] iBATIS 의 sql-map-config 설정 파일 작성 -->
+	<settings useStatementNamespaces="false"
+		cacheModelsEnabled="true" />
+	<!-- Spring 2.5.5 이상, iBATIS 2.3.2 이상에서는 iBATIS 연동을 위한 SqlMapClientFactoryBean 
+		정의 시 mappingLocations 속성으로 Sql 매핑 파일의 일괄 지정이 가능하다. ("sqlMapClient" bean 설정 
+		시 mappingLocations="classpath:/META- INF/sqlmap/mappings/lab-*.xml" 로 지정하였음) 
+		단, sql-map-config-2.dtd 에서 sqlMap 요소를 하나 이상 지정하도록 되어 있으므로 아래 의 dummy 매핑 파일을 
+		설정한다. -->
+	<sqlMap resource="META-INF/sqlmap/mappings/lab-emp.xml" />
+</sqlMapConfig>
+```
+META-INF/sqlmap/mappings/lab-emp.xml -> iBATIS 쿼리위한 SQL  Mapping  XML 설정
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="Emp">
+	<!-- TODO [Step 2-5] lab-emp.xml mapping xml 작성 -->
+	<typeAlias alias="empVO"
+		type="egovframework.lab.dataaccess.service.EmpVO" />
+	<resultMap id="empResult" class="empVO">
+		<result property="empNo" column="EMP_NO" />
+		<result property="empName" column="EMP_NAME" />
+		<result property="job" column="JOB" />
+		<result property="mgr" column="MGR" />
+		<result property="hireDate" column="HIRE_DATE" />
+		<result property="sal" column="SAL" />
+		<result property="comm" column="COMM" />
+		<result property="deptNo" column="DEPT_NO" />
+	</resultMap>
+	<insert id="insertEmp" parameterClass="empVO"> 
+<![CDATA[
+insert into EMP
+(EMP_NO,
+EMP_NAME,
+JOB,
+MGR,
+HIRE_DATE,
+SAL,
+COMM,
+DEPT_NO)
+values   (#empNo#, 
+#empName#,
+#job#,
+#mgr#,
+#hireDate#, 
+#sal#,
+#comm#, 
+#deptNo#)
+]]>
+	</insert>
+	<update id="updateEmp" parameterClass="empVO"> 
+<![CDATA[
+update EMP
+set EMP_NAME= #empName#, 
+JOB = #job#,
+MGR = #mgr#,
+HIRE_DATE = #hireDate#, 
+SAL = #sal#,
+COMM = #comm#, 
+DEPT_NO = #deptNo#
+where EMP_NO = #empNo#
+]]>
+	</update>
+	<delete id="deleteEmp" parameterClass="empVO"> 
+<![CDATA[
+delete from EMP
+where EMP_NO = #empNo#
+]]>
+	</delete>
+	<select id="selectEmp" parameterClass="empVO"
+		resultMap="empResult"> 
+<![CDATA[
+select EMP_NO, 
+EMP_NAME, 
+JOB,
+MGR,
+HIRE_DATE, 
+SAL,
+COMM, 
+DEPT_NO
+from EMP
+where EMP_NO = #empNo#
+]]>
+	</select>
+	<select id="selectEmpList" parameterClass="empVO"
+		resultMap="empResult"> 
+<![CDATA[
+select EMP_NO, 
+EMP_NAME, 
+JOB,
+MGR,
+HIRE_DATE, 
+SAL,
+COMM, 
+DEPT_NO
+from EMP 
+where 1 = 1
+]]>
+		<isNotNull prepend="and" property="empNo">
+			EMP_NO = #empNo#
+		</isNotNull>
+		<isNotNull prepend="and" property="empName">
+			EMP_NAME LIKE '%' ||
+			#empName# || '%'
+		</isNotNull>
+	</select>
+</sqlMap>
+```
+</div>
+</details>
+
+<details><summary><b>DB Sequence 기반의 ID Generation 사용 설정</b></summary>
+<div markdown="1"><br>
+META-INF/spring/context-idgen.xml -> select next value... 문법은 Hsqldb의 sequence 사용 문법!
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+	<!-- TODO [Step 1-6] Id Generation Service 설정 확인 -->
+    <!-- from절의 DUAL의 경우 Oracle의 DUAL 테이블과 동일하다. 이를 위해 초기화 스크립트 sql(=sample_chema_hsql.sql)에 create를 미리 한다. -->
+	<bean name="primaryTypeSequenceIds" class="org.egovframe.rte.fdl.idgnr.impl.EgovSequenceIdGnrService" destroy-method="destroy">
+		<property name="dataSource" ref="dataSource" />
+		<property name="query" value="SELECT NEXT VALUE FOR empseq FROM DUAL" />
+	</bean>
+</beans>
+```
+META-INF/testdata/sample_schema_hsql.sql -> DUAL, SEQUENCE 생성 및 테스트코드에서 사용하려는 DB 테이블 재생성 sql문
+```sql
+drop table jobhist IF EXISTS;
+drop table emp IF EXISTS;
+drop table dept IF EXISTS;
+drop table dual IF EXISTS;
+drop sequence empseq IF EXISTS;
+CREATE SEQUENCE empseq START WITH 8000;
+CREATE TABLE dual (
+    dummy        VARCHAR(1) PRIMARY KEY
+);
+CREATE TABLE dept (
+    dept_no          NUMERIC(2) NOT NULL,
+    dept_name        VARCHAR(14),
+    loc             VARCHAR(13),
+    CONSTRAINT dept_pk PRIMARY KEY (dept_no),
+    CONSTRAINT dept_name_uq UNIQUE (dept_name)
+);
+CREATE TABLE emp (
+    emp_no          NUMERIC(4) NOT NULL,
+    emp_name        VARCHAR(10),
+    job             VARCHAR(9),
+    mgr             NUMERIC(4),
+    hire_date       DATE,
+    sal             NUMERIC(7),
+    comm            NUMERIC(7),
+    dept_no         NUMERIC(2),
+	CONSTRAINT emp_pk PRIMARY KEY (emp_no),
+	CONSTRAINT emp_sal_ck CHECK (sal > 0),
+	CONSTRAINT emp_ref_dept_fk FOREIGN KEY (dept_no) REFERENCES dept(dept_no)
+);
+CREATE TABLE jobhist (
+    emp_no           NUMERIC(4) NOT NULL,
+    start_date       DATE NOT NULL,
+    end_date         DATE,
+    job             VARCHAR(9),
+    sal             NUMERIC(7),
+    comm            NUMERIC(7),
+    dept_no          NUMERIC(2),
+    chg_desc         VARCHAR(80),
+    CONSTRAINT jobhist_pk PRIMARY KEY (emp_no, start_date),
+    CONSTRAINT jobhist_ref_emp_fk FOREIGN KEY (emp_no)
+        REFERENCES emp(emp_no) ON DELETE CASCADE,
+    CONSTRAINT jobhist_ref_dept_fk FOREIGN KEY (dept_no)
+        REFERENCES dept (dept_no) ON DELETE SET NULL,
+	CONSTRAINT jobhist_date_chk CHECK (start_date <= end_date)
+);
+-- dual 
+INSERT INTO dual VALUES ('X');
+--  Load the 'dept' table
+--
+INSERT INTO dept VALUES (10,'ACCOUNTING','NEW YORK');
+INSERT INTO dept VALUES (20,'RESEARCH','DALLAS');
+INSERT INTO dept VALUES (30,'SALES','CHICAGO');
+INSERT INTO dept VALUES (40,'OPERATIONS','BOSTON');
+--
+--  Load the 'emp' table
+--
+INSERT INTO emp VALUES (7369,'SMITH','CLERK',7902,'1980-12-17',800,NULL,20);
+INSERT INTO emp VALUES (7499,'ALLEN','SALESMAN',7698,'1981-02-20',1600,300,30);
+INSERT INTO emp VALUES (7521,'WARD','SALESMAN',7698,'1981-02-22',1250,500,30);
+INSERT INTO emp VALUES (7566,'JONES','MANAGER',7839,'1981-04-02',2975,NULL,20);
+INSERT INTO emp VALUES (7654,'MARTIN','SALESMAN',7698,'1981-09-28',1250,1400,30);
+INSERT INTO emp VALUES (7698,'BLAKE','MANAGER',7839,'1981-05-01',2850,NULL,30);
+INSERT INTO emp VALUES (7782,'CLARK','MANAGER',7839,'1981-06-09',2450,NULL,10);
+INSERT INTO emp VALUES (7788,'SCOTT','ANALYST',7566,'1987-04-19',3000,NULL,20);
+INSERT INTO emp VALUES (7839,'KING','PRESIDENT',NULL,'1981-11-17',5000,NULL,10);
+INSERT INTO emp VALUES (7844,'TURNER','SALESMAN',7698,'1981-09-08',1500,0,30);
+INSERT INTO emp VALUES (7876,'ADAMS','CLERK',7788,'1987-05-23',1100,NULL,20);
+INSERT INTO emp VALUES (7900,'JAMES','CLERK',7698,'1981-12-03',950,NULL,30);
+INSERT INTO emp VALUES (7902,'FORD','ANALYST',7566,'1981-12-03',3000,NULL,20);
+INSERT INTO emp VALUES (7934,'MILLER','CLERK',7782,'1982-01-23',1300,NULL,10);
+--
+--  Load the 'jobhist' table
+--
+INSERT INTO jobhist VALUES (7369,'1980-12-17',NULL,'CLERK',800,NULL,20,'New Hire');
+INSERT INTO jobhist VALUES (7499,'1981-02-20',NULL,'SALESMAN',1600,300,30,'New Hire');
+INSERT INTO jobhist VALUES (7521,'1981-02-22',NULL,'SALESMAN',1250,500,30,'New Hire');
+INSERT INTO jobhist VALUES (7566,'1981-04-02',NULL,'MANAGER',2975,NULL,20,'New Hire');
+INSERT INTO jobhist VALUES (7654,'1981-09-28',NULL,'SALESMAN',1250,1400,30,'New Hire');
+INSERT INTO jobhist VALUES (7698,'1981-05-01',NULL,'MANAGER',2850,NULL,30,'New Hire');
+INSERT INTO jobhist VALUES (7782,'1981-06-09',NULL,'MANAGER',2450,NULL,10,'New Hire');
+INSERT INTO jobhist VALUES (7788,'1987-04-19','1988-04-12','CLERK',1000,NULL,20,'New Hire');
+INSERT INTO jobhist VALUES (7788,'1988-04-13','1989-05-04','CLERK',1040,NULL,20,'Raise');
+INSERT INTO jobhist VALUES (7788,'1990-05-05',NULL,'ANALYST',3000,NULL,20,'Promoted to Analyst');
+INSERT INTO jobhist VALUES (7839,'1981-11-17',NULL,'PRESIDENT',5000,NULL,10,'New Hire');
+INSERT INTO jobhist VALUES (7844,'1981-09-08',NULL,'SALESMAN',1500,0,30,'New Hire');
+INSERT INTO jobhist VALUES (7876,'1987-05-23',NULL,'CLERK',1100,NULL,20,'New Hire');
+INSERT INTO jobhist VALUES (7900,'1981-12-03','1983-01-14','CLERK',950,NULL,10,'New Hire');
+INSERT INTO jobhist VALUES (7900,'1983-01-15',NULL,'CLERK',950,NULL,30,'Changed to Dept 30');
+INSERT INTO jobhist VALUES (7902,'1981-12-03',NULL,'ANALYST',3000,NULL,20,'New Hire');
+INSERT INTO jobhist VALUES (7934,'1982-01-23',NULL,'CLERK',1300,NULL,10,'New Hire');
+commit;
+```
+</div>
+</details>
+
+<details><summary><b>aop 설정</b></summary>
+<div markdown="1"><br>
+/META-INF/spring/context-aspect.xml -> AOP 설정 (Exception 예외처리 핸들)
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd">
+	<!-- TODO [Step 1-8] aspect 설정 확인 -->
+	<aop:config>
+		<aop:pointcut id="serviceMethod" expression="execution(* egovframework.lab..impl.*Impl.*(..))" />
+		<aop:aspect ref="exceptionTransfer">
+			<aop:after-throwing throwing="exception" pointcut-ref="serviceMethod" method="transfer" />
+		</aop:aspect>
+	</aop:config>
+    <!-- 빈 등록 -->
+	<bean id="exceptionTransfer" class="org.egovframe.rte.fdl.cmmn.aspect.ExceptionTransfer">
+		<property name="exceptionHandlerService">
+			<list>
+				<ref bean="defaultExceptionHandleManager" />
+			</list>
+		</property>
+	</bean>
+	<bean id="defaultExceptionHandleManager" class="org.egovframe.rte.fdl.cmmn.exception.manager.DefaultExceptionHandleManager">
+		<property name="reqExpMatcher" ref="antPathMater" />
+		<property name="patterns">
+			<list>
+				<value>**service.impl.*</value>
+			</list>
+		</property>
+		<property name="handlers">
+			<list>
+				<ref bean="egovHandler" />
+			</list>
+		</property>
+	</bean>
+	<bean id="egovHandler" class="egovframework.lab.dataaccess.common.JdbcLoggingExcepHndlr" />
+</beans>
+```
+</div>
+</details>
+
+<details><summary><b>DAO, Service 로직은?</b></summary>
+<div markdown="1"><br>
+EmpService, EmpVO 생략<br>EmpServiceImpl.java -> 서비스 구현 + EgovAbstractServiceImpl 상속<br>insert 부분의 sequence 기반 id generation 이 있어서 이것만 참고
+```java
+@Service("empService")
+public class EmpServiceImpl extends EgovAbstractServiceImpl implements EmpService {
+	// TODO [Step 2-3] EmpServiceImpl 작성 추가
+	@Resource(name = "primaryTypeSequenceIds")
+	EgovIdGnrService egovIdGnrService;
+	@Resource(name = "empDAO")
+	private EmpDAO empDAO;
+	public BigDecimal insertEmp(EmpVO empVO) throws Exception {
+		// ID generation Service 를 사용하여 key 를 땀. 여기서
+		// primaryTypeSequenceIds 는 Sequence 기반임.
+		BigDecimal generatedEmpNo = egovIdGnrService.getNextBigDecimalId();
+		egovLogger.debug("EmpServiceImpl.insertEmp - generated empNo : " + generatedEmpNo);
+		empVO.setEmpNo(generatedEmpNo);
+		empDAO.insertEmp(empVO);
+		return generatedEmpNo;
+	}
+    //...
+}
+```
+EmpDAO.java -> EgovAbstractDAO 상속 (상속받은 메소드 사용하는 스타일)
+```java
+@Repository("empDAO")
+public class EmpDAO extends EgovAbstractDAO {
+	// TODO [Step 2-4] EmpDAO 작성
+	public void insertEmp(EmpVO vo) {
+		insert("insertEmp", vo);
+	}
+	public int updateEmp(EmpVO vo) {
+		return update("updateEmp", vo);
+	}
+	public int deleteEmp(EmpVO vo) {
+		return delete("deleteEmp", vo);
+	}
+	public EmpVO selectEmp(EmpVO vo) {
+		return (EmpVO) select("selectEmp", vo);
+		// return (EmpVO) select ("selectEmpUsingCacheModelLRU", vo);
+	}
+	@SuppressWarnings("unchecked")
+	public List<EmpVO> selectEmpList(EmpVO searchVO) {
+		return (List<EmpVO>) list("selectEmpList", searchVO);
+	}
+}
+```
+</div>
+</details>
+
+<br>
+
+**MyBatis를  활용한  Persistence  Layer  개발**
+
+1)  [MyBatis  설정  1]  SQL  Mapper  XML  파일  작성    설정
+- 실행할  SQL문과  관련  정보  설정
+- SELECT/INSERT/UPDATE/DELETE,  Parameter/Result  Object,  Dynamic  SQL  등
+2)  [MyBatis  설정  2]  MyBatis  Configuration  XML  파일  작성
+    - MyBatis  동작에  필요한  옵션을  설정
+    - \<mapper>:  SQL  Mapper  XML  파일의  위치
+      - **최신 스프링은 아래 Bean정의에서 mapperLocations로 \<mapper> 역할까지 포함**
+3)  **[스프링연동  설정]  SqlSessionFactoryBean  정의 -> 빈 등록!**  
+    **@Mapper 방식 사용시 MapperConfigurer 빈 등록 필수!**
+- Spring와  MyBatis  연동을  위한  설정
+- 역할)  MyBatis  관련  메서드  실행을  위한  SqlSession  객체를  생성 (IBATIS는 sqlMapClient이름)
+- dataSource,  configLocation,  mapperLocations  속성  설정
+4)  DAO  클래스  작성
+    - 방법1) SqlSessionDaoSupport를  상속하는  **EgovAbstractMapper**  클래스를  상속받아  확장/구현
+      - 실행할  SQL문을  호출하기  위한  메서드  구현:  SQL  Mapping  XML  내에  정의한  각  Statement  id를  매개변수로  전달
+      - 단, namespace.qureyId 를 매개변수로 전달해서 구분하기도 하는듯. (qureyId만 해도 됨ㅇㅇ.)
+    - 방법2) DAO  클래스를  Interface로  작성하고,  각  Statement  id와  **메서드명을  동일하게**  작성  **(Mapper  Interface  방식)**  
+      **=> 권장하는 방식!** IBATIS와는 다르게 이런 부분이 MYBATIS가 좋네
+      - Annotation을  이용한  SQL문  작성  가능
+      - 메서드명을  Statement  id로  사용하기  때문에,  코드  최소화  가능
+      - **Mapper Interface 방식을 사용 시 EgovAbstractMapper를 상속할 필요 없음**
+
+**코드 모음:**
+
+이 실습의 대표적 생성 빈id: empService, empDAO(+empMapper), sqlSession, txManager, dataSource
+
+<details><summary><b>DB연동을 위한 DataSource 부터 - jdbc:embedded-database</b></summary>
+<div markdown="1"><br>
+{src/test/resources/}META-INF/spring/context-datasource.xml -> DataSource 빈 등록!
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+						http://www.springframework.org/schema/jdbc  http://www.springframework.org/schema/jdbc/spring-jdbc-4.0.xsd">
+	<!-- TODO [Step 1-2] DataSource 설정 확인 -->
+	<!-- 
+	<bean id="dataSource"
+		class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="${db.driver}" />
+		<property name="url" value="${db.dburl}" />
+		<property name="username" value="${db.username}" />
+		<property name="password" value="${db.password}" />
+		<property name="defaultAutoCommit" value="false" />
+		<property name="poolPreparedStatements" value="true" />
+	</bean>
+	-->
+	<!-- [Step 1-2] DataSource 설정
+	embedded-database는 TEST환경에서 주로사용. 임베디드DB지원해줘서!
+	그래서 위에처럼 따로 db아이디나 비번 설정 이런게 없이 자동으로 Spring이 설정해줄수 있는것! 
+	특히, DB구동도 필요없음. 단, 위 빈등록 방식은 운영환경에서 주로사용하고 반드시 DB구동이 필요함. 메모리DB가 아니니까! 
+	특히, script등록할 수 있어서 앱 실행 시 "글로벌"로 1번 수행한다. 
+	단, 테스트땐 메소드마다 db초기화 필요할수도 있어서 편의상 @Before에 직접 execute로 외부쿼리 실행하게 하기도 한다. -->
+	<jdbc:embedded-database id="dataSource"
+		type="HSQL">
+		<jdbc:script
+			location="META-INF/testdata/sample_schema_hsql.sql" />
+	</jdbc:embedded-database>
+</beans>
+```
+META-INF/spring/context-common.xml -> PropertyPlaceholderConfigurer 설정 (여기선 생략가능. .properties 활용 안했었거든)
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+				http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+   	<!-- dataSource property를 위한 PropertyPlaceholderConfigurer 설정(사용 안했긴 함) 
+	<context:property-placeholder location="classpath:/META-INF/spring/jdbc.properties" />       
+    -->
+	<!-- 스테레오 타입 Annotation 을 인식하여 Spring bean 으로 자동 등록하기 위한 component-scan 설정 -->
+    <context:component-scan base-package="egovframework"/>
+    <!-- TODO [Step 1-7] 공통 설정 확인 -->
+	<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<property name="basenames">
+			<list>
+				<value>classpath:/message/message-common</value>
+				<value>classpath:/org/egovframe/rte/fdl/idgnr/messages/idgnr</value>
+				<value>classpath:/org/egovframe/rte/fdl/property/messages/properties</value>
+			</list>
+		</property>
+		<property name="cacheSeconds">
+			<value>60</value>
+		</property>
+	</bean>
+	<bean id="leaveaTrace" class="org.egovframe.rte.fdl.cmmn.trace.LeaveaTrace">
+		<property name="traceHandlerServices">
+			<list>
+				<ref bean="traceHandlerService" />
+			</list>
+		</property>
+	</bean>
+	<bean id="traceHandlerService" class="org.egovframe.rte.fdl.cmmn.trace.manager.DefaultTraceHandleManager">
+		<property name="reqExpMatcher">
+			<ref bean="antPathMater" />
+		</property>
+		<property name="patterns">
+			<list>
+				<value>*</value>
+			</list>
+		</property>
+		<property name="handlers">
+			<list>
+				<ref bean="defaultTraceHandler" />
+			</list>
+		</property>
+	</bean>
+	<bean id="antPathMater" class="org.springframework.util.AntPathMatcher" />
+	<bean id="defaultTraceHandler" class="org.egovframe.rte.fdl.cmmn.trace.handler.DefaultTraceHandler" />
+</beans>
+```
+META-INF/spring/jdbc.properties -> db연동에 사용할 변수 설정 (이것도 사용안했음. 생략.)
+```properties
+#TODO [Step 1-2] dataSource 설정
+db.driver=org.hsqldb.jdbcDriver
+#db.dburl=jdbc:hsqldb:mem:testdb
+db.dburl=jdbc:hsqldb:hsql://localhost/sampledb
+db.username=sa
+db.password=
+```
+META-INF/spring/context-trasaction.xml -> 트랜잭션 매니저 빈 등록하면서 driven을 추가!(스캔)
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+	<!-- TODO [Step 1-3] Transaction 설정 
+	IBATIS에선 driven을 추가안했는데 아마 전역 @Transactional 설정해서 그런듯 하다. 
+	driven을 추가하면 메서드에 개별로 따로 지정 가능하다는 말인것 같다. -> @Transactional  Anntation  스캔을  위해서는  <tx:annotation-driven  />을  선언해야  한다. 
+	특히, tx:aop 형식으로 트랜잭션 대상을 지정하여 비즈니스 서비스 메서드에 일괄 지정하는 경우가 많다. -->
+	<bean id="txManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<tx:annotation-driven
+		transaction-manager="txManager" />
+</beans>	
+```
+</div>
+</details>
+
+<details><summary><b>MyBatis 연동 설정</b></summary>
+<div markdown="1"><br>
+{src/test/resources/}META-INF/spring/context-mybatis.xml -> sqlSession 빈 등록(FactoryBean)과 @Mapper setup
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+	<!-- SqlSession setup for MyBatis Database Layer -->
+	<!-- TODO [Step 1-4] MyBatis와 Spring 연동 설정 -->
+	<bean id="sqlSession"
+		class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation"
+			value="classpath:/META-INF/sqlmap/sql-mybatis-config.xml" />
+		<!-- <property name="mapperLocations" value="classpath:**/lab-*.xml" /> -->
+	</bean>
+	<!-- MapperConfigurer setup for @Mapper -->
+	<!-- TODO [Step 3-3] MyBatis의 Mapper Interface 자동스캔 설정 -->
+	<bean class="org.egovframe.rte.psl.dataaccess.mapper.MapperConfigurer ">
+		<property name="basePackage"
+			value="egovframework.lab.dataaccess.service.impl" />
+	</bean>
+</beans>	
+```
+META-INF/sqlmap/sql-mybatis-config.xml -> MyBatis 연동위한 MyBatis  Configuration  XML 설정(여긴 \<mappers>방식)
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<!-- TODO [Step 1-5] MyBatis Configuration File 작성 -->
+	<typeAliases>
+		<typeAlias alias="empVO"
+			type="egovframework.lab.dataaccess.service.EmpVO" />
+	</typeAliases>
+	<!-- MyBatis 연동을 위한 SqlSessionFactoryBean 정의 시 mapperLocations 속성으로 한 번에 
+		모든 Mapper XML File을 설정할 수 있다. (<property name="mapperLocations" value="classpath:**/lab-*.xml" 
+		/> 추가) 단, 아래 <mappers> 설정과 mapperLocations 설정 중 한가지만 선택해야 한다. -->
+	<mappers>
+		<mapper resource="META-INF/sqlmap/mappers/lab-dao-class.xml" />
+		<mapper
+			resource="META-INF/sqlmap/mappers/lab-mapper-interface.xml" />
+	</mappers>
+</configuration>
+```
+META-INF/sqlmap/mappers/lab-dao-class.xml -> MyBatis 쿼리위한 SQL  Mapping  XML 설정(DAO-Class Statement 호출 방식)
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Emp">
+	<!-- TODO [Step 2-3] lab-dao-class.xml 작성 (EgovAbstractMapper 상속한 DAO) -->
+	<!-- DAO 클래스의 Statement 호출 방식: 사용자가 직접 지정해준 ID 파라미터 값과 일치하는 Statement를 호출.
+		동일한 Statement ID가 있으면, <mapper>의 namespace를 지정한다. 
+		− namespace=A, statement id=insertEmp  A.insertEmp으로 호출 
+		− namespace=B, statement id=insertEmp  B.insertEmp으로 호출 -->
+	<resultMap id="empResult" type="empVO">
+		<id property="empNo" column="EMP_NO" />
+		<result property="empName" column="EMP_NAME" />
+		<result property="job" column="JOB" />
+		<result property="mgr" column="MGR" />
+		<result property="hireDate" column="HIRE_DATE" />
+		<result property="sal" column="SAL" />
+		<result property="comm" column="COMM" />
+		<result property="deptNo" column="DEPT_NO" />
+	</resultMap>
+	<insert id="insertEmp" parameterType="empVO"> 
+<![CDATA[
+insert into EMP (EMP_NO, EMP_NAME, JOB, MGR, HIRE_DATE, SAL, COMM, DEPT_NO) 
+values(#{empNo}, #{empName}, #{job}, #{mgr}, #{hireDate}, #{sal}, #{comm}, #{deptNo})
+]]>
+	</insert>
+	<update id="updateEmp" parameterType="empVO"> 
+<![CDATA[
+update EMP
+set EMP_NAME = #{empName}, 
+JOB = #{job},
+MGR = #{mgr},
+HIRE_DATE = #{hireDate}, 
+SAL = #{sal},
+COMM = #{comm},
+DEPT_NO = #{deptNo} 
+where EMP_NO = #{empNo}
+]]>
+	</update>
+	<delete id="deleteEmp" parameterType="empVO"> 
+<![CDATA[
+delete from EMP
+where EMP_NO = #{empNo}
+]]>
+	</delete>
+	<select id="selectEmp" parameterType="empVO"
+		resultMap="empResult"> 
+<![CDATA[
+select EMP_NO, EMP_NAME, JOB, MGR, HIRE_DATE, SAL, COMM, DEPT_NO 
+from EMP
+where EMP_NO = #{empNo}
+]]>
+	</select>
+	<select id="selectEmpList" parameterType="empVO"
+		resultMap="empResult"> 
+<![CDATA[
+Select EMP_NO, EMP_NAME, JOB, MGR, HIRE_DATE, SAL, COMM, DEPT_NO 
+From EMP
+where 1 = 1
+]]>
+		<if test="empNo != null">
+			AND EMP_NO = #{empNo}
+		</if>
+		<if test="empName != null">
+			AND EMP_NAME LIKE '%' || #{empName} || '%'
+		</if>
+	</select>
+</mapper>
+```
+META-INF/sqlmap/mappers/lab-mapper-interface.xml -> MyBatis 쿼리위한 SQL  Mapping  XML 설정(Mapper-Interface Statement 호출 방식)
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="egovframework.lab.dataaccess.service.impl.EmpMapper">
+	<!-- TODO [Step 3-4] lab-mapper-interface.xml 작성 (Mapper Interface) -->
+	<!-- Mapper 인터페이스의 Statement 호출 방식: 메소드명과 일치하는 Statement를 자동 호출. 
+	이 때 MyBatis는 호출된 메서드가 포함된 인터페이스의 풀네임을 namespace 값으로 사용하기 때문에, 
+	반드시 namesapce 값 을 지정해주어야 한다. 
+	− namespace=x.y.z.EmpMapper, statement id=insertEmp -> 내부적으로 x.y.z.EmpMapper.insertEmp을 호출 -->
+	<resultMap id="empResult" type="empVO">
+		<id property="empNo" column="EMP_NO" />
+		<result property="empName" column="EMP_NAME" />
+		<result property="job" column="JOB" />
+		<result property="mgr" column="MGR" />
+		<result property="hireDate" column="HIRE_DATE" />
+		<result property="sal" column="SAL" />
+		<result property="comm" column="COMM" />
+		<result property="deptNo" column="DEPT_NO" />
+	</resultMap>
+	<insert id="insertEmp" parameterType="empVO"> 
+<![CDATA[
+insert into EMP (EMP_NO, EMP_NAME, JOB, MGR, HIRE_DATE, SAL, COMM, DEPT_NO) 
+values(#{empNo}, #{empName}, #{job}, #{mgr}, #{hireDate}, #{sal}, #{comm}, #{deptNo})
+]]>
+	</insert>
+	<update id="updateEmp" parameterType="empVO"> 
+<![CDATA[
+update EMP
+set EMP_NAME = #{empName}, 
+JOB = #{job},
+MGR = #{mgr},
+HIRE_DATE = #{hireDate}, 
+SAL = #{sal},
+COMM = #{comm},
+DEPT_NO = #{deptNo} 
+where EMP_NO = #{empNo}
+]]>
+	</update>
+	<delete id="deleteEmp" parameterType="empVO"> 
+<![CDATA[
+delete from EMP
+where EMP_NO = #{empNo}
+]]>
+	</delete>
+	<select id="selectEmp" parameterType="empVO"
+		resultMap="empResult"> 
+<![CDATA[
+select EMP_NO, EMP_NAME, JOB, MGR, HIRE_DATE, SAL, COMM, DEPT_NO 
+from EMP
+where EMP_NO = #{empNo}
+]]>
+	</select>
+	<select id="selectEmpList" parameterType="empVO"
+		resultMap="empResult"> 
+<![CDATA[
+Select EMP_NO, EMP_NAME, JOB, MGR, HIRE_DATE, SAL, COMM, DEPT_NO 
+From EMP
+where 1 = 1
+]]>
+		<if test="empNo != null">
+			AND EMP_NO = #{empNo}
+		</if>
+		<if test="empName != null">
+			AND EMP_NAME LIKE '%' || #{empName} || '%'
+		</if>
+	</select>
+</mapper>
+```
+</div>
+</details>
+
+<details><summary><b>DB Sequence 기반의 ID Generation 사용 설정</b></summary>
+<div markdown="1"><br>
+META-INF/spring/context-idgen.xml -> select next value... 문법은 Hsqldb의 sequence 사용 문법!
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+	<!-- TODO [Step 1-6] Id Generation Service 설정 확인 -->
+    <!-- from절의 DUAL의 경우 Oracle의 DUAL 테이블과 동일하다. 이를 위해 초기화 스크립트 sql(=sample_chema_hsql.sql)에 create를 미리 한다. -->
+	<bean name="primaryTypeSequenceIds" class="org.egovframe.rte.fdl.idgnr.impl.EgovSequenceIdGnrService" destroy-method="destroy">
+		<property name="dataSource" ref="dataSource" />
+		<property name="query" value="SELECT NEXT VALUE FOR empseq FROM DUAL" />
+	</bean>
+</beans>
+```
+META-INF/testdata/sample_schema_hsql.sql -> DUAL, SEQUENCE 생성 및 테스트코드에서 사용하려는 DB 테이블 재생성 sql문
+```sql
+drop table jobhist IF EXISTS;
+drop table emp IF EXISTS;
+drop table dept IF EXISTS;
+drop table dual IF EXISTS;
+drop sequence empseq IF EXISTS;
+CREATE SEQUENCE empseq START WITH 8000;
+CREATE TABLE dual (
+    dummy        VARCHAR(1) PRIMARY KEY
+);
+CREATE TABLE dept (
+    dept_no          NUMERIC(2) NOT NULL,
+    dept_name        VARCHAR(14),
+    loc             VARCHAR(13),
+    CONSTRAINT dept_pk PRIMARY KEY (dept_no),
+    CONSTRAINT dept_name_uq UNIQUE (dept_name)
+);
+CREATE TABLE emp (
+    emp_no          NUMERIC(4) NOT NULL,
+    emp_name        VARCHAR(10),
+    job             VARCHAR(9),
+    mgr             NUMERIC(4),
+    hire_date       DATE,
+    sal             NUMERIC(7),
+    comm            NUMERIC(7),
+    dept_no         NUMERIC(2),
+	CONSTRAINT emp_pk PRIMARY KEY (emp_no),
+	CONSTRAINT emp_sal_ck CHECK (sal > 0),
+	CONSTRAINT emp_ref_dept_fk FOREIGN KEY (dept_no) REFERENCES dept(dept_no)
+);
+CREATE TABLE jobhist (
+    emp_no           NUMERIC(4) NOT NULL,
+    start_date       DATE NOT NULL,
+    end_date         DATE,
+    job             VARCHAR(9),
+    sal             NUMERIC(7),
+    comm            NUMERIC(7),
+    dept_no          NUMERIC(2),
+    chg_desc         VARCHAR(80),
+    CONSTRAINT jobhist_pk PRIMARY KEY (emp_no, start_date),
+    CONSTRAINT jobhist_ref_emp_fk FOREIGN KEY (emp_no)
+        REFERENCES emp(emp_no) ON DELETE CASCADE,
+    CONSTRAINT jobhist_ref_dept_fk FOREIGN KEY (dept_no)
+        REFERENCES dept (dept_no) ON DELETE SET NULL,
+	CONSTRAINT jobhist_date_chk CHECK (start_date <= end_date)
+);
+-- dual 
+INSERT INTO dual VALUES ('X');
+--  Load the 'dept' table
+--
+INSERT INTO dept VALUES (10,'ACCOUNTING','NEW YORK');
+INSERT INTO dept VALUES (20,'RESEARCH','DALLAS');
+INSERT INTO dept VALUES (30,'SALES','CHICAGO');
+INSERT INTO dept VALUES (40,'OPERATIONS','BOSTON');
+--
+--  Load the 'emp' table
+--
+INSERT INTO emp VALUES (7369,'SMITH','CLERK',7902,'1980-12-17',800,NULL,20);
+INSERT INTO emp VALUES (7499,'ALLEN','SALESMAN',7698,'1981-02-20',1600,300,30);
+INSERT INTO emp VALUES (7521,'WARD','SALESMAN',7698,'1981-02-22',1250,500,30);
+INSERT INTO emp VALUES (7566,'JONES','MANAGER',7839,'1981-04-02',2975,NULL,20);
+INSERT INTO emp VALUES (7654,'MARTIN','SALESMAN',7698,'1981-09-28',1250,1400,30);
+INSERT INTO emp VALUES (7698,'BLAKE','MANAGER',7839,'1981-05-01',2850,NULL,30);
+INSERT INTO emp VALUES (7782,'CLARK','MANAGER',7839,'1981-06-09',2450,NULL,10);
+INSERT INTO emp VALUES (7788,'SCOTT','ANALYST',7566,'1987-04-19',3000,NULL,20);
+INSERT INTO emp VALUES (7839,'KING','PRESIDENT',NULL,'1981-11-17',5000,NULL,10);
+INSERT INTO emp VALUES (7844,'TURNER','SALESMAN',7698,'1981-09-08',1500,0,30);
+INSERT INTO emp VALUES (7876,'ADAMS','CLERK',7788,'1987-05-23',1100,NULL,20);
+INSERT INTO emp VALUES (7900,'JAMES','CLERK',7698,'1981-12-03',950,NULL,30);
+INSERT INTO emp VALUES (7902,'FORD','ANALYST',7566,'1981-12-03',3000,NULL,20);
+INSERT INTO emp VALUES (7934,'MILLER','CLERK',7782,'1982-01-23',1300,NULL,10);
+--
+--  Load the 'jobhist' table
+--
+INSERT INTO jobhist VALUES (7369,'1980-12-17',NULL,'CLERK',800,NULL,20,'New Hire');
+INSERT INTO jobhist VALUES (7499,'1981-02-20',NULL,'SALESMAN',1600,300,30,'New Hire');
+INSERT INTO jobhist VALUES (7521,'1981-02-22',NULL,'SALESMAN',1250,500,30,'New Hire');
+INSERT INTO jobhist VALUES (7566,'1981-04-02',NULL,'MANAGER',2975,NULL,20,'New Hire');
+INSERT INTO jobhist VALUES (7654,'1981-09-28',NULL,'SALESMAN',1250,1400,30,'New Hire');
+INSERT INTO jobhist VALUES (7698,'1981-05-01',NULL,'MANAGER',2850,NULL,30,'New Hire');
+INSERT INTO jobhist VALUES (7782,'1981-06-09',NULL,'MANAGER',2450,NULL,10,'New Hire');
+INSERT INTO jobhist VALUES (7788,'1987-04-19','1988-04-12','CLERK',1000,NULL,20,'New Hire');
+INSERT INTO jobhist VALUES (7788,'1988-04-13','1989-05-04','CLERK',1040,NULL,20,'Raise');
+INSERT INTO jobhist VALUES (7788,'1990-05-05',NULL,'ANALYST',3000,NULL,20,'Promoted to Analyst');
+INSERT INTO jobhist VALUES (7839,'1981-11-17',NULL,'PRESIDENT',5000,NULL,10,'New Hire');
+INSERT INTO jobhist VALUES (7844,'1981-09-08',NULL,'SALESMAN',1500,0,30,'New Hire');
+INSERT INTO jobhist VALUES (7876,'1987-05-23',NULL,'CLERK',1100,NULL,20,'New Hire');
+INSERT INTO jobhist VALUES (7900,'1981-12-03','1983-01-14','CLERK',950,NULL,10,'New Hire');
+INSERT INTO jobhist VALUES (7900,'1983-01-15',NULL,'CLERK',950,NULL,30,'Changed to Dept 30');
+INSERT INTO jobhist VALUES (7902,'1981-12-03',NULL,'ANALYST',3000,NULL,20,'New Hire');
+INSERT INTO jobhist VALUES (7934,'1982-01-23',NULL,'CLERK',1300,NULL,10,'New Hire');
+commit;
+```
+</div>
+</details>
+
+<details><summary><b>aop 설정</b></summary>
+<div markdown="1"><br>
+/META-INF/spring/context-aspect.xml -> AOP 설정 (Exception 예외처리 핸들)
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd">
+	<!-- TODO [Step 1-8] aspect 설정 확인 (예외처리) -->
+	<aop:config>
+		<aop:pointcut id="serviceMethod" expression="execution(* egovframework.lab..impl.*Impl.*(..))" />
+		<aop:aspect ref="exceptionTransfer">
+			<aop:after-throwing throwing="exception" pointcut-ref="serviceMethod" method="transfer" />
+		</aop:aspect>
+	</aop:config>
+    <!-- 빈 등록 -->
+	<bean id="exceptionTransfer" class="org.egovframe.rte.fdl.cmmn.aspect.ExceptionTransfer">
+		<property name="exceptionHandlerService">
+			<list>
+				<ref bean="defaultExceptionHandleManager" />
+			</list>
+		</property>
+	</bean>
+	<bean id="defaultExceptionHandleManager" class="org.egovframe.rte.fdl.cmmn.exception.manager.DefaultExceptionHandleManager">
+		<property name="reqExpMatcher" ref="antPathMater" />
+		<property name="patterns">
+			<list>
+				<value>**service.impl.*</value>
+			</list>
+		</property>
+		<property name="handlers">
+			<list>
+				<ref bean="egovHandler" />
+			</list>
+		</property>
+	</bean>
+	<bean id="egovHandler" class="egovframework.lab.dataaccess.common.JdbcLoggingExcepHndlr" />
+</beans>
+```
+</div>
+</details>
+
+<details><summary><b>DAO, Service 로직은?</b></summary>
+<div markdown="1"><br>
+EmpService(인터페이스), EmpVO 생략<br>EmpServiceImpl.java -> EmpService 구현 + EgovAbstractServiceImpl 상속<br>insert 부분의 sequence 기반 id generation 와 EmpDAO vs EmpMapper 만 참고
+```java
+@Service("empService")
+public class EmpServiceImpl extends EgovAbstractServiceImpl implements EmpService {
+	// EmpDAO를 사용 (DAO방법1: 직접 쿼리ID 넘겨 매칭)
+//	@Resource(name = "empDAO")
+//	private EmpDAO empDAO;
+	// EmpMapper를 사용 (DAO방법2: 메소드명을 쿼리ID와 같게 만들면 자동 매칭)
+	 @Resource(name = "empMapper")
+	 EmpMapper empDAO;
+	@Resource(name = "primaryTypeSequenceIds")
+	EgovIdGnrService egovIdGnrService; // primaryTypeSequenceIds 는 Sequence 기반으로 key 생성
+//
+	// insert Emp -> 메소드단에서 트랜잭션
+	// @Transactional(value="txManager", propagation=Propagation.REQUIRED,
+	// rollbackFor=Exception.class)
+	@Transactional(value = "txManager", propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
+	public BigDecimal insertEmp(EmpVO empVO) throws Exception {
+		// IDGeneration Service 를 사용하여 key 생성
+		// primaryTypeSequenceIds 는 Sequence 기반임.
+		BigDecimal generatedEmpNo = egovIdGnrService.getNextBigDecimalId();
+		egovLogger.debug("EmpServiceImpl.insertEmp - generated empNo : " + generatedEmpNo);
+		empVO.setEmpNo(generatedEmpNo);
+		empDAO.insertEmp(empVO);
+		return generatedEmpNo;
+	}
+```
+EmpDAO.java -> EgovAbstractMapper 상속 (상속받은 메소드 사용하는 스타일) EgovAbstractMapper(MyBatis)나 EgovAbstractDAO(IBATIS) 상속받아서 사용하면 됨.
+```java
+@Repository("empDAO")
+public class EmpDAO extends EgovAbstractMapper {
+	// TODO [Step 2-2] EmpDAO 작성 (EgovAbstractMapper 상속한 DAO)
+	public void insertEmp(EmpVO vo) {
+		insert("Emp.insertEmp", vo);
+	}
+	public int updateEmp(EmpVO vo) {
+		return update("Emp.updateEmp", vo);
+	}
+	public int deleteEmp(EmpVO vo) {
+		return delete("Emp.deleteEmp", vo);
+	}
+	public EmpVO selectEmp(EmpVO vo) {
+		return selectOne("Emp.selectEmp", vo);
+	}
+	@SuppressWarnings("unchecked")
+	public List<EmpVO> selectEmpList(EmpVO searchVO) {
+		return selectList("Emp.selectEmpList", searchVO);
+	}
+}
+```
+EmpMapper.java 인터페이스 작성 -> 메소드명과 쿼리ID 꼭 동일하게! (자동매핑)<br>Mapper Interface 방식을 사용하는경우 EgovAbstractMapper를 사용할 필요 없음.
+```java
+@Mapper("empMapper")
+public interface EmpMapper {
+	// TODO [Step 3-2] EmpMapper 작성 (Mapper Interface)
+	public void insertEmp(EmpVO vo);
+	public int updateEmp(EmpVO vo);
+	public int deleteEmp(EmpVO vo);
+	public EmpVO selectEmp(EmpVO vo);
+	public List<EmpVO> selectEmpList(EmpVO searchVO);
+}
+```
+</div>
+</details>
+<br><br>
+
+### 실행환경 - 배치처리(Batch)
+
+대용량 데이터를 한번에 처리하는 Batch 실행환경이고 Spring Batch를 활용한다. 
+
+**자세한 Job, JobLauncher, JobRepository, Job Runner, Step 등 개념은 pdf 보기**
+
+**배치 실행법은 주로 3가지:** 외부통신 트리거(ex:HTTP), 스케줄링(ex:cron), 터미널 명령
+
+<details><summary><b>Spring Batch 구성요소(아키텍처)</b></summary>
+<div markdown="1"><br>
+<img src="https://github.com/user-attachments/assets/8a5e130b-2149-4c13-85a9-4d4e9ba25b6e" alt="Image" style="zoom:80%;" /><br>
+<img src="https://github.com/user-attachments/assets/3facb69b-beeb-4da4-855a-351e7bed3f3b" alt="Image" style="zoom:80%;" /><br> 
+<img src="https://github.com/user-attachments/assets/06bb11df-aa77-4427-96cf-340165400805" alt="Image" style="zoom:80%;" /><br> 
+<img src="https://github.com/user-attachments/assets/839dc4e7-bde5-498d-9298-15f8b70160ed" alt="Image"  /><br>
+<img src="https://github.com/user-attachments/assets/fafd6952-34e3-469f-93dc-286d8a31dbef" alt="Image" style="zoom:80%;" />  
+</div>
+</details>
+
+<br>
+
+**배치템플릿 프로젝트 생성:**
+
+- 프로젝트 생성은 eGovFrame>Start>New Boot Batch Template Project>File(SAM)>Scheduler
+- 테스트코드 생성은 eGovFrame>Test>Batch Job Test
+
+**프로젝트 분석:**
+
+- src/main/java: 
+
+  - domain/trade에 **CustomerCredit.java, CustomerCreditIncreaseProcessor.java**, CustomerCreditRowMapper.java 가 있고
+    - **CustomerCredit**는 엔티티!
+    - **CustomerCreditIncreaseProcessor**는 비즈니스 로직!
+
+  - jdbc/cubrid/incrementer에 CubridDataFieldMaxValueIncrementerFactory.java, CubridSequenceMaxValueIncrementer.java 가 있고
+    - Cubrid DB 사용 시 자동 증가 값 처리!
+
+  - scheduler에 EgovSchedulerJobRunner.java 가 있고  
+    scheduler/support에 EgovJobLauncherDetails 가 있다.
+    - 스케줄러 기반 배치 작업 자동실행 지원!
+
+- src/main/resources:
+
+  - batch/data/inputs 에 **csvData.csv**, txtData.txt 가 있고
+
+  - batch/job/abstract 에 **eGovBase.xml** 있고
+    - 공통적인 배치 Job 및 Step 설정을 정의하여 중복 제거 및 표준화!
+    - 예로 미리 스프링빈에 등록한 **jobRepository도 연결** (공통로직이잖)
+
+  - batch/job 에 **delimitedToDelimitedJob.xml**, fixedLengthToFixedLengthJob.xml, fixedLengthToJdbcJob.xml, fixedLengthToMybatisJob.xml 가 있고
+    - **배치 Job 설정**. 아래 테스트 코드는 delimitedToDelimitedJob 사용! -> **File To File**이고, FlatFileItemWriter 사용한다!
+    - fixedLengthToJdbcJob 의 경우 **File To DB(JDBC방식)**이고, EgovJdbcBatchItemWriter 사용한다!
+
+  - batch/propertie 에 context-batch-datasource.xml, **context-batch-job-launcher.xml**, context-batch-mapper.xml, context-batch-scheduler.xml, context-common.xml, context-batch-scheduler-job.xml 이 있다.
+    - **job-launcher**는 배치 JobLauncher 관련 설정!
+      - 자세히: eGovBatchRunner빈 등록(Job 실행관리), jobLauncher빈 등록(Job 실행역할), jobRepository빈 등록(작업상태기록 저장소), jobExplorer빈 등록(모니터링), jobRegistry빈 등록(Job관리-여러Job 중 선택가능), jdbcTemplate빈 등록(JDBC 사용한 DB연결이 필요한경우)
+      - Cubrid, Tibero 등 DBMS 에 맞게 코드 주석해제
+    - scheduler관련은 스케줄링 설정
+    - datasource, mapper, common 은 흔하니 PASS
+
+- 나머지 더 있는데 배치와는 관련 없어 보여서 PASS
+
+**아래 테스트 코드의 전체 프로세스 요약:**
+
+```
+[Test 코드 실행]
+       │ EgovBatchRunner.start()
+       ▼ 
+[delimitedToDelimitedJob.xml 로딩]
+       │ Job 및 Step 구성: CSV 파일 읽기 → 데이터 객체로 변환 → 데이터 처리 → CSV 파일 쓰기
+       │ 상속: eGovBase.xml (jobRepository같은 공통로직 적용)
+       ▼ 
+[FlatFileItemReader]───▶ csvData.csv 읽기 
+       │ 라인 매핑(EgovDefaultLineMapper)
+       │ └─▶ 필드 분리(EgovDelimitedLineTokenizer) - "," 기준
+       │ └─▶ 객체 변환(EgovObjectMapper)───▶ CustomerCredit 객체 생성(엔티티)
+       ▼ 
+[CustomerCreditIncreaseProcessor]───▶ 데이터 처리(신용점수 증가 등)
+       ▼ 
+[FlatFileItemWriter]───▶ csvOutput.csv에 결과 저장 
+       ▼ 
+[Test 코드]───▶ BatchStatus.COMPLETED 검증 (성공 여부 확인)
+```
+
+<details><summary><b>테스트코드에 사용한 전체 코드와 결과</b></summary>
+<div markdown="1"><br>
+테스트코드는 아래와 같다 -> **JOB은 delimitedToDelimitedJob.xml 사용 + Job Launcher도 context-batch-job-launcher.xml 사용**
+```java
+/** 
+ * Test File Information 
+ * Job:: /egovframework/batch/job/delimitedToDelimitedJob.xml
+ * Job Launcher:: /egovframework/batch/context-batch-job-launcher.xml
+ * job Parameters:: Date_Default Timestamp
+ */ 
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = { "/egovframework/batch/context-batch-job-launcher.xml", "/egovframework/batch/job/delimitedToDelimitedJob.xml", "/egovframework/batch/context-batch-datasource.xml" })
+public class BatchJobTestR{
+	@Autowired
+	@Qualifier("eGovBatchRunner")
+	private EgovBatchRunner egovBatchRunner;
+	@Test
+	public void testJobRun() throws Exception {
+		String jobName = "delimitedToDelimitedJob";
+		JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
+		jobParametersBuilder.addLong("timestamp", new Date().getTime());
+		String jobParameters = egovBatchRunner.convertJobParametersToString(jobParametersBuilder.toJobParameters());
+        //테스트시작 (정상구동 확인위해 Id받음)
+		long executionId = egovBatchRunner.start(jobName, jobParameters);
+		assertEquals(BatchStatus.COMPLETED, egovBatchRunner.getJobExecution(executionId).getStatus());
+	}
+}
+```
+delimitedToDelimitedJob.xml 보기 -> 전체적인 찐 배치 작업과정 설정 부분!!
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch-3.0.xsd">
+    <import resource="abstract/eGovBase.xml" />
+    <!-- Job, Step을 결정하는 중요한 부분이 아래 코드이다. 인터벌2는 2개 데이터씩 -->
+    <job id="delimitedToDelimitedJob" parent="eGovBaseJob" xmlns="http://www.springframework.org/schema/batch">
+        <step id="delimitedToDelimitedStep" parent="eGovBaseStep">
+            <tasklet>
+                <chunk reader="delimitedToDelimitedJob.delimitedToDelimitedStep.delimitedItemReader" processor="delimitedToDelimitedJob.delimitedToDelimitedStep.itemProcessor"
+                    writer="delimitedToDelimitedJob.delimitedToDelimitedStep.delimitedItemWriter" commit-interval="2" />
+            </tasklet>
+        </step>
+    </job>
+    <bean id="delimitedToDelimitedJob.delimitedToDelimitedStep.delimitedItemReader" class="org.springframework.batch.item.file.FlatFileItemReader" scope="step">
+        <property name="resource" value="file:./src/main/resources/egovframework/batch/data/inputs/csvData.csv" />
+        <property name="lineMapper">
+            <bean class="org.egovframe.rte.bat.core.item.file.mapping.EgovDefaultLineMapper">
+                <property name="lineTokenizer">
+                    <bean class="org.egovframe.rte.bat.core.item.file.transform.EgovDelimitedLineTokenizer">
+                        <property name="delimiter" value="," />
+                    </bean>
+                </property>
+                <property name="objectMapper">
+                    <bean class="org.egovframe.rte.bat.core.item.file.mapping.EgovObjectMapper">
+                        <property name="type" value="egovframework.example.bat.domain.trade.CustomerCredit" />
+                        <property name="names" value="name,credit" />
+                    </bean>
+                </property>
+            </bean>
+        </property>
+    </bean>
+    <bean id="delimitedToDelimitedJob.delimitedToDelimitedStep.delimitedItemWriter" class="org.springframework.batch.item.file.FlatFileItemWriter" scope="step">
+        <property name="resource" value="file:./target/test-outputs/csvOutput.csv" />
+        <property name="lineAggregator">
+            <bean class="org.springframework.batch.item.file.transform.DelimitedLineAggregator">
+                <property name="delimiter" value="," />
+                <property name="fieldExtractor">
+                    <bean class="org.egovframe.rte.bat.core.item.file.transform.EgovFieldExtractor">
+                        <property name="names" value="name,credit" />
+                    </bean>
+                </property>
+            </bean>
+        </property>
+    </bean>
+    <bean id="delimitedToDelimitedJob.delimitedToDelimitedStep.itemProcessor" class="egovframework.example.bat.domain.trade.CustomerCreditIncreaseProcessor" />
+</beans>
+```
+context-batch-job-launcher.xml -> JobLauncher 설정 (수많은 빈 등록)
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+			http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+			http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch-3.0.xsd">
+	<import resource="classpath:/egovframework/batch/context-batch-datasource.xml" />
+	<import resource="classpath:/egovframework/batch/context-batch-mapper.xml" />
+	<bean id="eGovBatchRunner" class="org.egovframe.rte.bat.core.launch.support.EgovBatchRunner">
+		<constructor-arg ref="jobOperator" />
+		<constructor-arg ref="jobExplorer" />
+		<constructor-arg ref="jobRepository" />
+	</bean>
+	<bean id="jobLauncher" class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
+		<property name="jobRepository" ref="jobRepository" />
+	</bean>
+	<bean class="org.springframework.batch.core.configuration.support.JobRegistryBeanPostProcessor">
+		<property name="jobRegistry" ref="jobRegistry" />
+	</bean>
+	<bean id="jobRepository" class="org.springframework.batch.core.repository.support.JobRepositoryFactoryBean"
+		p:dataSource-ref="dataSource" p:transactionManager-ref="transactionManager"
+		p:lobHandler-ref="lobHandler" />
+	 <!-- tibero 사용시 주석해제-->
+	 <!-- 
+	<bean id="jobRepository" class="org.springframework.batch.core.repository.support.JobRepositoryFactoryBean"
+		p:dataSource-ref="dataSource" p:transactionManager-ref="transactionManager"
+		p:lobHandler-ref="lobHandler" p:databaseType="oracle" />
+	 -->
+	<!-- altibase/oracle 사용시 주석해제-->
+	<!-- 
+	<bean id="jobRepository" class="org.springframework.batch.core.repository.support.JobRepositoryFactoryBean"
+		p:dataSource-ref="dataSource" p:transactionManager-ref="transactionManager"
+		p:lobHandler-ref="lobHandler" p:isolationLevelForCreate="ISOLATION_DEFAULT"/>
+	-->
+	<!-- cubrid 사용시 주석해제 -->
+	<!-- 
+	<bean id="jobRepository" class="org.springframework.batch.core.repository.support.JobRepositoryFactoryBean"
+		p:dataSource-ref="dataSource" p:transactionManager-ref="transactionManager" p:lobHandler-ref="lobHandler"
+		p:incrementerFactory-ref="cubridDatabaseTypeFactory" p:databaseType="oracle" />
+	<bean id="cubridDatabaseTypeFactory" class="egovframework.example.bat.jdbc.cubrid.incrementer.CubridDataFieldMaxValueIncrementerFactory">
+		<constructor-arg index="0" ref="dataSource"/>
+	</bean> 
+	 -->
+	<bean id="jobOperator" class="org.springframework.batch.core.launch.support.SimpleJobOperator"
+		p:jobLauncher-ref="jobLauncher" p:jobExplorer-ref="jobExplorer"
+		p:jobRepository-ref="jobRepository" p:jobRegistry-ref="jobRegistry" />
+	<bean id="jobExplorer" class="org.springframework.batch.core.explore.support.JobExplorerFactoryBean"
+		p:dataSource-ref="dataSource" />
+	<bean id="jobRegistry" class="org.springframework.batch.core.configuration.support.MapJobRegistry" />
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+</beans>
+```
+eGovBase.xml -> 공통로직 추상화 (ex: jobRepository)
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch-3.0.xsd">
+    <job id="eGovBaseJob" abstract="true" job-repository="jobRepository" restartable="true" xmlns="http://www.springframework.org/schema/batch" />
+    <step id="eGovBaseStep" abstract="true" xmlns="http://www.springframework.org/schema/batch">
+        <tasklet allow-start-if-complete="false" start-limit="" transaction-manager="transactionManager">
+            <chunk commit-interval="" reader="" writer="" />
+        </tasklet>
+    </step>
+</beans>
+```
+CustomerCredit.java 는 @Entity만든거라 간단해서 생략<br>CustomerCreditIncreaseProcessor.java
+```java
+public class CustomerCreditIncreaseProcessor implements ItemProcessor<CustomerCredit, CustomerCredit> {
+	// 증가할 수
+	public static final BigDecimal FIXED_AMOUNT = new BigDecimal("5");
+	/**
+	 * FIXED_AMOUNT만큼 증가 시킨 후 return
+	 */
+	@Override
+	public CustomerCredit process(CustomerCredit item) throws Exception {
+		return item.increaseCreditBy(FIXED_AMOUNT);
+	}
+}
+```
+**실행결과:**
+```
+input: csvData.csv
+customer1	10
+customer2	20
+customer3	30
+customer4	40
+output: csvOutput.txt
+customer1,15
+customer2,25
+customer3,35
+customer4,45
+```
+</div>
+</details>
+<br><br>
+
+### 실행환경 - 화면처리(Presentation)
+
+MVC 패턴 개발은 앞에서도 봤고, 잘 이해하고 있어서 **로그인방식, 전역@ModelAttribute, 국제화 메시지, 자동완성Ajax만 추가적으로 보자.**
+
+**해당 실습은 로그인 방식이 "세션"** 
+
+- 본인은 직접 `httpSession.setAttribute()` 이런식으로 기록했었다.  
+  그리고 컨트롤러(java)에서 로그인정보 필요할 경우 `@SessionAttribute(name = "loginMember", required = false) Member loginMember` 대신 AOP를 활용해서 `@Login` 방식으로 구현했었다.
+
+- **이 실습은 @SessionAttributes("login")를 전역에 + @ModelAttribute("login") 으로 자동 세션 등록을 수행했다!**  
+  물론, AOP로 @Login 방식으로 가져오는건 생략했고!
+
+  - 로그인 정보를 세션에 기록할 땐 **클래스 전역에서 @SessionAttributes("login")**를 사용시 자동 생성한다.
+
+    - 단, 지정한 네임(ex:"login")으로 로그인 **메소드 인자에서 @ModelAttribute("login")**를 해야한다.
+
+    - ```java
+      @Controller
+      @SessionAttributes("login") //@ModelAttribute("login") 보고 자동 세션 등록
+      public class LoginController {
+          @RequestMapping(value = "/loginProcess1.do", method = RequestMethod.POST)
+          public String loginProcess(@ModelAttribute("login") LoginCommand loginCommand) {
+              return "login/loginSuccess";
+          }
+      }
+      ```
+
+    - ```jsp
+      <!--jsp의 표현식 문법 사용하면 "모델,request,session" 등 속성을 바로 참조 가능-->
+      <%@ page language="java" contentType="text/html; charset=UTF-8" %>
+      <html>
+          <head>
+              <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+              <title>로그인 성공</title>
+          </head>
+          <body>
+              <p>${login.id} 님은 로그인에 성공했습니다. </p>
+          </body>
+      </html>
+      ```
+
+  - 로그인 정보를 가져올땐 메소드 인자에서 @SessionAttribute를 사용시 가능하다.
+
+<br>
+
+**@ModelAttribute를 메소드인자 에서 사용 시:** 입력 데이터를 자동으로 원하는 객체로 변환!!
+
+**@ModelAttribute를 메소드에서 사용 시:** 매 요청마다 메소드가 사용되며 초기객체를 추가하여 JSP에게 제공할 수 있다. **(Null Pointer Exception 방지 + 전역으로 사용가능!)**
+
+- `form modelAttribute="login"`: @ModelAttribute의 객체와 바인딩
+- `<td><form:select path="loginType">`: 폼 필드 생성하고 path로 객체 속성과 바인딩(login.loginType)
+- `<form:options items="${loginTypes}" itemValue="code" itemLabel="value"/>`: select태그 하위로써 드롭다운 데이터 생성
+  - **items**: 옵션 데이터를 제공하는 모델 속성의 이름을 지정, `${loginTypes}`가 사용!
+  - **itemValue**: 옵션의 값으로 사용할 속성 이름을 지정, `code`가 사용! (login.loginType.code)
+  - **itemLabel**: 옵션의 레이블로 사용할 속성 이름을 지정, `value`가 사용! (login.loginType.value)
+- `<td><form:errors path="loginType"/></td>`: path로 바인딩된 폼 필드의 오류 메시지를 출력
+
+**@ModelAttribute를 메소드에서 사용 시 -> 사용안해야 할 때:** "공통으로 사용할 이유가 없을 때" or "파라미터 사용으로 인해 URL패턴이 안맞는 경우가 하나라도 존재할 때"
+
+- ```java
+  @RequestMapping(value = "/updateEmployee.do", method = RequestMethod.GET)
+  public String defaultUpdateEmployee(@RequestParam("employeeid") String employeeid, ModelMap model) {
+      model.addAttribute("employee", getEmployeeInfo(employeeid));
+      return "modifyemployee";
+  }
+  
+  //@ModelAttribute("employee") //-> 이거 안써야 잘 동작.
+  //String employeeid를 스프링이 찾지 못해 에러가 뜬다. 업데이트 URL은 ...?id 로 주겠지만 다른 URL은 아니잖아.
+  //그니까 에러 뜸. 안쓰는게 맞음. 어차피 defaultUpdateEmployee 에서만 필요한거라 "공통으로 쓸 이유도 없음". String id 못 찾는것도 여전히 문제고.
+  public Employee getEmployeeInfo(String employeeid) {
+      return employeeService.getEmployeeInfoById(employeeid);
+  }
+  ```
+
+<details><summary><b>@ModelAttribute를 메소드에서 사용 코드:</b></summary>
+<div markdown="1"><br>
+**Java**
+```java
+/*
+ * TODO [Step 1-2-5] @ModelAttribute - 모델의 초기화 ModelAttribute를 이용하여 loginTypes와
+ * login 객체를 초기화 해주는 메소드를 만든다.
+*/
+@ModelAttribute("loginTypes")
+protected List<LoginType> referenceData() throws Exception {
+    List<LoginType> loginTypes = new ArrayList<LoginType>();
+    loginTypes.add(new LoginType("A", "개인회원"));
+    loginTypes.add(new LoginType("B", "기업회원"));
+    loginTypes.add(new LoginType("C", "관리자"));
+    return loginTypes;
+}
+@ModelAttribute("login")
+protected Object referenceData4login() throws Exception {
+    return new LoginCommand();
+}
+```
+**JSP -> form modelAttribute="login" + loginTypes를 select태그의 option절에 사용하는 모습**
+```jsp
+<%@ page contentType="text/html; charset=UTF-8"%>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title><spring:message code="login.form.title" /></title>
+<link type="text/css" rel="stylesheet" href="<c:url value='/css/egovframework/egov.css'/>"/>
+</head>
+<body>
+<h3>Login Page</h3>
+<form:form modelAttribute="login">
+	<form:errors />
+	<table>
+		<tr>
+			<!-- TODO [Step 1-2-2] SpringMessage 사용 -->
+			<%-- <td><label for="id"><spring:message code="login.form.id" /></label></td> --%>
+			<td><label for="id">아이디</label></td>
+			<td><form:input id="id" path="id" /></td>
+			<td><form:errors path="id" /></td>
+		</tr>
+		<tr>
+			<td><label for="password"><spring:message code="login.form.password" /></label></td>
+			<td><form:password id="password" path="password" /></td>
+			<td><form:errors path="password" /></td>
+		</tr>
+		<tr>
+			<td><label for="loginType"> 
+			<spring:message	code="login.form.type" /></label></td>
+			<td><form:select path="loginType">
+				<option value="">---선택하세요---</option>
+				<form:options items="${loginTypes}" itemValue="code" itemLabel="value" />
+			</form:select></td>
+			<td><form:errors path="loginType" /></td>
+		</tr>
+        <tr>
+            <td colspan="3" align="right" >
+                <input type="submit" value="<spring:message code="login.form.submit" />">
+            </td>
+        </tr>
+	</table>
+</form:form>
+</body>
+</html>
+```
+</div>
+</details>
+<br>
+
+**국제화 메시지 설정**도 쉽다.   
+**ResourceBundleMessageSource 빈을 message-common.propeties 연결하여 등록**하고,  
+**JSP**에서 `<spring:message code="Login.form.id"/>` 이런식으로 사용.(propeties의 Login.form.id 매핑)  
+
+마지막 **국제화(lang)는?**
+
+1. **요청 수신**: 사용자가 `http://example.com?lang=ko` 처럼 lang을 담아 서버에 요청!
+2. **인터셉터 실행(context-servlet.xml)**: `RequestMappingHandlerMapping`은 요청을 처리하기 전에 등록된 인터셉터(`LocaleChangeInterceptor`: 로케일 변경 역할)를 호출
+3. **로케일 변경(context-servlet.xml)**: 인터셉터는 URL 파라미터에서 `lang=ko`를 추출하고, 이를 **세션**(`SessionLocaleResolver`: 로케일을 세션에 관리하는 리졸버)에 저장하여 로케일을 변경
+4. **컨트롤러 호출**: 인터셉터 -> 컨트롤러 순서는 자명.
+5. **로케일 적용**: 이후 모든 요청에서 변경된 로케일이 적용되어 국제화된 콘텐츠가 제공!
+
+<details><summary><b>국제화 적용 코드:</b></summary>
+<div markdown="1"><br>
+```xml
+<!-- setting Locale Locale Interceptor 설정하기  -->   
+<!-- TODO [Step 1-3-1] Internalization - 국제화 관련 bean 설정  -->
+<!-- HandlerMapping 설정방법 참고 -->
+<bean id="localeChangeInterceptor" class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"
+      p:paramName="lang" />
+<bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver" />
+<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping">
+    <property name="interceptors">
+        <list>
+            <ref bean="localeChangeInterceptor"/>
+        </list>
+    </property>
+</bean>
+<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter" />
+```
+</div>
+</details>
+
+<br>
+
+**ajax로 jQuery UI 기능인 autocomplete(자동완성), autoSelected(자동완성-select태그) 구현하기**
+
+- **(공통) MappingJackson2JsonView 빈 등록** -> 컨트롤러에서 JSON으로 클라에게 반환 목적
+
+- **autocomplete(자동완성)**
+
+  - ```jsp
+    $("#searchName").autocomplete({
+      source: function(request, response){
+    	   $.ajax({
+    		  url:"<c:url value='/autoComplete.do'/>",
+    		  contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+    		  data: {keyword : encodeURIComponent(request.term)},	 
+    		  dataType:'json',
+    		  success: function(returnData, status){	  
+    			response(returnData.resultList);
+    		  }
+    	  }); 
+      },
+      minLength : 1,
+      select: function(event, ui){
+    	    $("#searchName").val(this.value);
+      }
+    });
+    ```
+
+  - **source 함수**: Autocomplete의 소스코드 설정 -> 사용자가 입력 필드에 텍스트를 입력할 때마다 호출 (input 이벤트 감지는 Autocomplete API에 구현되어 있을거임)
+
+  - **request.term**: 사용자가 입력 필드에 입력한 현재 텍스트
+
+  - **encodeURIComponent(request.term)**: 입력한 텍스트를 URL 인코딩하여 서버로 전송 -> 특수 문자가 올바르게 전송
+
+  - **minLength: 1**: 최소 1글자 이상 입력해야 자동 완성 기능이 작동
+  - **select:** 자동 완성 목록에서 항목을 선택할 때 호출 -> searchName 필드로 선택 값(this.value) 저장
+
+- **autoSelected(자동완성-select태그)**
+
+  - ```jsp
+    $('#superdeptid').change(function(){ 
+    	$.ajax({
+    		url: "<c:url value='/autoSelectDept.do'/>",
+    		contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+    		data: {depth:2, superdeptid:encodeURIComponent($('#superdeptid 					option:selected').val())}, 
+    		dataType: "json",
+    		success: function(returnData, status){
+    			$('#departmentid').loadSelectDept(returnData,"근무부서를 선택하세요."); 
+    		}
+    	});
+    });
+    ```
+
+  - **$('#superdeptid').change(function() { ... }):** 부서 번호 선택 필드(`#superdeptid`)의 변경 이벤트를 감지
+
+  - **data: { depth: 2, superdeptid: encodeURIComponent($('#superdeptid option:selected').val()) }:** superdeptid인 select태그 값으로 요청 데이터를 준비한다.
+
+    - **depth**: 부서 깊이를 지정합니다 (이 경우 2) -> DB테이블에 상위부서(1), 하위부서(2), 하위하위부서(3) 이렇게 데이터가 있을 수 있을텐데 depth=2로 지정해서 가져온다는 것.
+
+  - **$('#departmentid').loadSelectDept(returnData, "근무부서를 선택하세요."):** 하위 부서 목록을 로딩하는 함수를 호출
+
+    - **loadSelectDepth** 함수는 직접 JS로 구현한 함수고, select 태그에 option태그를 append하는 로직을 가진다.
+
+<details><summary><b>ajax 사용한 jsp 코드 보기:</b></summary>
+<div markdown="1"><br>
+```jsp
+<%@ page contentType="text/html; charset=UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="ui" uri="http://egovframework.gov/ctl/ui"%>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title><spring:message code="easaycompany.employeelist.title"/></title>
+<link type="text/css" rel="stylesheet" href="<c:url value='/css/easycompany.css'/>" />
+<!-- jQuery -->
+<link rel="stylesheet" href="<c:url value='/css/jqueryui.css'/>"/>
+<script src="<c:url value='/js/jquery.js'/>"></script>
+<script src="<c:url value='/js/jqueryui.js'/>"></script>
+<script src="<c:url value='/js/select_load.js'/>"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	//검색어에 대한 jquery ajax 자동완성 구현하기(jquery autocomplete)
+    $("#searchName").autocomplete({
+      source: function(request, response){
+    	   $.ajax({
+    		  url:"<c:url value='/autoComplete.do'/>",
+    		  contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+    		  data: {keyword : encodeURIComponent(request.term)},	 
+    		  dataType:'json',
+    		  success: function(returnData, status){	  
+    			response(returnData.resultList);
+    		  }
+    	  }); 
+      },
+      minLength : 1,
+      select: function(event, ui){
+    	    $("#searchName").val(this.value);
+      }
+    });
+	//
+   // TODO [Step 2-2-1] 부서번호에 대한 jquery autoSelected 기능 구현하기(jquery autoselected)
+    $('#superdeptid').change(function(){ 
+        $.ajax({
+            url: "<c:url value='/autoSelectDept.do'/>",
+            contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+            data: {depth:2, superdeptid:encodeURIComponent($('#superdeptid 					option:selected').val())}, 
+            dataType: "json",
+            success: function(returnData, status){
+                $('#departmentid').loadSelectDept(returnData,"근무부서를 선택하세요."); 
+            }
+        });
+    });
+});
+</script>
+</head>
+<body>
+<br/>
+<h2>AJAX : AutoComplete 기능 </h2>
+<div id="searchform">
+<form:form modelAttribute="searchCriteria" action="employeelist.do">
+<table width="80%" border="0">
+<tr>
+        <td>이름 : <form:input path="searchName"/></td>
+</tr>
+</table>
+</form:form>
+</div>
+<br/>
+<br/>
+<h2>AJAX : AutoSelected 기능 </h2>
+<div id="editform">
+<form:form modelAttribute="employee">
+<table>
+    <tr>
+        <td>부서번호 : </td>
+        <td>
+            <form:select path="superdeptid">
+                <option value="">상위부서를 선택하세요.</option>
+                <form:options items="${deptInfoOneDepthCategory}" />
+            </form:select>
+            </td><td>
+            <form:select path="departmentid">
+                <option value="">근무부서를 선택하세요.</option>
+                <form:options items="${deptInfoTwoDepthCategory}" />
+            </form:select>
+        </td>
+    </tr>
+</table>
+</form:form>
+</div>
+</body>
+</html>
+```
+</div>
+</details>
+<br><br>
+
+### 실행환경 - easycompany 해답
+
+실행환경 잘 적응했나 예제 문제로 학습하기(배치는 없음)
+
+<details><summary><b>프로젝트 구조 분석:</b></summary>
+<div markdown="1"><br>
+1. **src/main/webapp:**
+   - css
+     - jqueryui css가 있음 -> 공홈에서 다운
+     - images
+       - button 이미지가 있음
+     - js
+       - jquery.js, **jqueryui.js**가 있음 -> 공홈에서 다운
+       - **select_load.js** -> 직접 제작 (loadSelectDept함수: select태그 기입함수!)
+     - scripts
+       - easycompany.css -> 해당 플젝에서 사용하는 css
+   - WEB-INF
+     - config
+       - springmvc/**context-servlet.xml**
+         - 뷰리졸버, ajax로 autocomplete위한 MappingJacksonJsonView, Exception, Message, Pagination Tag, mvc:interceptors, mvc:view-controller, 컴포넌트 스캔까지(include-filter, exclude-filter)
+       - jsp
+       - cmmn/egovBizException.jsp, genneralException.jsp, taglibs.jsp
+         -  부트에서 /error 하위 자동 페이지등록 출력해주던 에러페이지처럼 **"에러"페이지**
+       - 다양한 페이지들 jsp...
+       - lib -> 비어있음
+       - tlds/ui.tld -> 뭔지 모르겠음.. pagination tag 관련 같은데..
+       - web.xml -> 이건 뭐 DispatcherServlet 설정하는 극 상위 설정
+2. **src/main/resources:**
+   - db/sampledb.sql -> 초기 create table, insert 데이터 쿼리
+     - message/message-common_en, message-common_ko, message-common.properties -> 메시지 국제화
+       - jakarta commons validator (검증 메시지), spring message&validator, label(jsp에 사용) 등 메시지 관련 전부 모음
+   - property/db.properties -> datasource에 사용할 db설정을 변수로 선언
+     - spring
+       - context-datasource.xml -> db.properties 변수 활용
+       - **context-common.xml** -> 공통부분 설정 (메시지, 빈 스캔, **추적-LeaveaTrace, Pagination Tag**)
+         - leaveaTrace는 Exception을 던지지 않고 후처리 로직 수행(로그, 모니터링 등)
+           - TraceHandlerService는 로그를 넘어서 별도의 모니터링 연동 등 다양한 확장성을 제공
+         - Pagination Tag는 공문의 라이프 사이클 확인: [페이징설명-공식문서](https://www.egovframe.go.kr/wiki/doku.php?id=egovframework%3Arte%3Aptl%3Aview%3Apaginationtag)
+       - context-aspect.xml -> AOP 설정 (여긴 Exception AOP만)
+       - context-sqlMap.xml -> MyBatis 설정
+       - context-transaction.xml -> 트랜잭션 직접 빈 등록 (select절 read-only, 적용범위 등 상세 설정)
+       - **context-validator.xml** -> Spring Modules-jakarta commons validator 빈 등록
+     - sqlmap
+       - config/sql-map-config.xml -> mybatis 설정..
+       - sql/com/easycompany/*.xml -> mybatis 설정 sql문..
+     - **validator**
+       - validator.xml -> 어떤 객체에 어떤 룰 적용할지 설정
+         - required: 값 비었나, integer: int형탠가, email: 이메일 형식인가... 등등
+       - validator-rules.xml -> jakarta commons validator 의 공식 rules (커스텀 당연히 가능)
+   - **log4j2.xml** -> 부트에서 properties에 debug, trace등 로그레벨 설정하던 그 설정을 하게 됨.
+     - 부트 사용한다면 이건 properties에서 선언해도 충분할 듯!
+3. **src/main/java:** 
+   - interceptor(login-authentic), controller, service, dao, vo, mapper, exception, validator, ajax, imagepaginationrenderer 관련 자바 파일
+   - 설명은 생략.
+4. **pom.xml** -> Maven 빌드 툴 사용 (gradle이면 build.gradle 사용)
+</div>
+</details>
+
+**WEB-INF 하위의 context-servlet.xml과 resources 하위의 context-*.xml 들이 설정이 많이 겹치는데 역할이 다르다.**
+
+<img src="https://github.com/user-attachments/assets/d8e08cd6-6882-4b5b-b8a3-65b283a1495c" alt="Image" style="zoom:80%;" /> 
+
+- **WEB-INF 하위 XML(오른쪽-Child)** → 컨트롤러 및 웹 관련 빈 관리
+  - 예로 컴포넌트스캔(Controller), mvc:interceptors, mvc:view-controller 등
+  - 특히, mvc:view-controller 는 컨트롤러 메소드 없이 **직접 URL을 뷰에 매핑**
+
+- **resources 하위 XML(왼쪽-Root)** → 서비스, 리포지토리 및 공통 빈 관리
+  - 예로 컴포넌트스캔(Repository, Service) 등
 
 
+<br>
+
+void를 반환하면 loginSuccess.jsp를 자동으로 렌더링함 -> 원래 String 반환으로 직접 jsp 이름을 반환 했었음. (위에서 정리했었긴 함!)
+
+```java
+@RequestMapping(value="/loginSuccess.do", method=RequestMethod.GET)
+public void loginSuccess() {
+}
+```
+
+@ModelAttribute 좀 더 심화  
+(위에서 정리했었긴 함!)
+
+- 안써야 할 때?
+
+  - ```java
+    @RequestMapping(value = "/updateEmployee.do", method = RequestMethod.GET)
+    public String defaultUpdateEmployee(@RequestParam("employeeid") String employeeid, ModelMap model) {
+        model.addAttribute("employee", getEmployeeInfo(employeeid));
+        return "modifyemployee";
+    }
+    
+    //@ModelAttribute("employee") //-> 이거 안써야 잘 동작.
+    //String employeeid를 스프링이 찾지 못해 에러가 뜬다. 업데이트 URL은 ...?id 로 주겠지만 다른 URL은 아니잖아.
+    //그니까 에러 뜸. 안쓰는게 맞음. 어차피 defaultUpdateEmployee 에서만 필요한거라 "공통으로 쓸 이유도 없음". String id 못 찾는것도 여전히 문제고.
+    public Employee getEmployeeInfo(String employeeid) {
+        return employeeService.getEmployeeInfoById(employeeid);
+    }
+    ```
+
+- 원래는 이렇게 써야지
+
+  - ```java
+    //deptInfoOneDepthCategory 객체를 JS에서 바로 사용하기 위해.
+    @ModelAttribute("deptInfoOneDepthCategory")
+    private Map<String, String> referenceDataOneDepthDept() {
+        return departmentService.getDepartmentIdNameList("1");
+    }
+    
+    //employee 추가하는 form 화면이라면 이걸 사용해줘야 null pointer 에러 방지.
+    //물론, form 화면 매핑하는 GET컨트롤러에서 직접 model.addAttribute("employee", new Emplyee()) 해도 되지만 
+    //"공통으로 사용"할 수 있다는 장점이 있어서 이렇게 사용하는걸 추천!
+    @ModelAttribute("employee")
+    public Employee defaultEmployee() {
+        return new Employee();
+    }
+    ```
+
+**(학습?) Pagination Tag**
+
+[이거봐-공문](https://www.egovframe.go.kr/wiki/doku.php?id=egovframework%3Arte%3Aptl%3Aview%3Apaginationtag) 로 페이징 페이지 만드는것 좀 따로 정리. 커스텀 당연히 가능. 이거보고 커스텀 해야할듯ㅇㅇ.
+
+**(학습?) 여러가지 Exception**
+
+- **XML 설정 + AOP**: 예외가 발생하면 지정된 **JSP 뷰**로 매핑되어 예외 메시지를 출력
+
+- **REST API 예외 처리**: 예외가 발생하면 **JSON** 형태의 응답을 반환
+  
+  - 이전에 이미 Boot로 하는거 정리했다. (부트는 뷰로 /error 하위 자동 페이지 반환 되는것도 기억)
+  
+- **전체적인 흐름 정리: 서비스계층, 컨트롤러 계층 나눠서 보기**
+
+- | 단계 | 위치                                                | 처리 방식                                           | 설명 및 역할                                                 |
+  | ---- | --------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------ |
+  | ①    | Service Layer (`EgovAbstractServiceImpl`)           | `processException()` 호출하여 EgovBizException 발생 | 중요한 비즈니스 로직 오류 시 메시지를 다국어로 처리하여 명확히 사용자에게 전달 |
+  | ②    | Service Layer (`EgovAbstractServiceImpl`)           | `leaveaTrace()` 호출하여 로그만 남김 (예외 미발생)  | 심각하지 않은 상황에서 로그만 남기고 정상 흐름 유지          |
+  | ③    | Controller Layer (`SimpleMappingExceptionResolver`) | 서비스에서 던진 Exception을 JSP 뷰로 매핑           | Exception 종류에 따라 적절한 에러 페이지로 안내              |
+
+  - **EgovAbstractServiceImpl** 를 보면 EgovBizException 발생 메소드(**processException**) 와 Exception 발생없이 후처리로직 메소드(**leaveaTrace**)를 제공한다.
+    - processException는 어떤 예외든 EgovBizException로 예외처리 하게끔!
+    - leaveaTrace는 내부적으로 TraceHandlerService로 로그처리 하는데 TraceHandlerService는 로그를 넘어서 별도의 모니터링 연동 등 다양한 확장성을 제공
+
+  - **의문점: 왜 processException, leaveaTrace를 사용하지?**
+    - try-catch로 간단히 logger쓰고 넘어가면 leaveaTrace를 사용할 필요 없을텐데...  
+      try-catch에서 throw로 EgovBizException 직접 발생시켜도 될텐데...
+    - **다국어 지원 메시지, 확장성, 표준화 로직** 때문에 사용!
+
+
+**(학습?) 여러가지 Validator**
+
+| 프레임워크                        | 특징                        | 사용 방법                                                    |
+| --------------------------------- | --------------------------- | ------------------------------------------------------------ |
+| **Valang**                        | XML 기반 유효성 검사        | XML 파일에서 규칙 정의                                       |
+| **Jakarta Commons Validator**     | 템플릿 기반 유효성 검사     | validator-rules.xml 파일 사용 (Spring Module에서 Jakatra Commons도 제공 중) |
+| **Spring (Java Bean Validation)** | 어노테이션 기반 유효성 검사 | @Valid, @Validated 어노테이션 사용                           |
+
+- Jakarta Commons: eGovframe학습할 때 계속 이것만 사용하더라.
+
+  - **validator-rules.xml** 에 기본제공 룰 말고 **커스텀 룰 추가**하는법: [공문](https://www.egovframe.go.kr/wiki/doku.php?id=egovframework:rte:ptl:validation:add_rules_in_commons_validator)
+
+  - **적용법:**
+
+    1. **validation.xml, validator.jsp, URL매핑** : 공통 규칙 정의 (서버+클라이언트)
+
+       validation.xml로 공통 규칙 정의
+
+       validator.jsp로 \<validator:javascript> 수행 시 자동으로 검증 JS코드 생성하게 선언
+
+       URL 매핑은 "컨트롤러"로 하던지 context-servlet.xml에서 \<mvc:view-controller> 등록하던지!
+
+    2. **JSP validator 태그** : 클라이언트 측 JavaScript 코드 자동 생성 및 적용
+
+       ```jsp
+       <script type="text/javascript" src="<c:url value="/validator.do"/>"></script>
+       <validator:javascript formName="employee"/>
+       <!-- 위 코드 수행시 자동으로 검증하는 JS코드를 생성해 줌. -->  
+       <!-- validateEmployee(this.form) 이런식으로 생성된 JS코드를 사용한 후(검증후) 버튼 submit 할 것 -->
+       ```
+
+    3. **Spring MVC Controller** : 서버 측에서 동일한 validation.xml 기반으로 다시 한번 검증 수행  
+       -> beanValidator + bindingResult 활용
+
+       DefaultBeanValidator는 @Validated 로 사용했던 스프링프레임워크의 검증 지원 빈이다.  
+       이를 스프링모듈에서 Jakarta Commons 와 연동할 수 있게 지원해 준다.  
+       따라서 DefaultBeanValidator 를 직접 사용하자!   
+       **=> 즉, @Validated 는 beanValidator.validate() 를 자동 수행해 bindingResult에 결과를 담았었는데, 우린 이걸 수동으로 해야함!**
+
+- **Spring 어노테이션 기반: 이건 우리가 하던 그거**임 ㅇㅇ. 이미 옛날에 정리해둠.
 
 <br>
 
