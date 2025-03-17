@@ -6183,21 +6183,29 @@ tasks.named('test') {
 
 추가로 현재 4.3도 출시되어서 4.3Dev(개발용) 이클립스가 있음.(2025-03)
 
-**학습후 느낀점:**
+<br>
 
-일단 MVC패턴으로 egovframe라이브러리 사용하여 레포, 서비스를 만드는건 필수이고..   
-Spring Data JPA도 사용해도 될것 같기도 하고(물론, crudRepository를 우선 써야할것 같다만..) + 일단 JPA보단 MyBatis(egovframe있으+DBIO Editor활용!)를 많이 사용하는것 같아 보이니 이거 쓰는게 나을것 같긴 하다만,,  
-DB는 뭘 써도 상관없어 보이고  
+**플젝 진행해보면서 나한테 맞는 쳌리 만들기!!!!!!!!!!! (본인은 부트 많이 사용하려함)**  
+순수스프링 플젝(+XML설정)은 easycompany 위주로 복습! 애초에 아래 공부내용 대부분 순수스프링 방식임.   
+
+일단 **MVC패턴으로 egovframe라이브러리 사용하여 레포DAO, 서비스**를 만드는건 필수이고..   
+엔티티의 경우도 VO로 하며 인터페이스도 넣는것 같더라. @Entity도 쓰긴 하려고그냥 원래하던것 처럼  
+=> **빈 주입 방식은 내가하던 생성자 주입**으로 하게. 짜피 다른것들은 아래 학습한것들 복습하면 충분함.  
+Spring Data JPA도 사용해도 될것 같기도 하고(물론, crudRepository를 우선 써야할것 같다만..) + 일단 JPA보단 **MyBatis(egovframe있으+인터페이스방식ver+DBIO Editor활용!)**를 많이 사용하는것 같아 보이니 이거 쓰는게 나을것 같긴 하다만,,  
+**DB(내부테스트DB쓰다가 MySQL ㄱㄱㄹ)**는 뭘 써도 상관없어 보이고  
 어느정도 SpringBoot2.x 사용해도 괜찮은것 같음. 꼭 XML로 빈을 전부 등록하며 이럴 필요없이 Boot로 애노테이션 활용하여 자바코드로 간단히 해도 딱히 지침에 위반될것 같진 않는..?    
-검색은 ajax써서 자동완성기능 해보는거 좋아 보임.  
-로그인쪽(게시판 등?) "공통기능" 이용 + Spring Security도 표준프레임워크로 [security](https://arckwon.tistory.com/entry/%EC%A0%84%EC%9E%90%EC%A0%95%EB%B6%80%ED%94%84%EB%A0%88%EC%9E%84%EC%9B%8C%ED%81%AC-%EC%8A%A4%ED%94%84%EB%A7%81%EC%8B%9C%ED%81%90%EB%A6%AC%ED%8B%B0-%EB%A1%9C%EA%B7%B8%EC%9D%B8-%EC%A0%81%EC%9A%A912), [암호화](https://arckwon.tistory.com/entry/%EC%A0%84%EC%9E%90%EC%A0%95%EB%B6%80%ED%94%84%EB%A0%88%EC%9E%84%EC%9B%8C%ED%81%AC-DB%EC%A0%91%EC%86%8D%EC%A0%95%EB%B3%B4-%EC%95%94%ED%98%B8%ED%99%94-crypto-%EC%84%9C%EB%B9%84%EC%8A%A4), [공문](https://www.egovframe.go.kr/wiki/doku.php?id=egovframework:rte4.0:fdl:server_security) 참고!   
-01.개발환경_교육교재.pdf에 Jenkins(CI)설치 사용, 형상관리(SVN, GIT-설명은 안보임. 어차피 GIT은 잘 아니까 뭐) 도 있으니 이걸로 하면 되겠고..   
-Spring Batch는 간단히 웹하나 만들어서 HTTP로 트리거줘서 egovframe껄로 같이 구현해둬도 좋을듯.
+=> 눈치껏 easycompany플젝 흐름대로하다가 웬만하면 내가쓰던 Boot방식 주로 쓰자.   
+=> 예로 **로그레벨 설정, 트랜잭션도 딱히따로 등록안할거라 DataSource연결, 빈 등록 등등 properties우선!!**  
+=> 혼합 가능하니까 부가적인걸 XML로 설정ㄱ.(**Exception, AOP, Validation-자카트라 커믄 정도려나?**)  
+검색은 **ajax써서 자동완성기능** 꼭 넣자.  
+로그인쪽(게시판 등?) **"공통기능" 이용 + Spring Security(공통기능)**도 표준프레임워크로 [security](https://arckwon.tistory.com/entry/%EC%A0%84%EC%9E%90%EC%A0%95%EB%B6%80%ED%94%84%EB%A0%88%EC%9E%84%EC%9B%8C%ED%81%AC-%EC%8A%A4%ED%94%84%EB%A7%81%EC%8B%9C%ED%81%90%EB%A6%AC%ED%8B%B0-%EB%A1%9C%EA%B7%B8%EC%9D%B8-%EC%A0%81%EC%9A%A912), [암호화](https://arckwon.tistory.com/entry/%EC%A0%84%EC%9E%90%EC%A0%95%EB%B6%80%ED%94%84%EB%A0%88%EC%9E%84%EC%9B%8C%ED%81%AC-DB%EC%A0%91%EC%86%8D%EC%A0%95%EB%B3%B4-%EC%95%94%ED%98%B8%ED%99%94-crypto-%EC%84%9C%EB%B9%84%EC%8A%A4), [공문](https://www.egovframe.go.kr/wiki/doku.php?id=egovframework:rte4.0:fdl:server_security) 참고!   
+=> 단, Spring Security는.. JWT를 eGov에서도 하지않을까? 맞으면 이건 맨 마지막에 삽입! (형상기록으로 세션방식이랑 구분해두겡)  
+이건 **마지막쯤?**에 하장ㅇ. 01.개발환경_교육교재.pdf에 **Jenkins(CI)**설치 사용, 형상관리(SVN, GIT-설명은 안보임. 어차피 GIT은 잘 아니까 뭐) 도 있으니 이걸로 하면 되겠고..   
+=> 이것도 마지막쯤.. **Spring Batch**는 간단히 웹하나 만들어서 HTTP로 트리거줘서 egovframe껄로 같이 구현해둬도 좋을듯.
 
-마지막으로 플젝할때 easycompany 해답 참고해서 하면 좋을듯!  
-플젝 진행해보면서 나한테 맞는 쳌리 만들기
+주저리 주저리.. 아래 내용도 참고해서 개발 -> 개발 때 꼭 연구노트에 나만의 쳌리 만들면서 진행하기!
 
-이클림스:live플러그인, 실행빨리하는 단축키?, 자동완성..플러그인이있는건지..  
+이클립스:live플러그인(애초에 톰캣구동하는데 Python이 아닌이상 이건 필요없을듯), 실행빨리하는 단축키?, 자동완성..플러그인이있는건지..(우선 easycompany플젝은 소스 저장시 자동으로 반영되는듯 했음- **Build Automatically** 일듯. 체크해보쟈)  
 **빈 등록이든 뭐든 설정**엔 어노테이션과 XML혼합해서 사용 당연히 가능. **부트는 어노테이션 기반 설정을 주로 쓰되 특정 상황에선 XML도 잘 사용.(부트인데.. 원래하던 어노테이션 꼭 많이쓰자 그냥!)**  
 **Validation**은 기존에 했던것도 좋지만 이번엔 Jakarta Commons 써보기.(XML이네. +검증 메시지.)  
 => @Validation 이런걸 안쓸 뿐이지 bindingresult 다 쓰네 뭐 ㅇㅇ. 비슷하네역시. 기존이랑.   
@@ -6205,8 +6213,7 @@ Spring Batch는 간단히 웹하나 만들어서 HTTP로 트리거줘서 egovfra
 **Exception**은 API아닌 JSP고 부트쓰긴 하지만 /error 이 기능말고 XML+AOP로 해보장.  
 => 그럼 **AOP**는 Exception뿐만아니라 메소드시간구하는 것도 XML로 같이 해보자.   
 => EgovAbstractServiceImpl의 processException, leaveaTrace도 활용하자!  
-**국제화메시지, 로그인, ajax(자동완성)**은 여기서 한걸로 하자~ -> 로그인은 나랑 똑같을거같기도? 세션이라  
-=> 이부분은 "실행환경 - 화면처리(Presentation)" + easycompany 보는게 나을것 같음    
+**국제화메시지, 로그인, ajax(자동완성)**은 "실행환경 - 화면처리(Presentation)" + easycompany 보는게 나을것 같음~ -> 로그인은 나랑 똑같이 세션이라. 유사한데 @Login 쓰는게 다름ㅇㅇ.  
 **로그레벨**은 xml말고 properties에서 해도 충분할 듯!(부트 사용시)  
 **페이징**은 Pagination Tag 정리한 공.문 꼭 참고
 
@@ -6306,8 +6313,8 @@ Spring Batch는 간단히 웹하나 만들어서 HTTP로 트리거줘서 egovfra
 
 - 순수스프링: 
   - 빈을 XML 에서 설정. 이 빈을 @Resource(name)으로 주입하여 사용
-    - 참고: @Resource(이름기반주입), @Autowired(타입기반주입), setter주입(EX:XML빈에 property사용시 자동setter주입), 생성자주입(제일권장!)
-    - 헷갈리는 Autowired, Qualifier, Resource: **@Autowired**와 함께 @*Qualifier*를 사용하고, **@Resource는** @*Autowired*와 @*Qualifier*를 한번에 간결하게 표현
+    - 참고: @Resource(이름기반주입), @Autowired(타입기반주입), setter주입(EX:XML빈에 property사용시 자동setter주입), **생성자주입(제일권장!)**
+    - **헷갈리는 Autowired, Qualifier, Resource**: **@Autowired**와 함께 @*Qualifier*를 사용하고, **@Resource는** @*Autowired*와 @*Qualifier*를 한번에 간결하게 표현
   - 테스트 코드엔 이 2가지 사용(jUnit4 기준)  
     @RunWith(SpringJUnit4ClassRunner.**class**)  
     @ContextConfiguration(locations= {"/context-helloworld.xml"})
@@ -6841,7 +6848,7 @@ public class EgovConfigWeb implements WebMvcConfigurer, ApplicationContextAware 
 SampleDefaultVO는 SampleVO(**"엔티티"**)의 부모클래스, SampleService는 인터페이스, SampleDAO는 eGovFram쪽 상속받아 구현한 **"레포"**, SampleServiceImpl은 위 인터페이스 구현체인 **"서비스"**, SampleController는 **"컨트롤러"**  
 +) SampleMapper, mapper-config, Sample_MAPPER는 MyBatis!!
 
-@Resource로 여기선 빈 등록받네. 보통 @Autowired나 생성자주입방식 쓸텐디.. "조사해보자"
+@Resource로 여기선 빈 등록 받는중.
 
 <img src="https://github.com/user-attachments/assets/8c36b51e-e8d3-46c1-be24-f1dc5c620719" alt="Image" style="zoom:80%;" /> 
 
