@@ -10269,3 +10269,171 @@ TIP3) Nginx가 외부의 요청을 받아 뒷단 서버로 요청을 전달하�
 
 **간략히 구현방법 설명하자면?**
  nginx 설치 및 내부 앱 포트 연결 → 안전하게 운영환경.yml을 외부에 생성 및 프로필2개에 포트(8081,8082)이런식 설정 → 배포 [스크립트.sh](http://xn--5y2bv6no1lihc.sh) 작성(현재 구동중 프로필 확인 후 nginx 연결 안된 프로필 찾아 할당해두고 구동중인건 종료하고 새로 할당한 섭 실행) → nginx가 근데 포트 설정엔 하나의 profile을 바라보고 있었을테니 이걸 변경하는 nginx동적 프록시 설정 → 배포시점에 이 바라보는 프로필을 자동으로 변경하는 nginx 스크립트 작성(포트도 자동으로 변경 하려는 거임) → 마지막으로 처음 만든 배포스크립트.sh에 뒤에 만든 자동변경 스크립트를 수행하게 하기 위해 스크립트 실행 코드까지 넣어주면 끝
+
+<br><br>
+
+### 페이징 JS - 직접제작 vs Egov 라이브러리
+
+페이징(limit, offset) 방법은 앞에서 이미 정리했다. [JPQL+페이징](https://bh946.github.io/checklist/CHECK_LIST_SPRING/#jpql--%ED%8E%98%EC%9D%B4%EC%A7%95)  
+좀 더 체계적인 방식은 **Egov 파트에서 페이징**을 참고하자.
+
+DAO에서 페이징 쿼리로 데이터를 잘 받아왔다면, **웹에서는 어떻게 JS로 구현 할지가 문제다.**
+
+**결론부터 말하자면, Egov 사용한것처럼 이미 잘 구현되어있는 라이브러리 사용하는걸 추천! (Egov 파트 페이징을 꼭 써라)**  
+직접 JS로 작성해보면 페이징에 사용할 로직은 거기서 거기니까.
+
+<br>
+
+**간단비교:**
+
+- 직접 만든ver:   
+  jquery로 js코드로 직접 페이지 번호 생성 및 이동 버튼 생성과 실제 URL이동 등을 하나하나 DOM에 붙여서 태그가 생성되게 만들었다.
+- Egov라이브러리 사용ver:  
+  Egov가 제공하는 페이징 룰을 따라서 직접 js코드 작성이 아닌 제공된 기능을 그대로 사용하며 ajax로 SPA방식으로 구현했다.
+
+<br>
+
+<details><summary><b>직접 만든ver 코드 (html)</b></summary>
+<div markdown="1"><br>
+```html
+<!-- pagination -->
+<br><br><br><br>
+<nav aria-label="Page navigation">
+    <ul id="dyn_ul" class="pagination" style="justify-content: center;">
+    </ul>
+</nav>
+<!-- -->
+<!-- 페이징 -->
+<!--    var pageCount = /*[[${(totalCount/10)+1}]]*/ null; // 총 페이지 크기 -> 통신으로 받음-->
+<script th:inline="javascript">
+    var totalCount = /*[[${totalCount}]]*/ null;
+    if(totalCount % 10 == 0) {var pageCount = totalCount/10;}
+    else {var pageCount = totalCount/10 +1;} // 총 페이지 크기 -> 통신으로 받은값으로 계산
+    var pageMax = 10; // 보여줄 페이지 수
+    var activePage = /*[[${pageId}]]*/ null; // 현재 페이지 -> 통신으로 받음(active)
+    // 보여줄 시작 페이지(계산 여기서 하겠음)
+    // 현재페이지/보여줄페이지수 몫 * 보여줄페이지수
+    // ex) 23 / 10 * 10 -> 2*10 -> 20
+    var startIndex = parseInt((activePage-1)/pageMax)*pageMax + 1;
+    var endIndex = startIndex + pageMax -1;
+    if(endIndex > pageCount)
+        endIndex = startIndex + (pageCount%startIndex);
+//
+    // 동적 스타일링
+    var arrowLeft = "<img class='img-fluid' src='/arrow-left.svg' style='width:1.2vw;' onclick='redirectSavedBgm()'/>"
+    var arrowRight = "<img class='img-fluid' src='/arrow-right.svg' style='width:1.2vw;' onclick='redirectSavedBgm()'/>"
+//
+//
+    // [동적 ul 페이징 처리 실시]
+    if(pageCount == 1){ //생성해야할 페이지가 1페이지인 경우
+        var insertUl = "<li class='page-item'>"; // 변수 선언
+        insertUl += insertUl + "<a class='page-link active' href='/gallery/1' onclick = 'redirectSavedBgm()'>";
+        insertUl += "1</a></li>";
+        $("#dyn_ul").append(insertUl); //jquery append 사용해 동적으로 추가 실시
+    }
+    else if(pageCount >= 2){ //생성해야할 페이지가 2페이지 이상인 경우
+        // (Previous)이전 페이지 추가 실시
+        var insertSTR = "<li class='page-item'>"; // 변수 선언
+        if(activePage===1) insertSTR = insertSTR + "<a class='page-link disabled' style='background-color: var(--main-1); opacity:0.3;' href='/gallery/"+(activePage)+"' onclick = 'redirectSavedBgm()'>";
+        else insertSTR = insertSTR + "<a class='page-link' href='/gallery/"+(activePage-1)+"' onclick = 'redirectSavedBgm()'>";
+        // insertSTR = insertSTR + "Previous";
+        insertSTR = insertSTR + arrowLeft;
+        insertSTR = insertSTR + "</a></li>";
+        $("#dyn_ul").append(insertSTR); //jquery append 사용해 동적으로 추가 실시
+//
+        // ... 페이지 추가 (앞에 페이지 더 있을경우 맨앞 페이지로 이동)
+        if((activePage > pageMax)) {
+            var insertMID = "<li class='page-item'>"; // 변수 선언
+            insertMID = insertMID + "<a class='page-link' href='/gallery/"+(1)+"' onclick = 'redirectSavedBgm()'>";
+            insertMID = insertMID + "...";
+            insertMID = insertMID + "</a></li>";
+            $("#dyn_ul").append(insertMID); //jquery append 사용해 동적으로 추가 실시
+        }
+//
+//
+        // 1, 2, 3 .. 페이지 추가 실시
+        var count = 1;
+        for(var i=startIndex; i<=pageCount; i++){
+            if(count > pageMax){ //최대로 생성될 페이지 개수가 된 경우
+                page = i - pageMax; //생성된 페이지 초기값 저장 (초기 i값 4 탈출 인경우 >> 1값 저장)
+                break; //for 반복문 탈출
+            }
+            var insertUl = "<li class='page-item'>"; // 변수 선언
+            if(i===activePage) insertUl = insertUl + "<a class='page-link active' href='/gallery/"+i+"' onclick = 'redirectSavedBgm()'>";
+            else insertUl = insertUl + "<a class='page-link' href='/gallery/"+i+"' onclick = 'redirectSavedBgm()'>";
+            insertUl = insertUl + String(i);
+            insertUl = insertUl + "</a></li>";
+            $("#dyn_ul").append(insertUl); //jquery append 사용해 동적으로 추가 실시
+            count ++;
+        }
+//
+        // ... 페이지 추가 (뒤에 페이지 더 있을경우 끝 페이지로 이동)
+        if((activePage < pageCount) && (activePage >= pageMax) && (endIndex < pageCount)) {
+            var insertMID = "<li class='page-item'>"; // 변수 선언
+            insertMID = insertMID + "<a class='page-link' href='/gallery/"+(pageCount)+"' onclick = 'redirectSavedBgm()'>";
+            insertMID = insertMID + "...";
+            insertMID = insertMID + "</a></li>";
+            $("#dyn_ul").append(insertMID); //jquery append 사용해 동적으로 추가 실시
+        }
+//
+        // (Next)다음 페이지 추가 실시
+        var insertEND = "<li class='page-item'>"; // 변수 선언
+        if(activePage === pageCount)  insertEND = insertEND + "<a class='page-link disabled' style='background-color: var(--main-1); opacity:0.3;' href='/gallery/"+(activePage)+"' onclick = 'redirectSavedBgm()'>";
+        else insertEND = insertEND + "<a class='page-link' href='/gallery/"+(activePage+1)+"' onclick = 'redirectSavedBgm()'>";
+        // insertEND = insertEND + "Next";
+        insertEND = insertEND + arrowRight;
+        insertEND = insertEND + "</a></li>";
+        $("#dyn_ul").append(insertEND); //jquery append 사용해 동적으로 추가 실시
+    }
+</script>
+```
+</div>
+</details>
+
+<details><summary><b>Egov 사용 코드 (jsp)</b></summary>
+<div markdown="1"><br>
+jquery 문법을 활용해서 ajax 적용 했음. (jstl은 jpa 표준 태그 라이브러리 - c, fmt 등)
+```jsp
+<%@ page contentType="text/html; charset=UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="ui" uri="http://egovframework.gov/ctl/ui"%>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" href="/css/basic.css"/>
+<link rel="stylesheet" href='/css/gallery.css'/>
+<link rel="stylesheet" href='/css/jqueryui.css'/>
+<script src="<c:url value='/js/jquery.js'/>"></script>
+<script src="<c:url value='/js/jqueryui.js'/>"></script>
+</head>
+<script type="text/javascript">
+	function linkPageAjax(pageNo) {
+		//location.href = "/gallery?pageIndex=" + pageNo;
+        $.ajax({
+            url: '/gallery',
+            type: 'post',
+            data: {
+                pageIndex: pageNo
+            }
+        }).done(function(fragment) {
+            $('#content_area').html(fragment);
+        });
+	}
+</script>
+<body>
+<div id="content_area" >
+${resultList}
+    <ui:pagination paginationInfo="${paginationInfo}" type="image"
+                   jsFunction="linkPageAjax" />
+</div>
+</body>
+</html>
+```
+</div>
+</details>
+
