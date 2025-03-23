@@ -56,9 +56,11 @@ typora-root-url: ../../..
     <li>인텔리J(IDE)에서도 가능할거임. 물론, 어느 IDE든 "빌드 툴에 의존성 추가"가 간편!</li>
 </ul>
 </details>
-- 특히 starter-web 라이브러리 없으면 바로 종료되기 때문에, Spring을 사용한다면 이때 `ApplicationRunner` 구현체로 자바코드 실행하는게 보통
+- 특히 boot-starter-web 라이브러리 없으면 바로 종료되기 때문에, Spring을 사용한다면 이때 `ApplicationRunner` 구현체로 자바코드 실행하는게 보통
 
-- 아래 jUnit은 Boot기준이고 순수 스프링은 SpringJUnit4ClassRunner와 ContextConfiguration를 사용
+  - ApplicationRunner는 스프링 부트가 애플리케이션(서버)이 완전히 초기화된 후 실행되는 콜백 인터페이스이기 때문!!
+
+- 아래 JUnit은 Boot기준(@SpringBootTest)이고, 순수 스프링은 @RunWith(SpringJUnit4ClassRunner.class)와 @ContextConfiguration를 사용
 
   <details><summary><b>build.gradle 설정 예시 (+플러그인)</b></summary>
   <div markdown="1"><br>
@@ -477,6 +479,9 @@ New Java Project → JDK17 사용<br>
 * `GenerationType.AUTO` 옵션이 기본값 (확실한 건 직접 택을 권장)
 
   * 자동으로 IDENTITY, SEQUENCE, TABLE 중 택1
+    * IDENTITY: DB가 제공하는 auto_increment 자동증가 컬럼
+    * SEQUENCE: 오라클에서 사용하던 그 시퀀스
+    * TABLE: 별도의 테이블로 ID값 관리
 
 <br>
 
@@ -997,10 +1002,26 @@ New Java Project → JDK17 사용<br>
 
 **인터페이스를 간략히 알아보자.**
 
-- **만약 MemberRepository 클래스**를 구현 했다면??  
-  **만약 MemberRepository 인터페이스를 정의**하고 **MemberRepositoryImpl 클래스로 해당 인터페이스를 구현(implements)** 했다면??
+- **ve1)만약 MemberRepository 클래스**를 구현 했다면??  
+  **ver2)만약 MemberRepository 인터페이스를 정의**하고 **MemberRepositoryImpl 클래스로 해당 인터페이스를 구현(implements)** 했다면??
 - 둘 다 서비스계층에서 바로 `memberRepository.save()` 이런식으로 사용 가능
   - 여기서 알 수 있는 장점 -> 인터페이스를 구현하는 **MemberRepositoryImpl2 클래스**를 또 추가해서 구현체를 바꿔도 "서비스계층의 `memberRepository.save()`" 코드는 수정 할 필요가 없다!! 굉장히 유연해진다!!
+
+- **TIP:** 인터페이스의 메소드가 뭐였는지 헷갈릴 수 있다. **"주석을 활용하자"**
+
+  - ```java
+    public interface ItemService {
+        /**
+    	 * Item의 이전, 이후 Item 구하기
+    	 * @param id
+    	 * @return
+    	 * @throws Exception
+    	 */
+        public List<Item> findThree(Long id) throws Exception;
+    }
+    ```
+
+  - 이렇게 하면 **ItemServiceImpl 구현체**에서 오버라이딩때 메소드 설명란(hover)에 **"주석내용"이 보임!**
 
 <br><br>
 
@@ -1398,6 +1419,8 @@ public void initCacheMembers() {
 
 참고) [졸작](https://github.com/BH946/LePl_Spring/tree/kbh)은 JUnit5, [우테코](https://github.com/BH946/java-lotto-6/tree/main/src/test/java/lotto)는 AssertJ 사용했음, **TDD는 테스트 주도 개발 방법론**
 
+**보통 메모리DB로 테스트**: application.properties 주석 시 boot-data-jpa 의존성이 자동 제공 및 @Entity, @Id, @GeneratedValue로 JPA 어노테이션 사용해야 테이블 생성까지 자동..!
+
 * **JUnit5**
 
   * `Assertions.assertNull, Assertions.assertInstanceOf, Assertions.assertEquals, Assertions.assertThrows` 등등 자주 사용
@@ -1456,13 +1479,17 @@ public void initCacheMembers() {
 * **스프링 테스트 선언법**
 
   * Junit4 : @RunWith, @SpringBootTest 둘다 선언 - 클래스 단에
-  * **Junit5** : @SpringBootTest 선언 - 클래스 단에
+  * **Junit5** : @SpringBootTest 선언 - 클래스 단에 (@RunWith를 자동 제공)
   * **이후 @Test** 를 메소드마다 선언하여 테스트!! - 메소드 단에
     * @RunWith(SpringRunner.class) : 스프링과 테스트 통합 -> **Junit4 이하만 사용**
-    * **@SpringBootTest** :  스프링 컨테이너와 테스트를 함께 실행. 모든 빈 로드. (이게 없으면 @Autowired 다 실패) -> (레포, 서비스에 당연히 쓰겠지?) **=> 컨트롤러만 테스트?? @WebMvcTest 사용 (서블릿 컨테이너 MOCK)**
-      * 즉, 스프링 빈 사용하고 싶으면 반드시 필수
+    * **@SpringBootTest** :  스프링 컨테이너와 테스트를 통합 실행. 모든 빈 로드. (이게 없으면 @Autowired 다 실패) -> (레포, 서비스 테스트때 당연히 쓰겠지?)   
+      **=> 컨트롤러만 테스트?? @WebMvcTest 사용 (서블릿 컨테이너 MOCK)**
+      * **@SpringBootApplication을 찾아서 테스트를 위한 Bean을 생성!** 즉, 스프링 빈 사용하고 싶으면 반드시 필수
       * @TestConfiguration : 테스트에서 **스프링 빈 등록을 지원**하는 어노테이션
-
+      * 중요: **수동 빈** 등록(ex:XML)할 때는 **메인의 XML파일을 test/resources 하위로 복제하자!**
+        * xml수동 빈 등록은 메인에서 @ImportResource("classpath:..)"로 직접 가져오는데,  
+          테스트환경에서는 classpath 가 test/resources 경로가 우선이라 못 가져온다.   
+          못 찾으면 main/resources 경로에서 찾는다고는 하던데 본인 경험상 못 찾더라.
 * **given, when, then 예시** -> tdd 로 자동완성 사용 중
 
   * given에 멤버 이름 설정
@@ -1470,7 +1497,6 @@ public void initCacheMembers() {
   * then에 결과를 보는것. 멤버이름이 잘 생겼는지 등등..(assert보통 씀!)
     - **@BeforEach, @AfterEach**는 각 @Test 수행 전, 후 동작 -> @Test마다 **독립적 실행** 상태라 필요 (@Test마다 실행해 줌)
     - 다만, DB와 연동하는 **레포(DAO)단**에선 **@Transactional의 @Rollback(false)**를 통해 **DB의 데이터 공유는 전역**으로 가능해서 테스트가 정상 동작 하는 것!
-
 * **@Transactional** : 테스트를 실행할 때 마다 트랜잭션을 시작하고 테스트가 끝나면 트랜잭션을 강제로 롤백 (이 어노테이션은 테스트 케이스에서 사용될때만 기본값으로 롤백)
 
   * **롤백을 하기때문에 내부에서 굳이 영속성 컨텍스트 플러시를 안하는 특징**을 가짐
@@ -1481,7 +1507,6 @@ public void initCacheMembers() {
   * **서비스 TDD 때 트랜잭션 선언안하면 서비스가 동작을 안하기 때문에 그냥 전역으로 써주고! 대신에 서비스 코드에 트랜잭션 있는건 꼭 확인**
     * 왜냐하면 **TDD에 선언한 트랜잭션때문에 서비스에 트랜잭션이 없어도 동작하기 때문!**
     * 참고) 트랜잭션이 겹칠텐데 전파로 인해 기존 사용중인 트랜잭션을 그대로 사용하므로 문제가 없다.
-
 * **@TestMethodOrder(MethodOrderer.OrderAnnotation.class)**
 
   * **@Order()+@Rollback(value=false)** 활용 -> 주로 db저장 먼저하려고!
@@ -1977,6 +2002,7 @@ public class InitDB {
 - `spring: datasource: url, username, password...` 에서 h2 db 연결 세팅
   - **테스트에선 db연동 이부분을 주석 해야지 "메모리DB" 사용.**
   - **db걱정 없음!! h2가 자바기반이라 제공**
+  - **단, boot-data-jpa 의존성 필요 + 테이블에 @Entity, @Id, @GeneratedValue로 JPA 어노테이션 사용 필수**
 - `spring: jpa: hibernate, properties` 에서 create, none 옵션으로 테이블 생성 또는 기존 테이블 사용 설정 + show_sql로 jpa가아닌 실제 sql문 체크(튜닝 하려면 sql 필수로 체크)
   - 근데 show_sql 사용 안하고, 아래 **logging.level의 SQL을 사용 하자.**
 - `server: servlet: session: timout: 30m` 으로 세션 타임아웃 설정
@@ -2948,13 +2974,18 @@ private final MyDataSourceConfig source;
 
 <br>
 
-## JPQL(JPA-ORM), SQL(MyBatis-SQL Mapper)
+## JPQL(JPA-ORM) vs SQL(MyBatis-SQL Mapper)
 
-[JPA vs Mybatis 참고 문헌](https://www.elancer.co.kr/blog/detail/231?seq=231)
+**MyBatis는 "스프링 DB 관련 추가 지식" -> "MyBatis" 파트를 보자  **
+=> JPA와 MyBatis 개발은 확연히 다르단걸 인지하자. 그차이도 "MyBatis"파트를 보자
 
-ORM과 SQL Mapper 는 둘 다 객체와 SQL 매핑을 도와줘서 유사하긴 하다.<br>다만, ORM은 SQL을 작성 할 필요 없을 정도로 더 많은 걸 지원한다. (JPQL 작성도 하긴 함)
+> [JPA vs Mybatis 참고 문헌](https://www.elancer.co.kr/blog/detail/231?seq=231)
 
-SQL Mapper는 Java 코드와 SQL(XML) 문을 아예 분리 + 동적쿼리를 세밀하게 지원 해준다.
+ORM과 SQL Mapper 는 둘 다 객체와 SQL 매핑을 도와줘서 유사하긴 하다.<br>
+
+- ORM은 SQL을 작성 할 필요 없을 정도로 더 많은 걸 지원한다. (JPQL을 작성 하긴 함)
+
+- SQL Mapper는 Java 코드와 SQL(XML) 문을 아예 분ㄴ리 + 동적쿼리를 세밀하게 지원 해준다.
 
 <br><br>
 
@@ -3097,7 +3128,7 @@ SQL Mapper는 Java 코드와 SQL(XML) 문을 아예 분리 + 동적쿼리를 세
 
 <br><br>
 
-### JPQL + 페이징
+### JPQL + 페이징(limit,offset)
 
 #### JPQL (distinct, 연관관계, sql vs jpql)
 
@@ -3379,11 +3410,9 @@ public Long updateTotalCount() { return itemRepository.findTotalCount(); }
 </div>
 </div>
 </details>
-<br>
+<br><br>
 
-<br>
-
-## 엔티티 조회 권장 순서 - 필수!
+### 엔티티 조회 권장 순서 - 필수!
 
 **엔티티 조회 권장 순서**
 
@@ -3572,26 +3601,28 @@ DataSource 가 `(1)my.datasource.하위` 와 `(2)spring: datasource: url, userna
 
 참고: Mybatis, Jpa는 귀찮은 setId가 필요 없다. (jdbc의 PreparedStatement구문엔 필요)
 
-**데이터접근 결론으로 무엇을 추천하는가??**
+**(주관적)데이터접근 무엇을 추천하는가??**
 
-- **JPA, 스프링 데이터 JPA, Querydsl** 을 기본으로 사용 -> **[적용 플젝(레포): v1~v3](https://github.com/BH946/LePl_Spring/tree/kbh/lepl/src/main/java/com/lepl/Repository/member), [적용 플젝(서비스): v1~v2](https://github.com/BH946/LePl_Spring/tree/kbh/lepl/src/main/java/com/lepl/Service/member)**
+- **(기본적인 CRUD 가정) JPA, 스프링 데이터 JPA, Querydsl** 을 기본으로 사용 -> **[적용 플젝(레포): v1~v3](https://github.com/BH946/LePl_Spring/tree/kbh/lepl/src/main/java/com/lepl/Repository/member), [적용 플젝(서비스): v1~v2](https://github.com/BH946/LePl_Spring/tree/kbh/lepl/src/main/java/com/lepl/Service/member)**
 
   - 어댑터 추가ver, 단순ver 은 상황에 맞게 선택!
   - 상관없다면?? **단순ver을 사용**하자 -> **스프링데이터JPA + QueryDSL** 를 기본으로 잡자!<br>스프링데이터JPA의 **@Query로 충분히 JPQL작성**도 가능하기 때문!
 
-- 복잡한 쿼리가 잘 해결이 안될때 해당 부분은 JdbcTemplate이나 MyBatis를 함께 사용
+- **복잡한 쿼리나 SQL사용**의 경우 JdbcTemplate이나 **MyBatis를 함께 사용 추천!**
 
   - JPA랑 JDBC는 트랜잭션 매니저가 다를텐데 어떡하나??
   - `JpaTransactionManager` 가 대부분 기능들을 제공해서 괜찮다고 한다.
   - 단, JPA 플러시 타이밍에 주의
 
-- **참고) 동적쿼리 문제란?? 예시**
+- **특히, 동적쿼리**는 **MyBatis나 QueryDSL 추천!**
 
-  - 검색 조건이 없을 때, 상품명으로 검색 때, 최대가격 검색 때, 상품명과 최대가격 둘다 검색 때 -> 총 4가지를 전부 동적으로 SQL 생성이 필요하다면 코드가 복잡..!
+  - findAll() 메서드 쿼리에 "검색 조건이 없을 때, 상품명으로 검색 때, 최대가격 검색 때, 상품명과 최대가격 둘다 검색 때" 총 4가지를 전부 동적으로 SQL 생성이 필요하다면 코드가 복잡..!
 
-  - MyBatis나 QueryDSL로 해결 추천<br>why?? 기존엔 너무 복잡하게 if, else 반복으로 구현하기 때문 (아래 예시코드)
+  - MyBatis나 QueryDSL로 해결 추천<br>why?? 기존엔 여러 메소드(DAO)를 더 구현하여 사용해야 하기 때문 (아래 예시코드)
 
-  - ```java
+  - <details><summary><b>findAll() 동적쿼리 예전 방식 예시</b></summary>
+    <div markdown="1"><br>
+    ```java
     //QueryDSL 사용하지 않았을 때 동적 쿼리 구현 방식
     public List<Item> findAll(ItemSearchCond cond) {
         String itemName = cond.getItemName();
@@ -3607,12 +3638,188 @@ DataSource 가 `(1)my.datasource.하위` 와 `(2)spring: datasource: url, userna
         }
     }
     ```
+    </div>
+    </details>
+  
+  - <details><summary><b>findAll() 동적쿼리 현재 방식 예시 - MyBatis</b></summary>
+    <div markdown="1"><br>
+    ```xml
+    <!-- (동적쿼리)검색+페이징 -->
+    <select id="findAllWithPage" resultMap="item">
+    	SELECT *
+    	FROM item
+    	<where>
+    		<if test="searchKeyword != null and searchKeyword != ''">
+    			<choose>
+    				<when test="searchCondition == 0">
+    					and id like concat('%', #{searchKeyword}, '%')
+    				</when>
+    				<when test="searchCondition == 1">
+    					and title like concat('%', #{searchKeyword}, '%')
+    				</when>
+    			</choose>
+    		</if>
+    	</where>
+    	order by item_id DESC 
+    	LIMIT #{recordCountPerPage} OFFSET #{firstIndex}
+    </select>
+    ```
+    </div>
+    </details>
 
 <br>
 
 #### MyBatis
 
-**MyBatis 사용한 2가지 예시 + 동적쿼리**<br>
+> MyBatis만 사용할거면 JPA 어노테이션(ex:@OneToMany) 사용할 필요 없음. SQL 매퍼(xml)에서 해야함.  
+> => JPA는 엔티티 개념을 사용했지만, MyBatis는 직접SQL이라 DB개념으로 좀 더 생각하자.  
+>
+> 즉, JPA의 영속성 컨텍스트로 도메인 패턴 필요 없음.   
+> update도 더티체킹 없이 전부 SQL로 처리 해야 함.
+>
+> PK값 자동증가 ID도 SQL 매퍼에서 MySQL은 useGeneratedKeys로 적용(auto_increment)  
+> => [Mybatis 키 자동 생성 - useGeneratedKeys(MySQL), selectKey(Oracle)](https://sesoc.tistory.com/41)
+>
+> N+1 문제는 JPA-"페치조인(즉시로딩)+컬렉션은 distinct까지" 로 해결  
+> MyBatis는 SQL문 사용하므로 조인이나 서브쿼리 덕분에 직면할 문제가 아님
+>
+> update는 JPA에선 더티체킹 방식이지만, SQL인 MyBatis는 아님.  
+> @Transactional에서 JPA는 영속성컨텍스트 덕분에 쿼리모아서 한번에 전송지만, MyBatis는 매순간 전송
+
+**MyBatis 테스트를 위해 꼭 참고할 점:**
+
+1. main/resources하위 XML수동 빈 등록은 test/resources 하위로 복제하자   
+   (단, XML내 빈에 property로 연동한 XML은 복제 안해도 됨. 자동으로 main하위도 찾아줌.  
+   예로 XML내 빈에 연동된 XML이 아닌 context-common.xml의 경우  `@ImportResource("classpath:/spring/*.xml")` 로 main함수위에 직접 등록해야하는데,  
+   빈 내에서 XML연동한 파일의 경우 "test하위로 복제 안해도 main에서 찾아 주더라"  
+   **=> 따라서 SQL을 작성한 XML은(=따로 빈에서 연동된) main에서만 관리하면 됨!**
+
+   테스트를 위한 XML 관리법을 다시 정리하자면,   
+   **부트니까 @SpringBootTest 를 사용하여 메인환경의 빈을 자동 등록(자동 빈, 수동 빈 둘다)  
+   메인환경의 수동 빈 등록법은 "@ImportResource("classpath:..) 필수 + 테스트환경에 ImportResource로 등록한 XML 파일 복제"**
+
+2. boot-jpa-data 의존성으로 자동 테이블 생성 사용 시 "데이터 타입 매핑과 자동 언더스코어(db)에서 카멜케이스(java)"를 알자.  
+   테이블 자동 생성 JPA: `Long` → `bigint`, `String` → `varchar(255)`, `LocalDateTime` → `datetime(6)`    
+   `@Id+@GeneratedValue(strategy = GenerationType.IDENTITY)` → `PK+not null auto_increment`  
+   **MyBatis에서 맞춰주자: XML에서 언더스코어에서 카멜케이스 자동 매핑 설정.   **
+   **예: sql에 ${imgSrc} <- img_src 매핑**  
+   **객체 매핑 주의점:** sql에 아예 필드명 다른건 select **item_id as id** .. where item_id = #{id} 이런식으로 하거나,  
+   **Result Maps**을 사용 -> **as 별칭을 대체!**
+
+<br>
+
+**MyBatis 참고 문법**
+
+1. namespace="패키지.매퍼인터페이스": @Mapper 선언한 매퍼 인터페이스 클래스와 연결  
+   -> xml쿼리 id와 인터페이스 메소드명과 반드시 동일
+
+2. id 값(중복불가): 이 속성으로 SQL 구분+매퍼 인터페이스의 메서드 이름과 연결되어 쿼리를 더 쉽게 호출
+
+3. useGeneratedKeys="true": 이 속성은 데이터베이스에서 생성된 키를 반환하도록 MyBatis에 지시합니다.
+
+4. keyColumn="user_id": db의 user_id 필드명이 generatedKeys 임을 알려줌.(아마 keyProperty를 한다면 이건 생략해도 될거임 ㅇㅇ)
+
+5. keyProperty="user_id": 생성된 키가 User 객체의 user_id 필드에 설정되도록 합니다.
+
+6. resultType="패키지.Item": 쿼리결과 반환타입 지정  
+   -> MyBatis별칭 사용중이면 "Item"
+
+7. SQL의 데이터 입력 매핑?
+
+   - 단일 데이터 입력: parameterType 설정안해도 어차피 1개라 자동 매핑
+   - 다중 테이터 입력: 인터페이스에서 @Param 활용해서 xml의 #{}과 매핑 or 같은 필드명 가진 객체(Object)로 매핑(=parameterType설정)  
+     @Param예: `void update(@Param("id") Long id, @Param("updateParam") ItemUpdateDto updateParam)`
+
+8. SQL에 as 별칭 사용 or  resultMap 사용: 객체 필드와 DB 컬럼을 매핑
+
+9. 동적 SQL: `if, choose (when, otherwise) , trim (where, set), foreach`
+
+10. 기타: 
+
+    - `insert, update, delete` 의 반환값은 영향을 받은 행수를 반환
+    - `${}`는 문자열로써 sql인젝션에 취약(대신 sql에서 수식연산 가능)  
+    - `#{}`는 파라미터 형식으로써 sql인젝션에 안전(대신 sql에서 수식연산 불가해서 미리 연산해서 주기!)  
+    - `<=, <, > 등` 이런 연산자는 xml 파싱 문제가 있을 수 있어서 "<![CDATA[ 사용 or xml문법 사용"
+
+    <details><summary><b>매퍼 예시 코드</b></summary>
+    <div markdown="1"><br>
+    ```xml
+    <mapper namespace="com.secretgallery.service.impl.ItemMapper">
+    	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+    		insert
+    		into item (nickname, password, title, content, img_src, date1, date2)
+    		values (#{nickname}, #{password}, #{title}, #{content}, #{imgSrc},
+    		#{date1}, #{date2})
+    	</insert>
+    	<update id="update">
+    		update item
+    		set password=#{password},
+    		title=#{title},
+    		content=#{content}
+    		where item_id = #{id}
+    	</update>
+    	<select id="findById" resultType="Item">
+    		select item_id as id, nickname,
+    		password, title, content, img_src, date1,
+    		date2
+    		from item
+    		where item_id =
+    		#{id}
+    	</select>
+        <resultMap id="item" type="Item">
+            <result property="id" column="item_id" />
+            <result property="nickname" column="nickname" />
+            <result property="password" column="password" />
+            <result property="title" column="title" />
+            <result property="content" column="content" />
+            <result property="imgSrc" column="img_src" />
+            <result property="date1" column="date1" />
+            <result column="date2" property="date2" />
+        </resultMap>
+        <!-- (동적쿼리)검색+페이징 -->
+    	<select id="findAllWithPage" resultMap="item">
+    		SELECT *
+    		FROM item
+    		<where>
+    			<if test="searchKeyword != null and searchKeyword != ''">
+    				<choose>
+    					<when test="searchCondition == 0">
+    						and id like concat('%', #{searchKeyword}, '%')
+    					</when>
+    					<when test="searchCondition == 1">
+    						and title like concat('%', #{searchKeyword}, '%')
+    					</when>
+    				</choose>
+    			</if>
+    		</where>
+    		order by item_id DESC 
+    		LIMIT #{recordCountPerPage} OFFSET #{firstIndex}
+    	</select>
+    </mapper>
+    ```
+    ```java
+    public class Item {
+        @Id //db에 pk
+        @GeneratedValue(strategy = GenerationType.IDENTITY) //db에 not null auto_increment
+        @Column(name="item_id") //db 필드명
+        private Long id; //엔티티 필드명
+        private String nickname;
+        private String password;
+        private String title;
+        private String content;
+        private String imgSrc; //db엔 img_src
+        @DateTimeFormat(pattern = "yy.MM.dd.HH:mm")
+        private LocalDateTime date1;
+        @DateTimeFormat(pattern = "yy년 MM월 dd일 HH시 mm분")
+        private LocalDateTime date2;
+    }
+    ```
+    </div>
+    </details>
+
+<br>
+
+**MyBatis 사용한 3가지 예시 + 동적쿼리**<br>
 
 **(1) 스프링을 사용하지 않은 MyBatis 방식**<br>**4개의 파일 활용:** mybatis-config.xml, SqlSessionTemplate.java, UserMapper.xml, UserMapper.interface
 
@@ -3621,22 +3828,16 @@ DataSource 가 `(1)my.datasource.하위` 와 `(2)spring: datasource: url, userna
 - **사용흐름**
 
   1. `mybatis-config.xml` 에 세팅 및 `UserMapper.xml` 매핑 추가
+  
   2. `UserMapper.xml` 파일 생성 및 sql문 작성+매핑에 namespace=UserMapper인터페이스 추가
-     - **참고 문법**
-       1. id 값(중복불가): 이 속성으로 SQL 구분+매퍼 인터페이스의 메서드 이름과 연결되어 쿼리를 더 쉽게 호출
-       2. useGeneratedKeys="true": 이 속성은 데이터베이스에서 생성된 키를 반환하도록 MyBatis에 지시합니다.
-       3. keyColumn="user_id": db의 user_id 필드명이 generatedKeys 임을 알려줌.(아마 keyProperty를 한다면 이건 생략해도 될거임 ㅇㅇ)
-       4. keyProperty="user_id": 생성된 키가 User 객체의 user_id 필드에 설정되도록 합니다.
-       5. SQL의 데이터 입력 매핑?
-          - 단일 데이터 입력: parameterType 설정안해도 어차피 1개라 자동 매핑
-          - 다중 테이터 입력: 인터페이스에서 @Param 활용해서 xml의 #{}과 매핑 or 같은 필드명 가진 객체(Object)로 매핑(=parameterType설정)
-  3. `UserMapper인터페이스`  파일 생성 및 기능 함수 작성 (insert쪽은 void로!)
+     - `UserMapper인터페이스`  파일 생성 및 기능 함수 작성 (insert쪽은 void로!)
+     
   4. `UserRepository` 를 마지막으로 생성 및 DAO 로직 작성
      - 참고로 `SqlSession, SqlSessionFactory` 를 추가 활용
-
+  
   5. `SqlSessionTemplate` 는 `UserRepository` 에 **SqlSessionFactory를 파라미터로** 넣어 사용 위함
      - mybatis-config.xml 설정 내용도 SqlSessionFactory 자바 객체에 담게 된다.
-
+  
   <details><summary><b>전체코드</b></summary>
   <div markdown="1"><br>
   **mybatis-config.xml**
@@ -3656,7 +3857,7 @@ DataSource 가 `(1)my.datasource.하위` 와 `(2)spring: datasource: url, userna
      -->
   <!-- -->
   <!-- -->
-    <!-- typeAliases를 통해서 사용하고자 하는 객체를 등록해야함 -->
+    <!-- typeAliases를 통해서 사용하고자 하는 객체를 등록 -->
     <typeAliases>
       <typeAlias type="org.example.v2.domain.User" alias="User"/>
       <typeAlias type="org.example.v2.domain.Profile" alias="Profile"/>
@@ -3812,31 +4013,360 @@ DataSource 가 `(1)my.datasource.하위` 와 `(2)spring: datasource: url, userna
 
 <br>
 
-**(2) 스프링을 사용한 MyBatis 방식 + 동적쿼리**<br>**3개의 파일 활용:** application.properties, ItemMapper.interface, ItemMapper.xml, ItemRepository
+**(2) 순수 스프링을 사용한 MyBatis 방식 + 동적쿼리**
+
+**구현흐름(eGov를 감미한..)**
+
+1. **MyBatis 인터페이스 방식 구현(=@Mapper 방식)**: ItemService.class 인터페이스 + ItemServiceImpl.class (@Service로 자동 빈) + ItemMapper.class 인터페이스(@Mapper로 프록시로 자동 빈)  
+   => 특히, ItemServiceImpl 클래스 = EgovAbstractServiceImpl 상속 + ItemService 구현체 역할
+
+2. **(부트와 큰 차이점)xml설정 부분**: **Mybatis-boot-starter 의존성 없으니 빈 등록 필수!** 
+   - context-mybatis.xml 필수(=빈 등록: SqlSessionFactoryBean:sql-mybatis-config.xml등록, MapperConfigurer:@Mapper 인터페이스 자동 스캔 위치 지정) +  
+   - sql-mybatis-config.xml 에서 \<mapper Item.xml> + lazy설정, 별칭, 캐시 등
+   - Item.xml 에는 SQL문 작성!  
+
+3. **xml 사용 위해:** main함수 위에 `@ImportResource("classpath:/spring/*.xml")` 로 등록
+
+   <details><summary><b>전체코드와 사용 파일 한눈에 보기</b></summary>
+   <div markdown="1"><br>
+   {src/main/resources/}spring/context-mybatis.xml -> sqlSession빈<br>
+   {src/main/resources/}sqlmap/sql-mybatis-config.xml -> Item.xml(매퍼)연결 및 별칭,캐시 등<br> 
+   {src/main/resources/}sqlmap/mappers/Item.xml -> SQL<br>
+   {src/main/java/}...service.impl/ItemMapper.java -> @Mapper<br>
+   {src/main/java/}...service.impl/ItemServiceImpl.java -> @Service<br>
+   {src/main/java/}...service/ItemService.java -> (그냥 확장성 위해 인터페이스 추가한거일 뿐)<br>
+   **context-mybatis.xml**
+   ```xml
+   <?xml version="1.0" encoding="UTF-8"?>
+   <beans xmlns="http://www.springframework.org/schema/beans"
+   	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+   	<!-- 애초에 boot-mybatis-starter 라이브러리 사용했으면 이부분 자동 설정해 줌. 안 사용해서 추가한거임. -->
+   <!-- -->
+   	<!-- SqlSession setup for MyBatis Database Layer -->
+   	<!-- MyBatis와 Spring 연동 설정
+   	물론, 스프링부트는 java 파일에서 빈 등록을 권장 -->
+   	<bean id="sqlSession"
+   		class="org.mybatis.spring.SqlSessionFactoryBean">
+   		<property name="dataSource" ref="dataSource" />
+   		<property name="configLocation"
+   			value="classpath:/sqlmap/sql-mybatis-config.xml" />
+   		<!-- <property name="mapperLocations" value="classpath:**/lab-*.xml" /> -->
+   	</bean>
+   	<!-- MapperConfigurer setup for @Mapper -->
+   	<!-- MyBatis의 Mapper Interface 자동스캔 설정 
+   	물론, 스프링부트는 java 파일에서 빈 등록을 권장 -->
+   	<bean class="org.egovframe.rte.psl.dataaccess.mapper.MapperConfigurer ">
+   		<property name="basePackage"
+   			value="com.secretgallery.service.impl" />
+   	</bean>
+   </beans>	
+   ```
+   **sql-mybatis-config.xml**
+   ```xml
+   <?xml version="1.0" encoding="UTF-8"?>
+   <!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+   <configuration>
+   <!--  -->
+   	<settings>
+   		<setting name="cacheEnabled" value="true" />
+   		<setting name="lazyLoadingEnabled" value="true" />
+   		<setting name="multipleResultSetsEnabled" value="true" />
+   		<setting name="mapUnderscoreToCamelCase" value="true" />
+   	</settings>
+   	<!-- 별칭 지정시 sql문쪽 resultType 이런곳에서 "클래스명"만으로 바로 사용 가능! 
+   	단, 클래스단위임. 패키지 단위는 application.properties에서 해야함. -->
+   	<typeAliases>
+   		<typeAlias alias="Item"
+   			type="com.secretgallery.vo.Item" />
+   	</typeAliases>
+   <!--  -->
+   	<typeHandlers>
+   		<typeHandler
+   			handler="org.egovframe.rte.psl.dataaccess.typehandler.CalendarMapperTypeHandler" />
+   	</typeHandlers>
+   <!--  -->
+   	<mappers>
+   		<mapper resource="sqlmap/mappers/Item.xml" />
+   	</mappers>
+   </configuration>
+   ```
+   **Item.xml**
+   ```xml
+   <?xml version="1.0" encoding="UTF-8"?>
+   <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+           "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+   <mapper namespace="com.secretgallery.service.impl.ItemMapper">
+   	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+   		insert
+   		into item (nickname, password, title, content, img_src, date1, date2)
+   		values (#{nickname}, #{password}, #{title}, #{content}, #{imgSrc},
+   		#{date1}, #{date2})
+   	</insert>
+   	<update id="update">
+   		update item
+   		set password=#{password},
+   		title=#{title},
+   		content=#{content}
+   		where item_id = #{id}
+   	</update>
+   	<select id="findById" resultType="Item">
+   		select item_id as id, nickname,
+   		password, title, content, img_src, date1,
+   		date2
+   		from item
+   		where item_id =
+   		#{id}
+   	</select>
+   	<delete id="delete">
+   		delete from item where item_id = #{id}
+   	</delete>
+   	<select id="findAll" resultType="Item">
+   		select item_id as id, nickname,
+   		password, title, content, img_src,
+   		date1,
+   		date2
+   		from item
+   	</select>
+   <!--  -->
+   	<!-- DBIO 써보기 + as별칭 말고 resultMap 써보기 -->
+   	<resultMap id="item" type="Item">
+   		<result property="id" column="item_id" />
+   		<result property="nickname" column="nickname" />
+   		<result property="password" column="password" />
+   		<result property="title" column="title" />
+   		<result property="content" column="content" />
+   		<result property="imgSrc" column="img_src" />
+   		<result property="date1" column="date1" />
+   		<result column="date2" property="date2" />
+   	</resultMap>
+   	<!-- (동적쿼리)검색+페이징 -->
+   	<select id="findAllWithPage" resultMap="item">
+   		SELECT *
+   		FROM item
+   		<where>
+   			<if test="searchKeyword != null and searchKeyword != ''">
+   				<choose>
+   					<when test="searchCondition == 0">
+   						and id like concat('%', #{searchKeyword}, '%')
+   					</when>
+   					<when test="searchCondition == 1">
+   						and title like concat('%', #{searchKeyword}, '%')
+   					</when>
+   				</choose>
+   			</if>
+   		</where>
+   		order by item_id DESC 
+   		LIMIT #{recordCountPerPage} OFFSET #{firstIndex}
+   	</select>
+   	<select id="findTotalCount" resultType="int">
+   		SELECT count(*) FROM Item
+   		<where>
+   			<if test="searchKeyword != null and searchKeyword != ''">
+   				<choose>
+   					<when test="searchCondition == 0">
+   						and id like concat('%', #{searchKeyword}, '%')
+   					</when>
+   					<when test="searchCondition == 1">
+   						and title like concat('%', #{searchKeyword}, '%')
+   					</when>
+   				</choose>
+   			</if>
+   		</where>
+   	</select>
+   	<!-- 자동검색(ajax) -->
+   	<select id="findTitleListForSuggest" resultType="string">
+   		SELECT TITLE
+   		FROM item
+   		where title like '%' || #{value} || '%'
+   		<!-- where title like concat('%', #{value}, '%') -->
+   	</select>
+   	<select id="findPrevNextById" resultMap="item">
+   		<![CDATA[
+   		SELECT * FROM Item WHERE
+   		item_id >= #{prevId} and item_id <= #{nextId}
+   		]]>
+   	</select>
+   </mapper>
+   ```
+   **ItemMapper.java**
+   ```java
+   //Mapper Interface - 메서드명과 쿼리ID를 매핑하여 쿼리호출
+   @Mapper
+   public interface ItemMapper {
+   	public Long save(Item item);
+   	public Long update(Item item);
+   	public Long delete(Item item);
+   	public Item findById(Long id);
+   	public List<Item> findAll();
+   //	
+   	public List<Item> findAllWithPage(ItemDefault searchItem);
+   	public int findTotalCount(ItemDefault searchItem);
+   	public List<String> findTitleListForSuggest(String value);
+   	public List<Item> findPrevNextById(@Param("prevId") Long prevId, @Param("nextId") Long nextId);
+   }
+   ```
+   **ItemServiceImpl.java**
+   ```java
+   @Service
+   @Transactional(readOnly = true) 
+   @RequiredArgsConstructor
+   @Slf4j
+   public class ItemServiceImpl extends EgovAbstractServiceImpl implements ItemService {
+   	private final ItemMapper itemMapper;
+   	//CRUD
+   	@Override
+   	@Transactional // 쓰기모드
+   	public Long save(Item item) throws Exception {
+   		return itemMapper.save(item);
+   	}
+   	@Override
+   	@Transactional // 쓰기모드
+   	public Long update(Item item) throws Exception {
+   		// TODO Auto-generated method stub
+   		return itemMapper.update(item);
+   	}
+   	@Override
+   	@Transactional // 쓰기모드
+   	public Long delete(Item item) throws Exception {
+   		// TODO Auto-generated method stub
+   		return itemMapper.delete(item);
+   	}
+   	@Override
+   	public Item findById(Long id) throws Exception {
+   		return itemMapper.findById(id);
+   	}
+   	@Override
+   	public List<Item> findAll() throws Exception {
+   		// TODO Auto-generated method stub
+   		return itemMapper.findAll();
+   	}
+   //
+   	//추가 함수
+   	@Override
+   	public List<Item> findAllWithPage(ItemDefault searchItem) throws Exception {
+   		// TODO Auto-generated method stub
+   		return itemMapper.findAllWithPage(searchItem);
+   	}
+   	@Override
+   	public int findTotalCount(ItemDefault searchItem) throws Exception {
+   		// TODO Auto-generated method stub
+   		return itemMapper.findTotalCount(searchItem);
+   	}
+   	@Override
+   	public List<String> findTitleListForSuggest(String value) throws Exception {
+   		// TODO Auto-generated method stub
+   		return itemMapper.findTitleListForSuggest(value);
+   	}
+   	@Override
+   	public List<Item> findPrevNextById(Long id) throws Exception {
+   		// TODO Auto-generated method stub
+   		return itemMapper.findPrevNextById(id-1, id+1);
+   	}
+   }
+   ```
+   **ItemService.java**
+   ```java
+   /**
+    * CRUD + 
+    * findAllWithPage + findTotalCount + findTitleListForSuggest + findPrevNextById
+    	* 총 게시물 수 구하는 함수: findTotalCount()
+    	* 이전, 이후 전시실 버튼 생성용: findPrevNextById()
+    	* 검색 자동완성 함수: findTitleListForSuggest()
+    */
+   public interface ItemService {
+   	/**
+   	 * CRUD - C
+   	 * @param item
+   	 * @return count(개수)
+   	 * @throws Exception
+   	 */
+   	public Long save(Item item) throws Exception;
+   	/**
+   	 * CRUD - U
+   	 * @param item
+   	 * @return count(개수)
+   	 * @throws Exception
+   	 */
+   	public Long update(Item item) throws Exception;
+   	/**
+   	 * CRUD - D
+   	 * @param item
+   	 * @return count(개수)
+   	 * @throws Exception
+   	 */
+   	public Long delete(Item item) throws Exception;
+   	/**
+   	 * CRUD - R
+   	 * @param id
+   	 * @return 
+   	 * @throws Exception
+   	 */
+   	public Item findById(Long id) throws Exception;
+   	/**
+   	 * CRUD - R
+   	 * @return 
+   	 * @throws Exception
+   	 */
+   	public List<Item> findAll() throws Exception;
+   	//
+   	//추가 함수
+   	/**
+   	 * 해당 페이지 Item 전부 조회 by desc
+   	 * @param pageId
+   	 * @return
+   	 * @throws Exception
+   	 */
+   	public List<Item> findAllWithPage(ItemDefault searchItem) throws Exception;
+   	/**
+   	 * 전체 Item의 총 개수
+   	 * @return
+   	 * @throws Exception
+   	 */
+   	public int findTotalCount(ItemDefault searchItem) throws Exception;
+   	/**
+   	 * 검색에 자동완성 기능
+   	 * @param value
+   	 * @return
+   	 * @throws Exception
+   	 */
+   	public List<String> findTitleListForSuggest(String value) throws Exception;
+   	/**
+   	 * Item의 이전, 이후 Item 구하기
+   	 * @param id
+   	 * @return
+   	 * @throws Exception
+   	 */
+   	public List<Item> findPrevNextById(Long id) throws Exception;
+   }
+   ```
+   </div>
+   </details>
+
+<br>
+
+**(3) 스프링 부트를 사용한 MyBatis 방식 + 동적쿼리 -> 자세한 코드 예시는 [Spring Boot MyBatis](https://github.com/BH946/spring-first-roadmap/tree/main/spring_study_7/itemservice-db#mybatis)**<br>**3개의 파일 활용:** application.properties, ItemMapper.interface, ItemMapper.xml, ItemRepository
 
 <details><summary><b>주요 동작방식(그림)</b></summary>
 <div markdown="1"><br>
-![image](https://github.com/user-attachments/assets/e7639c7e-498d-40b3-aa93-998b66719ed0)
+<img src="https://github.com/user-attachments/assets/e7639c7e-498d-40b3-aa93-998b66719ed0" alt="image" style="zoom:80%;" />
 </div>
 </details>
+
 
 - **라이브러리 추가**: `implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.2.0' //spring boot mybatis`
 
 - **사용 흐름**
 
+  1. **(큰 차이점)mybatis-boot-starter 의존성** 덕분에 SqlSessionFactory가 자동 빈 등록 되고, MapperConfigurer도 필요없이 자동으로 @Mapper 붙은 인터페이스를 찾아 줌.
   1. `application.properties` 로 type-aliases(별칭), underscore와 camel-case 매핑, 로그 등 설정
-  2. `ItemMapper인터페이스`는 Mybatis 매핑 XML(=ItemMapper.xml)을 호출해주는 "매퍼 인터페이스" + 매핑에 namespace=UserMapper인터페이스 추가
+  2. `ItemMapper.class`는 Mybatis 매핑 XML(=ItemMapper.xml)을 호출해주는 "매퍼 인터페이스"
      - **@Mapper** 를 반드시 사용 -> 최종적으로 스프링은 프록시 구현체 만들어 **"빈 등록!"**
-  3. `ItemMapper.xml` 로 `src/main/resources` 하위에 위치 및 사용할 sql을 작성한다.
-     - **참고 문법**<br>**자세한 코드 예시는 [Spring Boot MyBatis](https://github.com/BH946/spring-first-roadmap/tree/main/spring_study_7/itemservice-db#mybatis)**
-       1. **동적 SQL** -> `if, choose (when, otherwise) , trim (where, set), foreach`
-       2. **애노테이션으로 SQL 작성** -> xml 대신 애노테이션에 SQL 작성
-       3. **문자열 대체** -> SQL 인젝션 공격을 당할 수 있어서 권장하지 않음
-       4. **재사용 가능한 SQL 조각** -> sql 태그
-       5. **Result Maps** -> as 별칭을 대체 가능
-  4. `ItemRepository` 를 마지막으로 생성 및 DAO 로직 작성
-     - 빈에 등록된 ItemMapper 를 바로 가져다 사용 가능~!!~!
-
+  4. `ItemMapper.xml`는 부트니까 `src/main/resources` 하위에 위치 및 사용할 sql을 작성한다.
+     - 매핑에 namespace=UserMapper인터페이스 추가
+  5. `ItemRepository` 를 마지막으로 생성 및 DAO 로직 작성
+     - 빈에 등록된 ItemMapper 를 바로 가져다 사용하면 됨.
+  
   <details><summary><b>전체코드</b></summary>
   <div markdown="1"><br>
   **application.properties**
@@ -4587,6 +5117,9 @@ EXIT 또는 QUIT   -- SQL*Plus 종료[3]
 
 ## 스프링 부트의 애노테이션들
 
+중요: **스프링 빈** 설정은 자동 설정보다 **수동 설정이 우선순위 높다.**   
+예로, @Bean으로 수동 등록과 @Service, @Component같이 자동 등록이면 @Bean 등록 우선
+
 <details><summary><b>엔티티</b></summary>
 <div markdown="1">
 * @Entity : 스프링빈 자동 등록
@@ -4655,17 +5188,16 @@ EXIT 또는 QUIT   -- SQL*Plus 종료[3]
 * @PathVariable("userId"), @RequestParam => @PathVariable 방식 권장
   - @RequestParam : 기존 url 쿼리 파라미터 방식 : ?userId=userA
     - 단, POST-HTML Form 방식도 body를 쓰지만 쿼리 파라미터 형식으로 저장되기 때문에 @RequestParam 을 사용 가능
-    - 또한, 생략도 가능한데 **본인은 넣는걸 권장** (이때 required=true)
+    - 또한, 생략도 가능한데 **본인은 넣는걸 권장** 
+    - 값이 반드시 넘어오지 않아도 됨을 명시할 수 있음 (required=false)
     - 기본값 설정도 가능 (defaultValue = "-1")!!
       - 널 뿐만아니라 "/username=" 이렇게 "" 빈값으로 넘어온 데이터도 기본값을 설정해줌
     - Map, MultiValueMap 형태로 값을 받아올수도 있음
   - @PathVariable("itemId") : 최신 트랜드인 경로 변수 방식 : /mapping/userA
     - 중요한점은 @PathVariable 로 매핑한 userA가 따로 Model을 활용하지 않아도,
     - 백엔드뿐만 아니라 프론트에서도 userA값을 사용가능하단 점이다.
-    - (이부분은 추측이지만, 자동으로 변수를 추가해서 같이 프론트로 반환되는게 아닐까)
-      - 스프링의 Model 클래스는 브라우저의 쿠키처럼 프론트에 같이 넘어가는 클래스
-      - 이 때문에 데이터를 주고받기 수월하단 장점을 가짐.
-    - 물론, 햇갈릴수도 있어서 그냥 **Model을 항상 데이터 보내는 용도로 사용**하고,
+      - 프론트에서 URL 문자열을 가져와 사용할 수 있으니까.
+    - 물론, 그냥 **Model을 항상 데이터 보내는 용도로 사용**하고,
     - **@PathVariable을 url로 받은 값을 사용하는 목적**으로 활용하는게 젤 좋아보임.
 * @ModelAttribute("form")
   * model.addAttribute 에도 담기고, form서밋 때 html에 있는 form 데이터를 매핑해서 변수에도 자동으로 담아줘서 변수선언도 따로 할 필요 없음
@@ -5719,12 +6251,17 @@ tasks.named('test') {
 
 - **자원 재활용(forward) : 폼... 분리 가능한건 분리해서 작성 권장 - addForm, editForm**
 
-  * **GET에 꼭 빈 값이라도 엔티티 Model에 삽입 - th:object 함께 사용**
+  * **GET에 꼭 빈 값이라도 엔티티 Model에 삽입 - th:object 함께 사용**  
 
+    * 예로 `@ModelAttribute("item") Item item` 사용 시 "넘어온 form데이터 없어도 Item은 생성!"
+    * Employee employee = new Employee();  
+      //... 데이터있으면 필드 setter  
+      model.addAttribute("employee", employee); 를 자동으로 해주거덩 (그냥 Model이면 직접해야!)
+  
   * POST에는 `@Validated @ModelAttribute("item") AddItemDto form, BindingResult bindingResult, RedirectAttributes redirectAttributes)` 이런식으로 파라미터 필수
-
+  
   * **장점은 검증 실패시 html로 바로 return!! -> forward 이기 때문에 자원 재활용!! (redirect 안해도 되는거즤~)**
-
+  
   * ```java
     if(bindingResult.hasErrors()) {
       log.info("error={}", bindingResult);
@@ -6002,10 +6539,12 @@ tasks.named('test') {
 
 - 타임리프?
   - 웹 브라우저 -> 톰캣(서블릿 컨테이너) -> 스프링 컨테이너 순으로 이동하여,  
-    Controller를 찾고 있으면 viewResolver로 화면에 응답.
+    Controller를 찾고 있으면 자동 등록된 **viewResolver**로 화면에 응답.
   - 이때, templates/hello.html 처럼 Thymeleaf 템플릿 엔진 처리가 **"기본 경로"**로 가능!
+    - 즉, **boot-starter-thymeleaf 의존성이 있다면** 부트가 "뷰 리졸버" 자동 등록 + "경로 설정" 자동 등록
+    - 애초에 뷰 리졸버랑 이런건 **boot-starter-web 의존성** 덕분에 기본적으로 부트가 자동 지원.
 - JSP?
-  - 웹 접근은 위와 동일하다. 
+  - 부트를 사용하니 의존성들 덕분에 뷰 리졸버 이런 등록은 자동이다. (순수 스프링은 하나부터 열까지 직접 xml로...)
   - 단, **"JSP 템플릿 엔진 처리"**를 따로 라이브러리로 설치해야하고 **"경로도 설정"**해야 한다.
 
 <br>
@@ -6020,7 +6559,7 @@ tasks.named('test') {
 
 **3가지만 지키자:** 
 
-- JAR는 골치아파서 JSP엔 WAR 사용! -> 어차피 내장 톰캣으로 IDE 실행 되더라! 의문이긴 한데.
+- JAR는 골치아파서 JSP엔 WAR 사용! -> **(정정: 부트의 경우 내장콤캣 덕분에 JAR도 똑같이 잘 구동)**
 
 - 의존성: 
 
@@ -8434,9 +8973,11 @@ MVC 패턴 개발은 앞에서도 봤고, 잘 이해하고 있어서 **로그인
 
 <br>
 
-**@ModelAttribute를 메소드인자 에서 사용 시:** 입력 데이터를 자동으로 원하는 객체로 변환!!
+**@ModelAttribute를 메소드인자 에서 사용 시:** 입력 데이터(ex:form)를 자동으로 원하는 객체로 변환!   
+만약, 입력 데이터가 없어도 빈 객체를 생성! **(Null Pointer Exception 방지)**
 
-**@ModelAttribute를 메소드에서 사용 시:** 매 요청마다 메소드가 사용되며 초기객체를 추가하여 JSP에게 제공할 수 있다. **(Null Pointer Exception 방지 + 전역으로 사용가능!)**
+**@ModelAttribute를 메소드에서 사용 시:** 매 요청마다 메소드가 사용!(@GetMapping 보다먼저)   
+초기객체를 추가하여 JSP에게 제공하기 좋다. **(Null Pointer Exception 방지 + 전역 항상 적용)**
 
 - `form modelAttribute="login"`: @ModelAttribute의 객체와 바인딩
 - `<td><form:select path="loginType">`: 폼 필드 생성하고 path로 객체 속성과 바인딩(login.loginType)
@@ -8456,7 +8997,7 @@ MVC 패턴 개발은 앞에서도 봤고, 잘 이해하고 있어서 **로그인
   }
   
   //@ModelAttribute("employee") //-> 이거 안써야 잘 동작.
-  //String employeeid를 스프링이 찾지 못해 에러가 뜬다. 업데이트 URL은 ...?id 로 주겠지만 다른 URL은 아니잖아.
+  //String employeeid를 스프링이 찾지 못해 에러가 뜬다. 업데이트 URL은 ...?id 로 파라미터 준다고 하지만, 다른 URL은 파라미터 안주는것도 있음.
   //그니까 에러 뜸. 안쓰는게 맞음. 어차피 defaultUpdateEmployee 에서만 필요한거라 "공통으로 쓸 이유도 없음". String id 못 찾는것도 여전히 문제고.
   public Employee getEmployeeInfo(String employeeid) {
       return employeeService.getEmployeeInfoById(employeeid);
@@ -8794,10 +9335,25 @@ $(document).ready(function(){
 - **WEB-INF 하위 XML(오른쪽-Child)** → 컨트롤러 및 웹 관련 빈 관리
   - 예로 컴포넌트스캔(Controller), mvc:interceptors, mvc:view-controller 등
   - 특히, mvc:view-controller 는 컨트롤러 메소드 없이 **직접 URL을 뷰에 매핑**
-
 - **resources 하위 XML(왼쪽-Root)** → 서비스, 리포지토리 및 공통 빈 관리
   - 예로 컴포넌트스캔(Repository, Service) 등
 
+참고: 순수스프링은 web.xml에 필터, 디스패처 서블릿 다 세팅한 덕분에 main함수직접 작성 안해도 톰캣 위에서 동작  
+
+> **ContextLoaderListener**는 **web.xml** 파일에 설정되어, 웹 애플리케이션이 시작될 때 **Spring** 애플리케이션 **컨텍스트를 초기화**
+>
+> 이 리스너는 **contextConfigLocation** 파라미터를 통해 **XML** 파일의 위치를 지정받고, 해당 파일을 로드하여 빈을 등록
+>
+> 이를 담당해주는 web.xml이 없으면 당연히 "자바코드"로 직접 작성해서 main함수로 실행해줘야 할거임.
+
+헷갈리는 스프링의 xml 같은 config 파일들 인식 방법:
+
+- web.xml에서 xml들 다 인식하게 설정하는건 자명.
+- web.xml이 없다면?
+  - Test코드라면 `@ContextConfiguration(locations = {"classpath:...*.xml"}` 이런식 등록
+  - 부트라면 `@ImportResource("classpath...xml")` 이렇게 간단히 가능하다.
+  - 추가방법(GPT): Java Config로 등록 or ClassPathXmlApplicationContext 로 등록 법이 있음  
+    => 둘다 main함수에서 직접 applicationContext초기화 방식
 
 <br>
 
@@ -8839,8 +9395,8 @@ public void loginSuccess() {
     }
     
     //employee 추가하는 form 화면이라면 이걸 사용해줘야 null pointer 에러 방지.
-    //물론, form 화면 매핑하는 GET컨트롤러에서 직접 model.addAttribute("employee", new Emplyee()) 해도 되지만 
-    //"공통으로 사용"할 수 있다는 장점이 있어서 이렇게 사용하는걸 추천!
+    //물론, form 화면 매핑하는 GET컨트롤러에서 직접 model.addAttribute("employee", new Emplyee()) 해도 됨.
+    //더 쉬운건 @ModelAttribute("employee") Employee employee 이렇게 인자로 넣으면 model.addAttribute를 자동으로 해준다는거~!
     @ModelAttribute("employee")
     public Employee defaultEmployee() {
         return new Employee();
