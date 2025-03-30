@@ -1397,6 +1397,193 @@ public void initCacheMembers() {
 
 <br>
 
+**컨트롤러 로직에서 생각할 점:**
+
+1. DTO관련 생각: 굳이 필드 숨길게 없으면 안해도 되겠지만 password처럼 있으면 꼭 생성하자. 어차피 "요청DTO, 응답DTO" 둘 다 사용한다고 해서 코드만 조금 복잡해지지 성능이 떨어지고 할건 없다.  
+   특히, 검증(ex:@Validation)도 따로 지정할 수 있어 더 효과적이다.
+
+   <details><summary><b>본인 판단하에 DTO 사용 & 사용안한 코드 예시:</b></summary>
+   <div markdown="1"><br>
+   WEB) GalleryController -> gallery(), StudioController -> studioIdUpdate
+   ```java
+   /**
+   	 * 페이지 별로 조회 메서드 -> 페이징
+   	 * 
+   	 * @param item  -> 어차피 숨기고 싶은 password가 안들어 올거라서 요청은 DTO로 안 받겠다.
+   	 * @param model -> 응답DTO 사용
+   	 * @return
+   	 * @throws Exception
+   	 */
+   	@GetMapping()
+   	public String search(@ModelAttribute Item item, Model model) throws Exception {
+   //		log.info("itemId: {}",item.getId());
+   		return this.gallery(item, model); // HTTP말고 그냥 메소드 호출한거.(포워드,리다이렉트 아님)
+   	}
+   	@PostMapping() // ...?pageIndex=1 이런식으로 페이지 파라미터 넘어 올거임(pageIndex란 Item이 상속받고 있는 DefaultItem의
+   					// 필드)
+   	public String gallery(@ModelAttribute Item item, Model model) throws Exception {
+   		item.setPageUnit(myDataSource.getPageUnit());
+   		item.setPageSize(myDataSource.getPageSize());
+   //
+   		// pagination setting
+   		PaginationInfo paginationInfo = new PaginationInfo();
+   		paginationInfo.setCurrentPageNo(item.getPageIndex());
+   		paginationInfo.setRecordCountPerPage(item.getPageUnit());
+   		paginationInfo.setPageSize(item.getPageSize());
+   //
+   		item.setFirstIndex(paginationInfo.getFirstRecordIndex());
+   		item.setLastIndex(paginationInfo.getLastRecordIndex());
+   		item.setRecordCountPerPage(paginationInfo.getRecordCountPerPage());
+   //
+   		// List
+   		List<Item> items = itemService.findAllWithPage(item);
+   		List<ItemResDto> itemsResDto = items.stream().map(o -> new ItemResDto(o)).collect(Collectors.toList());
+   		int totCnt = itemService.findTotalCount(item);
+   //
+   		model.addAttribute("itemsResDto", itemsResDto);
+   		paginationInfo.setTotalRecordCount(totCnt);
+   		// Pagination
+   		model.addAttribute("paginationInfo", paginationInfo);
+   		log.info("cnt: {}, resultList: {}", totCnt, items);
+   //
+   		return "jsp/gallery";
+   	}
+   //
+   /**
+        * 수정 데이터 작성 -> 정보 기입
+        * 특징: 갤러리-아이템에서 이곳으로 접근
+        * @param itemId
+        * @param model
+        * @return
+        * @throws Exception 
+        */
+       @GetMapping("item/{itemId}")
+       public String studioCompleteId(@PathVariable Long itemId, Model model) throws Exception {
+           Item item = itemService.findById(itemId);
+           model.addAttribute("item", item);
+           return "/jsp/studio_item"; 
+       }
+       /***
+        * 수정 수행 -> 정보 기입
+        * @param form -> 요청 DTO (Valid로 JSP에 출력)
+        * @param bindingResult
+        * @param itemId
+        * @param redirectAttributes
+        * @return
+        * @throws Exception
+        */
+       @PostMapping("item/{itemId}")
+       public String studioIdUpdate(@Validated @ModelAttribute UpdateItemDto form, BindingResult bindingResult,
+                                    @PathVariable Long itemId, RedirectAttributes redirectAttributes, Model model) throws Exception {
+           if(bindingResult.hasErrors()) {
+               log.info("error={}", bindingResult);
+               model.addAttribute("bindingResult", bindingResult);
+               return "jsp/studio_item"; //다시 폼으로 이동
+               // 어차피 "검증" 에 걸려서 DB 사용안하기에 PRG 패턴 상관없움
+           }
+           log.info("title테스트={}", form.getTitle());
+           itemService.update(form);
+   //      int pageId = itemService.findPageId(itemId);
+   //      itemService.updateAllWithPage(pageId); // 캐싱
+         redirectAttributes.addFlashAttribute("status", "updateON");
+         redirectAttributes.addAttribute("itemId", itemId);
+         return "redirect:/gallery/itemDetail/{itemId}";        
+       }
+   //Dto 클래스
+   @Data
+   public class UpdateItemDto {
+   	  @NotNull
+   	  private Long id;
+   	  @NotNull
+   	  private String nickname;
+   	  @NotNull
+   	  @Pattern(regexp = "^[0-9]+", message = "비밀번호는 숫자로 입력 해주세요.")
+   	  private String password;
+   	  @NotNull
+   	  private String title;
+   	  @NotNull
+   	  private String content;
+   }
+   ```
+   API) ListsApiController -> findByDateWithMemberTask()
+   ```java
+   /**
+      * 일정 조회(4) - 날짜범위로 Lists(=하루단위 일정모음) 조회 -> 해당 회원꺼만 하루, 한달, 1년 등등 원하는 날짜 범위만큼 사용 가능
+      * 요청Dto, 응답Dto
+      */
+     @PostMapping(value = "/member/date")
+     public ResponseEntity<ApiResponse<List<ListsResDto>>> findByDateWithMemberTask(
+         @Login Long memberId,
+         @RequestBody @Validated CreateListsRequestDto request, BindingResult bindingResult) {
+       if (bindingResult.hasErrors()) {
+         log.info("검증 오류 발생 errors={}", bindingResult);
+         ApiResponse res = ApiResponse.error(HttpStatus.BAD_REQUEST.value(), bindingResult);
+         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+       }
+       List<Lists> listsList = listsService.findByDateWithMemberTask(memberId, request.startTime,
+           request.endTime);
+       if (listsList.isEmpty()) {
+         ApiResponse res = ApiResponse.success(HttpStatus.NO_CONTENT.value(), null);
+         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(res);
+       }
+       List<ListsResDto> result = listsList.stream()
+           .map(o -> new ListsResDto(o))
+           .collect(Collectors.toList());
+       ApiResponse res = ApiResponse.success(HttpStatus.OK.value(), result);
+       return ResponseEntity.status(HttpStatus.OK).body(res);
+     }
+   //
+   // DTO
+     @Getter
+     static class ListsResDto {
+       private Long listsId;
+       private LocalDate listsDate; // 등록 날짜
+       private String timerAllUseTime; // 타이머총사용시간
+       private List<TaskDto> listsTasks;
+       public ListsResDto(Lists lists) { // lazy 강제 초기화
+         listsId = lists.getId();
+         listsDate = lists.getListsDate();
+         Long time = lists.getTimerAllUseTime();
+         Long hour = time / (60 * 60 * 1000);
+         time %= (60 * 60 * 1000);
+         Long minute = time / (60 * 1000);
+         time %= (60 * 1000);
+         Long second = time / (1000);
+         timerAllUseTime = hour + ":" + minute + ":" + second; // 시:분:초 형태로 반환
+         listsTasks = lists.getTasks().stream()
+             .map(o -> new TaskDto(o))
+             .collect(Collectors.toList());
+       }
+     }
+     @Getter
+     static class CreateListsRequestDto {
+       @NotNull(message = "날짜 범위는 필수입니다.")
+       private LocalDateTime startTime;
+       @NotNull(message = "날짜 범위는 필수입니다.")
+       private LocalDateTime endTime;
+     }
+   ```
+   </div>
+   </details>
+
+2. 반환에 대한 생각: API는 JSON을 반환해서 반환처리가 "String+여러가지"로 복잡한 반면, 웹은 "String"만 해도 충분! (String으로 간단히 jsp 반환)
+
+3. 컨트롤러 에서의 JPA vs MyBatis 관점 POINT: "JSP에서 Item정보를 가져온다 가정"
+
+   JPA에선 update나 delete할때 항상 findOne으로 해당 Item을 DB에서 찾아와서 "영속성 만들고" update, delete를 적용했다. (특히, "더티체킹" 사용하려면 영속성을 꼭 만들어야 한다.)   
+   MyBatis에선 SQL직접 작성하니 findOne을 따로하지 않고 JSP에서 얻은 Item정보로 바로 update, delete 쿼리를 적용했다. (영속성 필요가 없으니)
+
+   따라서 복잡한 도메인(객체) 중심은 JPA, 쿼리 최적화가 중요하면 MyBatis가 좋겠다.  
+   JPA가 더티체킹위해 비즈니스 로직(update)이 엔티티단에 캡슐화 가능한 관점처럼 둘은 차이가 있다.
+
+4. API JSON직렬화 덕분에 유연 vs JSP는 엄격한 Bean규약: 예로 (private)static class vs public static class
+
+   API에서는 Jackson 라이브러리가 객체를 JSON으로 직렬화할 때 더 유연한 접근 방식(리플렉션)을 사용하기 때문에 내부 클래스가 public이 아니더라도 잘 동작했습니다. 반면, JSP의 EL은 더 엄격한 Java Beans 규약을 따르기 때문에 클래스와 getter 메서드가 모두 public이어야 합니다.
+
+   이러한 차이로 인해 API 응답에서는 문제가 없었지만, JSP에서는 public 접근 제한자가 필요했던 것입니다.
+
+<br>
+
 <br>
 
 ## 테스트 코드 -> 코드 커버리지 필수
@@ -1999,6 +2186,8 @@ public class InitDB {
 
 사용법은 "목차"에서 알아서 찾아서 참고 (다 내용 정리 되어 있을거임)
 
+**운영환경.yml TIP**: 자동 DB생성하지 말자(실수로 깃에 올리면 머리아픔) + 외부 yml, 내부 resources하위 yml 둘다 사용하자.(DB정보 등 때문, yml 둘 다 사용하게 설정 간단)
+
 - `spring: datasource: url, username, password...` 에서 h2 db 연결 세팅
   - **테스트에선 db연동 이부분을 주석 해야지 "메모리DB" 사용.**
   - **db걱정 없음!! h2가 자바기반이라 제공**
@@ -2517,13 +2706,17 @@ public class MessageTest {
 
 #### 외부 설정 -> @ConfigurationProperties 사용 하자!
 
-**외부 설정(application.yml) 에서 설정한 내용을 -> 자바객체로 바꿔서 -> 스프링 빈에 등록하여 사용하자는 방법! (messages랑 다른거다 오해하지말자!)**<br>`@ConfigurationProperties` 로 간단히 가능하다.
+**외부 설정(application.yml) 에서 설정한 내용을 -> 자바객체로 바꿔서 -> 스프링 빈에 등록하여 사용하자는 방법! (messages랑 다른거다 오해하지말자!)**<br>
+**특히,** `spring.config.import=optional:file:../prod.properties ` **로 외부의 설정 파일(ex:prod.properties가 우선순위)도 가져올 수 있다.(권장!)**
 
-- `application.yml` 에 **my.datasource 하위 내용(경로)**를 설정해서 사용하고자 한다면?
+- `application.yml` 에 **my.datasource.imgPath=값**를 설정해서 사용하고자 한다면?
 - `MyDataSourceProperties.java` 를 만들어서 **@ConfigurationProperties("my.datasource")** 로 설정 등록이 먼저다.
-- `MyDataSourceConfig.java` 를 만들어서 **@EnableConfigurationProperties(MyDataSourceProperties.class)** 로 추가 설정하고 **@Bean**로 스프링 빈 등록(기능확장)을 하면 끝이다. -> `MyDataSource.java` 를 직접 만들어서 이를 "자바객체"로 사용하게 하자.
-  - **@Value("${my.datasource.imgPath}")** 로 간단히 가져올 수 있지만, 우린 이걸 쓰려는게 아니니까 이건 잠시 잊자.
-- 사용은 그냥 **MyDataSourceConfig 객체**를 가져다가 바로 사용하면 됨!
+  - @ConfigurationProperties로 application.properties 내용을 JVM에 로드
+
+- `MyDataSourceConfig.java` 를 만들어서 **@EnableConfigurationProperties(MyDataSourceProperties.class)** 로 추가 설정하고, 객체로 쉽게 사용할 수 있게 추가로 `MyDataSource.java` 를 **@Bean**로 스프링 빈 등록(기능확장)을 하면 끝이다.
+  - @EnableConfigurationProperties로 @ConfigurationProperties를 빈 사용 활성화
+  - 애초에 **@Value("${my.datasource.imgPath}")** 로 간단히 가져올 수 있지만, 우린 이걸 쓰려는게 아니니까 이건 잠시 잊자.
+
 
 <details><summary><b>자세한 예시 코드 - application.yml, MyDataSourceProperties.java, MyDataSourceConfig.java, MyDataSource.java, TEST_CODE</b></summary>
 <div markdown="1"><br>
@@ -2597,12 +2790,13 @@ public class MyDataSource {
 TEST_CODE
 ```java
 //필요한 곳에서 불러오고
-private final MyDataSourceConfig source;
+private final MyDataSourceConfig source; //MyDataSource 불러와 바로 사용해도 됨
 //이를 바로 사용하면 끝
 .addResourceLocations("file:///"+source.getMyDataSource().getImgPath());
 ```
 </div>
 </details>
+
 <br><br>
 
 ### 검증(Valid)과 예외처리(Exception)
@@ -5200,6 +5394,8 @@ EXIT 또는 QUIT   -- SQL*Plus 종료[3]
     - 물론, 그냥 **Model을 항상 데이터 보내는 용도로 사용**하고,
     - **@PathVariable을 url로 받은 값을 사용하는 목적**으로 활용하는게 젤 좋아보임.
 * @ModelAttribute("form")
+  * 모든 소스의 request parameter를 맵핑할 수 있다.(즉 GET, POST 둘 다 상관없지만 GET에 주로 사용)
+  * "초기화 -> 바인딩" 을 거치므로 값이 전달되지 않아도 초기화 값을 사용
   * model.addAttribute 에도 담기고, form서밋 때 html에 있는 form 데이터를 매핑해서 변수에도 자동으로 담아줘서 변수선언도 따로 할 필요 없음
   * 또한, @ModelAttribute 를 생략하고 바로 **HelloData** 가 와도 동일하게 가능
   * **단, 너무 생략하면 햇갈릴 수 있어서 조심하자**
@@ -5252,6 +5448,7 @@ public HelloData requestBodyJsonV5(@RequestBody HelloData data) {
 * 쿠키 편리하게 조회 **@CookieValue**
 </div>
 </details>
+
 <br>
 
 <details><summary><b>ETC</b></summary>
@@ -6247,7 +6444,9 @@ tasks.named('test') {
 
 **PRG 패턴 적용(위에 PRG 정리한 내용 참고) - 무한 POST 방지**
 
-* **추가로 forward 사용가능한 건 forward 형태로 하는게 효과적**
+* **Post는 PRG패턴 위해 꼭 redirect 고려하자. 대부분 접근할 곳에 Get엔드포인트가 있어서 redirect 많이 사용할 거임. 없으면 forward로 ㄱㄱ**
+  * **forward 사용가능한 건 forward 형태로 하는게 효과적**
+
 
 - **자원 재활용(forward) : 폼... 분리 가능한건 분리해서 작성 권장 - addForm, editForm**
 
@@ -6258,19 +6457,38 @@ tasks.named('test') {
       //... 데이터있으면 필드 setter  
       model.addAttribute("employee", employee); 를 자동으로 해주거덩 (그냥 Model이면 직접해야!)
   
-  * POST에는 `@Validated @ModelAttribute("item") AddItemDto form, BindingResult bindingResult, RedirectAttributes redirectAttributes)` 이런식으로 파라미터 필수
+  * POST에는 `@Validated @ModelAttribute("item") AddItemDto form, BindingResult bindingResult, RedirectAttributes redirectAttributes)` 이런식으로 여러 파라미터 고려!
   
-  * **장점은 검증 실패시 html로 바로 return!! -> forward 이기 때문에 자원 재활용!! (redirect 안해도 되는거즤~)**
+    * Valid와 BindingResult**장점은 검증 실패시 html로 바로 return!! -> forward 이기 때문에 자원 재활용!! (redirect 안해도 되는거즤~)**
   
-  * ```java
-    if(bindingResult.hasErrors()) {
-      log.info("error={}", bindingResult);
-      return "studio-complete"; // studio-complete.html 반환 -> forward 로 자원 재활용
-      // 어차피 "검증" 에 걸려서 DB 사용안하기에 PRG 패턴 상관없움
-    }
-    //성공로직...
-    return "redirect:/gallery/{pageId}/itemDetail/{itemId}"; // PRG 패턴 적용
-    ```
+      * ```java
+        if(bindingResult.hasErrors()) {
+          log.info("error={}", bindingResult);
+          return "studio-complete"; // studio-complete.html 반환 -> forward 로 자원 재활용
+          // 어차피 "검증" 에 걸려서 DB 사용안하기에 PRG 패턴 상관없움
+        }
+        //성공로직...
+        return "redirect:/gallery/{pageId}/itemDetail/{itemId}"; // PRG 패턴 적용
+        ```
+  
+    * PRG 패턴 값 넘길 때 redirectAttributes를 주로 활용 특징: addAttribute, addFlashAttribute
+  
+      ```java
+      redirectAttributes.addAttribute("itemId", itemId);
+      redirectAttributes.addAttribute("test", test);
+      redirectAttributes.addFlashAttribute("status", "updateOFF");
+      return "redirect:/gallery/itemDetail/{itemId}"; // 기존 화면 다시 로딩
+      ```
+  
+      - addAttribute는 자동으로 URL에 붙어서(쿼리파라미터) 넘어가는데, itemId는 이미 URL에 있으니 test만 추가로 "?test=값" 형태로 넘어간다.
+      - addFlashAttribute를 사용하면 1번만 값을 넘겨주고 자동으로 지워준다. 
+        - PRG패턴으로 무한 POST를 피해도 클라에서 status값 보고 alert를 띄운다면, GET이여도 새로고침하면 클라 자체에서 계속 alert가 뜨는 불편함이 있는데 이를 피할 수 있는 유용한 기능이다.
+        - 중요한점: JSP에서 `<body data-status="${status}">` 이렇게 해줘야 `document.body.getAttribute('data-status');` 로 상태값을 js에서 잘 활용할 수 있다.
+
+- **헷갈리는 return "jsp/gallery", {return "redirect:/gallery", return "forward:/gallery"}, return this.gallery(item, model) ??**
+  - **jsp 반환은 뷰를 바로 반환하는 거고** -> ex: 뷰리졸버가 jsp/gallery.jsp 를 호출
+  - **redirect->get와 forward->post는 컨트롤러에 메서드로 구현한 URL을 매핑하여 동작** -> ex: @GetMapping("/gallery")
+  - **메소드는 HTTP 말고 그냥 컨트롤러의 메소드를 호출(GET, POST와 관계 없으며 서버에서 바로 호출한거니 forward에 가까움)**
 
 <br>
 
@@ -8973,7 +9191,7 @@ MVC 패턴 개발은 앞에서도 봤고, 잘 이해하고 있어서 **로그인
 
 <br>
 
-**@ModelAttribute를 메소드인자 에서 사용 시:** 입력 데이터(ex:form)를 자동으로 원하는 객체로 변환!   
+**@ModelAttribute를 메소드인자 에서 사용 시:** 입력 데이터(ex:form)를 자동으로 원하는 객체로 변환 및 응답에도 담아줌!(MVC의 M부분)   
 만약, 입력 데이터가 없어도 빈 객체를 생성! **(Null Pointer Exception 방지)**
 
 **@ModelAttribute를 메소드에서 사용 시:** 매 요청마다 메소드가 사용!(@GetMapping 보다먼저)   
@@ -9113,7 +9331,30 @@ protected Object referenceData4login() throws Exception {
 
 **ajax로 jQuery UI 기능인 autocomplete(자동완성), autoSelected(자동완성-select태그) 구현하기**
 
-- **(공통) MappingJackson2JsonView 빈 등록** -> 컨트롤러에서 JSON으로 클라에게 반환 목적
+- **(공통) jquery.js 와 jqueryui.js 가 필요**하다.
+
+- **(공통) MappingJackson2JsonView 빈 등록** -> 컨트롤러에서 JSON으로 클라에게 반환 목적 (JSON 통신)
+
+  - ```java
+    //사원정보 리스트 페이지에서 검색입력창(사원이름)에 사용되는 자동완성기능
+    @RequestMapping("/suggestName.do")
+    protected ModelAndView suggestName(HttpServletRequest request)throws Exception{
+    
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.setViewName("jsonView");
+    
+        String searchName = URLDecoder.decode(request.getParameter("searchName"),"utf-8");
+    
+        System.out.println("searchName: "+searchName);
+        List<String> nameList = employeeService.getNameListForSuggest(searchName);
+    
+        modelAndView.addObject("nameList", nameList);
+    
+        return modelAndView;
+    }
+    ```
+
+  - 근데, @ResponseBody 사용하면 더 간결한 코드 가능하다. (JSON 자동 반환 해주니까)
 
 - **autocomplete(자동완성)**
 
