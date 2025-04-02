@@ -1402,6 +1402,9 @@ public void initCacheMembers() {
 1. DTO관련 생각: 굳이 필드 숨길게 없으면 안해도 되겠지만 password처럼 있으면 꼭 생성하자. 어차피 "요청DTO, 응답DTO" 둘 다 사용한다고 해서 코드만 조금 복잡해지지 성능이 떨어지고 할건 없다.  
    특히, 검증(ex:@Validation)도 따로 지정할 수 있어 더 효과적이다.
 
+   "파일위치"는 컨트롤러면 controller/dto/*, 엔티티쪽 비즈니스 로직으로 인해 사용한다면 entity/dto/\* 이런식으로 가져가면 됨, 간단한건 static class로 코드내에 가져가도 됨.  
+   => 즉, 자기가 사용하는 쪽 하위에 달아두기. (규칙은 아니고 난 이렇게 함)
+   
    <details><summary><b>본인 판단하에 DTO 사용 & 사용안한 코드 예시:</b></summary>
    <div markdown="1"><br>
    WEB) GalleryController -> gallery(), StudioController -> studioIdUpdate
@@ -1565,7 +1568,7 @@ public void initCacheMembers() {
    ```
    </div>
    </details>
-
+   
 2. 반환에 대한 생각: API는 JSON을 반환해서 반환처리가 "String+여러가지"로 복잡한 반면, 웹은 "String"만 해도 충분! (String으로 간단히 jsp 반환)
 
 3. 컨트롤러 에서의 JPA vs MyBatis 관점 POINT: "JSP에서 Item정보를 가져온다 가정"
@@ -1578,9 +1581,18 @@ public void initCacheMembers() {
 
 4. API JSON직렬화 덕분에 유연 vs JSP는 엄격한 Bean규약: 예로 (private)static class vs public static class
 
-   API에서는 Jackson 라이브러리가 객체를 JSON으로 직렬화할 때 더 유연한 접근 방식(리플렉션)을 사용하기 때문에 내부 클래스가 public이 아니더라도 잘 동작했습니다. 반면, JSP의 EL은 더 엄격한 Java Beans 규약을 따르기 때문에 클래스와 getter 메서드가 모두 public이어야 합니다.
+   API 컨트롤러의 경우:
 
-   이러한 차이로 인해 API 응답에서는 문제가 없었지만, JSP에서는 public 접근 제한자가 필요했던 것입니다.
+   - **주로 해당 컨트롤러 내에서만 DTO를 사용**
+   - 응답 데이터는 JSON으로 직렬화되어 전송됨 
+     - 이때 **Jackson**같은 라이브러리가 리플렉션 활용하여 private 접근 가능
+   - **클라이언트 측에서는 이미 직렬화된 데이터를 받기 때문**에 Java 클래스의 접근성 제한에 영향을 받지 않음
+   
+   JSP의 경우:
+   
+   - **컨트롤러에서 사용할 뿐만 아니라 JSP 페이지에서도 직접 객체에 접근**
+   - JSP 표준 액션 태그나 EL 표현식이 **Java 객체에 직접 접근**해야 함
+   - 따라서 Bean 클래스와 그 멤버들이 public으로 선언되어야 함
 
 <br>
 
@@ -2369,6 +2381,8 @@ logging:
 
 ## 리팩토링 - AOP(+캐시), 메시지와 외부설정, 검증과 예외 등
 
+참고 동작: requset(HTTP) > Filter(서블릿필터) > Servlet(디스패처서블릿) > **Interceptor > Argument Resolver > AOP** > Controller
+
 <br><br>
 
 ### AOP(공통 해결 관심사)
@@ -2630,6 +2644,8 @@ public class ApiConfig implements WebMvcConfigurer {
   * `MessageSource` 는 이렇게 등록한 메시지를 사용하게 해주는 빈 (@Autowired 로 간단히 주입해서 사용 ㄱㄱ)
 * 여러개 추가할거면?? 
   * 예로 `errors.properties` 추가한다고 하면 `spring.messages.basename=message, errors` 이렇게 이어적으면 됨
+* 단, 부트 지원은 MessageSource 빈을 자동 만들어 주는거고(application.yml 설정 했다 가정)  
+  메시지 국제화는 LocaleChangeInterceptor빈과 LocaleResolver 빈을 만들어서 인터셉터 추가 설정을 해야지 적용 됩니다!(테스트는 URL?lang=en 이런식)
 
 <details><summary><b>예시 코드 - application.yml, messages.properties, messages_en.properties, TEST_CODE</b></summary>
 <div markdown="1"><br>
@@ -2801,19 +2817,20 @@ private final MyDataSourceConfig source; //MyDataSource 불러와 바로 사용�
 
 ### 검증(Valid)과 예외처리(Exception)
 
-주의: 웹이 아닌 **API의 경우 JSON으로 변경된 데이터를 Valid로 검증**하는것. **JSON으로 변경될 때 에러나 그 전에 이미 발생한 에러는 Exception(예외처리)**으로 해결!
+웹이 아닌 API의 경우 클라쪽 검증은 서버가 할 일이 아니다(JS는 프론트쪽 개발진이 해야지!),  
+서버는 **JSON으로 변경된 데이터를 "Valid(검증)"**하는거라서 **JSON→DTO매핑될 때 에러나 그 시점 다양한 에러(주로 서비스로직)들은 "Exception(예외)"**으로 해결!  
+**=> 즉, 웹은 “검증”만으로 충분하지만 API는 “검증+예외”가 필요!**
 
 **Valid는 클라, 서버 둘다에서 하면 더 안전하고 좋다.** 왜 그런지는 아래를 참고
 
 - **id에는 적용하는가??? 언제써야 하는가???**
-  *  id에 왜 검증을 넣냐고 볼 수도 있지만, POSTMAN같은 툴로 충분히 악의적 접근이 가능하기 때문에 "최종 검증은 서버에서 진행하는 것이 안전"
-  *  예로 "등록 폼" 에서는 보통 id가 자동생성하므로 필요없기 때문에 @NotNull 같은걸 적용안해도 됨. 그러나 "수정 폼" 에서는 id가 필요하기에 "검증"을 해주는것이 안전
+  *  id에 왜 검증을 넣냐고 볼 수도 있지만, 클라단에서만 검증(JS)로직 사용시 POSTMAN같은 툴로 충분히 악의적 접근이 가능하기 때문에 "최종 검증은 서버에서 진행하는 것이 안전"
   *  **즉, 필요한 경우가 있을때는 "서버에서 최종 검증" 을 하는것이 안전!**
 
 **검증과 예외 예시**
 
 * 예외처리 예시 => ex: String 타입에 int가 넘어온 에러를 처리
-* 검증 예시 => ex: 0~9999 숫자범위"를 지정
+* 검증 예시 => ex: 0~9999 숫자범위를 지정
 
 **예외란??** -> **Error**는 주로 JVM에서 발생하는 문제라서 에러처리 하지 않아도 된다. Exception을 보자.
 
@@ -2836,11 +2853,14 @@ private final MyDataSourceConfig source; //MyDataSource 불러와 바로 사용�
 
 * HTTP 요청 **"Form데이터, URL파라미터" 는 "검증"** 만으로 충분 - @ModelAttribute
 * HTTP 요청 **"API" 는 "검증 + 예외처리"** 까지 필요 - @RequestBody
-  * 또한, **API의 경우에는 여기서 사용한 메커니즘들을 활용하되 메시지는 꼭 API스펙에 맞춰 잘 반환**해주면 됨 (참고로 타임리프는 그냥 th문법으로 알아서 잘 가져옴)
+  * 또한, **API의 경우에는 여기서 사용한 메커니즘들을 활용하되 메시지는 꼭 API스펙에 맞춰 잘 반환**해주면 됨
 
 <br>
 
 #### 검증(Valid)
+
+Bean Validation 방식을 설명한다. (일반적인 스프링 제공 검증 방식)    
+⇒ eGov 플젝이 다른 방식이였음
 
 **Valid검증: “@Validated + {HTTP요청 + BindingResult} + 검증 애노테이션 + errors.properties(메시지)”**
 
@@ -2891,7 +2911,7 @@ private final MyDataSourceConfig source; //MyDataSource 불러와 바로 사용�
       </div>
       </details>
 
-  - **FiledError -> erros.properties 활용 권장 (메시지)**<br>**ObjectError -> bindingResult.reject() 활용 권장 (메시지)**
+  - **FiledError -> erros.properties 또는 @NotNull(message=”…”) 활용 권장 (메시지)**<br>**ObjectError -> bindingResult.reject() 활용 권장 (메시지)**
 
     - **FieldError** 는 도메인에 "검증 애노테이션" 사용 + "bindingResult.hasErrors()" 필수
 
@@ -2900,10 +2920,11 @@ private final MyDataSourceConfig source; //MyDataSource 불러와 바로 사용�
       * `bindingResult.hasErrors()` 는 errors가 있는지 여부를 반환하고, 
       * `errors` 에는 "검증결과 에러" 들을 기록하며 이는 "검증 애노테이션"에 걸린 에러들을 의미
 
-    - **POST**에서 주로 사용하게 되는 것 같다.? 즉, **외부 입력이 필요할때**
-
+    - GET 조회도 외부입력이 필요할 수 있어서 보안을 위해서는 사용하는게 좋긴 하겠지?  
+      근데 **POST**에서는 꼭 사용해주자. **외부 입력이 대부분 들어오니까**
+    
     - 아래 예제에선 errors.properties는 굳이 안썼다. 메시지 국제화에는 좋겠지만 뭐 기본제공 메시지도 넘 좋고, **@NotNull("메시지내용")** 처럼 직접 작성도 있어서!
-
+    
       <details><summary><b>코드 예시</b></summary>
       <div markdown="1"><br>
       FiledError 예시
@@ -2950,6 +2971,16 @@ private final MyDataSourceConfig source; //MyDataSource 불러와 바로 사용�
 <br>
 
 #### 예외처리(Exception)
+
+**예외를 처리하는 방법 크게 2가지**
+
+1. 예외를 잡아서 정상화 하는 방법 ⇒ 예로 try, catch
+
+2. 예외를 해결할 수 없는 문제로 인정하고 공통 처리하는 방법(사용자에게 죄송합니다. 같은 화면을 보여주는 방법) ⇒ 예로 @ExceptionHandler + @ControllerAdvice
+
+   특히, API(JSON)의 경우 대부분 2번으로 해결 됨. 직접 예외 throw로 던져서 공통 관리해도 되니까.
+
+<br>
 
 **예외처리 - Spring Exception**
 
@@ -3100,6 +3131,15 @@ private final MyDataSourceConfig source; //MyDataSource 불러와 바로 사용�
       public ErrorResult exceptionApiHandler(Exception e) {
         log.error("[exceptionHandler] ex", e);
         return new ErrorResult("SERVER ERROR", e.getMessage());
+      }
+    }
+    //
+    //MemberService.java
+    private void validateDuplicateMember(Member member) {
+      Member findMember = memberRepository.findByUid(member.getUid());
+      if (findMember != null) {
+        // IllegalStateException 예외를 호출
+        throw new IllegalStateException("이미 존재하는 회원입니다.");
       }
     }
     ```
@@ -3510,7 +3550,22 @@ ORM과 SQL Mapper 는 둘 다 객체와 SQL 매핑을 도와줘서 유사하긴 
     </div>
     </div>
     </details>
-
+    
+    <details><summary><b>IN 절은 어떻게 접근?</b></summary>
+    <div markdown="1"><br>
+    * **IN 조건은 '=' or '필터' 로 처리!**
+      - **IN 조건이 '=' 되려면 IN-LIST Iterator 방식으로 풀려야만 한다.**
+        - 컬럼이 인덱스를 타야 함 (옵티마이저가 자동으로 in-list iterator 동작)
+      - **그렇지 않으면 IN 조건은 "필터" 로 처리한다.**
+        - 컬럼이 인덱스를 타지 않아야 함 -> '='아닌 조건절로 인해 뒤 컬럼 전부 필터링도 포함
+      - **[꼭 이해! 넘 잘 설명해두신 분 글](https://m.blog.naver.com/fbfbf1/223275530812)**
+    * **IN 조건과 OR 조건 구분 -> OR-Expansion 과 IN-List Iterator구분**
+      - `in`과 `or`은 다른 표현 방식일 뿐 동일 -> 원래 or 연산자는 Index Range Scan 불가능!!<br>그러나, 둘다 UNION ALL 방식으로 작성시 Index Range Scan 가능!!
+      - **옵티마이저는 인덱스가 있으면 자동으로 쿼리변환**: in, or 연산자를 예전엔(9i) OR-Expansion방식을 사용했고, 현재 in 연산자는 IN-List Iterator방식을 사용(10g)
+        - `OR-Expansion`은 union all 로 변환하여 Index Range Scan을 사용하게 하는 효과
+        - `IN-List Iterator`는 in-list 갯수만큼 Index Range Scan을 반복하는 것이며, union all 로 변환한 것과 같은 효과를 얻을 수 있다.
+    </div>
+    </details>
 
 <br>
 
@@ -3875,7 +3930,33 @@ DataSource 가 `(1)my.datasource.하위` 와 `(2)spring: datasource: url, userna
 > => [Mybatis 키 자동 생성 - useGeneratedKeys(MySQL), selectKey(Oracle)](https://sesoc.tistory.com/41)
 >
 > N+1 문제는 JPA-"페치조인(즉시로딩)+컬렉션은 distinct까지" 로 해결  
-> MyBatis는 SQL문 사용하므로 조인이나 서브쿼리 덕분에 직면할 문제가 아님
+> MyBatis는 SQL문 사용하므로 조인이나 서브쿼리 덕분에 직면할 문제가 아님.  
+> 단, JPA의 fetch join은 N+1방지(즉시로딩)과 연관엔티티 자동 매핑 해준다.   
+> MyBatis도 resultMap과 SQL쿼리 작성만 잘하면 자동 연관엔티티 매핑 가능. (아래 예시코드 참고)
+>
+> <details><summary><b>MyBatis join의 연관엔티티 자동 매핑</b></summary>
+> <div markdown="1"><br>
+> Order, OrderItem 테이블이고, `List<OrderItem> orderItems` 변수가 자동 매핑!
+> ```xml
+> <resultMap id="OrderResultMap" type="Order">
+>     <id property="id" column="order_id"/>
+>     <result property="orderDate" column="order_date"/>
+>     <collection property="orderItems" ofType="OrderItem">
+>         <id property="id" column="item_id"/>
+>         <result property="productName" column="product_name"/>
+>         <result property="quantity" column="quantity"/>
+>     </collection>
+> </resultMap>
+> <!-- -->
+> <select id="getOrdersWithItems" resultMap="OrderResultMap">
+>     SELECT o.id AS order_id, o.order_date, 
+>            i.id AS item_id, i.product_name, i.quantity
+>     FROM orders o
+>     LEFT JOIN order_items i ON o.id = i.order_id
+> </select>
+> ```
+> </div>
+> </details>
 >
 > update는 JPA에선 더티체킹 방식이지만, SQL인 MyBatis는 아님.  
 > @Transactional에서 JPA는 영속성컨텍스트 덕분에 쿼리모아서 한번에 전송지만, MyBatis는 매순간 전송
@@ -9708,10 +9789,13 @@ public void loginSuccess() {
     3. **Spring MVC Controller** : 서버 측에서 동일한 validation.xml 기반으로 다시 한번 검증 수행  
        -> beanValidator + bindingResult 활용
 
-       DefaultBeanValidator는 @Validated 로 사용했던 스프링프레임워크의 검증 지원 빈이다.  
-       이를 스프링모듈에서 Jakarta Commons 와 연동할 수 있게 지원해 준다.  
+       스프링모듈의 DefaultBeanValidator빈을 사용해서 @Validated 처럼 검증할 수 있다.(@Validated는 스프링프레임워크의 LocalValidatorFactoryBean 빈이였음)   
+       스프링모듈에서는 Jakarta Commons 와 연동할 수 있게 지원해 준다.  
        따라서 DefaultBeanValidator 를 직접 사용하자!   
-       **=> 즉, @Validated 는 beanValidator.validate() 를 자동 수행해 bindingResult에 결과를 담았었는데, 우린 이걸 수동으로 해야함!**
+       **=> @Validated 는 beanValidator.validate() 를 자동 수행해 bindingResult에 결과를 담았었는데, Jakarta Commons에선 이걸 수동으로 직접 해야함!**
+       
+    4. JSP에 BindingResult결과도 보여주고싶다면 Bean Validation이나 Jakarta Commons나 똑같이 Model에 담아서 보여줌.  
+       근데, 타임리프는 JSP와 다르게 이걸 좀 쉽게 사용하는 코드 제공(th:error로 자동으로 bindingresult확인하여 @NotNull("이미지가 없습니다") 이런 메시지 출력)
 
 - **Spring 어노테이션 기반: 이건 우리가 하던 그거**임 ㅇㅇ. 이미 옛날에 정리해둠.
 
@@ -10677,4 +10761,3 @@ ${resultList}
 ```
 </div>
 </details>
-
