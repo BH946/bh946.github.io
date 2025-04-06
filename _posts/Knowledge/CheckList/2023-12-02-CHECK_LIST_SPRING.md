@@ -3197,6 +3197,10 @@ Bean Validation 방식을 설명한다. (일반적인 스프링 제공 검증 �
 
 ![Image](https://github.com/user-attachments/assets/a82f59c7-6e22-4756-b53b-ed4c904a8ce1) 
 
+<img src="https://github.com/user-attachments/assets/a82f59c7-6e22-4756-b53b-ed4c904a8ce1" alt="image" style="zoom:100%;" /> 
+
+
+
 <br>
 
 ## 배포 (+원하는 프로필로)
