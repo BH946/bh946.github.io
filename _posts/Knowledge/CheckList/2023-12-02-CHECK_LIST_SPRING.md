@@ -2442,8 +2442,8 @@ logging:
     <details><summary><b>예시 코드<br>서버 메모리 캐시 위해 CachingConfigurerSupport 상속 및 구현(기능확장)</b></summary>
     <div markdown="1"><br>
     CacheManager를 오버라이딩!! 물론, 간단히 설정파일(yaml)에서 설정도 지원 중<br>
-    main 함수있는 클래스에서 `@EnableCaching` 필수 선언!
-    코드는 사용법과 만드는 법을 간단히 소개
+    원래, main 함수있는 클래스에서 `@EnableCaching` 필수 선언!<br>=> 그러나 직접 빈 등록방식을 사용한다면 해당 설정 파일에서만 `@EnableCaching` 선언해도 됨!<br>
+    코드는 사용법과 만드는 법을 간단히 소개<br>
     ```java
     // 사용법: 서비스단 메소드에 이런식으로 적용
     @Cacheable(value = "users", key = "#memberId", cacheNames = "users", cacheManager = "cacheManager2")
@@ -2455,6 +2455,35 @@ logging:
             .maximumSize(200) // 캐시에 포함할 수 있는 최대 엔트리 수 (멤버 200명 정도한테 적용하자)
     //                .weakKeys() // 직접 키를 설정하므로 주석처리
             .recordStats());
+    ```
+    아래 방식을 추천 -> 직접 빈 등록 설정 파일
+    ```java
+    @Configuration
+    @EnableCaching
+    public class CacheConfig extends CachingConfigurerSupport {
+      @Override
+      @Bean
+      public CacheManager cacheManager() {
+        CaffeineCacheManager cacheManager = new CaffeineCacheManager("members");
+        cacheManager.setCaffeine(Caffeine.newBuilder()
+            .initialCapacity(50) // 내부 해시 테이블의 최소한의 크기
+            .maximumSize(50) // 캐시에 포함할 수 있는 최대 엔트리 수
+    //                .weakKeys() // 직접 키를 설정하므로 주석처리
+            .recordStats());
+        return cacheManager;
+      }
+    //
+      @Bean
+      public CacheManager cacheManager2() {
+        CaffeineCacheManager cacheManager = new CaffeineCacheManager("users");
+        cacheManager.setCaffeine(Caffeine.newBuilder()
+            .initialCapacity(1) // 내부 해시 테이블의 최소한의 크기 (캐릭터 어차피 1개만 기록)
+            .maximumSize(200) // 캐시에 포함할 수 있는 최대 엔트리 수 (멤버 200명 정도한테 적용하자)
+    //                .weakKeys() // 직접 키를 설정하므로 주석처리
+            .recordStats());
+        return cacheManager;
+      }
+    }
     ```
     </div>
     </details>
@@ -2817,9 +2846,11 @@ private final MyDataSourceConfig source; //MyDataSource 불러와 바로 사용�
 
 ### 검증(Valid)과 예외처리(Exception)
 
-웹이 아닌 API의 경우 클라쪽 검증은 서버가 할 일이 아니다(JS는 프론트쪽 개발진이 해야지!),  
-서버는 **JSON으로 변경된 데이터를 "Valid(검증)"**하는거라서 **JSON→DTO매핑될 때 에러나 그 시점 다양한 에러(주로 서비스로직)들은 "Exception(예외)"**으로 해결!  
-**=> 즉, 웹은 “검증”만으로 충분하지만 API는 “검증+예외”가 필요!**
+**API의 경우 클라쪽 "검증"은 서버가 할 일이 아니다(JS는 프론트쪽 개발진이 해야지!)**  
+**웹의 경우 클라와 서버쪽 둘 다 "검증"**해주는게 좋다.
+
+**API의 "예외"**의 경우 서버는 **JSON으로 변경된 데이터를 “Valid(검증)”**하는거라서 **JSON→DTO매핑될 때 에러나 그 시점에 다양한 에러(주로 서비스로직)들은 “Exception(예외)”**으로 해결!
+**=> 웹은 “검증”만으로 충분하지만 API는 “검증+예외”가 필요!**
 
 **Valid는 클라, 서버 둘다에서 하면 더 안전하고 좋다.** 왜 그런지는 아래를 참고
 
@@ -2978,7 +3009,12 @@ Bean Validation 방식을 설명한다. (일반적인 스프링 제공 검증 �
 
 2. 예외를 해결할 수 없는 문제로 인정하고 공통 처리하는 방법(사용자에게 죄송합니다. 같은 화면을 보여주는 방법) ⇒ 예로 @ExceptionHandler + @ControllerAdvice
 
-   특히, API(JSON)의 경우 대부분 2번으로 해결 됨. 직접 예외 throw로 던져서 공통 관리해도 되니까.
+   특히, API(JSON)의 경우 대부분 2번으로 해결 됨. 직접 예외를 throw로 던져서 공통 관리해도 되니까.
+
+**예외를 처리하는 계층의 흐름 이해:**
+
+1. 서비스계층의 비즈니스 로직의 예외 발생하면 정상화하거나 공통 처리위해 던지기
+2. 컨트롤러에서 웹이면 서비스의 Exception을 JSP 뷰로 매핑, API면 JSON으로 응답
 
 <br>
 
@@ -3149,13 +3185,17 @@ Bean Validation 방식을 설명한다. (일반적인 스프링 제공 검증 �
     - 요청할 때 body에 아무것도 입력 안했을때 예외처리가 **두번째**이다.(Exception)
     - 요청할 때 body에 요청 json형식에 안맞게 입력했을 때가 **세번째**이다.(Exception)
     - 아쉽지만 IllegalArgumentException 에러는 확인 못했다. Json 입력 에러는 다른 예외처리 사용하더라구.<br>
-    ![image](https://github.com/user-attachments/assets/d02fb4a3-ac85-46d7-b139-c08d537669f9)<br>
-    ![image](https://github.com/user-attachments/assets/fcffeb21-92f1-4df4-9fee-e45bcac12e76)<br>
-    ![image](https://github.com/user-attachments/assets/cdaad4cd-a69c-491c-8d34-03bc4e00df65)
+    <img src="https://github.com/user-attachments/assets/d02fb4a3-ac85-46d7-b139-c08d537669f9" alt="image"  /><br>
+    <img src="https://github.com/user-attachments/assets/fcffeb21-92f1-4df4-9fee-e45bcac12e76" alt="image"  /><br>
+    <img src="https://github.com/user-attachments/assets/cdaad4cd-a69c-491c-8d34-03bc4e00df65" alt="image"  />
     </div>
     </details>
 
 <br>
+
+![Image](https://github.com/user-attachments/assets/ced9d38e-6a3b-402a-bd9e-01a16e1f1934) 
+
+![Image](https://github.com/user-attachments/assets/a82f59c7-6e22-4756-b53b-ed4c904a8ce1) 
 
 <br>
 
@@ -9659,6 +9699,7 @@ $(document).ready(function(){
   - 특히, mvc:view-controller 는 컨트롤러 메소드 없이 **직접 URL을 뷰에 매핑**
 - **resources 하위 XML(왼쪽-Root)** → 서비스, 리포지토리 및 공통 빈 관리
   - 예로 컴포넌트스캔(Repository, Service) 등
+- 어디서 설정하든 적용은 사실 둘 다 되는데, 유지보수 위해서라도 구분 짓자!
 
 참고: 순수스프링은 web.xml에 필터, 디스패처 서블릿 다 세팅한 덕분에 main함수직접 작성 안해도 톰캣 위에서 동작  
 
@@ -9735,7 +9776,7 @@ public void loginSuccess() {
 
 - **REST API 예외 처리**: 예외가 발생하면 **JSON** 형태의 응답을 반환
   
-  - 이전에 이미 Boot로 하는거 정리했다. (부트는 뷰로 /error 하위 자동 페이지 반환 되는것도 기억)
+  - 이전에 이미 Boot로 하는거 정리했다. (부트의 타임리프는 뷰로 /error 하위 자동 페이지 반환 기억)
   
 - **전체적인 흐름 정리: 서비스계층, 컨트롤러 계층 나눠서 보기**
 
@@ -9765,9 +9806,9 @@ public void loginSuccess() {
 
 - Jakarta Commons: eGovframe학습할 때 계속 이것만 사용하더라.
 
-  - **validator-rules.xml** 에 기본제공 룰 말고 **커스텀 룰 추가**하는법: [공문](https://www.egovframe.go.kr/wiki/doku.php?id=egovframework:rte:ptl:validation:add_rules_in_commons_validator)
-
   - **적용법:**
+
+    1. 제공된 **validator-rules.xml** 사용 및 기본제공 룰 말고 **커스텀 룰 추가**하는법: [공문](https://www.egovframe.go.kr/wiki/doku.php?id=egovframework:rte:ptl:validation:add_rules_in_commons_validator)
 
     1. **validation.xml, validator.jsp, URL매핑** : 공통 규칙 정의 (서버+클라이언트)
 
@@ -9795,7 +9836,7 @@ public void loginSuccess() {
        **=> @Validated 는 beanValidator.validate() 를 자동 수행해 bindingResult에 결과를 담았었는데, Jakarta Commons에선 이걸 수동으로 직접 해야함!**
        
     4. JSP에 BindingResult결과도 보여주고싶다면 Bean Validation이나 Jakarta Commons나 똑같이 Model에 담아서 보여줌.  
-       근데, 타임리프는 JSP와 다르게 이걸 좀 쉽게 사용하는 코드 제공(th:error로 자동으로 bindingresult확인하여 @NotNull("이미지가 없습니다") 이런 메시지 출력)
+       타임리프의 th:error와 유사하게 JSP도 form:errors로 가능 (th:error로 자동으로 bindingresult확인하여 @NotNull("이미지가 없습니다") 이런 메시지 출력, 물론 message.properties와 연동도 되고)
 
 - **Spring 어노테이션 기반: 이건 우리가 하던 그거**임 ㅇㅇ. 이미 옛날에 정리해둠.
 
