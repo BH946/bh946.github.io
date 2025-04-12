@@ -12,32 +12,24 @@ typora-root-url: ../../..
 
 
 
-**Spring + Spring Boot + JPA + Spring Data JPA + MyBatis + Thymeleaf + DB(H2, MySQL, Oracle) 등 활용한 개발 경험**  
-+) Eclipse, STS, 전자정부프레임워크
+**"일반":** 인텔리J(IDE) + Gradle(빌드 툴) + JSON(API) or 타임리프(WEB) + JPA&Spring Data JPA(ORM) + Spring Boot + H2, MySQL, Oracle(DB) 등 방식  
+**=> "JPA+Boot파트"**
+
+**"eGov":** 이클립스(IDE) + Maven(빌드 툴) + JSP(WEB) + MyBatis(SQL Mapper) + Spring Boot & Spring 등 방식  
+**=> "MyBatis+Spring+Boot+eGov 파트"**
 
 <br>
 
-**헷갈리는 스프링, 스프링부트 프로젝트 생성과 JAR, WAR**
-
-- Spring Framework 는 사이트 제공은 없고, STS3이나 직접 디렉토리 구조를 구성!  
-  - 디렉토리 구조가 "**스프링부트+JSP+WAR**" 구조와 비슷 -> `src/main/webapp/WEB-INF/jsp`
-  - 템플릿 엔진(View)에서 JSP를 사용
-- Spring Boot 는 [start.spring.io](http://start.spring.io/) 이나 IDE(이클립스, STS 등)로 플젝 생성  
-  - 디렉토리 구조가 "타임리프" 사용에 맞는 구조 -> **webapp부분 없고 java, resources가 끝!**
-  - 템플릿 엔진(View)에서 타임리프를 사용(오피셜)
-    - **외부 라이브러리(임베디드-톰캣-JSP 라이브러리) 사용시 JSP 사용가능**
-      - WAR인데 JAR 실행처럼 IDE에서 내부톰캣으로 바로 실행도 되는 장점!
-    - 스프링부트에서 JSP사용할거면 WAR 형식 사용을 추천.(JAR는 좀 복잡)
-- 참고: 원래 WAR는 따로 WAS(톰캣)을 구동후 위에 돌려야 하고, JAR는 JVM위에서 바로 돌릴수 있다.
-
 <br>
+
+## 들어가기전.. 개발흐름, 네이밍 등
 
 `IDE: IntelliJ & Eclipse + Build Tool: Gradle - Groovy & Maven - Pom.xml`
 
 
 > 주로 IntelliJ + Gradle 사용 중
 
-<details><summary><b>실제 빌드와 실행 둘 다 IntelliJ 로 설정 (실행 속도가 더 빠름. 주의: 부트 3.2부터는 Gradle로 하자) + "코드 컨벤션" + "자바 버전 설정"</b></summary><br>
+<details><summary><b>주의: 부트 3.2부터는 Gradle로 하자) 실제 빌드와 실행 둘 다 IntelliJ 로 설정 (실행 속도가 더 빠름.) + "코드 컨벤션" + "자바 버전 설정"</b></summary><br>
 참고: 스프링부트 3.2부터는 IntelliJ IDEA로 빌드와 실행 설정하면 에러가 발생. 따라서 Gradle을 사용해서 빌드하고 실행하자. (첨 빌드는 느릴지라도 Gradle 캐시를 하므로 2번째 부턴 빠름)
 <br>
 <b>Settings → gradle 검색 → IntelliJ IDEA로 설정 (빌드툴, 실제 실행 설정)</b>
@@ -48,149 +40,153 @@ typora-root-url: ../../..
 <img src="https://github.com/user-attachments/assets/4ffc05a9-0ac2-40f6-83b4-1bf6929937fc"/>
 </details>
 
-<details><summary><b>툴 마다 외부 라이브러리 적용법</b></summary>
+<details><summary><b>툴(Maven, Gradle) 마다 외부 라이브러리 적용법</b></summary>
 <ul>
     <li>Maven(빌드 툴)은 <b>pom.xml</b>에서 라이브러리 설정</li>
     <li>Gradle(빌드 툴)은 <b>build.gradle</b>에서 라이브러리 설정</li>
-    <li>이클립스(IDE)에서 빌드 툴 사용안했을 때는 직접 jar파일 집어 넣었었음.(전통)</li>
-    <li>인텔리J(IDE)에서도 가능할거임. 물론, 어느 IDE든 "빌드 툴에 의존성 추가"가 간편!</li>
+    <li>참고로 이클립스(IDE)에서 빌드 툴 사용안했을 때는 직접 jar파일 집어 넣었었음.(전통방식)</li>
 </ul>
 </details>
-- 특히 boot-starter-web 라이브러리 없으면 바로 종료되기 때문에, Spring을 사용한다면 이때 `ApplicationRunner` 구현체로 자바코드 실행하는게 보통
 
-  - ApplicationRunner는 스프링 부트가 애플리케이션(서버)이 완전히 초기화된 후 실행되는 콜백 인터페이스이기 때문!!
+아래 JUnit은 Boot기준(@SpringBootTest)이고, 순수 스프링은 @RunWith(SpringJUnit4ClassRunner.class)와 @ContextConfiguration를 사용
 
-- 아래 JUnit은 Boot기준(@SpringBootTest)이고, 순수 스프링은 @RunWith(SpringJUnit4ClassRunner.class)와 @ContextConfiguration를 사용
-
-  <details><summary><b>build.gradle 설정 예시 (+플러그인)</b></summary>
-  <div markdown="1"><br>
-  **스프링부트 플러그인 사용 시 "라이브러리 버전관리 자동화" -> 지원 안되는건 "직접 버전 등록 필수!"**<br>
-  `spring 3.x` 사용은 `java17` 필수!<br>
-  ```groovy
-  plugins {
-    id 'java'
-    id 'org.springframework.boot' version '3.1.2'
-    id 'io.spring.dependency-management' version '1.1.0'
+<details><summary><b>build.gradle 설정 예시 (+플러그인)</b></summary>
+<div markdown="1"><br>
+**스프링부트 플러그인 사용 시 "라이브러리 버전관리 자동화" -> 지원 안되는건 "직접 버전 등록 필수!"**<br>
+`spring boot 3.x` 사용은 `java17` 필수!<br>
+```groovy
+plugins {
+  id 'java'
+  id 'org.springframework.boot' version '3.1.2'
+  id 'io.spring.dependency-management' version '1.1.0'
+}
+group = 'com'
+  version = '0.0.1-SNAPSHOT'
+ 	sourceCompatibility = '17'
+  configurations {
+  compileOnly {
+    extendsFrom annotationProcessor
   }
-  group = 'com'
-    version = '0.0.1-SNAPSHOT'
-   	sourceCompatibility = '17'
-    configurations {
-    compileOnly {
-      extendsFrom annotationProcessor
-    }
-  }
-  repositories {
-    mavenCentral()
-  }
-  dependencies {
-    // data-jpa(jpa, spring data jpa), web(http), lombok, db(h2, oracle)
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    compileOnly 'org.projectlombok:lombok'
-    runtimeOnly 'com.h2database:h2'
-    // https://mvnrepository.com/artifact/com.oracle.database.jdbc/ojdbc10
-    implementation group: 'com.oracle.database.jdbc', name: 'ojdbc10',     version: '19.21.0.0'
-    annotationProcessor 'org.projectlombok:lombok'
-    // test(JUnit, AsserJ 등), lombok 을 test 에서 사용
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testCompileOnly 'org.projectlombok:lombok'
-    testAnnotationProcessor 'org.projectlombok:lombok'
-    //valid(NotEmpty 등) 사용위해 추가
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'org.springframework.boot:spring-boot-starter'
-    implementation 'org.springframework.boot:spring-boot-devtools'
-    // 캐시(caffeine 로 캐시매니저 간단 등록)
-    implementation 'org.springframework.boot:spring-boot-starter-cache'
-    implementation 'com.github.ben-manes.caffeine:caffeine:3.1.1' 
-    // 모니터링(actuator, prometheus)
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'io.micrometer:micrometer-registry-prometheus'
-  }
-  tasks.named('test') {
-    useJUnitPlatform()
-  }
-  ```
-  </div>
-  </details>
-  <details><summary><b>SpringBoot+jUnit 버전별로 라이브러리 추가 주의(Spring2+JUnit4, Srping3+JUnit5)</b></summary>
-  <div markdown="1"><br>
-  **(1) SpringBoot 2.xx + JUnit4(Test Code)**<br>
-  * `build.gradle`
-  <div markdown="1">
-  ```groovy
-  //JUnit4 추가(junit5로 자동실행 되기 때문) - 의존성 추가
-  testImplementation("org.junit.vintage:junit-vintage-engine") {
-    exclude group: "org.hamcrest", module: "hamcrest-core"
-  }
-  ```
-  </div>
-  * `TestCode.java`
-  <div markdown="1">
-  ```java
-  @RunWith(SpringRunner.class) // SpringRunner : Junit4
-  @SpringBootTest // 스프링과 통합 테스트 - "빈" 등 스프링 사용시 필수
-  public class ItemServiceTest { 
-    @Test // 기본 테스트(필수)
-    public void 조회() {} 
-  }
-  ```
-  </div>
-  **(2) SpringBoot 3.xx + JUni5(Test Code)**
-  * H2 사용시 반드시 버전 업그레이드 + 자바 17이상
-  * RunWith, JUnit4 등록이 없어졌다고 보면 됨.
-  * `build.gradle`
-  <div markdown="1">
-  ```groovy
-  // JUnit5 자동 사용!
-  // 테스트 코드에서 lombok 사용하는 꿀 팁! -> 아래 의존성 추가
+}
+repositories {
+  mavenCentral()
+}
+dependencies {
+  // data-jpa(jpa, spring data jpa), web(http), lombok, db(h2, oracle)
+  implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+  implementation 'org.springframework.boot:spring-boot-starter-web'
+  compileOnly 'org.projectlombok:lombok'
+  runtimeOnly 'com.h2database:h2'
+  // https://mvnrepository.com/artifact/com.oracle.database.jdbc/ojdbc10
+  implementation group: 'com.oracle.database.jdbc', name: 'ojdbc10',     version: '19.21.0.0'
+  annotationProcessor 'org.projectlombok:lombok'
+  // test(JUnit, AsserJ 등), lombok 을 test 에서 사용
+  testImplementation 'org.springframework.boot:spring-boot-starter-test'
   testCompileOnly 'org.projectlombok:lombok'
   testAnnotationProcessor 'org.projectlombok:lombok'
-  ```
-  </div>
-  * `TestCode.java`
-  <div markdown="1">
-  ```java
-  @SpringBootTest // 스프링과 통합 테스트 - "빈" 등 스프링 사용시 필수
-  public class ItemServiceTest { 
-    @Test // 기본 테스트(필수)
-    public void 조회() {} 
-  }
-  ```
-  </div>
-  </div>
-  </details>
+  //valid(NotEmpty 등) 사용위해 추가
+  implementation 'org.springframework.boot:spring-boot-starter-validation'
+  implementation 'org.springframework.boot:spring-boot-starter'
+  implementation 'org.springframework.boot:spring-boot-devtools'
+  // 캐시(caffeine 로 캐시매니저 간단 등록)
+  implementation 'org.springframework.boot:spring-boot-starter-cache'
+  implementation 'com.github.ben-manes.caffeine:caffeine:3.1.1' 
+  // 모니터링(actuator, prometheus)
+  implementation 'org.springframework.boot:spring-boot-starter-actuator'
+  implementation 'io.micrometer:micrometer-registry-prometheus'
+}
+tasks.named('test') {
+  useJUnitPlatform()
+}
+```
+</div>
+</details>
+
+<details><summary><b>스프링과 부트에서 JUnit 버전별로 주의점(JUnit4, JUnit5)</b></summary>
+<div markdown="1"><br>
+순수 스프링은 @RunWith(SpringJUnit4ClassRunner.class)와 @ContextConfiguration(빈 사용 xml)를 사용,<br>
+부트는 @ContextConfiguration 대신 편리한 @SpringBootTest를 사용!<br>
+아래는 Boot에서 JUnit4, JUnit5 사용 주의점
+**(1) SpringBoot 2.xx + JUnit4(Test Code)**<br>
+* `build.gradle`
+<div markdown="1">
+```groovy
+//JUnit4 추가(junit5로 자동실행 되기 때문) - 의존성 추가
+testImplementation("org.junit.vintage:junit-vintage-engine") {
+  exclude group: "org.hamcrest", module: "hamcrest-core"
+}
+```
+</div>
+* `TestCode.java`
+<div markdown="1">
+```java
+@RunWith(SpringRunner.class) // SpringRunner : Junit4
+@SpringBootTest // 스프링과 통합 테스트 - "빈" 등 스프링 사용시 필수
+public class ItemServiceTest { 
+  @Test // 기본 테스트(필수)
+  public void 조회() {} 
+}
+```
+</div>
+**(2) SpringBoot 3.xx + JUni5(Test Code)**
+* H2 사용시 반드시 버전 업그레이드 + 자바 17이상
+* RunWith, JUnit4 등록이 없어졌다고 보면 됨.
+* `build.gradle`
+<div markdown="1">
+```groovy
+// JUnit5 자동 사용!
+// 테스트 코드에서 lombok 사용하는 꿀 팁! -> 아래 의존성 추가
+testCompileOnly 'org.projectlombok:lombok'
+testAnnotationProcessor 'org.projectlombok:lombok'
+```
+</div>
+* `TestCode.java`
+<div markdown="1">
+```java
+@SpringBootTest // 스프링과 통합 테스트 - "빈" 등 스프링 사용시 필수
+public class ItemServiceTest { 
+  @Test // 기본 테스트(필수)
+  public void 조회() {} 
+}
+```
+</div>
+</div>
+</details>
 
 <br>
 
-**이클립스에서 스프링 플젝보면 Explorer source폴더가 두개가 있는 이유가 뭘까?**
+**Eclipse(이클립스)와 STS 살펴보자면?**
 
-- **물리적 위치는 동일**하지만, **폴더별 역할이 다름!**
-- 패키지모양을 담은 폴더는 **컴파일 대상** 폴더이고, 그냥 일반폴더는 **컴파일하지않는** static 리소스를 보통 담는다.
+- **이클립스에서 Explorer source폴더가 두개가 있는 이유?**  
+  예로: src/main/java, src/main/resources 가 패키지모양 폴더, src/main/webapp 가 일반폴더
 
-<details><summary><b>Eclipse+Spring Tools 플러그인 / STS3,4 => 맘 편히 STS4 사용을 권장!</b></summary>
+  - **물리적 위치는 동일**하지만, **폴더별 역할이 다름!**
+
+  - 패키지모양을 담은 폴더는 **컴파일 대상** 폴더이고, 그냥 일반폴더는 **컴파일 하지 않는** static 리소스를 보통 담는다. (어렵게 생각하지 말자)
+
+
+<details><summary><b>Eclipse+Spring Tools 플러그인 / STS3, STS4(권장) or eGovDev-Eclipse / 이클립스 환경설정</b></summary>
 <div markdown="1"><br>
 **참고문서: [STS3,4 설치와 환경설정](https://www.snugarchive.com/blog/sts-setup/), [이클립스 설치와 환경설정](https://www.snugarchive.com/blog/java-eclipse-setup/), [아파치 설치와 환경설정](https://www.snugarchive.com/blog/apache-tomcat-setup/)**<br>
 **"Eclipse엔 Spring Tools 이란 플러그인을 추가"**하거나 아예 Spring 개발용으로 개발된 이클립스인 **"STS IDE"**를 사용함.<br>
-1. **이클립스 기반인 STS IDE 사용의 경우: [STS 설치 문서](https://spring.io/tools)**
-   JSP, JS 사용할거면 Help > Eclipse Marketplace > JAVA EE 플러그인 설치는 필요함 (**웹 개발 도구 추가ver!** )<br>
+1. **이클립스 기반인 STS IDE 사용의 경우: [STS 설치 문서](https://spring.io/tools)**<br>
+JSP, JS 사용할거면 Help > Eclipse Marketplace > JAVA EE 플러그인 설치는 필요함 (**웹 개발 도구 추가ver!** )<br>
    **STS3도 Boot 지원. 근데 STS4 만큼 최신 Boot 지원은 아님.**  <br>
-   단, STS4의 경우 legacy가 지원 안되는것 같아서 얘는 오히려 STS3 플러그인도 추가 설치해야 legacy도 사용 가능. (물론, 부트만 쓸거면 상관 없겠지만!)<br>
-   **=> 따라서 spring legacy project 랑 spring boot(starter) project 둘다 쓰려면 STS3을 쓰거나, 최신 Boot 사용을 위해 STS4를 쓰되 STS3 플러그인까지 설치하자.**<br>
-   **=> 중요: STS4에서 STS3을 사용하려면 반드시 STS4.14.1 + STS3.9.22 Add-On For STS4(플러그인) 버전을 사용할 것. (스프링은 STS4를 권장하므로 이제 이전버전 지원안하거든)**<br><br>
+   단, STS4의 경우 legacy가 지원 안되는것 같아서 얘는 오히려 STS3 플러그인도 추가 설치해야 legacy도 사용 가능. (물론, 직접 디렉 구성하거나 부트만 쓸거면 상관 없겠지만!)<br>
+   **=> 따라서 spring legacy project 랑 spring boot(starter) project 둘다 쓰려면 STS3을 쓰거나, 최신 Boot 사용을 위해 STS4를 쓰되 STS3 플러그인까지 설치하자.**<br><br>
+   **중요: STS4에서 STS3을 사용하려면 반드시 STS4.14.1 + STS3.9.22 Add-On For STS4(플러그인) 버전을 사용할 것. (스프링은 STS4를 권장하므로 이제 이전버전 지원안하거든)**<br><br>
    spring starter project 로 생성 시 spring init 사이트에서 부트 플젝 생성하던것처럼 라이브러리도 다 추가하고 손 쉽게 가능!! -> [생성모습](https://euni8917.tistory.com/199)<br><br>
-   **JS 환경설정 필요: STS4 의 경우 JAVA EE 플러그인 설치 완료 가정**
+   **JS 환경설정 필요: STS4 + JAVA EE 플러그인 설치 완료 가정**
    - Window > Preferences > General > Editors > File Associations로 이동합니다.<br>
      'File types'에 *.js를 추가합니다.<br>
      'Associated editors'에서 'Generic Text Editor'를 기본값(default)으로 설정합니다.
-2. **이클립스에서 STS 플러그인 설치하는 경우: [이클립스 설치 문서](https://www.eclipse.org/downloads/packages/)**
-   Eclipse IDE for Java Developers(=JAVA SE) 는 일반 자바 개발에 설치하고, 보통 이 경우 **웹 개발 용인 Eclipse IDE for Enterprise Java and Web Developers(=JAVA EE) 로 설치!**<br>
-   => Standard가 JAVA SE이고, JAVA EE나 JAVA ME(Micro.작은)는 JAVA SE 기반으로 만든 플랫폼.<br><br>
-   STS 플러그인은 Help > Eclipse Marketplace > 에서 끝이 RELEASE로 끝나는 최상단의 3버전과 4버전을 설치 (STS3, 4 둘다 사용하려고!)<br>
-   **=> 중요: STS4에서 STS3을 사용하려면 반드시 STS4.14.1 + STS3.9.22 Add-On For STS4 버전을 사용할 것. (스프링은 STS4를 권장하므로 이제 이전버전 지원안하거든)**<br><br>
-   **특히, 이클립스 버전도 STS 프러그인 지원하는지 잘 맞춰줘야함. 이클립스 조차 JDK호환 버전이 다를수 있음 ㅠ (이래서 걍 STS4 IDE 이런거 쓰는데 편해..)**<br>
-   => 아래 사진은 STS3 플러그인이 제공하는 STS4 플러그인 버전과 이클립스 버전을 알려줌.<br>
-   <img src="https://github.com/user-attachments/assets/2720f436-db1d-4795-b33a-cc177252d4fa" alt="Image" style="zoom:80%;" /> <br>
+2. **이클립스에서 STS 플러그인 설치하는 경우: [이클립스 설치 문서](https://www.eclipse.org/downloads/packages/)**<br>
+   문서에서 Eclipse IDE for Java Developers(=JAVA SE) 는 일반 자바 개발에 설치하고,<br>이 경우는 **웹 개발 용인 Eclipse IDE for Enterprise Java and Web Developers(=JAVA EE) 로 설치!**<br>
+   참고) Standard가 JAVA SE이고, JAVA EE나 JAVA ME(Micro.작은)는 JAVA SE 기반으로 만든 플랫폼.<br><br>
+   STS 플러그인은 Help > Eclipse Marketplace > 에서 끝이 RELEASE로 끝나는 최상단의 3버전과 4버전을 설치 (STS3, 4 둘다 사용하려고!)<br><br>
+   **특히, 이클립스 버전도 STS 플러그인 지원하는지 잘 맞춰줘야함. 이클립스 조차 JDK호환 버전이 다를수 있음 ㅠ (이래서 걍 STS4 IDE 이런거 쓰는데 편해..)**<br><br>
+   아래 사진은 STS3 플러그인이 제공하는 STS4 플러그인 버전과 이클립스 버전을 알려줌.
+   <img src="https://github.com/user-attachments/assets/2720f436-db1d-4795-b33a-cc177252d4fa" alt="Image" style="zoom:80%;" /> <br><br>
    **이클립스 필수 고려할 환경 설정~! (STS IDE도 이클립스랑 유사해서 이거처럼ㄱㄱ)**
    - **IDE가 사용할 JVM 설정하기:  IDE에게 어떤 버전의 JVM을 사용할지 알려주기.**<br>
      **IDE(이클립스)가 사용할 jdk이지 프로젝트에서 사용할 jdk가 아님. 서로 독립임**
@@ -211,6 +207,7 @@ typora-root-url: ../../..
      1. Window > Preferences > General > Workspace로 이동합니다.
      2. Text file encoding 항목을 UTF-8로 변경합니다. (보통 이미 UTF-8임.)
      3. CSS, HTML, JSP 등 웹 파일의 인코딩 방식도 Window > Preferences > Web 에서 UTF-8로
+     4. 한글 깨지면 preference-encoding 검색 > Content Types > Java Class File, Test 를 UTF-8
    - 기본 브라우저 변경하기: 이클립스는 기본 내장 브라우저 사용해서 외부로 바꿔주기
      1. Window > Preferences > General > Web Browser로 이동합니다.
      2. "Use external web browser"를 선택합니다.
@@ -219,13 +216,31 @@ typora-root-url: ../../..
    - 퍼스펙티브(perspective) 설정하기: 이클립스를 열면 개발 목적에 맞게 미리 준비된 전체 영역이 보임.
      - 전체 퍼스펙티브 옵션 보기: 주황색 박스 왼쪽의 'Open Perspective'를 선택
      - **본인은 JAVA EE 환경 + GIT + Debug 세팅**
+   - 자동완성 설정하기
+     1. preference-content assist검색
+     2. Auto triggers java에 `<=$:{.@qwertyuioplkjhgfdsazxcvbnm_QWERTYUIOPLKJHGFDSAZXCVBNM` 기입
+     3. Disable insertion triggers except 'Enter' 체크
+   - tdd 등록 (인텔리J 에서 하던
+     - Window > Preferences > Java > Editor > Templates > new > 
+     - Name:tdd, Description:TDD 테스트 메소드 생성, Pattern:원하는 tdd 코드 작성
+   - 자동정렬(Ctrl+Shift+F) 커스텀
+     - Preferences>Web>Html>Editor에서 입맛에 맞춰 설정
+   - 힙 메모리보기
+     - preference-general-show heap 체크
    - **실제 자주 사용하던건?**  
      Project->Build Auto : 저장마다 .class 생성<br>
      Open Perspective → Debug, Git, Java 등 화면 구성<br>
      New Java Project → JDK17 사용<br>
+     기본 내장 브라우저 사용 시 Window > Preferences > General > Web Browser<br>
+     Window > Preferences > General > Appearance > Colors and Fonts > Basic > Text Font > Edit 원하는 폰트(사이즈 12ㄱ)<br>
+     자동완성 설정: preference-content assist검색 > Auto triggers java에 `<=$:{.@qwertyuioplkjhgfdsazxcvbnm_QWERTYUIOPLKJHGFDSAZXCVBNM` 기입 후 Disable insertion triggers except 'Enter' 체크<br>
+     tdd 등록: Window > Preferences > Java > Editor > Templates > new > ...<br>
+     자동정렬(Ctrl+Shift+F) 커스텀: Preferences>Web>Html>Editor에서 입맛에 맞춰 설정<br>
+     힙 메모리보기: preference-general-show heap 체크<br>
      참고) zip 파일 import로 압축 풀 필요 없이 간단히 프로젝트 추가 가능<br>
-     참고) 이클립스가 혹시 JDK버전 문제로 실행 안될 땐 'eclipse.ini' 도 고려<br>
-     참고) 기본 내장 브라우저 사용 시 Window > Preferences > General > Web Browser
+     참고) 이클립스가 혹시 JDK버전 문제로 실행 안될 땐 'eclipse.ini'에 jdk 고려<br>
+     참고) 톰캣 사용 시 서버 없을때 설치하는 live플러그인 필요 없음(소스도 바로 반영)<br>
+     참고) 한글 깨지면 preference-encoding 검색 > Content Types > Java Class File, Test 를 UTF-8
 3. **추가 정보: 톰캣 설치해야겠죵?** -> `C:\Program Files\Apache Software Foundation\Tomcat 10.0` 본인은 예전에 톰캣10 설치해뒀길래 이거 그대로 사용하겠음.
    물론, Spring Boot는 내장 톰캣지원함. STS4는 Spring Boot를 지원하니까 당연히 내장 톰캣도 가능!!<br><br>
    **톰캣 필수 고려할 환경 설정~!**
@@ -233,26 +248,32 @@ typora-root-url: ../../..
      - 로컬: 톰캣 > bin > startup.bat
      - IDE: [Window] - [Preferences] - [Server] - [Runtime Environments]<br>
        또는 이클립스 하단에 있는 `Servers` 뷰에서 파란색 링크
-     - 참고) Spring Boot 사용 시 내장 톰캣있음! spring-web라이브러리에 포함! **단, JSP는 꼭 따로 임베디드 톰캣 JSP 라이브러리를 추가해줘야 정상 동작!**
+     - 참고) Spring Boot 사용 시 내장 톰캣있음! spring-web라이브러리에 포함! <br>**단, JSP는 꼭 따로 임베디드 톰캣 JSP 라이브러리를 추가해줘야 정상 동작!**
    - 포트 번호 변경
      - 로컬: 톰캣 > conf > server.xml 에서 설정
      - IDE: Servers 항목을 더블 클릭하여 Overview 에서 설정
 </div>
 </details>
 
-<details><summary><b>Eclipse의 실행환경 설정과 우선순위(JDK) - 초기 설정에 참고</b></summary>
+<details><summary><b>Eclipse의 주요 환경설정과 우선순위(JDK) - 초기 설정에 참고</b></summary>
 <div markdown="1"><br>
 Project->Build Auto : 저장마다 .class 생성<br>
 Open Perspective → Debug, Git, Java 등 화면 구성<br>
 New Java Project → JDK17 사용<br>
+기본 내장 브라우저 사용 시 Window > Preferences > General > Web Browser<br>
+Window > Preferences > General > Appearance > Colors and Fonts > Basic > Text Font > Edit 원하는 폰트(사이즈 12ㄱ)<br>
+자동완성 설정: preference-content assist검색 > Auto triggers java에 `<=$:{.@qwertyuioplkjhgfdsazxcvbnm_QWERTYUIOPLKJHGFDSAZXCVBNM` 기입 후 Disable insertion triggers except 'Enter' 체크<br>
+tdd 등록: Window > Preferences > Java > Editor > Templates > new > ...<br>
+자동정렬(Ctrl+Shift+F) 커스텀: Preferences>Web>Html>Editor에서 입맛에 맞춰 설정<br>
+힙 메모리보기: preference-general-show heap 체크<br>
 참고) zip 파일 import로 압축 풀 필요 없이 간단히 프로젝트 추가 가능<br>
-참고) 이클립스가 혹시 JDK버전 문제로 실행 안될 땐 'eclipse.ini' 도 고려<br>
-참고) 기본 내장 브라우저 사용 시 Window > Preferences > General > Web Browser<br>
-<br>
+참고) 이클립스가 혹시 JDK버전 문제로 실행 안될 땐 'eclipse.ini'에 jdk 고려<br>
+참고) 톰캣 사용 시 서버 없을때 설치하는 live플러그인 필요 없음(소스도 바로 반영)<br>
+참고) 한글 깨지면 preference-encoding 검색 > Content Types > Java Class File, Test 를 UTF-8<br><br>
 **이클립스는 다음과 같은 우선순위로 실행 환경을 결정합니다:**<br>
-=> 참고1: 이클립스가 구동되기 위한 jvm인 jdk21이랑 플젝에서 사용중인 jdk17이랑 독립.<br>
-=> 참고2: 프로젝트 우클릭 → `Properties > Java Compiler`로 이동해서 컴파일러 level부터 꼭 체크!
-1. 프로젝트별 설정 - 빌드 경로(`Java Build Path`)에 설정된 JRE/JDK.<br>  
+참고1: 이클립스가 구동되기 위한 jvm인 jdk21이랑 플젝에서 사용중인 jdk17이랑 독립.<br>
+참고2: 프로젝트 우클릭 → `Properties > Java Compiler`로 이동해서 컴파일러 level부터 꼭 체크!
+1. 프로젝트별 설정 - 빌드 경로(`Java Build Path`)에 설정된 JRE/JDK.<br>
    +) Gradle/Maven 등 빌드 도구에 명시된 JDK. => build.gradle 같은거.<br>
    프로젝트를 우클릭하고 `Properties > Java Build Path > Libraries` 에서 `JRE System Library`를 선택한 후 `Edit` 버튼을 클릭<br>
    build.gradle도 당연히 jdk 버전 맞춰야겠지?
@@ -264,7 +285,10 @@ New Java Project → JDK17 사용<br>
    이건 그 시스템 환경변수에서 등록한거 말함.
 </div>
 </details>
+
 <br>
+
+**단축키 한눈에 보기**
 
 <details><summary><b>IntelliJ 단축키</b></summary>
 <div markdown="1"><br>
@@ -290,16 +314,16 @@ New Java Project → JDK17 사용<br>
   - 프로젝트 속성으로 이동하기: Alt + Enter
   - 디버그 모드로 실행: F11
 - **코드 편집**
-  - 패키지 임포트 및 정리하기: Ctrl + Shift + O
+  - **패키지 임포트 및 정리하기: Ctrl + Shift + O**
     - 아직 임포트가 부족하다면: 이클립스 상단에 Project > Clean
   - 추천 리스트 받기: Ctrl + Space
-  - 주석 처리/제거하기: Ctrl + / (=JAVA) 또는 Ctrl + Shift + / (=XML,JSP)
-  - 자동 정렬하기: Ctrl + Shift + F
+  - **주석 처리/제거하기: Ctrl + / (=JAVA) 또는 Ctrl + Shift + / (=XML,JSP)**
+  - **자동 정렬하기: Ctrl + Shift + F**
   - 들여쓰기/내어쓰기: Tab ↔ Shift + Tab
   - 코드 한 줄 위/아래로 이동하기: Alt + ↑ ↔ Alt + ↓
   - 특정 함수 위치로 이동하기: F3
   - 화면 확대/축소하기: Ctrl + + ↔ Ctrl + -
-- **리팩토링 및 코드 생성**
+- **리팩토링 및 코드 생성** -> 우클릭 source로도 가능
   - 세터(Setter) 생성하기: Alt + Shift + S, R
   - 생성자(Constructor) 생성하기: Alt + Shift + S, O
   - 인터페이스 만들기: Alt + Shift + T, I
@@ -312,8 +336,8 @@ New Java Project → JDK17 사용<br>
   - 파일 간 전환: Ctrl + E
   - 메서드 간 이동: Ctrl + O
 - **검색 및 찾기**
-  - 파일 찾기: Ctrl + Shift + R
-  - 전체 검색: Ctrl + H
+  - **파일 찾기: Ctrl + Shift + R**
+  - **전체 검색: Ctrl + H**
   - 선언부로 이동: F3 또는 Ctrl + 클릭
 - **편집기 관리**
   - 편집기 전체화면 전환: Ctrl + M
@@ -325,11 +349,252 @@ New Java Project → JDK17 사용<br>
 </div>
 </details>
 
-<br>
+<br><br>
+
+### 스프링, 스프링부트 비교 이해
+
+<details><summary><b>스프링, 스프링부트 프로젝트 생성과 JAR, WAR</b></summary>
+<div markdown="1"><br>
+- Spring Framework 플젝 생성은 사이트 제공은 없고,  
+  IDE(이클립스[STS3, eGov], 인텔리J 등)를 사용하거나 직접 디렉토리 구조 생성!  
+  - 디렉토리 구조가 "**WEB-INF**" 사용하는게 특징! -> `src/main/webapp/WEB-INF/jsp`
+  - 템플릿 엔진(View)에서 JSP를 사용
+- Spring Boot 는 [start.spring.io](http://start.spring.io/) 이나 IDE로 플젝 생성
+  - 디렉토리 구조가 "**webapp/WEB-INF 없이 java, resources**" 사용!
+  - 템플릿 엔진(View)에서 타임리프를 사용(오피셜)
+    - **외부 라이브러리(임베디드-톰캣-JSP 라이브러리) 사용 시 JSP 사용가능**
+  - WAR패키징인데 JAR 실행처럼 IDE에서 내부톰캣으로 바로 실행도 됨!
+- 참고: 원래 WAR는 따로 WAS(톰캣)을 구동후 위에 돌려야 하고, JAR는 JVM위에서 바로 돌릴수 있다.
+</div>
+</details>
+
+**순수스프링:**
+
+- “내장 서버”가 없었고, **외부 톰캣**에 올려야 했음 + **JSP가 기본**
+  - **톰캣**은 웹앱 구동시 해당 웹앱의 `/WEB-INF/web.xml` 를 기본적으로 참고**(표준 서블릿 스펙)**
+    - 따라서 보통 `src/main/webapp/WEB-INF` 디렉토리를 만들어 사용하는 편
+    - main 함수도 없이 잘 구동 (web.xml 덕분)
+  - WAR는 따로 WAS(톰캣)을 구동후 위에 돌려야 하고, JAR는 JVM위에서 바로 돌릴수 있음.
+    - **순수스프링은 WAR**를 많이 사용 (외부 톰캣 많이 사용하니까)
+- **XML로 초기 설정**을 직접 해야하고, 대부분 설정들을 XML로 진행 (물론, Java Config 방식도 많이 사용-필수일 때도 있고)
+  - WEB-INF 하위 `context-servlet.xml`과 resources 하위의 `context-*.xml` 설정이 많이 겹치는데 역할이 다르다. (아래 정리를 참고)
+
+<details><summary><b>순수스프링 기본설정은 크게 2가지 계층 XML + 젤 최상위 web.xml:</b></summary>
+<div markdown="1"><br>
+- <img src="https://github.com/user-attachments/assets/d8e08cd6-6882-4b5b-b8a3-65b283a1495c" alt="Image" style="zoom:80%;" /> 
+  1. **WEB-INF 하위 XML(오른쪽-Child)** → **컨트롤러** 및 웹 관련 빈 관리
+     - 예로 컴포넌트스캔(Controller), mvc:interceptors, mvc:view-controller 등
+     - 특히, mvc:view-controller 는 컨트롤러 메소드 없이 **직접 URL을 뷰에 매핑**
+  2. **resources 하위 XML(왼쪽-Root)** → **서비스, 리포지토리** 및 공통 빈 관리
+     - 예로 컴포넌트스캔(Repository, Service) 등
+  3. **최상위(그림X)**: 톰캣이 항상 체크하는 web.xml -> 젤 최상위 설정
+     - 예로 필터, 서블릿(ex:디스패처서블릿), **1번과 2번 XML 등록** 등
+- **참고:**
+  1. **1번, 2번 xml 설정**을 반드시 맞출 필요없지만, **유지보수 위해서라도 개념적으로 구분 하는 것!**
+  2. web.xml에 필터, 디스패처 서블릿 등 덕분에 main함수 없어도 톰캣 위에서 정상 실행
+     - **ContextLoaderListener**는 **web.xml** 파일에 설정되어, 웹 애플리케이션이 시작될 때 **Spring** 애플리케이션 **컨텍스트를 초기화**
+     - 이 리스너는 **contextConfigLocation** 파라미터를 통해 **XML** 파일의 위치를 지정받고, 해당 파일을 로드하여 빈을 등록
+     - 이를 담당해주는 web.xml이 없으면 당연히 "자바코드"로 직접 작성해서 main함수로 실행해줘야 할거임.
+  2. 헷갈리는 스프링의 설정 인식 방법:
+     - web.xml에서 xml들 다 인식하게 설정하는건 자명. (web.xml은 반드시 톰캣에 의해 수행되기도 하고)
+     - web.xml이 없다면?
+       - Test코드라면 `@ContextConfiguration(locations = {"classpath:...*.xml"}` 이런식 등록
+       - 부트라면 `@ImportResource("classpath...xml")` 이렇게 간단히 가능하다.
+       - 추가방법(GPT): Java Config로 등록 or ClassPathXmlApplicationContext 로 등록 법이 있음
+         - 둘다 main함수에서 직접 applicationContext초기화 방식
+</div>
+</details>
+
+<details><summary><b>예시 코드 XML 설정 3개</b></summary>
+<div markdown="1"><br>
+**webapp/WEB-INF/web.xml**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app id="WebApp_ID" version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee; http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
+	<display-name>Lab301-mvc</display-name>
+	<filter>
+		<filter-name>encodingFilter</filter-name>
+		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>utf-8</param-value>
+		</init-param>
+	</filter>
+<!--  -->
+	<filter-mapping>
+		<filter-name>encodingFilter</filter-name>
+		<url-pattern>*.do</url-pattern>
+	</filter-mapping>
+<!--  -->
+	<!-- Spring  context configuration -->
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>classpath*:spring/context-*.xml</param-value>
+	</context-param>
+<!--  -->
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+<!--  -->
+	<!-- Spring WEB context configuration -->
+	<servlet>
+		<servlet-name>mvcAction</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>/WEB-INF/config/springmvc/context-*.xml</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+<!--  -->
+	<servlet-mapping>
+		<servlet-name>mvcAction</servlet-name>
+		<url-pattern>*.do</url-pattern>
+	</servlet-mapping>
+<!--  -->
+	<welcome-file-list>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
+	<login-config>
+		<auth-method>BASIC</auth-method>
+	</login-config>
+</web-app>
+```
+**webapp/WEB-INF/config/context-servlet.xml**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+				http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+<!--  -->
+	<!-- set component scan -> include:Controller -->
+	<context:component-scan base-package="com.easycompany">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Service"/>
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Repository"/>
+	</context:component-scan>
+<!-- -->	
+	<mvc:annotation-driven/>
+	<!-- 모든 핸들러매핑에 인터셉터 등록하는 부트와 유사한 방식! 
+	인터셉터가 적용될 URL 매핑과 exclude로 제외할 URL을 지정할 수 있다. -->
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/*Employee.do" />
+			<mvc:mapping path="/employeeList.do" />
+			<bean class="com.easycompany.cmm.interceptor.AuthenticInterceptor" />
+		</mvc:interceptor>
+	</mvc:interceptors>
+<!--  -->	
+	<!-- set view resolver -->
+	<!-- TODO [Step 1-1-1] ViewResolver - View를 처리할 해결사를 설정하자 (이거하면 /WEB-INF/jsp/ 접근가능) -->
+	<bean  class="org.springframework.web.servlet.view.InternalResourceViewResolver"
+		p:prefix="/WEB-INF/jsp/" p:suffix=".jsp" /> 
+    <!-- 컨트롤러 메소드 필요없이 직접 매핑! login.jsp와 validator.jsp로 매핑
+	validator.jsp는 JavaScript 유효성 검사 코드를 생성하는 역할을 합니다. -->
+	<mvc:view-controller path="/login.do"/>
+	<mvc:view-controller path="/validator.do"/>
+<!--  -->
+	<!-- set message source -->
+	<!-- TODO [Step 1-2-1] SpringMessage - messageSource 활성화 설정 -->
+	<!-- messageSource 활성화하는 부분 -->
+	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basenames">
+			<list>
+				<value>messages.message-common</value>
+			</list>
+		</property>
+	</bean>
+<!--  -->
+	<!-- setting Locale -->
+	<!-- setting Locale Locale Interceptor 설정하기  -->   
+	<!-- TODO [Step 1-3-1] Internalization - 국제화 관련 bean 설정  -->
+	<!-- *HandlerMapping 설정방법 참고 -->
+	<bean id="localeChangeInterceptor" class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"
+		p:paramName="lang" />
+	<bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver" />
+	<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping">
+		<property name="interceptors">
+			<list>
+				<ref bean="localeChangeInterceptor"/>
+			</list>
+		</property>
+	</bean>
+	<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter" />
+</beans>
+```
+**src/main/resources/spring/context-common.xml**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+				http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+<!--  -->	
+    <!-- set component scan -> include: Service, Repository -->
+	<context:component-scan base-package="com.easycompany">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Service"/>
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Repository"/>
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+	</context:component-scan>
+<!--  -->
+	<bean id="leaveaTrace" class="org.egovframe.rte.fdl.cmmn.trace.LeaveaTrace">
+		<property name="traceHandlerServices">
+			<list>
+				<ref bean="traceHandlerService" />
+			</list>
+		</property>
+	</bean>
+	<bean id="traceHandlerService" class="org.egovframe.rte.fdl.cmmn.trace.manager.DefaultTraceHandleManager">
+		<property name="reqExpMatcher">
+			<ref bean="antPathMater" />
+		</property>
+		<property name="patterns">
+			<list>
+				<value>*</value>
+			</list>
+		</property>
+		<property name="handlers">
+			<list>
+				<ref bean="defaultTraceHandler" />
+			</list>
+		</property>
+	</bean>
+	<bean id="antPathMater" class="org.springframework.util.AntPathMatcher" />
+	<bean id="defaultTraceHandler" class="org.egovframe.rte.fdl.cmmn.trace.handler.DefaultTraceHandler" />
+<!-- 	 -->
+	<!-- For Pagination Tag -->
+	<bean id="imageRenderer" class="com.easycompany.cmm.tag.ImagePaginationRenderer"/>
+	<bean id="paginationManager" class="org.egovframe.rte.ptl.mvc.tags.ui.pagination.DefaultPaginationManager">
+		<property name="rendererType">
+			<map>
+				<entry key="image" value-ref="imageRenderer"/> 
+			</map>
+		</property>
+	</bean>
+</beans>
+```
+</div>
+</details>
 
 <br>
 
-## 개발흐름, 네이밍 TIP
+**스프링부트:**
+
+- **“내장 서버(톰캣)”** 이 있어서 바로 실행 가능 + **타임리프가 기본**
+  - 덕분에 JAR로 바로 JVM상에서 서버 실행 함
+  - /WEB-INF/ 하위 사용 안하는편, **main과 resources 하위 사용이 기본 스펙**
+    - **resources/templates 에서 타임리프** 사용이 기본 스펙
+    - JSP는 “임베디드 톰캣 JSP 라이브러리”를 추가해야 정상 동작 가능
+- XML보다 **Java Config & properties(yml) 설정을 권장** + 많은 MVC설정들이 자동
+  - Java로 설정하다 보니 main함수 필수(web.xml활용하는게 아니니까)
+  - 라이브러리 (ex: boot-starter-web:내장톰캣 등) 추가하면 많은 설정들이 “자동”
+    - boot-starter-web 라이브러리 없으면 정상 실행은 하지만 바로 종료!
+    - 따라서 `ApplicationRunner` 구현체로 자바코드 실행하는게 보통
+    - ApplicationRunner는 스프링 부트가 애플리케이션(서버)이 완전히 초기화된 후 실행되는 콜백 인터페이스이기 때문!!
 
 <br><br>
 
@@ -344,51 +609,82 @@ New Java Project → JDK17 사용<br>
 * **도메인 설계**
   * 도메인 모델 분석(간략히)
   * 테이블 설계(DB) + 엔티티 설계(JPA)
-  * **`ERDCloud` 툴을 사용한 설계 => 테이블, 엔티티 설계를 여기서 한번에**
+  * `ERDCloud` **툴을 사용한 설계 => 테이블, 엔티티 설계를 여기서 한번에**
 * **기능 구현 -> TDD 기법 활용 권장**
   * 도메인 구현 -> 엔티티를 의미하며, 모든 계층에서 사용
   * 레퍼지토리 구현 -> DB와 상호작용
   * 서비스 구현 -> 비지니스 로직 & 트랜잭션
     * `도메인 모델 패턴` : 서비스 계층은 단순히 엔티티에 필요한 요청을 위임하는 방식
+      * **참고로 본인은** `도메인 모델 패턴` **방식을 주로 사용 -> JPA 와 잘 맞음**
     * `트랜잭션 스크립트 패턴` : 엔티티에는 비지니스 로직이 거의 없고 서비스 계층이 담당하는 방식
-    * **참고로 본인은 `도메인 모델 패턴` 방식을 주로 사용**
-
-  * 컨트롤러 구현 -> 웹 계층과 상호작용 (API 포함)
+      * **MyBatis와 잘 맞겠다고 생각**
+  * 컨트롤러 구현 -> 웹 계층과 상호작용 (+API 포함)
 
 <br><br>
 
-### 네이밍 TIP
+### 네이밍 방식
 
 **Database**
 
 - 테이블명 형식으로 `ORDER 또는 order` 사용 **=> 대문자** or 소문자
 - 컬럼명 형식으로 `order_id` 사용 **=> 스네이크 케이스**
   - 보통 **PK**인 컬럼명을 `테이블명_id` 형태로 쓰지만, 나머지 컬럼명들은 `테이블명` **을 안붙이는 편** (ex:member_id, name)
-- 스프링에서 테이블 매핑 마지막에 전부 **"대문자"**로 자동
-  - 실제로 스프링 부트로 DB 테이블 자동 생성시 **"대문자" 이름 확인**
 
 <br>
 
 **JPA -> ORM(객체 관계 매핑)**
 
 - 엔티티명 형식으로 `OrderItem` 사용 **=> 파스칼 케이스**
-  - **스프링 부트는 엔티티명을 `OrderItem -> ORDERITEM` 처럼 "대문자"로 바꿔서 매핑**
+  - **스프링 부트 JPA는 엔티티명을** `OrderItem -> ORDERITEM` **처럼 "대문자"로 바꿔서 매핑**
 - 필드명 형식으로 `orderId` 사용 **=> 카멜 케이스**  
-  - **스프링 부트는 필드명을 `orderId -> order_id` 로 컬럼명 찾아서 매핑**
+  - **스프링 부트  JPA는 필드명을** `orderId -> order_id` **로 컬럼명 찾아서 매핑**
+- JPA는 테이블 자동 생성 시 **"대문자"**로 자동 변경
+  - 실제로 스프링 부트의 JPA로 DB(H2) 테이블 자동 생성시 **"대문자" 이름 확인**
 
 <br>
 
 <br>
 
-## (도메인) 테이블 설계와 엔티티 구현
+## JPA+Boot(MVC패턴)
+
+**JPA 중심으로 개발하는거라 MyBatis 사용하는 엔티티, 레포지토리가 많이 차이남.**
+
+**인터페이스도 MVC패턴에 많이 적용. 인터페이스는?**
+
+- **ve1)만약 MemberRepository 클래스**를 구현 했다면??  
+  **ver2)만약 MemberRepository 인터페이스를 정의**하고 **MemberRepositoryImpl 클래스로 해당 인터페이스를 구현(implements)** 했다면??
+
+- 둘 다 서비스계층에서 `memberRepository.save()` 사용 가능
+
+  - 단, ver2는 **MemberRepositoryImpl2 클래스**를 추가해서 구현체를 바꿔도 "서비스계층의 `memberRepository.save()` 코드는 수정 할 필요가 없다!" (유연)
+
+- **TIP:** 인터페이스의 메소드가 뭐였는지 헷갈릴 수 있다. **"주석을 활용하자"**
+
+  - ```java
+    public interface ItemService {
+        /**
+    	 * Item의 이전, 이후 Item 구하기
+    	 * @param id
+    	 * @return
+    	 * @throws Exception
+    	 */
+        public List<Item> findThree(Long id) throws Exception;
+    }
+    ```
+
+  - 이렇게 하면 **ItemServiceImpl 구현체**에서 오버라이딩때 메소드 설명란(hover)에 **"주석내용"이 보임!**
+
+**"검색(동적쿼리)+페이징, 자동완성(검색)"** -> MyBatis + Spring & Boot +eGov 파트 참고
 
 <br><br>
 
-### 테이블 설계
+### (도메인) 테이블 설계
 
 **N:M** 관계는 **1:N, N:1** 로 풀기
 
-* N:M 관계를 두 테이블로 구성하는건 데이터 중복 야기. 외래키를 2개 써서 해결하려 해도 애초에 외래키 2개 사용 자체가 너무 비효율. 가능은 한지도 모르겠고.
+* N:M 관계를 두 테이블 만으로 구성하는건 데이터 중복 야기.  
+  외래키를 2개 써서 해결하려 해도 애초에 외래키 2개 사용 자체가 너무 비효율.   
+  가능은 한지도 모르겠고.
 
   <details><summary><b>테이블 관계 TIP</b></summary>
   <div markdown="1">
@@ -409,7 +705,7 @@ New Java Project → JDK17 사용<br>
 
 **외래키가 있어야할 위치**
 
-* **1:N, N:1** 의 경우 **N**에 사용 -> **1**은 양방향 필요시 연결(엔티티)
+* **1:N, N:1** 의 경우 **N**에 사용
 
   <details><summary><b>1쪽에 FK 놓으면 2가지 단점</b></summary>
   <div markdown="1"><br>
@@ -426,14 +722,16 @@ New Java Project → JDK17 사용<br>
   </details>
 
 * **1:1**의 경우 **상황에 따라** 사용 - 보통은 **주 테이블에 외래키** 사용
-  
+
   * **주 테이블 외래키 단방향** - 단점 : 값 없으면 외래 키에 null 허용
   * **대상 테이블에 외래키 양방향** - 단점 : 무조건 즉시로딩
-  
+
   <details><summary><b>객체 관점과 DB 관점의 양방향 차이</b></summary>
   <div markdown="1"><br>
-  데이터베이스의 양방향 관계: 외래 키 하나만으로도 양쪽 테이블을 자유롭게 조인할 수 있다. 따라서 단방향이나 양방향의 개념이 특별히 존재하지 않는다.
+  데이터베이스의 양방향 관계: 외래 키 하나만으로도 양쪽 테이블을 자유롭게 조인할 수 있다. 따라서 단방향이나 양방향의 개념이 특별히 존재하지 않는다.<br>
   객체의 양방향 관계: 참조 필드가 있는 쪽에서만 다른 객체를 참조할 수 있다는 특징이 있다. 따라서 두 가지 관계가 존재한다.(단방향, 양방향)
+  - `@OneToMany(mappedBy = "character") // 양방향`
+  - 이렇게 양방향을 설정해야 JPA에선 양방향 사용 가능하다.
   </div>
   </details>
 
@@ -444,40 +742,43 @@ New Java Project → JDK17 사용<br>
 * **일반적인 전략** : JOINED, SINGLE_TABLE 방식이 유명한데 보통 **JOINED 방식을** 선호
   * **부모 자식간에 join**을 하게 됨
     * 참고로 join 열에 Index 추가하면 빠르게 join이 가능
-  * 혹시나 테이블이 너무 단순하다면 SINGLE_TABLE 을 사용 -> 조인이 없어서 속도 빠름!
+  * 테이블이 너무 단순하다면 SINGLE_TABLE 을 사용 -> 조인이 없어서 속도 빠름!
 
 * **Mapped Superclass 전략**
   * 상속 매핑으로 선언된 클래스를 상속받게 되면 해당 상속 내용을 전부 테이블에 넣을 수 있다.
+  * 자세한 사용은 "엔티티 구현" 파트 참고
 
 <br><br>
 
-### 엔티티 구현
+### (도메인) 엔티티 구현
 
-**객체 중심** 설계!
+**객체 중심** 설계가 원칙!
 
-* ```java
-  @Getter @Entity @Slf4j // @Slf4j 는 log
-  @NoArgsConstructor(access = AccessLevel.PROTECTED)
-  @Table(name = "MEMBER", indexes = @Index(name = "IDX_MEMBER_ID", columnList = "member_id desc")) // 인덱스 추가 법
-  public class Member {...}
-      
-  @Id // pk
-  @GeneratedValue
-  @Column(name = "member_id") // db컬럼명 매핑, 참고로 nullable = false 속성은 not null
-  private Long id; // 엔티티에선 id 에도 보통 "테이블명 생략"
-  ```
-  
-* 보통 **PK**인 필드명을 `id` 로 쓰고 **직접** 테이블의 컬럼명과 **매핑**을 선언함 - @Column(...)
+> 예전엔 "자바끼리 통신"을 위해 엔티티(객체)에 직렬화 Serializable 인터페이스 구현 필수지만,   
+> 현재는 Json(+xml,csv등) 직렬화를 많이 사용하다 보니 Jackson 사용 시 필요가 없다.  
+> (Spring은 자동으로 이 직렬화를 제공 -> 예: @RestController)
 
-* 개발과정에선 **@Getter, @Setter**를 열어두고 나중에 **리팩토링으로 @Setter 제거**
+```java
+@Getter @Entity @Slf4j // @Slf4j 는 log
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "MEMBER", indexes = @Index(name = "IDX_MEMBER_ID", columnList = "member_id desc")) // 인덱스 추가 법
+public class Member {...}
+    
+@Id // pk
+@GeneratedValue
+@Column(name = "member_id") // db컬럼명 매핑, 참고로 nullable = false 속성은 not null
+private Long id; // 엔티티에선 id 에도 보통 "테이블명 생략"
+```
+
+* @Entity: 엔티티 빈 자동 등록
+* 네이밍: **PK**인 필드명을 `id` 로 쓰고 **직접** 테이블의 컬럼명과 **매핑**을 선언함 -> @Column(...)
+* 개발과정에선 **@Getter, @Setter**를 열어두고 나중에 **리팩토링으로 @Setter 제거**가 편함
   * 엔티티에서의 **비지니스 메서드** 구현은 **Setter 제거 효과**
-  * **setter를 최대한 사용하지 않게끔 DTO 방식 권장**
+  * **Setter를 최대한 사용하지 않게끔 DTO 방식 권장 -> 컨트롤러 단에서 생각하자!**
   * **Setter 제거** 위해 **생성자 Protected 패턴 (생성 편의 메서드 static으로 선언)** -> protected는 동일 패키지 까지만 허용
     - `@NoArgsConstructor(access = AccessLevel.PROTECTED)` 활용
     - 코드 의미대로 No Args(매개변수x) 생성자를 생성하는 코드!! (범위는 Protected)
-
 * `GenerationType.AUTO` 옵션이 기본값 (확실한 건 직접 택을 권장)
-
   * 자동으로 IDENTITY, SEQUENCE, TABLE 중 택1
     * IDENTITY: DB가 제공하는 auto_increment 자동증가 컬럼
     * SEQUENCE: 오라클에서 사용하던 그 시퀀스
@@ -487,26 +788,61 @@ New Java Project → JDK17 사용<br>
 
 엔티티 설계 때 **연관관계는 단방향 우선 개발(테스트)** 후 양방향 관계 추가
 
-* ```java
-  @OneToMany(mappedBy = "member") // 양방향 (member:lists = 1:N)
-  private List<Lists> lists = new ArrayList<>(); // 컬렉션은 필드에서 바로 초기화
-  
-  @OneToOne(fetch = FetchType.LAZY) // 단방향(=원래방향), 지연로딩 설정
-  @JoinColumn(name = "profile_id") // FK
-  private Profile profile;
-  
-  // CascadeType.REMOVE 를 해줘야 고아객체가 안생기게 되며, Lists 삭제도 정상
-  @OneToMany(mappedBy = "lists", cascade = CascadeType.REMOVE) // 양방향
-  private List<Task> tasks = new ArrayList<>();
-  ```
+```java
+//Member.java
+@OneToMany(mappedBy = "member") // 양방향 (member:lists = 1:N)
+private List<Lists> lists = new ArrayList<>(); // 컬렉션은 필드에서 바로 초기화
+
+@OneToOne(fetch = FetchType.LAZY) // 단방향(=원래방향), 지연로딩 설정
+@JoinColumn(name = "profile_id") // FK 가짐
+private Profile profile;
+```
 
 * 양방향은 코드만으로 해결 가능해서 **DB 설계에 아무런 영향을 끼치지 않음**
 
-* **양방향TIP: 연관관계 편의 메서드 + mappedBy** 를 세트로 항상 같이 작성 (개인적인 생각)
+* **양방향TIP:**
+
+  * **연관관계 편의 메서드 + mappedBy** 를 세트로 항상 같이 작성
+
+  * **외래키**는 항상 1:N 중에 **N이 가지게끔**
+
+  * 옵션 중에서 **cascade** 사용 유무는 관계가 **완전 종속일때만** 사용 (연관된 데이터 **연쇄적 변경** 효과)
+
+    - cascade는 영속성 전이를 하므로 **연관관계 매핑과는 관계 없고, 생명주기를 같이 함**
+
+    - cascade는 주 테이블에서 사용하여 전파 시키는게 일반적인데, **1:N 양방향 사용중이면 양방향에서 전파 시키는 경우가 많음 -> 아래 예시코드를 참고**
+
+    - <details><summary><b>두 가지 예시 코드</b></summary>
+      <div markdown="1">
+      Task:TaskStatus 는 1:1로써 주테이블(Task)에서 cascade 전파 함.<br>
+      Lists:Task 는 N:1로써 부테이블(Lists)에서 cascade 전파 함.<br>
+      - DB 상에서 어떤 모습인지 생각해보면 Task 에선 cascade 전파 할 필요가 없음 (Lists엔 task_id 가 없으니까)
+      - 그럼, 엔티티 메모리 상에선 Lists의 tasks의 요소는 어떡하냐고?
+        - Lists 새로 조회하면 DB와 동기화 하니까 상관 없어. 
+        - 만약 필요하다면 직접 영속성 컨텍스트 초기화 하거나, 연관관계 편의메서드로 tasks요소 삭제를 해도 좋고.
+      ```java
+      //Task.java
+      @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL) // 1:1관계며 같이 존재함. (생명주기 같아야함)
+      @JoinColumn(name = "task_status_id")
+      private TaskStatus taskStatus;
+      //
+      //Lists.java
+      // CascadeType.REMOVE 를 해줘야 고아객체가 안생기게 되며, Lists 삭제도 정상적으로 가능
+      @OneToMany(mappedBy = "lists", cascade = CascadeType.REMOVE) // 양방향
+      private List<Task> tasks = new ArrayList<>();
+      //
+      //Task.java
+      // cacade 필요한가?? 필요없다. Lists는 Task 정보를 가지고 있지 않다. Task 가 오히려 주인(fk)이다. 즉, DB상에선 Task 삭제되든 아니든 Lists는 연관없다.
+      @ManyToOne(fetch = FetchType.LAZY)
+      @JoinColumn(name = "lists_id")
+      private Lists lists;
+      ```
+      </div>
+      </details>
 
 <br>
 
-즉시 or 지연 로딩 중에서 무조건 **"지연 로딩"** 으로 개발 => **즉시 로딩의 N+1 문제** 때문
+JPA는 즉시 or 지연 로딩 중에서 무조건 **"지연 로딩"** 으로 개발 => **즉시 로딩의 N+1 문제** 때문
 
 
   - [정말 잘 정리하신 분! 참고 N+1](https://velog.io/@jinyoungchoi95/JPA-%EB%AA%A8%EB%93%A0-N1-%EB%B0%9C%EC%83%9D-%EC%BC%80%EC%9D%B4%EC%8A%A4%EA%B3%BC-%ED%95%B4%EA%B2%B0%EC%B1%85)
@@ -524,8 +860,10 @@ New Java Project → JDK17 사용<br>
     <img src="https://github.com/user-attachments/assets/05bada9d-a33d-4479-a403-e42d1ca41ff8" alt="image" style="zoom:80%;" /><br>
     <img src="https://github.com/user-attachments/assets/10c39d5f-87aa-475e-b895-4bb0e4e53669" alt="image" style="zoom: 80%;" /><br>
     <img src="https://github.com/user-attachments/assets/8b65009f-09f4-4ead-aabc-e30b046c8bb5" alt="image" style="zoom:80%;" /><br>
-    모든 User 검색(findAll) 요청(1번) 후 나중에 User의 컬럼에 Article 조회할 때(N번) 추가 쿼리<br>
-    지연 로딩임을 보고 처음에 추가 쿼리를 날리지는 않음. 단, 이후에 User.article 접근할 때 이미 User는 select했어서 join을 사용하지 못하고 N번 Article을 추가 select 쿼리 발생
+    모든 User 검색(findAll) 요청(1번) 후 나중에 User의 컬럼에 Article 조회할 때(N번) 추가 쿼리 발생<br>
+    지연 로딩임을 보고 처음에 추가 쿼리를 날리지는 않지만, 이후에 User.article 접근할 때 이미 User는 select끝나서 join을 사용하지 못하고 N번 Article을 추가 select 쿼리 발생<br><br>
+    애초에 이 상황에 findAll에 join까지 쿼리에 사용했었으면 Article을 1번의 쿼리에 다 가져와서 N+1 문제가 없었을 것이다.<br>
+    join이 즉시로딩 같지만, 마냥 즉시로딩 사용하면 N번 추가쿼리 날려 버리니 잘 구분.
     </div>
     </details>
     
@@ -537,30 +875,6 @@ New Java Project → JDK17 사용<br>
 
 <br>
 
-옵션 중에서 **cascade** 사용 유무는 관계가 **완전 종속일때만** 사용 (연관된 데이터 연쇄적 변경 효과)
-
-- cascade는 영속성 전이를 하므로, 연관관계 매핑과는 전혀 관계 없음 
-
-- 단지 이를 사용하면 **생명주기를 같이** 하는것
-
-  <details><summary><b>두 가지 예시 코드</b></summary>
-  <div markdown="1">
-  ```java
-  //Task.java
-  @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL) // 1:1관계며 같이 존재함. (생명주기 같아야함)
-  @JoinColumn(name = "task_status_id")
-  private TaskStatus taskStatus;
-  //
-  //Lists.java
-  // CascadeType.REMOVE 를 해줘야 고아객체가 안생기게 되며, Lists 삭제도 정상적으로 가능
-  @OneToMany(mappedBy = "lists", cascade = CascadeType.REMOVE) // 양방향
-  private List<Task> tasks = new ArrayList<>();
-  ```
-  </div>
-  </details>
-
-<br>
-
 **중복 코드**를 줄이는 효과적인 방법들
 
 - **`임베디드 타입(값 타입)` 과 `상속-Mapped Superclass`** 이것 두개를 잘 활용 + 간단한 건 `Enum` 도 좋음 -> 중복 코드를 많이 줄임
@@ -569,16 +883,19 @@ New Java Project → JDK17 사용<br>
     -> 상속은 필드 뿐만아니라 메소드까지 상속 되니까!
 
     - `값 타입` 은 엔티티 클래스에 `private Long id;` 와 같은 필드라고 생각!
-    - 그리고 식별자가 없으므로 "엔티티와 혼동X"
-    - 또한, 값 비교에 equlas 오버라이드는 필수
-
-  - **설계할때 부터 "값 타입"으로 활용될거는 따로 빼서 설계 + 상속은 중복 보고 리팩토링 하던지**
-
-    <details><summary><b>임베디드 타입(값 타입)+컬렉션 엔티티 예시</b></summary>
+    - `값 타입` 은 **식별자가 없으므로 "엔티티와 혼동X"**
+      - `값 타입 컬렉션`은 임베디드 보다 **일대다 고아+cascade를 권장**
+      - **식별자 있음 (엔티티임!)**
+      - 값 비교에 equlas,hashCode 오버라이드는 필수
+    - `상속` 은 일반적으로 잘 아는 그 상속
+    
+  - **설계할때 부터 "값 타입"으로 활용될거는 따로 빼서 설계 + "상속"은 중복 보고 리팩토링 때 하던지**
+  
+    <details><summary><b>임베디드 타입(값 타입)+컬렉션 엔티티(값 타입 컬렉션) 예시</b></summary>
     <div markdown="1">
-    - "임베디드 객체" 는 값 타입 하나. @Embedded 로<br>
+    - "임베디드 객체" 는 값 타입 하나. @Embeddable, @Embedded 로<br>
     - "값 타입 컬렉션" 은 값 타입 하나 이상. 일대다 고아+cascade 로<br>
-    <br>**임베디드 객체**<br>
+    <br>**임베디드 객체(값 타입 하나)**<br>
     <div markdown="1">
     ```java
     @Embeddable //임베디드 타입(값 타입) 생성
@@ -660,7 +977,6 @@ New Java Project → JDK17 사용<br>
     </div>
     </details>
     
-    
     <details><summary><b>상속-@MappedSuperclass</b></summary>
     <div markdown="1"><br>
     특징: 필드+메소드까지 상속<br>
@@ -703,6 +1019,9 @@ New Java Project → JDK17 사용<br>
     </div>
     </div>
     </details>
+    
+    **참고 어노테이션:**
+    
     - `@PrePersist`: 엔티티가 **처음 저장되기 전에** 실행되는 메서드를 정의. (`createdAt`, `updatedAt` 자동 설정)
     - `@PreUpdate`: 엔티티가 **업데이트되기 전에** 실행되는 메서드를 정의. (`updatedAt` 자동 갱신)
   
@@ -721,7 +1040,7 @@ New Java Project → JDK17 사용<br>
     }
     ```
 
-  - 데이터베이스에 `NEW`, `PROCESSING` 같은 "문자열이 저장" (인덱스 이런게 아니라)
+  - 데이터베이스에 `NEW`, `PROCESSING` 같은 "문자열이 저장" 굿! (인덱스 이런게 아니라)
 
   - 따라서 Enum 순서가 바뀌거나 값이 바뀌어도 문제가 생기지 않음.
 
@@ -737,13 +1056,13 @@ New Java Project → JDK17 사용<br>
     **@RequiredArgsConstructor와 final**을 이용한 **Constructor Injection**을 사용하자
   - **@RequiredArgsConstructor는 “final 붙은 필드를 인자로 받는 생성자"를 자동 생성**
     - ex: `private final ExpService expService` 선언만 해도 바로 사용 가능!
-  - **주의**: 객체에 관한 생성자 1개일때 Spring 4.3이후부턴 자동으로 @Autowired 가 붙어서 위 방식을 사용한거지만 여러 생성자를 사용할 경우는 무슨 생성자에 생성자 주입을 사용할지 선택해서 @Autowired를 꼭 붙여줘야 함.
+  - **주의**: 객체에 관한 생성자가 1개일때 Spring 4.3이후부턴 자동으로 @Autowired 가 붙어서 위 final 방식을 사용한거지만<br>여러 생성자를 사용할 경우는 무슨 생성자에 생성자 주입을 사용할지 선택해서 @Autowired를 꼭 붙여줘야 함.
 
 <br>
 
 **엔티티의 메서드 TIP : 생성\_편의 메서드, 연관관계\_편의 메서드, 비지니스\_편의 메서드(업뎃,조회 등) 권장**
 
-- **생성 메서드** 사용 권장 -> 생성자 대용 굿
+- **생성_편의 메서드** 사용 권장 -> 생성자 대용 굿
 
   - ex: `public static Member createMember()` 같은 것
 
@@ -767,7 +1086,7 @@ New Java Project → JDK17 사용<br>
         order.setMember(member);
         order.setDelivery(delivery);
         for(OrderItem orderItem : orderItems) {
-          order.addOrderItem(orderItem);
+          order.addOrderItem(orderItem); //연관관계_편의 메서드 적용
         }
         order.setStatus(OrderStatus.ORDER);
         order.setOrderDate(LocalDateTime.now());
@@ -820,7 +1139,7 @@ New Java Project → JDK17 사용<br>
     </details>
 
 
-  - **비지니스 메서드** 사용 권장
+  - **비지니스_편의 메서드** 사용 권장
 
     - Service 파트가 아닌 Entity파트에서 비지니스 로직 구현이 가능할 것 같은 경우에는 Entity에서 개발을 적극 권장(=**도메인 모델 패턴**) => **장점 : 좀 더 객체 지향적인 코드**
 
@@ -858,185 +1177,166 @@ New Java Project → JDK17 사용<br>
 
 <br>
 
-**추가 TIP: 엔티티에 정규식(Valid)과 타입컨버터 + DTO방식**
+**엔티티에 정규식(Valid)과 DTO와 타입컨버터**
 
-- 규칙을 @Pattern 애노테이션 하나로 바로 적용이 가능 -> Vaildation 꺼임.
+- **DTO**는 컨트롤러단 개발하다보면 고려하게 될 거다. (컨트롤러 파트 참고)
 
-  - `@NotNull @Pattern(regexp = "^[0-9]+", message = "비밀번호는 숫자로 입력 해주세요.")`
+  - **DTO에 보통 Valid 적용**하면 된다.
 
-- 타입컨버터 사용으로 LocalDateTime으로 저장된 데이터가 나중에 **사용할 때 정해둔 pattern 방식으로 String 반환되는 것!**
+    <details><summary><b>Item.java -> dto/AddItemDto.java, dto/UpdateItemDto.java 예시 코드</b></summary>
+    <div markdown="1"><br>
+    **Item.java**
+    ```java
+    @Entity
+    @Getter
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public class Item {
+      @Id
+      @GeneratedValue
+      @Column(name = "item_id")
+      private Long id;
+      private Long No;
+      private String nickName;
+      private String password;
+      private String title;
+      private String content;
+      private String imgSrc;
+      @DateTimeFormat(pattern = "yy.MM.dd.HH:mm")
+      private LocalDateTime date1;
+      @DateTimeFormat(pattern = "yy년 MM월 dd일 HH시 mm분")
+      private LocalDateTime date2;
+      //==생성 편의 메서드==//
+      public static Item createItem(AddItemDto addItemDto) {
+        Item item = new Item();
+        item.nickName = (addItemDto.getNickName().equals("")) ? "익명" : addItemDto.getNickName();
+        item.password = (addItemDto.getPassword().equals("")) ? "" : addItemDto.getPassword();
+        item.title = (addItemDto.getTitle().equals("")) ? "무제" : addItemDto.getTitle();
+        item.content = (addItemDto.getContent().equals("")) ? "" : addItemDto.getContent();
+        item.imgSrc = addItemDto.getImgSrc();
+        item.date1 = LocalDateTime.now();
+        item.date2 = LocalDateTime.now();
+        return item;
+      }
+      //==비지니스 로직 편의 메서드==//
+      public Item updateItem(UpdateItemDto dto) {
+        this.nickName = (dto.getNickName().equals("")) ? "익명" : dto.getNickName();
+        this.password = (dto.getPassword().equals("")) ? "" : dto.getPassword();
+        this.title = (dto.getTitle().equals("")) ? "무제" : dto.getTitle();
+        this.content = (dto.getContent().equals("")) ? "" : dto.getContent();
+        // 최신 업데이트 시간
+        this.date1 = LocalDateTime.now();
+        this.date2 = LocalDateTime.now();
+        return this;
+      }
+    }
+    ```
+    **AddItemDto.java -> id와 date가 없는 detail**
+    ```java
+    @Getter
+    public class AddItemDto {
+      @NotNull
+      private String nickName;
+      @NotNull
+      @Pattern(regexp = "^[0-9]+", message = "비밀번호는 숫자로 입력 해주세요.")
+      private String password;
+      @NotNull
+      private String title;
+      @NotNull
+      private String content;
+      @NotBlank(message = "이미지가 없습니다. 다시 시도하세요.")
+      private String imgSrc;
+      //==생성 편의 메서드==//
+      public AddItemDto(String nickName, String password, String title, String content, String imgSrc) {
+        this.nickName = nickName;
+        this.password = password;
+        this.title = title;
+        this.content = content;
+        this.imgSrc = imgSrc;
+      }
+    }
+    ```
+    **UpdateItemDto.java -> id가 있는 datil**
+    ```java
+    @Getter
+    public class UpdateItemDto {
+      @NotNull
+      private Long id;
+      @NotNull
+      private String nickName;
+      @NotNull
+      @Pattern(regexp = "^[0-9]+", message = "비밀번호는 숫자로 입력 해주세요.")
+      private String password;
+      @NotNull
+      private String title;
+      @NotNull
+      private String content;
+      @NotBlank(message = "이미지가 없습니다. 다시 시도하세요.")
+      private String imgSrc;
+      //==생성 편의 메서드==//
+      public UpdateItemDto(Long id, String nickName, String password, String title, String content,
+          String imgSrc) {
+        this.id = id;
+        this.nickName = nickName;
+        this.password = password;
+        this.title = title;
+        this.content = content;
+        this.imgSrc = imgSrc;
+      }
+    }
+    ```
+    </div>
+    </details>
 
-  ```java
-  private String password;
-  @DateTimeFormat(pattern = "yy.MM.dd.HH:mm")
-  private LocalDateTime date1;
-  @DateTimeFormat(pattern = "yy년 MM월 dd일 HH시 mm분")
-  private LocalDateTime date2;
-  ```
+- **Valid**도 리팩토링때 고려하게 될 거다. (검증 파트 참고) 
 
-- 만약 타입컨버터 애노테이션을 사용안했으면?? -> **더 복잡한 코드**
+  - 엔티티에 적용한 **예시 코드**: `@NotNull @Pattern(regexp = "^[0-9]+", message = "비밀번호는 숫자로 입력 해주세요.")`
 
-  ```java
-  private String date1; // string으로 변경 및 format 활용
-  private String date2;
-  
-  DateTimeFormatter formatter1 = DateTimeFormatter.ofPattern("yy.MM.dd.HH:mm");
-  DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("yy년 MM월 dd일 HH시 mm분");
-  item.date1 = LocalDateTime.now().format(formatter1);
-  item.date2 = LocalDateTime.now().format(formatter2);
-  ```
+- **타입컨버터 사용**으로 데이터가 나중에 **사용할 때 정해둔 pattern 방식으로 LocalDateTime->String 반환되는 것!**
 
-- **Item.java -> dto/AddItemDto.java, dto/UpdateItemDto.java**
+  - 예로 @DateTimeFormat 있다.
 
-  <details><summary><b>예시 코드</b></summary>
-  <div markdown="1"><br>
-  **Item.java**
-  ```java
-  @Entity
-  @Getter
-  @NoArgsConstructor(access = AccessLevel.PROTECTED)
-  public class Item {
-    @Id
-    @GeneratedValue
-    @Column(name = "item_id")
-    private Long id;
-    private Long No;
-    private String nickName;
-    private String password;
-    private String title;
-    private String content;
-    private String imgSrc;
+    <details><summary><b>타입컨버터 예시 코드</b></summary>
+    <div markdown="1">
+    ```java
     @DateTimeFormat(pattern = "yy.MM.dd.HH:mm")
     private LocalDateTime date1;
     @DateTimeFormat(pattern = "yy년 MM월 dd일 HH시 mm분")
     private LocalDateTime date2;
-    //==생성 편의 메서드==//
-    public static Item createItem(AddItemDto addItemDto) {
-      Item item = new Item();
-      item.nickName = (addItemDto.getNickName().equals("")) ? "익명" : addItemDto.getNickName();
-      item.password = (addItemDto.getPassword().equals("")) ? "" : addItemDto.getPassword();
-      item.title = (addItemDto.getTitle().equals("")) ? "무제" : addItemDto.getTitle();
-      item.content = (addItemDto.getContent().equals("")) ? "" : addItemDto.getContent();
-      item.imgSrc = addItemDto.getImgSrc();
-      item.date1 = LocalDateTime.now();
-      item.date2 = LocalDateTime.now();
-      return item;
-    }
-    //==비지니스 로직 편의 메서드==//
-    public Item updateItem(UpdateItemDto dto) {
-      this.nickName = (dto.getNickName().equals("")) ? "익명" : dto.getNickName();
-      this.password = (dto.getPassword().equals("")) ? "" : dto.getPassword();
-      this.title = (dto.getTitle().equals("")) ? "무제" : dto.getTitle();
-      this.content = (dto.getContent().equals("")) ? "" : dto.getContent();
-      // 최신 업데이트 시간
-      this.date1 = LocalDateTime.now();
-      this.date2 = LocalDateTime.now();
-      return this;
-    }
-  }
-  ```
-  **AddItemDto.java -> id와 date가 없는 detail**
-  ```java
-  @Getter
-  public class AddItemDto {
-    @NotNull
-    private String nickName;
-    @NotNull
-    @Pattern(regexp = "^[0-9]+", message = "비밀번호는 숫자로 입력 해주세요.")
-    private String password;
-    @NotNull
-    private String title;
-    @NotNull
-    private String content;
-    @NotBlank(message = "이미지가 없습니다. 다시 시도하세요.")
-    private String imgSrc;
-    //==생성 편의 메서드==//
-    public AddItemDto(String nickName, String password, String title, String content, String imgSrc) {
-      this.nickName = nickName;
-      this.password = password;
-      this.title = title;
-      this.content = content;
-      this.imgSrc = imgSrc;
-    }
-  }
-  ```
-  **UpdateItemDto.java -> id가 있는 datil**
-  ```java
-  @Getter
-  public class UpdateItemDto {
-    @NotNull
-    private Long id;
-    @NotNull
-    private String nickName;
-    @NotNull
-    @Pattern(regexp = "^[0-9]+", message = "비밀번호는 숫자로 입력 해주세요.")
-    private String password;
-    @NotNull
-    private String title;
-    @NotNull
-    private String content;
-    @NotBlank(message = "이미지가 없습니다. 다시 시도하세요.")
-    private String imgSrc;
-    //==생성 편의 메서드==//
-    public UpdateItemDto(Long id, String nickName, String password, String title, String content,
-        String imgSrc) {
-      this.id = id;
-      this.nickName = nickName;
-      this.password = password;
-      this.title = title;
-      this.content = content;
-      this.imgSrc = imgSrc;
-    }
-  }
-  ```
-  </div>
-  </details>
-
-<br>
-
-<br>
-
-## (레포지토리=DAO, 서비스) 기능 구현 + 인터페이스
-
-**인터페이스 관련해서 얘기하기 위해 주제에서 언급했다. 본인은 확장성을 위해서라도 항상 "레포지토리,서비스 단에 인터페이스를 활용"할 생각이다.**
-
-**인터페이스를 간략히 알아보자.**
-
-- **ve1)만약 MemberRepository 클래스**를 구현 했다면??  
-  **ver2)만약 MemberRepository 인터페이스를 정의**하고 **MemberRepositoryImpl 클래스로 해당 인터페이스를 구현(implements)** 했다면??
-- 둘 다 서비스계층에서 바로 `memberRepository.save()` 이런식으로 사용 가능
-  - 여기서 알 수 있는 장점 -> 인터페이스를 구현하는 **MemberRepositoryImpl2 클래스**를 또 추가해서 구현체를 바꿔도 "서비스계층의 `memberRepository.save()`" 코드는 수정 할 필요가 없다!! 굉장히 유연해진다!!
-
-- **TIP:** 인터페이스의 메소드가 뭐였는지 헷갈릴 수 있다. **"주석을 활용하자"**
-
-  - ```java
-    public interface ItemService {
-        /**
-    	 * Item의 이전, 이후 Item 구하기
-    	 * @param id
-    	 * @return
-    	 * @throws Exception
-    	 */
-        public List<Item> findThree(Long id) throws Exception;
-    }
     ```
+    **만약 타입컨버터 사용 안했으면 직접 복잡하게 구현해야 한다.**
+    ```java
+    private String date1; // string으로 변경 및 format 활용
+    private String date2;
+    DateTimeFormatter formatter1 = DateTimeFormatter.ofPattern("yy.MM.dd.HH:mm");
+    DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("yy년 MM월 dd일 HH시 mm분");
+    item.date1 = LocalDateTime.now().format(formatter1);
+    item.date2 = LocalDateTime.now().format(formatter2);
+    ```
+    </div>
+    </details>
 
-  - 이렇게 하면 **ItemServiceImpl 구현체**에서 오버라이딩때 메소드 설명란(hover)에 **"주석내용"이 보임!**
 
 <br><br>
 
-### 레포지토리(DAO)
+### (레포지토리) Repository + 인터페이스
+
+**레포지토리는 DB에 데이터 처리하는 역할**
+
+**확장성을 위해서 "레포지토리,서비스 단에 인터페이스를 활용"할 수 있다.**
 
 **레포지토리는** `Spring Data JPA + JPA` **함께 사용 중! -> 아래 "스프링 DB 관련" 챕터 필독!**
 
-참고로 Spring Data JPA는 `JpaReository 인터페이스` 로 볼 수 있고, 이거만 상속해도 **서비스 단에서 바로 사용**이 가능하다.   
-**-> 자동으로 구현체를 만들어 주기 때문**
+- **Spring Data JPA는** `JpaReository 인터페이스` 로 볼 수 있고, 
+- 상속 시 **서비스 단에서 바로 사용**이 가능하다.   
+  **-> 자동으로 구현체를 만들어 주기 때문**
+- **Sring Data JPA 기본 제공 CRUD표**
 
-**따라서 인터페이스 사용을 추천한다!**
+  - 참고: [JpaRepository 메소드 규칙 정리](https://priming.tistory.com/114)
 
-**단, 아래 예시 코드는 어댑터추가ver-type2이고, 본인은 보통 단순ver을 사용!**
 
-<details><summary><b>예시 코드 보기 - 레포지토리</b></summary>
+단, 아래 예시 코드는 어댑터추가ver-type2이고, 본인은 보통 **단순ver을 사용!**
+
+<details><summary><b>예시 코드 보기 - 레포지토리 어댑터추가ver</b></summary>
 <div markdown="1"><br>
 **MemberRepository 인터페이스 + MemberRepositoryCustom 인터페이스 + MemberRepositoryCustomImpl 클래스 의 조합**<br>
 ```java
@@ -1104,138 +1404,138 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
 ```
 </div>
 </details>
-<br>
-
-**Sring Data JPA 기본 제공 CRUD표**
-
-
-- 참고: [JpaRepository 메소드 규칙 정리](https://priming.tistory.com/114)
 
 <br>
 
-**레포에서 em.createQuery()**할때 `.getResultList();` 로 반환받는게 null처리 용이!! (보통 하나를 받더라도 이걸로 하는 중!)
+**코드 작성 TIP:**
 
-**Spring Data JPA를 사용해보면 Optional<>** 로 반환하므로 `orElse(null)` 또는 `orElseThrow(new ... )` 등 이런식으로 사용하기!  
-=> 물론, **Member** 이런식으로 반환타입써서 해주면 Optional<>로 반환 안함!  
+- @Repository: 레포지토리 빈 자동 등록
+- **레포에서 em.createQuery()**할때 `.getResultList();` 로 반환받는게 null처리 용이!! (보통 하나를 받더라도 이걸로 하는 중!)
 
-**RequestDto, ResponseDto**는 주로 컨트롤러 단에서 내부 엔티티 보호 목적으로 사용!!+JsonIgnore문제에도 자유롭다!(DTO Lazy강제초기화 필수)  
-따라서 **"미리 요청,응답 양식이 있는게 아니라면"** 컨트롤러 단 개발할 때 Dto 고려ㄱ  
-=> 보통 본인은 정해둔 요청 양식없이 바로 해버려서 이런흐름: 요청은 예상해서 Dto로 바로 엔티티 static create매개변수로 사용 기기 + 응답은 컨트롤러때 static class ㄱㄱㄹ  
-그리고 **TDD엔 그냥 내부 엔티티로 바로 테스트**하면 되는데 굳이 Dto쓰려다보니 Dto하나 수정에 수정파일이 넘 많아지네. 그래서 이 부분 참고하라고 작성함.
+- **Spring Data JPA를 사용해보면 Optional<>** 로도 반환하므로 `orElse(null)` 또는 `orElseThrow(new ... )` 등 알기!  
+  - 단, **Member** 이런식으로 반환타입 명시하면 **Optional<>로 반환 안함!**  
 
-일반 JPA를 사용할 때는 서비스 계층의 @Transactional 범위 내에서 동작하지만, **Spring Data JPA는 각 메서드가 독립적인 트랜잭션**으로 실행될 수 있어 차이가 발생!  
-=> EntityManager는 **트랜잭션 범위의 영속성 컨텍스트**를 사용  
-=> 서비스 계층에서 @Transactional이 있으면 그 트랜잭션 내에서 동작  
-=> EntityManager 사용하려면 당연히 @Transactional이 필요  
-=> 참고 TDD 코드 플젝: [entertainment 플젝](https://github.com/BH946/entertainment/tree/backend/entertainment/src/test/java/com/cafe24/entertainment/Repository/CardReadingRepositoryTest.java)
+- **DTO: RequestDto, ResponseDto**는 JsonIgnore문제에도 자유롭다!(DTO Lazy강제초기화 필수)
+  - 주로 컨트롤러 단에서 내부 엔티티 보호 목적으로 사용! -> "컨트롤러 파트 보자"
+  - 따라서 **"미리 요청,응답 양식이 있는게 아니라면"** 컨트롤러 단 개발할 때 Dto 고려
+  - **테스트코드 작성엔 DTO 생길수록 코드수정**이 늘어나긴 함
 
-**JPQL 은 아래 정리한 주제에서 참고**
+- **@Transactional 작성에 주의**하자.
+  - 일반 JPA를 사용할 때는 서비스 계층의 @Transactional 범위 내에서 동작하지만, **Spring Data JPA는 각 메서드가 독립적인 트랜잭션**으로 실행될 수 있어 차이가 발생!  
+  - 서비스 계층(상위 계층)에 @Transactional이 또 있으면 해당**(상위) 범위로 동작**  
+  - EntityManager는 **트랜잭션 범위의 영속성 컨텍스트**를 사용 하므로 당연히 @Transactional 필요
+  - 참고 TDD 코드 플젝: [entertainment 플젝](https://github.com/BH946/entertainment/tree/backend/entertainment/src/test/java/com/cafe24/entertainment/Repository/CardReadingRepositoryTest.java)
+    - 자세한 JPQL 관련 개념은 아래 "JPQL파트"에서 참고
 
 <br><br>
 
-### 서비스
+### (서비스) Service + Java Config(빈 등록 예)
 
-도메인, 레포지토리 처럼 @Service 선언해서 자동 빈 등록하면 됨.  
-**그러나, 수동 빈 등록법을 보여주려고 함! 추가로 모니터링 비지니스 로직도 함께 보자!**
+**서비스는 레포지토리 <-> 컨트롤러 이어주는 역할**  
+엔티티에서 비즈니스로직 많이하다 보니 서비스 단에 비즈니스 로직도 별로 없는편  
+**"트랜잭션, 캐시, 스케줄링"을 주로 보자.**
 
-**다만, 서비스 단에서는 인터페이스 잘 사용 안하므로 그건 알고 있자.**
+서비스 단에서는 인터페이스 잘 사용 안 하긴 함, 아래는 일부러 보여주려고 예시코드 작성
 
-인터페이스 설명은 레포지토리에서 했기에 생략하고, 모니터링 비지니스 로직을 위한 **"수동 빈 등록"** 을 잠시 보자.
+**모니터링** 비지니스 로직을 위한 **"수동 빈 등록"** 을 잠시 보자.
 
-- @Service 는 자동 빈 등록을 하는데 이걸 대신하려면 수동으로 빈 등록을 해야한다.
+- @Service 는 자동 빈 등록, 이걸 대신하는 수동 빈 등록은? -> Java Config 방식
 
-- @Configuration 과 @Bean 조합으로 등록할 수 있다.
+  <details><summary><b>Java Config 방식의 빈 등록 방법 2가지:</b></summary>
+  <div markdown="1"><br>
+  - @Component 로 빈 등록
+    - @Service, @Repository 처럼 **클래스 단**에서 자동 빈 등록
+  - @Configuration 과 @Bean 조합
+    - @Bean을 **메소드 단**에 적용하여 자동 빈 등록 -> 메소드 1개면 생략 가능
+    - @Configuration에 @Component가 포함되어 **클래스 단**도 자동 빈 등록
+  </div>
+  </details>
 
-- ```java
-  // 빈 등록
+- 아래 예시코드는 빈 등록 방법 중 "@Configuration 과 @Bean" 조합 방법을 사용
+
+  <details><summary><b>예시 코드 보기 - 서비스</b></summary>
+  <div markdown="1"><br>
+  **TaskService 인터페이스 + TaskServiceV2 클래스(구현체) + TaskConfigV2 클래스(설정-빈 등록)**<br>
+  TaskServiceV2 를 보면 정말 레포지토리 <-> 컨트롤러 이어주는 역할 하는 느낌이다.<br>
+  ```java
+  /**
+   * TaskService 인터페이스
+   */
+  public interface TaskService {
+    void join(Task task); // 일정 등록
+    Task findOne(Long taskId);
+    Task findOneWithMember(Long memberId, Long taskId);
+    void remove(Task task);
+    void update(Task task, String content, LocalDateTime startTime, LocalDateTime endTime);
+    void updateStatus(Task task, Boolean completedStatus, Boolean timerOnOff,
+        Long remainTime); // 일정 완료
+    void updateAll(List<Task> taskList, String content, LocalDateTime startTime, LocalDateTime endTime);
+  }
+  //
+  /*
+  @Timed 사용 시 아래와같은 빌더 작성을 생략가능
+  Counter.builder("my.task")
+          .tag("class", this.getClass().getName())
+          .tag("method", "addTask")
+          .description("task")
+          .register(registry).increment();
+   */
+  //TaskServiceV2 클래스 -> 인터페이스 구현체 (@Override 필수)
+  @Timed("my.task") // 모니터링
+  @Transactional(readOnly = true) // 읽기모드 기본 사용
+  @RequiredArgsConstructor // 생성자 주입
+  public class TaskServiceV2 implements TaskService {
+    private final TaskRepository taskRepository;
+    private final MeterRegistry registry;
+    @Override
+    @Transactional // 쓰기모드 사용 위해
+    public void join(Task task) {
+      taskRepository.save(task);
+      sleep(500);
+    }
+    @Override
+    @Transactional // 쓰기모드 사용 위해
+    public void remove(Task task) {
+      taskRepository.remove(task);
+    }
+    @Override
+    @Transactional // 더티체킹 - db 적용
+    public void update(Task task, String content, LocalDateTime startTime, LocalDateTime endTime) {
+      task.updateTask(content, startTime, endTime);
+    }
+    //...
+  }
+  //TaskConfigV2 클래스 -> 수동 빈 등록 설정
   @Configuration
   public class TaskConfigV2 {
-    @Bean
+    // 서비스 사용 위해 빈 등록
+    @Bean 
     TaskService taskService(TaskRepository taskRepository, MeterRegistry registry) {
       return new TaskServiceV2(taskRepository, registry);
     }
-    // @Timed 사용(->예시 코드 참고) 위해서 반드시 필수 -> AOP 사용
+    // 위에서 사용한 @Timed 사용 위해 빈 등록 -> AOP 사용
     @Bean
     public TimedAspect timedAspect(MeterRegistry registry) {
       return new TimedAspect(registry); 
     }
+    // TaskRepository는 이미 @Repository로 빈 등록되어 있어서 생략
   }
   ```
+  </div>
+  </details>
 
 <br>
 
-<details><summary><b>예시 코드 보기 - 서비스</b></summary>
-<div markdown="1"><br>
-**TaskService 인터페이스 + TaskServiceV2 클래스(구현체) + TaskConfigV2 클래스(설정-빈 등록)**<br>
-TaskServiceV2 를 보면 정말 레포지토리 <-> 컨트롤러 이어주는 역할 하는 느낌이다.<br>
-```java
-/**
- * TaskService 인터페이스
- */
-public interface TaskService {
-  void join(Task task); // 일정 등록
-  Task findOne(Long taskId);
-  Task findOneWithMember(Long memberId, Long taskId);
-  void remove(Task task);
-  void update(Task task, String content, LocalDateTime startTime, LocalDateTime endTime);
-  void updateStatus(Task task, Boolean completedStatus, Boolean timerOnOff,
-      Long remainTime); // 일정 완료
-  void updateAll(List<Task> taskList, String content, LocalDateTime startTime, LocalDateTime endTime);
-}
-//
-/*
-@Timed 사용 시 아래와같은 빌더 작성을 생략가능
-Counter.builder("my.task")
-        .tag("class", this.getClass().getName())
-        .tag("method", "addTask")
-        .description("task")
-        .register(registry).increment();
- */
-//TaskServiceV2 클래스 -> 인터페이스 구현체 (@Override 필수)
-@Timed("my.task") // 모니터링
-@Transactional(readOnly = true) // 읽기모드 기본 사용
-@RequiredArgsConstructor // 생성자 주입 + 엔티티 매니저(서비스에서는 안씀)
-public class TaskServiceV2 implements TaskService {
-  private final TaskRepository taskRepository;
-  private final MeterRegistry registry;
-  @Override
-  @Transactional // 쓰기모드 사용 위해
-  public void join(Task task) {
-    taskRepository.save(task);
-    sleep(500);
-  }
-  @Override
-  @Transactional // 쓰기모드 사용 위해
-  public void remove(Task task) {
-    taskRepository.remove(task);
-  }
-  @Override
-  @Transactional // 더티체킹 - db 적용
-  public void update(Task task, String content, LocalDateTime startTime, LocalDateTime endTime) {
-    task.updateTask(content, startTime, endTime);
-  }
-  //...
-}
-//TaskConfigV2 클래스 -> 수동 빈 등록 설정
-@Configuration
-public class TaskConfigV2 {
-  @Bean
-  TaskService taskService(TaskRepository taskRepository, MeterRegistry registry) {
-    return new TaskServiceV2(taskRepository, registry);
-  }
-  // 위에서 사용한 @Timed 사용 위해 반드시 필수 -> AOP 사용
-  @Bean
-  public TimedAspect timedAspect(MeterRegistry registry) {
-    return new TimedAspect(registry); 
-  }
-}
-```
-</div>
-</details>
-<br>
+**서비스 단에서 @Transactional(readOnly=true) 전역 사용 추천**
 
-**서비스 단에서 @Transactional(readOnly=true) 전역, @Cacheable(), @Scheduled()**   
--> 캐시랑 스케줄링을 여기서 사용했다. 
+* 트랜잭션 매니저 등록 안했는데, @Transactional 바로 사용가능한 이유는?
+  * @Transactional 은 "빈에 반드시 TransactionManager 가 필요" 
+  * **스프링 부트**는 **자동으로 TransactionManager 등 을 "빈에 등록"** -> "자동 구성"
+
+- **쓰기모드 필요할때만 @Transactional 추가 선언** -> readOnly=false 해야해서
+- 중첩(전파) 되고, 피하는것도 된다. 자세한건 "스프링DB 정리" 파트 참고
+
+**캐시와 스케줄: @Cacheable(), @Scheduled()** -> 자세한건 "리팩토링" 파트 참고
 
 <details><summary><b>예시 코드 보기 - 캐시와 스케줄</b></summary>
 <div markdown="1"><br>
@@ -1246,7 +1546,7 @@ public class TaskConfigV2 {
 // 만약 설정한 캐시매니저가 따로 있으면 cacheManager = "cacheManager2" 속성 추가
 @Cacheable(value = "members", key = "#pageId", cacheNames = "members") // [캐시 없으면 저장] 조회
 public List<FindMemberResponseDto> findAllWithPage(int pageId) {
-  return memberRepository.findAllWithPage(pageId);
+  return memberRepository.findAllWithPage(pageId); //반환값이 캐싱
 }
 // 캐시에 저장된 값 제거 -> 30분 마다 실행하겠다.
 // 초(0-59) 분(0-59) 시간(0-23) 일(1-31) 월(1-12) 요일(0-6) : "00 30 * * * *"
@@ -1259,63 +1559,288 @@ public void initCacheMembers() {
 </div>
 </details>
 
-참고 : 왜 @Transactional 이런건 바로 사용 가능한가?
-* @Transactional 은 "빈에 반드시 TransactionManager 가 필요" 
-* 스프링 부트는 자동으로 TransactionManager 등등 을 "빈에 등록" -> "자동 구성"
+<br><br>
 
-- **쓰기모드 필요할때만 @Transactional 추가 선언** -> readOnly=false 해야해서
+### (컨트롤러API) HTTP 구현 + 컴포넌트 스캔 + DTO
 
-<br>
+@Controller: 자동 컨트롤러 빈 등록  
+@RestController: API는 위보다 이걸 사용
 
-<br>
+**보통 @RestController + @RequestMapping + @RequiredArgsConstructor 조합 사용**
 
-## (컨트롤러) 통신 구현 + 컴포넌트 스캔
+- @RequiredArgsConstructor + final 은 생성자 주입
 
-**컴포넌트 스캔은 전체와 부분으로 적용 가능**
+- @RestController 는 API에 필수(+**@ResponseBody도 포함**하여 Json 반환 자동)
 
-- 그냥 @SpringBootApplication 만 해도 컴포넌트 스캔을 **전체 범위**로 설정!!
-- `@SpringBootApplication(scanBasePackages = "hello.itemservice.web")` 로 하면 **web하위만** 컴포넌트 스캔!!<br>부분 스캔이면... 나머지는 어떻게 스캔?? -> **@Import**
-  - 해당 하위에 컨트롤러들이 있는데 @Controller 를 제외한 레포,서비스 등은 스프링빈 수동 등록필요!!
-  - 이를 **@Import(레포이름) 스캔으로 추가 등록!**
+- @RequestMapping("api/v1/members") 는 전역 주소 + GET, POST 둘다 한번에 지원
 
-<br>
+  - @PostMapping, @GetMapping -> 주로 사용 (좀 더 유지보수하기 좋은듯)
 
-**파라미터 요청이나 응답** 둘다 “**DTO(+Valid)”는 거의 필수** 사용 -> Jackson, Gson (json변환 라이브러리) 필수 공부
+  - @RequestBody, @ResponseBody : HttpEntity 처럼 **HTTP 메시지 컨버터**가 **HTTP 메시지 바디**의 내용을 우리가 원하는 문자나 객체(DTO) 등으로 자동 변환
 
-- **DTO는 경로 상 제일 하위에서 가지는 계층에 두자**
+    - 요청엔 @RequestBody, 응답엔 @ResponseBody!!
 
-- LePl 플젝(Jackson), Swing 플젝(Gson) 사용했으니 참고~~: [정리한 노션](https://www.notion.so/Java-Spring-7611b33fb665463284dc7a4ffb783c39#19c4a96ae5e341a2b2b628a963bf6d53)
+  - **응답은 항상 아래 흐름**
 
-  - JSON 반환시 꼭 마지막에 객체로 감싸서 반환 -> `{ 데이터 }`
-  - 배열 JSON이면 꼭 마지막에 배열로 감싸서 반환 -> `[{},{}...]`
+    - `ResponseEntity.status(HttpStatus.NOT_FOUND).body(FAIL_LOGIN)` 이런 패턴 사용중! -> ResponseEntity 활용 (상태코드 담기 좋다)
 
-  <details><summary><b>Jackson 2.8.0 이전 버전 LocalDateTime 오류?</b></summary>
-  <div markdown="1">
+    - `@ResponseStatus(HttpStatus.BAD_REQUEST)` 이걸로ResponseEntity 없이 쉽게 반환할 수도 있음 (상태코드를 @ResponseStatus로 해결)
+
+      <details><summary><b>HttpStatus 클래스에서 제공하는 주요 상태 코드</b></summary>
+      <div markdown="1">
+      - **1xx: 정보 응답**
+          - **100 Continue**: 클라이언트가 요청을 계속 진행해도 좋다는 의미입니다.
+          - **101 Switching Protocols**: 서버가 클라이언트의 요청에 따라 프로토콜을 전환하고 있다는 의미입니다.
+      - **2xx: 성공**
+          - **200 OK**: 요청이 성공적으로 처리되었습니다.
+          - **201 Created**: 요청이 성공적으로 처리되어 새로운 자원이 생성되었습니다.
+          - **202 Accepted**: 요청이 수락되었으나 아직 처리되지 않았음을 의미합니다.
+          - **204 No Content**: 요청이 성공적으로 처리되었으나 반환할 내용이 없음을 의미합니다.
+      - **3xx: 리다이렉션**
+          - **300 Multiple Choices**: 요청에 대해 여러 개의 선택지가 있음을 의미합니다.
+          - **301 Moved Permanently**: 요청한 자원이 영구적으로 새로운 URI로 이동하였음을 나타냅니다.
+          - **302 Found**: 요청한 자원이 다른 URI로 임시로 이동되었음을 의미합니다.
+          - **304 Not Modified**: 클라이언트가 캐시한 자원이 수정되지 않았음을 나타냅니다.
+      - **4xx: 클라이언트 오류**
+          - **400 Bad Request**: 요청이 잘못되어 서버가 이해할 수 없음을 의미합니다.
+          - **401 Unauthorized**: 요청에 인증이 필요하며, 인증 정보가 없거나 유효하지 않음을 나타냅니다.
+          - **403 Forbidden**: 서버가 요청을 이해했지만, 요청을 수행할 권한이 없음을 의미합니다.
+          - **404 Not Found**: 요청한 자원을 찾을 수 없음을 나타냅니다.
+          - **405 Method Not Allowed**: 요청한 HTTP 메서드가 해당 자원에서 지원되지 않음을 의미합니다.
+      - **5xx: 서버 오류**
+          - **500 Internal Server Error**: 서버에서 요청을 처리하는 도중 오류가 발생했음을 나타냅니다.
+          - **501 Not Implemented**: 요청한 메서드가 서버에서 구현되지 않았음을 의미합니다.
+          - **503 Service Unavailable**: 서버가 현재 요청을 처리할 수 없음을 나타내며, 보통 서버가 과부하 상태이거나 유지보수 중일 때 발생합니다.
+      </div>
+      </details>
+
+    - **Valid 사용하면 Api응답양식**까지 포함해서 body에 반환
+      `ApiResponse res = ApiResponse.error(HttpStatus.BAD_REQUEST.value(), bindingResult);` -> (ApirResponse는 아래 "리팩토링 Valid 파트"에서 참고)
+
+- **세션 얻으려고 직접 HttpServletRequest** 파라미터를 받기도 함. -> request 가 세션 관리 기억!
+
   ```java
-  Map<String, LocalDateTime> map = new HashMap<>();
-  map.put("startTime", st);
-  map.put("endTime", en);
-  ObjectMapper obj = new ObjectMapper();
-  String content = obj.registerModule(new JavaTimeModule())
-      .writeValueAsString(map); // Jackson 2.8.0 이전 버전에서는 JavaTimeModule 을 써야 에러 해결(직렬화 에러)
+  // 세션 있으면 세션 반환, 없으면 신규 세션 생성
+  HttpSession session = request.getSession(); // UUID 형태로 알아서 생성 (기본값 : true)
+  // 세션에 로그인 회원 정보 보관
+  session.setAttribute(SESSION_NAME_LOGIN, findMember.getId());
   ```
-  </div>
-  </details>
 
-- API 응답 스펙에 맞추어 별도의 **DTO를 반환** 권장
+<br>
 
-  * **setter를 최대한 사용하지않고, 파라미터를 줄여주는 효과**
+**"컴포넌트 스캔"은 전체와 부분으로 적용 가능**
 
-- 특히, **DTO에서 lazy 강제 초기화 하고 있다.** 안하면 `LazyInitializationException` 에러
+- @SpringBootApplication 는 자동으로 **전체 범위**로 설정!!
+  - `@SpringBootApplication(scanBasePackages = "hello.itemservice.web")` 는 **web하위만** 컴포넌트 스캔!!<br>
 
-  - 강제 초기화를 안하면 fetch join으로 모두 조회 했어도 해당 엔티티를 찾을 수 없게 되어서 null이 응답!! -> "영속성에 등록하지 않아서. 즉, 메모리에 올려두지 않아서."
+- **@Import(이름.class)**로 Java Config 파일 따로 스캔등록 가능 (즉, 빈 등록 가능)
+  - **@ImportResource("classpath:/spring/*.xml")** 는 xml등록 할 때!
+
+
+<br>
+
+**컨트롤러 에서의 JPA vs MyBatis 관점 POINT**: "웹에서 Item정보를 form 담아 요청 가정"
+
+- **JPA**에선 update나 delete할때 항상 findOne으로 해당 Item을 DB에서 찾아와서 "영속성 만들고" update, delete를 적용했다. (객체 지향적인 JPA)
+  - 특히, "더티체킹" 사용하려면 영속성을 꼭 만들어야 한다.
+- **MyBatis**에선 SQL직접 작성하니 findOne을 따로하지 않고 웹에서 얻은 Item정보로 바로 update, delete 쿼리를 적용했다. (영속성이란게 없음)
+- **즉 JPA는 쿼리2개, MyBatis는 쿼리1개 날라갔다.**
+
+- 따라서 복잡한 도메인(객체) 중심은 JPA, 쿼리 최적화가 중요하면 MyBatis가 좋겠다.  
+  JPA가 더티체킹위해 비즈니스 로직(update)이 엔티티단에 캡슐화 가능한 관점처럼 둘은 차이가 있다.
+
+<br>
+
+**파라미터 요청이나 응답** 둘다 “**DTO(+Valid)”는 거의 필수** 사용 -> Jackson, Gson (json변환 라이브러리) 알아두면 좋다.
+
+- **DTO는 경로 상 제일 하위에서 가지는 계층에 두자(규칙은 아니고 보통 그럼)**
+
+  - 컨트롤러면 `controller/dto/*`, 엔티티쪽 비즈니스 로직으로 사용한다면 `entity/dto/*`, 간단한건 `static class(inner)`로 내부에서 끝내던지.  
+
+- **API 응답 스펙**에 맞추어 별도의 **DTO를 반환** 권장 (**요청도** 마찬가지)
+
+  - 굳이 필드 숨길게 없으면 안해도 되겠지만 password처럼 있으면 꼭 생성하자.   
+    어차피 "요청DTO, 응답DTO" 둘 다 사용한다고 해서 코드만 조금 복잡해지지 성능이 떨어지고 할건 없다.  
+
+  - **검증(ex:@Validation)도 따로 지정**할 수 있어 더 효과적
+
+  - **DTO는 setter를 최대한 사용하지않고, 파라미터를 줄여주는 효과**
+
+    <details><summary><b>본인 판단하에 DTO 사용 & 사용안한 코드 예시:</b></summary>
+    <div markdown="1"><br>
+    WEB) GalleryController -> gallery(), StudioController -> studioIdUpdate
+    ```java
+    /**
+    	 * 페이지 별로 조회 메서드 -> 페이징
+    	 * 
+    	 * @param item  -> 어차피 숨기고 싶은 password가 안들어 올거라서 요청은 DTO로 안 받겠다.
+    	 * @param model -> 응답DTO 사용
+    	 * @return
+    	 * @throws Exception
+    	 */
+    	@GetMapping()
+    	public String search(@ModelAttribute Item item, Model model) throws Exception {
+    //		log.info("itemId: {}",item.getId());
+    		return this.gallery(item, model); // HTTP말고 그냥 메소드 호출한거.(포워드,리다이렉트 아님)
+    	}
+    	@PostMapping() // ...?pageIndex=1 이런식으로 페이지 파라미터 넘어 올거임(pageIndex란 Item이 상속받고 있는 DefaultItem의
+    					// 필드)
+    	public String gallery(@ModelAttribute Item item, Model model) throws Exception {
+    		item.setPageUnit(myDataSource.getPageUnit());
+    		item.setPageSize(myDataSource.getPageSize());
+    //
+    		// pagination setting
+    		PaginationInfo paginationInfo = new PaginationInfo();
+    		paginationInfo.setCurrentPageNo(item.getPageIndex());
+    		paginationInfo.setRecordCountPerPage(item.getPageUnit());
+    		paginationInfo.setPageSize(item.getPageSize());
+    //
+    		item.setFirstIndex(paginationInfo.getFirstRecordIndex());
+    		item.setLastIndex(paginationInfo.getLastRecordIndex());
+    		item.setRecordCountPerPage(paginationInfo.getRecordCountPerPage());
+    //
+    		// List
+    		List<Item> items = itemService.findAllWithPage(item);
+    		List<ItemResDto> itemsResDto = items.stream().map(o -> new ItemResDto(o)).collect(Collectors.toList());
+    		int totCnt = itemService.findTotalCount(item);
+    //
+    		model.addAttribute("itemsResDto", itemsResDto);
+    		paginationInfo.setTotalRecordCount(totCnt);
+    		// Pagination
+    		model.addAttribute("paginationInfo", paginationInfo);
+    		log.info("cnt: {}, resultList: {}", totCnt, items);
+    //
+    		return "jsp/gallery";
+    	}
+    //
+    /**
+         * 수정 데이터 작성 -> 정보 기입
+         * 특징: 갤러리-아이템에서 이곳으로 접근
+         * @param itemId
+         * @param model
+         * @return
+         * @throws Exception 
+         */
+        @GetMapping("item/{itemId}")
+        public String studioCompleteId(@PathVariable Long itemId, Model model) throws Exception {
+            Item item = itemService.findById(itemId);
+            model.addAttribute("item", item);
+            return "/jsp/studio_item"; 
+        }
+        /***
+         * 수정 수행 -> 정보 기입
+         * @param form -> 요청 DTO (Valid로 JSP에 출력)
+         * @param bindingResult
+         * @param itemId
+         * @param redirectAttributes
+         * @return
+         * @throws Exception
+         */
+        @PostMapping("item/{itemId}")
+        public String studioIdUpdate(@Validated @ModelAttribute UpdateItemDto form, BindingResult bindingResult,
+                                     @PathVariable Long itemId, RedirectAttributes redirectAttributes, Model model) throws Exception {
+            if(bindingResult.hasErrors()) {
+                log.info("error={}", bindingResult);
+                model.addAttribute("bindingResult", bindingResult);
+                return "jsp/studio_item"; //다시 폼으로 이동
+                // 어차피 "검증" 에 걸려서 DB 사용안하기에 PRG 패턴 상관없움
+            }
+            log.info("title테스트={}", form.getTitle());
+            itemService.update(form);
+    //      int pageId = itemService.findPageId(itemId);
+    //      itemService.updateAllWithPage(pageId); // 캐싱
+          redirectAttributes.addFlashAttribute("status", "updateON");
+          redirectAttributes.addAttribute("itemId", itemId);
+          return "redirect:/gallery/itemDetail/{itemId}";        
+        }
+    //Dto 클래스
+    @Data
+    public class UpdateItemDto {
+    	  @NotNull
+    	  private Long id;
+    	  @NotNull
+    	  private String nickname;
+    	  @NotNull
+    	  @Pattern(regexp = "^[0-9]+", message = "비밀번호는 숫자로 입력 해주세요.")
+    	  private String password;
+    	  @NotNull
+    	  private String title;
+    	  @NotNull
+    	  private String content;
+    }
+    ```
+    API) ListsApiController -> findByDateWithMemberTask()
+    ```java
+    /**
+       * 일정 조회(4) - 날짜범위로 Lists(=하루단위 일정모음) 조회 -> 해당 회원꺼만 하루, 한달, 1년 등등 원하는 날짜 범위만큼 사용 가능
+       * 요청Dto, 응답Dto
+       */
+      @PostMapping(value = "/member/date")
+      public ResponseEntity<ApiResponse<List<ListsResDto>>> findByDateWithMemberTask(
+          @Login Long memberId,
+          @RequestBody @Validated CreateListsRequestDto request, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+          log.info("검증 오류 발생 errors={}", bindingResult);
+          ApiResponse res = ApiResponse.error(HttpStatus.BAD_REQUEST.value(), bindingResult);
+          return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+        }
+        List<Lists> listsList = listsService.findByDateWithMemberTask(memberId, request.startTime,
+            request.endTime);
+        if (listsList.isEmpty()) {
+          ApiResponse res = ApiResponse.success(HttpStatus.NO_CONTENT.value(), null);
+          return ResponseEntity.status(HttpStatus.NO_CONTENT).body(res);
+        }
+        List<ListsResDto> result = listsList.stream()
+            .map(o -> new ListsResDto(o))
+            .collect(Collectors.toList());
+        ApiResponse res = ApiResponse.success(HttpStatus.OK.value(), result);
+        return ResponseEntity.status(HttpStatus.OK).body(res);
+      }
+    //
+    // DTO
+      @Getter
+      static class ListsResDto {
+        private Long listsId;
+        private LocalDate listsDate; // 등록 날짜
+        private String timerAllUseTime; // 타이머총사용시간
+        private List<TaskDto> listsTasks;
+        public ListsResDto(Lists lists) { // lazy 강제 초기화
+          listsId = lists.getId();
+          listsDate = lists.getListsDate();
+          Long time = lists.getTimerAllUseTime();
+          Long hour = time / (60 * 60 * 1000);
+          time %= (60 * 60 * 1000);
+          Long minute = time / (60 * 1000);
+          time %= (60 * 1000);
+          Long second = time / (1000);
+          timerAllUseTime = hour + ":" + minute + ":" + second; // 시:분:초 형태로 반환
+          listsTasks = lists.getTasks().stream()
+              .map(o -> new TaskDto(o))
+              .collect(Collectors.toList());
+        }
+      }
+      @Getter
+      static class CreateListsRequestDto {
+        @NotNull(message = "날짜 범위는 필수입니다.")
+        private LocalDateTime startTime;
+        @NotNull(message = "날짜 범위는 필수입니다.")
+        private LocalDateTime endTime;
+      }
+    ```
+    </div>
+    </details>
+
+- **DTO에서 lazy 강제 초기화 하고 있다.** 안하면 `LazyInitializationException` 에러
+
+  - 강제 초기화를 안하면 fetch join으로 모두 조회 해도 해당 엔티티를 찾을 수 없어 null이 응답!!  
+    -> "영속성에 등록하지 않아서. 즉, 메모리에 올려두지 않아서."
 
     <details><summary><b>자세히 (출력사진+코드)</b></summary>
     <div markdown="1"><br>
-    **Lazy 강제 초기화 안 할때**<br>
+    **Lazy 강제 초기화 안 할때(null 문제)**<br>
     <img src="https://github.com/user-attachments/assets/093f2678-788f-4ecf-8ade-4790f5cb31e1" alt="image" style="zoom:80%;" /><br>
     <img src="https://github.com/user-attachments/assets/4c512757-f58b-44ba-b89f-4fb9d0706dae" alt="image" style="zoom:80%;" /><br>
-    <br>**강제 초기화 할 때(하는법 코드참고)**
+    <br>**강제 초기화 할 때(객체를 불러오면 됨)**
     <div markdown="1">
     ```java
     //ListsResDto 생성자 내부
@@ -1335,274 +1860,160 @@ public void initCacheMembers() {
     </div>
     </details>
 
-<br>
+- API JSON직렬화 덕분에 유연 vs JSP는 엄격한 Bean규약: 예로 (private)static class vs public static class
 
-**반환타입 void일 때: 자동으로 뷰리졸버는 요청URL과 동일한 뷰를 탐색해서 반환! (직접 String반환 안해도!)**
+  **API 컨트롤러의 경우:**
 
-**보통 @RestController + @RequestMapping + @RequiredArgsConstructor 조합 사용**
+  - **주로 해당 컨트롤러 내에서만 DTO를 사용**
+  - 응답 데이터는 JSON으로 직렬화되어 전송됨 
+    - 이때 **Jackson**같은 라이브러리가 리플렉션 활용하여 private 접근 가능
+  - **클라이언트 측에서는 이미 직렬화된 데이터를 받기 때문**에 Java 클래스의 접근성 제한에 영향을 받지 않음
 
-- @RequiredArgsConstructor 은 이미 언급해서 생략
+  **JSP(웹)의 경우:**
 
-- @RestController 는 API에 필수(+**@ResponseBody도 포함**해서 예로 Json 반환 자동)
+  - **컨트롤러에서 사용할 뿐만 아니라 JSP 페이지에서도 직접 객체에 접근**
+  - JSP 표준 액션 태그나 EL 표현식이 **Java 객체에 직접 접근**해야 함
+  - 따라서 Bean 클래스와 그 멤버들이 public으로 선언되어야 함(**ex: 응답DTO가 public**)
 
-- @RequestMapping("api/v1/members") 는 전역 주소 -> GET, POST 둘다 한번에 지원
-  - @PostMapping, @GetMapping -> 주로 사용 (좀 더 유지보수하기 좋을듯?)
-  - @RequestBody, @ResponseBody : HttpEntity 처럼 **HTTP 메시지 컨버터**가 **HTTP 메시지 바디**의 내용을 우리가 원하는 문자나 객체(DTO) 등으로 자동 변환
+- LePl 플젝(Jackson), Swing 플젝(Gson) 사용했으니 참고: [정리한 노션](https://www.notion.so/Java-Spring-7611b33fb665463284dc7a4ffb783c39#19c4a96ae5e341a2b2b628a963bf6d53)
 
-  - 요청(ex:json)엔 @RequestBody, 응답엔 @ResponseBody!!
-  - **응답은 항상 아래 흐름**
-    - `ResponseEntity.status(HttpStatus.NOT_FOUND).body(FAIL_LOGIN)` 이런 패턴 사용중임! -> ResponseEntity 활용 (상태코드 담기 좋다)
-    - `@ResponseStatus(HttpStatus.*BAD_REQUEST*)` 이걸로ResponseEntity 없이 쉽게 반환할 수도 있음 (상태코드를 @ResponseStatus로 해결)
-    - **Valid 사용하면 Api응답양식**까지 포함해서 body에 반환
-       `ApiResponse res = ApiResponse.error(HttpStatus.BAD_REQUEST.value(), bindingResult);` -> (ApirResponse는 아래 리팩토링 주제 쪽에서 참고-Valid)
+  - JSON 반환시 꼭 마지막에 객체로 감싸서 반환 -> `{ 데이터 }`
+  - 배열 JSON이면 꼭 마지막에 배열로 감싸서 반환 -> `[{},{}...]`
 
-- 아래는 참고
-  
-  <details><summary><b>HttpStatus 클래스에서 제공하는 주요 상태 코드</b></summary>
+  <details><summary><b>Jackson 2.8.0 이전 버전 LocalDateTime 직렬화 오류?</b></summary>
   <div markdown="1">
-  - **1xx: 정보 응답**
-      - **100 Continue**: 클라이언트가 요청을 계속 진행해도 좋다는 의미입니다.
-      - **101 Switching Protocols**: 서버가 클라이언트의 요청에 따라 프로토콜을 전환하고 있다는 의미입니다.
-  - **2xx: 성공**
-      - **200 OK**: 요청이 성공적으로 처리되었습니다.
-      - **201 Created**: 요청이 성공적으로 처리되어 새로운 자원이 생성되었습니다.
-      - **202 Accepted**: 요청이 수락되었으나 아직 처리되지 않았음을 의미합니다.
-      - **204 No Content**: 요청이 성공적으로 처리되었으나 반환할 내용이 없음을 의미합니다.
-  - **3xx: 리다이렉션**
-      - **300 Multiple Choices**: 요청에 대해 여러 개의 선택지가 있음을 의미합니다.
-      - **301 Moved Permanently**: 요청한 자원이 영구적으로 새로운 URI로 이동하였음을 나타냅니다.
-      - **302 Found**: 요청한 자원이 다른 URI로 임시로 이동되었음을 의미합니다.
-      - **304 Not Modified**: 클라이언트가 캐시한 자원이 수정되지 않았음을 나타냅니다.
-  - **4xx: 클라이언트 오류**
-      - **400 Bad Request**: 요청이 잘못되어 서버가 이해할 수 없음을 의미합니다.
-      - **401 Unauthorized**: 요청에 인증이 필요하며, 인증 정보가 없거나 유효하지 않음을 나타냅니다.
-      - **403 Forbidden**: 서버가 요청을 이해했지만, 요청을 수행할 권한이 없음을 의미합니다.
-      - **404 Not Found**: 요청한 자원을 찾을 수 없음을 나타냅니다.
-      - **405 Method Not Allowed**: 요청한 HTTP 메서드가 해당 자원에서 지원되지 않음을 의미합니다.
-  - **5xx: 서버 오류**
-      - **500 Internal Server Error**: 서버에서 요청을 처리하는 도중 오류가 발생했음을 나타냅니다.
-      - **501 Not Implemented**: 요청한 메서드가 서버에서 구현되지 않았음을 의미합니다.
-      - **503 Service Unavailable**: 서버가 현재 요청을 처리할 수 없음을 나타내며, 보통 서버가 과부하 상태이거나 유지보수 중일 때 발생합니다.
+  ```java
+  Map<String, LocalDateTime> map = new HashMap<>();
+  map.put("startTime", st);
+  map.put("endTime", en);
+  ObjectMapper obj = new ObjectMapper();
+  String content = obj.registerModule(new JavaTimeModule())
+      .writeValueAsString(map); // Jackson 2.8.0 이전 버전에서는 JavaTimeModule 을 써야 에러 해결(직렬화 에러)
+  ```
   </div>
   </details>
-  
-- **세션 얻으려고 HttpServletRequest** 파라미터를 받기도 함. -> request 가 세션 관리 기억!
-
-  ```java
-  // 세션 있으면 세션 반환, 없으면 신규 세션 생성
-  HttpSession session = request.getSession(); // UUID 형태로 알아서 생성 (기본값 : true)
-  // 세션에 로그인 회원 정보 보관
-  session.setAttribute(SESSION_NAME_LOGIN, findMember.getId());
-  ```
 
 <br>
 
-**컨트롤러 로직에서 생각할 점:**
-
-1. DTO관련 생각: 굳이 필드 숨길게 없으면 안해도 되겠지만 password처럼 있으면 꼭 생성하자. 어차피 "요청DTO, 응답DTO" 둘 다 사용한다고 해서 코드만 조금 복잡해지지 성능이 떨어지고 할건 없다.  
-   특히, 검증(ex:@Validation)도 따로 지정할 수 있어 더 효과적이다.
-
-   "파일위치"는 컨트롤러면 controller/dto/*, 엔티티쪽 비즈니스 로직으로 인해 사용한다면 entity/dto/\* 이런식으로 가져가면 됨, 간단한건 static class로 코드내에 가져가도 됨.  
-   => 즉, 자기가 사용하는 쪽 하위에 달아두기. (규칙은 아니고 난 이렇게 함)
-   
-   <details><summary><b>본인 판단하에 DTO 사용 & 사용안한 코드 예시:</b></summary>
-   <div markdown="1"><br>
-   WEB) GalleryController -> gallery(), StudioController -> studioIdUpdate
-   ```java
-   /**
-   	 * 페이지 별로 조회 메서드 -> 페이징
-   	 * 
-   	 * @param item  -> 어차피 숨기고 싶은 password가 안들어 올거라서 요청은 DTO로 안 받겠다.
-   	 * @param model -> 응답DTO 사용
-   	 * @return
-   	 * @throws Exception
-   	 */
-   	@GetMapping()
-   	public String search(@ModelAttribute Item item, Model model) throws Exception {
-   //		log.info("itemId: {}",item.getId());
-   		return this.gallery(item, model); // HTTP말고 그냥 메소드 호출한거.(포워드,리다이렉트 아님)
-   	}
-   	@PostMapping() // ...?pageIndex=1 이런식으로 페이지 파라미터 넘어 올거임(pageIndex란 Item이 상속받고 있는 DefaultItem의
-   					// 필드)
-   	public String gallery(@ModelAttribute Item item, Model model) throws Exception {
-   		item.setPageUnit(myDataSource.getPageUnit());
-   		item.setPageSize(myDataSource.getPageSize());
-   //
-   		// pagination setting
-   		PaginationInfo paginationInfo = new PaginationInfo();
-   		paginationInfo.setCurrentPageNo(item.getPageIndex());
-   		paginationInfo.setRecordCountPerPage(item.getPageUnit());
-   		paginationInfo.setPageSize(item.getPageSize());
-   //
-   		item.setFirstIndex(paginationInfo.getFirstRecordIndex());
-   		item.setLastIndex(paginationInfo.getLastRecordIndex());
-   		item.setRecordCountPerPage(paginationInfo.getRecordCountPerPage());
-   //
-   		// List
-   		List<Item> items = itemService.findAllWithPage(item);
-   		List<ItemResDto> itemsResDto = items.stream().map(o -> new ItemResDto(o)).collect(Collectors.toList());
-   		int totCnt = itemService.findTotalCount(item);
-   //
-   		model.addAttribute("itemsResDto", itemsResDto);
-   		paginationInfo.setTotalRecordCount(totCnt);
-   		// Pagination
-   		model.addAttribute("paginationInfo", paginationInfo);
-   		log.info("cnt: {}, resultList: {}", totCnt, items);
-   //
-   		return "jsp/gallery";
-   	}
-   //
-   /**
-        * 수정 데이터 작성 -> 정보 기입
-        * 특징: 갤러리-아이템에서 이곳으로 접근
-        * @param itemId
-        * @param model
-        * @return
-        * @throws Exception 
-        */
-       @GetMapping("item/{itemId}")
-       public String studioCompleteId(@PathVariable Long itemId, Model model) throws Exception {
-           Item item = itemService.findById(itemId);
-           model.addAttribute("item", item);
-           return "/jsp/studio_item"; 
-       }
-       /***
-        * 수정 수행 -> 정보 기입
-        * @param form -> 요청 DTO (Valid로 JSP에 출력)
-        * @param bindingResult
-        * @param itemId
-        * @param redirectAttributes
-        * @return
-        * @throws Exception
-        */
-       @PostMapping("item/{itemId}")
-       public String studioIdUpdate(@Validated @ModelAttribute UpdateItemDto form, BindingResult bindingResult,
-                                    @PathVariable Long itemId, RedirectAttributes redirectAttributes, Model model) throws Exception {
-           if(bindingResult.hasErrors()) {
-               log.info("error={}", bindingResult);
-               model.addAttribute("bindingResult", bindingResult);
-               return "jsp/studio_item"; //다시 폼으로 이동
-               // 어차피 "검증" 에 걸려서 DB 사용안하기에 PRG 패턴 상관없움
-           }
-           log.info("title테스트={}", form.getTitle());
-           itemService.update(form);
-   //      int pageId = itemService.findPageId(itemId);
-   //      itemService.updateAllWithPage(pageId); // 캐싱
-         redirectAttributes.addFlashAttribute("status", "updateON");
-         redirectAttributes.addAttribute("itemId", itemId);
-         return "redirect:/gallery/itemDetail/{itemId}";        
-       }
-   //Dto 클래스
-   @Data
-   public class UpdateItemDto {
-   	  @NotNull
-   	  private Long id;
-   	  @NotNull
-   	  private String nickname;
-   	  @NotNull
-   	  @Pattern(regexp = "^[0-9]+", message = "비밀번호는 숫자로 입력 해주세요.")
-   	  private String password;
-   	  @NotNull
-   	  private String title;
-   	  @NotNull
-   	  private String content;
-   }
-   ```
-   API) ListsApiController -> findByDateWithMemberTask()
-   ```java
-   /**
-      * 일정 조회(4) - 날짜범위로 Lists(=하루단위 일정모음) 조회 -> 해당 회원꺼만 하루, 한달, 1년 등등 원하는 날짜 범위만큼 사용 가능
-      * 요청Dto, 응답Dto
-      */
-     @PostMapping(value = "/member/date")
-     public ResponseEntity<ApiResponse<List<ListsResDto>>> findByDateWithMemberTask(
-         @Login Long memberId,
-         @RequestBody @Validated CreateListsRequestDto request, BindingResult bindingResult) {
-       if (bindingResult.hasErrors()) {
-         log.info("검증 오류 발생 errors={}", bindingResult);
-         ApiResponse res = ApiResponse.error(HttpStatus.BAD_REQUEST.value(), bindingResult);
-         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
-       }
-       List<Lists> listsList = listsService.findByDateWithMemberTask(memberId, request.startTime,
-           request.endTime);
-       if (listsList.isEmpty()) {
-         ApiResponse res = ApiResponse.success(HttpStatus.NO_CONTENT.value(), null);
-         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(res);
-       }
-       List<ListsResDto> result = listsList.stream()
-           .map(o -> new ListsResDto(o))
-           .collect(Collectors.toList());
-       ApiResponse res = ApiResponse.success(HttpStatus.OK.value(), result);
-       return ResponseEntity.status(HttpStatus.OK).body(res);
-     }
-   //
-   // DTO
-     @Getter
-     static class ListsResDto {
-       private Long listsId;
-       private LocalDate listsDate; // 등록 날짜
-       private String timerAllUseTime; // 타이머총사용시간
-       private List<TaskDto> listsTasks;
-       public ListsResDto(Lists lists) { // lazy 강제 초기화
-         listsId = lists.getId();
-         listsDate = lists.getListsDate();
-         Long time = lists.getTimerAllUseTime();
-         Long hour = time / (60 * 60 * 1000);
-         time %= (60 * 60 * 1000);
-         Long minute = time / (60 * 1000);
-         time %= (60 * 1000);
-         Long second = time / (1000);
-         timerAllUseTime = hour + ":" + minute + ":" + second; // 시:분:초 형태로 반환
-         listsTasks = lists.getTasks().stream()
-             .map(o -> new TaskDto(o))
-             .collect(Collectors.toList());
-       }
-     }
-     @Getter
-     static class CreateListsRequestDto {
-       @NotNull(message = "날짜 범위는 필수입니다.")
-       private LocalDateTime startTime;
-       @NotNull(message = "날짜 범위는 필수입니다.")
-       private LocalDateTime endTime;
-     }
-   ```
-   </div>
-   </details>
-   
-2. 반환에 대한 생각: API는 JSON을 반환해서 반환처리가 "String+여러가지"로 복잡한 반면, 웹은 "String"만 해도 충분! (String으로 간단히 jsp 반환)
-
-3. 컨트롤러 에서의 JPA vs MyBatis 관점 POINT: "JSP에서 Item정보를 가져온다 가정"
-
-   JPA에선 update나 delete할때 항상 findOne으로 해당 Item을 DB에서 찾아와서 "영속성 만들고" update, delete를 적용했다. (특히, "더티체킹" 사용하려면 영속성을 꼭 만들어야 한다.)   
-   MyBatis에선 SQL직접 작성하니 findOne을 따로하지 않고 JSP에서 얻은 Item정보로 바로 update, delete 쿼리를 적용했다. (영속성 필요가 없으니)
-
-   따라서 복잡한 도메인(객체) 중심은 JPA, 쿼리 최적화가 중요하면 MyBatis가 좋겠다.  
-   JPA가 더티체킹위해 비즈니스 로직(update)이 엔티티단에 캡슐화 가능한 관점처럼 둘은 차이가 있다.
-
-4. API JSON직렬화 덕분에 유연 vs JSP는 엄격한 Bean규약: 예로 (private)static class vs public static class
-
-   API 컨트롤러의 경우:
-
-   - **주로 해당 컨트롤러 내에서만 DTO를 사용**
-   - 응답 데이터는 JSON으로 직렬화되어 전송됨 
-     - 이때 **Jackson**같은 라이브러리가 리플렉션 활용하여 private 접근 가능
-   - **클라이언트 측에서는 이미 직렬화된 데이터를 받기 때문**에 Java 클래스의 접근성 제한에 영향을 받지 않음
-   
-   JSP의 경우:
-   
-   - **컨트롤러에서 사용할 뿐만 아니라 JSP 페이지에서도 직접 객체에 접근**
-   - JSP 표준 액션 태그나 EL 표현식이 **Java 객체에 직접 접근**해야 함
-   - 따라서 Bean 클래스와 그 멤버들이 public으로 선언되어야 함
-
-<br>
-
-<br>
-
-## 테스트 코드 -> 코드 커버리지 필수
+<details><summary><b>컨트롤러에서 생각해볼 점:</b></summary>
+<div markdown="1"><br>
+1. **반환에 대한 생각**: 
+   - API는 JSON을 반환해서 반환처리가 "String+여러가지"로 복잡한 반면, 
+   - 웹은 "String"만 해도 충분! (String으로 간단히 jsp 반환)
+2. **컨트롤러 에서의 JPA vs MyBatis 관점 POINT**: "JSP에서 Item정보를 가져온다 가정"
+   - JPA에선 update나 delete할때 항상 findOne으로 해당 Item을 DB에서 찾아와서 "영속성 만들고" update, delete를 적용했다. (특히, "더티체킹" 사용하려면 영속성을 꼭 만들어야 한다.)  
+   - MyBatis에선 SQL직접 작성하니 findOne을 따로하지 않고 JSP에서 얻은 Item정보로 바로 update, delete 쿼리를 적용했다. (영속성 필요가 없으니)
+   - 따라서 복잡한 도메인(객체) 중심은 JPA, 쿼리 최적화가 중요하면 MyBatis가 좋겠다.<br>JPA가 더티체킹 위해 비즈니스 로직(update)이 엔티티단에 캡슐화 가능한 관점처럼 둘은 차이가 있다.<br>
+<div markdown="1"><br>
+2번 예시: JPA와 MyBatis의 수정로직 상황 (update, findOne 메소드만 보면 됨.)
+```java
+    //update 메소드 1개가 끝 (MyBatis)
+    @PostMapping("item/{itemId}")
+    public String studioIdUpdate(@ModelAttribute UpdateItemDto form, @RequestParam int pageIndex, BindingResult bindingResult,
+                                 @PathVariable Long itemId, RedirectAttributes redirectAttributes, Model model) throws Exception {
+    	beanValidator.validate(form, bindingResult); //@Validated 사용 안하면 직접 해줘야 함.
+    	if(bindingResult.hasErrors()) {
+            log.info("error={}", bindingResult);
+            model.addAttribute("bindingResult", bindingResult); //서버단 Valid결과 알려주는거 (직접 에러 커스텀도 해가지고 추가했음. form:error만 사용할경우 이 코드 필요없음)
+            return this.studioCompleteId(itemId, pageIndex, model); //다시 폼으로 이동 (item/{itemId}로 이동해야해서 내무메소드로 호출하겠음. 애초에 수정폼은 따로 둬서 폼바로 호출해야 했다. 이 방식은 비추다 ㅠ.)
+        }
+        log.info("title테스트={}", form.getTitle());
+        form.setPageIndex(pageIndex);
+        itemService.update(form);
+      redirectAttributes.addFlashAttribute("status", "updateON");
+      redirectAttributes.addAttribute("itemId", itemId);
+      return "redirect:/gallery/itemDetail/{itemId}";        
+    }
+```
+```java
+  //update, findOneWithMember 메소드가 필요 (JPA)
+  @PostMapping(value = "/member/update")
+  public ResponseEntity<ApiResponse<String>> update(@Login Long memberId,
+      @RequestBody @Validated UpdateTaskRequestDto request, BindingResult bindingResult) {
+    if (bindingResult.hasErrors()) {
+      log.info("검증 오류 발생 errors={}", bindingResult);
+      ApiResponse res = ApiResponse.error(HttpStatus.BAD_REQUEST.value(), bindingResult);
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+    }
+    Task task = taskService.findOneWithMember(memberId, request.getTaskId());
+    if (task == null) {
+      ApiResponse res = ApiResponse.success(HttpStatus.ALREADY_REPORTED.value(), VALID_TASK);
+      return ResponseEntity.status(HttpStatus.ALREADY_REPORTED).body(res); // 208
+    }
+    taskService.update(task, request.content, request.startTime, request.endTime); // 변경 감지
+    ApiResponse res = ApiResponse.success(HttpStatus.OK.value(), SUCCESS_TASK_UPDATE);
+    return ResponseEntity.status(HttpStatus.OK).body(res); // 200
+  }
+```
+</div>
+</div>
+</details>
 
 <br><br>
 
-### 코드 커버리지
+### (컨트롤러Thymeleaf) HTTP 구현 + 컴포넌트 스캔 + DTO
+
+**위 API 컨트롤러(DTO, JPA&MyBatis관점&컴포넌트 스캔)를 잘 참고 -> 이 곳은 타임리프+웹 관련 정리**
+
+**@Controller:** 자동 컨트롤러 빈 등록 (@RestController 미사용)
+
+- **메소드단 @GetMapping, @PostMapping** 로 HTTP 매핑
+
+- **클래스단 @RequestMapping**으로 공통 URL 매핑
+- 반환타입 void: 뷰리졸버는 요청URL과 동일한 뷰를 탐색해서 반환!
+- **반환타입 String**: 해당 반환 문자열과 동일한 뷰를 탐색해서 반환! -> **주로 사용**
+
+**@RequestParam, @PathVariable, @ModelAttributes 헷갈릴 때:** [쳌리-애노테이션-컨트롤러](https://bh946.github.io/checklist/CHECK_LIST_SPRING/#%EC%8A%A4%ED%94%84%EB%A7%81-%EB%B6%80%ED%8A%B8%EC%9D%98-%EC%95%A0%EB%85%B8%ED%85%8C%EC%9D%B4%EC%85%98%EB%93%A4)  
+
+- **@ModelAttributes는 자세한 기능을 알고 사용**하자. 웬만하면 **GET엔 @RequestParam이나 @PathVariable(권장!) 쓰자.**
+- @ModelAttributes의 자세한 동작은 Model로 addAttribute하는걸 자동화 함.
+  - Model은 MVC의 M부분이다.
+  - @ModelAttributes는 넘어온 데이터가 없다면 **빈 객체**를 자동으로 Model에 담거나, `@ModelAttributes("item") ItemDto dto`이면 form 데이터를 자동으로 ItemDto에 매핑 및 Model엔 item이름으로 기록한다.  
+  - 주의: form으로 넘길 때는 선언한 name(id)필드는 전부 매핑이 되어야함. 
+    - ex: `메서드(@ModelAttribute UpdateItemDto dto)` 라면 form의 필드들이 최소한 UpdateItemDto에 전부 있어야 함
+
+**return "jsp/gallery", {return "redirect:/gallery", return "forward:/gallery"}, return this.gallery(item, model) 헬갈릴 때:** [쳌리-PRG패턴](https://bh946.github.io/checklist/CHECK_LIST_SPRING/#3-thymeleaf-tip---%ED%95%84%EB%8F%85)
+
+- **jsp반환**은 "직접 뷰 반환"
+- **redirect&forward**는 "HTTP URL로 매핑"
+- **메소드**는 "일반 메소드 생각"
+
+**PRG 패턴** 값 넘길 때 **redirectAttributes**를 주로 활용함. (메소드: addAttribute, addFlashAttribute)
+
+```java
+//서버 사용 예시 코드
+redirectAttributes.addAttribute("itemId", itemId);
+redirectAttributes.addAttribute("test", test);
+redirectAttributes.addFlashAttribute("status", "updateOFF");
+return "redirect:/gallery/itemDetail/{itemId}"; // 기존 화면 다시 로딩
+```
+
+- **addAttribute**는 자동으로 URL에 붙어서(쿼리 파라미터) 넘어간다.  
+  - 예로 위 코드에선 itemId는 이미 URL에 있으니 test만 URL에 추가로 **"?test=값"** 형태로 넘어간다.
+- **addFlashAttribute**를 사용하면 1번만 값을 넘겨주고 **자동으로 지워준다.** 
+  - **왜써?** PRG패턴으로 무한 POST를 피해도 클라URL-status값 보고 alert를 띄운다면, GET이여도 새로고침하면 클라 자체에서 계속 alert가 뜨는 불편함이 있는데 이를 피할 수 있는 유용한 기능이다.<br>**반면,** alert가 아니라 html에 "저장완료"를 출력해야 하는 상황이라면 **"상태 유지"위해 addAttribute 사용이 옳다.**
+    - 근데, 무한POST 피한 상태라면 alert 여러번 떠도 사용자 입장에선 크게 상관은 없을것 같긴함. **그냥 addAttribute 사용으로 통일**하는것도 좋아보임.
+  - **클라 사용법**: 웹에서 `<body data-status="${status}">` 이렇게 해줘야 `document.body.getAttribute('data-status');` 로 상태값을 js에서 잘 활용할 수 있다.
+
+**검증(Valid)** 적용할 때 **웹은 클라단도** JS만들어 **적용**하기
+
+**타임리프 사용한 문법 예(JSP비교)**: fragment -> jsp:include, th:src -> c:url, th:text -> spring:message, text -> c:out, th:each -> c:forEach,  th:if -> c:if, th:error -> 직접 등 코드는 아래 참고
+
+<br>
+
+#### Thymeleaf
+
+
+
+
+
+<br><br>
+
+### (Test) 테스트 코드 작성
+
+<br>
+
+#### 코드 커버리지
 
 [코드 커버리지](https://amaran-th.github.io/소프트웨어 설계/[IntelliJ] 코드 커버리지 확인하기/) 내용이 궁금하다면 참고 링크
 
@@ -1611,16 +2022,21 @@ public void initCacheMembers() {
   <img src="https://github.com/user-attachments/assets/3804a3c4-e550-466d-bef9-3e6d56da6dcf" alt="image" style="zoom:150%;" /> 
 
   - 참고로 **edit configurations에서** **Run 멀티 설정, 실행 프로필 설정 등** 여러가지 할 수 있음.
+  
+- **이클립스**도 우클릭>Coverage as>Junit test 로 확인 가능
 
-<br><br>
+<br>
 
-### 테스트 코드 흐름
+#### 테스트 코드 작성
 
-참고) [졸작](https://github.com/BH946/LePl_Spring/tree/kbh)은 JUnit5, [우테코](https://github.com/BH946/java-lotto-6/tree/main/src/test/java/lotto)는 AssertJ 사용했음, **TDD는 테스트 주도 개발 방법론**
+>  [졸작](https://github.com/BH946/LePl_Spring/tree/kbh)은 JUnit5, [우테코](https://github.com/BH946/java-lotto-6/tree/main/src/test/java/lotto)는 AssertJ 사용했음, **TDD는 테스트 주도 개발 방법론**
 
-**보통 메모리DB로 테스트**: application.properties 주석 시 boot-data-jpa 의존성이 자동 제공 및 @Entity, @Id, @GeneratedValue로 JPA 어노테이션 사용해야 테이블 생성까지 자동..!
+**보통 메모리DB로 테스트**: application.properties 주석 시 boot-data-jpa 의존성이 이를 자동 제공 및 @Entity, @Id, @GeneratedValue로 JPA 어노테이션 사용해야 테이블 생성까지 자동..!
 
-* **JUnit5**
+- **print대신 assert 로 비교하자**
+  * 예로 `assertEquals`함수 사용시 두개 인자가 "안 동일하면 오류, 동일하면 정상 동작"
+
+* **(1) JUnit5**
 
   * `Assertions.assertNull, Assertions.assertInstanceOf, Assertions.assertEquals, Assertions.assertThrows` 등등 자주 사용
 
@@ -1646,56 +2062,102 @@ public void initCacheMembers() {
   </div>
   </details>
 
-* **AssertJ -> Junit5에서 파생된것**
+* **(2) AssertJ -> Junit5에서 파생된것**
 
   * ```java
+    import static org.assertj.core.api.Assertions.*;
     assertThat(connection).isNotNull();
     assertThat(findMember).isEqualTo(member);
     assertThatThrownBy(() -> repository.findById(member.getMemberId()))
-        .isInstanceOf(NoSuchElementException.class); // 예외 터지는거 확인
+        .isInstanceOf(NoSuchElementException.class); // 예외 터지는거 확인 
     ```
-
-* **print대신 assert 로 비교하자**
-  * `Assertion`을 이용하자. 이걸 사용해서 `assertEquals`함수 사용시 두개 인자가 동일한지 봐준다
-    * 안 동일하면 오류, 동일하면 정상 동작
-    * `Assertions.assertEquals(member, memberRepository.findOne(saveId));`
-    * `Assertions.assertThat(member).isEqualeTo(result);` 이것도 위처럼 사용된다.
-    * `Assertions.assertInstanceOf(Character.class, character);` 어떤 객체인지 체크하기 좋음
-  
-* **예외 테스트**
-
-  * (1)try, catch보다 간편하게 `assertThrows`를 사용해서 일부러 예외를 터트려서 테스트
-
-    * 아래 JUnit5 에 정리한 부분이 이 내용
-
-  * (2)또는 try, catch대신 `@Test(expected = IllegalStateException.class)` 를 선언하면 알아서 해당 예외 터질 때 종료해줌
-    * 만약 해당 예외가 안터지면 그다음 코드들이 계속 실행됨. 그 코드는 아래 형태로 작성
-    * `Assertions.fail("예외가 발생해야 한다.");` 예외가 안터져서 오히려 에러 라고 로그를 남겨줌
-
 
 <br>
 
-* **스프링 테스트 선언법**
+**테스트 코드 작성 TIP:**
+
+* **예외 테스트:**
+  * (1)try, catch보다 간편하게 `assertThrows`를 사용해서 일부러 예외를 터트려서 테스트
+
+  * (2)try, catch대신 `@Test(expected = IllegalStateException.class)` 를 선언하면 알아서 해당 예외 터질 때 종료해줌
+    * 만약 해당 예외가 안터지면 그다음 코드들이 계속 실행됨. 그 코드는 아래 형태로 작성
+    * `Assertions.fail("예외가 발생해야 한다.");` 예외가 안터져서 오히려 에러 라고 로그를 남겨줌
+
+* **스프링 테스트 선언법 (부트기준)**
 
   * Junit4 : @RunWith, @SpringBootTest 둘다 선언 - 클래스 단에
   * **Junit5** : @SpringBootTest 선언 - 클래스 단에 (@RunWith를 자동 제공)
-  * **이후 @Test** 를 메소드마다 선언하여 테스트!! - 메소드 단에
+  * **@Test** 를 메소드마다 선언하여 테스트!! - 메소드 단에
     * @RunWith(SpringRunner.class) : 스프링과 테스트 통합 -> **Junit4 이하만 사용**
-    * **@SpringBootTest** :  스프링 컨테이너와 테스트를 통합 실행. 모든 빈 로드. (이게 없으면 @Autowired 다 실패) -> (레포, 서비스 테스트때 당연히 쓰겠지?)   
-      **=> 컨트롤러만 테스트?? @WebMvcTest 사용 (서블릿 컨테이너 MOCK)**
-      * **@SpringBootApplication을 찾아서 테스트를 위한 Bean을 생성!** 즉, 스프링 빈 사용하고 싶으면 반드시 필수
-      * @TestConfiguration : 테스트에서 **스프링 빈 등록을 지원**하는 어노테이션
-      * 중요: **수동 빈** 등록(ex:XML)할 때는 **메인의 XML파일을 test/resources 하위로 복제하자!**
+    * **@SpringBootTest** :  스프링 컨테이너와 테스트를 통합 실행. @SpringBootApplication을 찾아서 모든 빈 로드. (이게 없으면 @Autowired 다 실패) 
+      * 레포, 서비스 때 주로 사용하게 됨.
+      * 컨트롤러만 테스트 방법은 **@WebMvcTest** 사용 (서블릿 컨테이너 MOCK)
+    * @SpringBootTest 의 빈 로드를 더 알아보자면,
+      * **수동 빈** 등록(ex:XML)할 때는 **메인의 XML파일을 test/resources 하위로 복제하자!**
         * xml수동 빈 등록은 메인에서 @ImportResource("classpath:..)"로 직접 가져오는데,  
           테스트환경에서는 classpath 가 test/resources 경로가 우선이라 못 가져온다.   
           못 찾으면 main/resources 경로에서 찾는다고는 하던데 본인 경험상 못 찾더라.
+      * 차라리 @TestConfiguration 테스트에서 **스프링 빈 등록을 지원**하는 어노테이션을 사용하는것도 있다.
+  
 * **given, when, then 예시** -> tdd 로 자동완성 사용 중
 
   * given에 멤버 이름 설정
   * when에 서비스의 join함수 사용(회원가입 되는지 확인하는 것)
   * then에 결과를 보는것. 멤버이름이 잘 생겼는지 등등..(assert보통 씀!)
-    - **@BeforEach, @AfterEach**는 각 @Test 수행 전, 후 동작 -> @Test마다 **독립적 실행** 상태라 필요 (@Test마다 실행해 줌)
-    - 다만, DB와 연동하는 **레포(DAO)단**에선 **@Transactional의 @Rollback(false)**를 통해 **DB의 데이터 공유는 전역**으로 가능해서 테스트가 정상 동작 하는 것!
+  
+* **데이터 Init:** @PostConstruct나 @BeforEach 등 활용
+
+  * **@BeforEach, @AfterEach**는 각 @Test 수행 전, 후 동작
+
+    - @Test마다 **독립적 실행** 상태라 필요 (@Test마다 실행해 줌)
+    - **공통으로 테스트할 객체 생성하기 좋다.**
+    - 다만, DB와 연동하는 **레포(DAO)단**에선 **@Transactional의 @Rollback(false)**를 통해 **DB의 데이터 공유는 전역**으로 가능해서 테스트가 정상 동작 했던 것!
+
+  * `InitDB.java` **로 개발 모드에서 간편하게 시작과 동시에 데이터를 미리 넣어두려는 목적(테스트 용이)**
+
+    <details><summary><b>InitDB.java 예시 코드:</b></summary>
+    <div markdown="1"><br>
+    **실행흐름: InitService 라는 서비스를 inner class 로 간단히 추가 및 빈 등록하고, @PostConstruct 로 바로 실행**
+    ```java
+        //안 사용할 거면 스프링 빈 등록 안되게끔(스캔X) @Component 주석 + @PostConstruct 주석
+        @Slf4j
+        @Component
+        @RequiredArgsConstructor // 생성자 주입
+        public class InitDB {
+            private final InitService initService;
+        //
+            // 해당 클래스 인스턴스 생성(construct)된 후 자동 실행
+            @PostConstruct
+            public void init() {
+                initService.initItem();
+            }
+        //
+            @Service
+            @RequiredArgsConstructor
+            @Transactional // 쓰기모드 -> 바로 DB 저장
+            public static class InitService {
+                private final EntityManager em;
+                private final ItemRepository itemRepository;
+                public void initItem() {
+                    Item item1 = Item.createItem("김익명", "123", "최근에 있었던 대외비", "최근에 이름 들으면 알 만한 회사랑 어떤 프로젝트 협업할 뻔했는데, 중간에 갑자기 뭐가 바껴서 결국 나랑 하기로 한 건 무산되었다. 너무 아까운 일이었는데 대외비라 어디에 이름 까고 말도 못해서 답답했음. 근데 최근에 보니까 그 프로젝트 초대박났더라고 하......^^^^;;; 또 생각해도 개빡치네*발ㅠㅠ", "test.jpeg");
+                    Item item2 = Item.createItem("", "1234", "", "", "");
+                    Item item3 = Item.createItem("철수", "123", "", "테스트", "test.jpeg");
+                    itemRepository.save(item1);
+                    itemRepository.save(item2);
+                    itemRepository.save(item3);
+                    List<Item> items = itemRepository.updateAllNo();
+        //            for(int i= 0 ; i<150; i++) {
+        //                String name = "test"+i;
+        //                Item item = Item.createItem(name, "12345", "테스트", "테스트123123", "");
+        //                itemRepository.save(item);
+        //            }
+                }
+            }
+        }
+    ```
+    </div>
+    </details>
+
 * **@Transactional** : 테스트를 실행할 때 마다 트랜잭션을 시작하고 테스트가 끝나면 트랜잭션을 강제로 롤백 (이 어노테이션은 테스트 케이스에서 사용될때만 기본값으로 롤백)
 
   * **롤백을 하기때문에 내부에서 굳이 영속성 컨텍스트 플러시를 안하는 특징**을 가짐
@@ -1703,58 +2165,61 @@ public void initCacheMembers() {
     * 롤백을 안하니까 **자동flush** 진행하므로 insert문 로그 확인가능
   * em.flush() 함수 사용 : **flush 진행**
     * 롤백은 건드리지않고 **수동flush** 진행하므로, 롤백은 그대로 진행하면서 insert문 로그 확인가능
-  * **서비스 TDD 때 트랜잭션 선언안하면 서비스가 동작을 안하기 때문에 그냥 전역으로 써주고! 대신에 서비스 코드에 트랜잭션 있는건 꼭 확인**
-    * 왜냐하면 **TDD에 선언한 트랜잭션때문에 서비스에 트랜잭션이 없어도 동작하기 때문!**
+  * **서비스 TDD 때 트랜잭션 선언안하면 서비스가 동작을 안하기 때문에 그냥 전역으로 써주자! 단,서비스 코드에 트랜잭션 있는건 꼭 확인**
+    * **TDD에 선언한 트랜잭션때문에 서비스에 트랜잭션이 없어도 동작하기 때문!**
     * 참고) 트랜잭션이 겹칠텐데 전파로 인해 기존 사용중인 트랜잭션을 그대로 사용하므로 문제가 없다.
+
 * **@TestMethodOrder(MethodOrderer.OrderAnnotation.class)**
 
   * **@Order()+@Rollback(value=false)** 활용 -> 주로 db저장 먼저하려고!
-  * `@Order(1), @Order(2)` ... 로 테스트 코드 실행 순서 지정 가능
+  * `@Order(1), @Order(2)` ... 로 테스트 코드 **실행 순서 지정 가능**
     * 주의 : Order 라는 클래스가 이미 import 중이라면 `@org.junit.jupiter.api.Order(1)`
     * 또한, `org.junit.jupiter.api` 패키지의 Order 를 사용한다는 점을 기억
 
   * `@DisplayName` 는 간단히 테스트 출력때 항목 이름을 설정해서 출력 가능
 
-- **@Slf4j** -> `private static final Logger log = LoggerFactory.getLogger(YourClassName.class);`와 같은 로깅 필드가 자동 생성
-  - `log.info("{}", member.getId());` 이런식 사용
-
-- **컨트롤러"만" 테스트: @WebMvcTest** 사용 (서블릿 컨테이너 MOCK) -> WAS 역할을 톰캣 대신 해주는것!
-
+- **@Slf4j**: `private static final Logger log = LoggerFactory.getLogger(YourClassName.class);`와 같은 로깅 필드가 자동 생성
+  
+  - 덕분에 `log.info("{}", member.getId());` 바로 사용
+  
+- **컨트롤러"만" 테스트: @WebMvcTest** 사용 (서블릿 컨테이너 MOCK)  
+  -> WAS 역할을 톰캣 대신 해주는것!
+  
   - @MockBean 으로 **가짜** 객체 등록. -> **중요: 실제 동작X**
-
+  
     - 따라서 `when(member.getId()).thenReturn(1L);` 이런식으로 **임의로 리턴값 지정**
     - `mockMvc.perform()` 사용때 post, get 잘 구분해서 적용
     - `Member member = mock(Member.class);` 처럼 함수내에서 Mocking 객체도 간단 (@MockBean이랑 동작은 비슷할 듯)
     - 진짜 **컨트롤러 코드만 테스트** 하는것!
-
+  
   - **MockMvc의 목적은 3가지**
-
+  
     * **request** 잘 받는지 - **content()**
     * 서비스 메서드로 **데이터 잘 전달** 되는지 - **verify()**
-      * times() 도 같이 많이 사용
+      * times() 도 같이 많이 사용 (몇번 서비스 호출 되었나 볼 수 있음)
       * 왜냐하면 여러번 서비스 불리는 경우 몇번 불리는지 times로 명시해줘야 TooMany 에러 방지
-
+  
     * 서비스 반환값으로 **response** 잘 받는지 - **when, given 필수!**
       * when, given 으로 해당 서비스의 반환값을 직접 설정가능!
       * response(응답) 관련 검증 메소드는 매우 다양!
         * andExpect() - status(), view(), redirectedUrl(), model(), content(), jsonPath() 등등.. 응답 관련 메소드..
         * andDo() : 요청, 응답관련 전체 메시지 출력
-
-  - 로그인 세션 같이 **세션은??**
-
+  
+  - 로그인 세션 같이 **세션 테스트는??**
+  
     - `MockHttpSession()` 활용 -> 가짜 세션으로 로그인 인증 "인터셉터" 통과
-
+  
     - 반대로 세션을 반환하는 "로그인" 컨트롤러 테스트 경우?
-
+  
       - 로그인 로직은 로그인 성공시 세션을 생성! **(request 역할)**
-
+  
         <img src="https://github.com/user-attachments/assets/34989c07-a468-46cd-b796-d9dafa4abc17" alt="image" style="zoom:150%;" /> 
-
+  
       - @WebMvcTest 테스트 수행한 로그 request쪽에 session atr 보면 생성된 HttpServletRequest 정보 확인 가능
-
+  
       - 다만, 응답 쿠키는 확인이 불가능했다. 쿠키는 웹에서는 자동 처리해주다보니 환경 차이인 것 같다.
-
-  - 아래는 참고
+  
+  - 아래는 참고 메서드
     
     <details><summary><b>Mock관련 메서드들 참고</b></summary>
     <div markdown="1">
@@ -1790,16 +2255,16 @@ public void initCacheMembers() {
     </div>
     </details>
     
-  - **HttpServletRequest, HttpServletResponse 관련 테스트** -> `MockHttpServletRequest, MockHttpServletResponse` 을 사용! (아직 사용해보지는 않았음)
-
-  - **NoSuchBeanDefinitionException 주의)** 컨트롤러에서 사용한 레포,서비스 등등 은 꼭 Mock해주자. 테스트코드에는 없고 컨트롤러에서만 사용중이어도 무조건 **@MockBean 등록은 일단 필수다!!**
+  - **Request 관련 테스트: HttpServletRequest, HttpServletResponse** -> `MockHttpServletRequest, MockHttpServletResponse` 을 사용! (아직 사용해보지는 않았음)
+  
+  - **NoSuchBeanDefinitionException 에러주의)** 컨트롤러에서 사용한 레포,서비스 등등 은 꼭 Mock해주자. 테스트코드에는 없고 컨트롤러에서만 사용중이어도 무조건 **@MockBean 등록은 일단 필수다!!**
   
     - **예로 @Test 회원가입() 로직에 memberService만 사용**하고 exp, character서비스는 사용하지 않았다.
-    - 근데, 실제 register() 로직인 회원가입 컨트롤러 코드를 보면 exp, character서비스 전부 사용한다.
+    - 근데, 실제 register() 로직인 "회원가입 컨트롤러 메서드" 코드를 보면 exp, character서비스 전부 사용한다.
     - 그렇다면 아래처럼 @MockBean 등록은 일단 필수다!!
-
+  
     <img src="https://github.com/user-attachments/assets/7b1c7fb2-c740-45c5-9018-49490c2dd293" alt="image" style="zoom:80%;" />  
-
+  
   - `mockMvc.perform` 함수에서 **json 내용**을 체크 하고 싶을때? -> `jsonPath()`
   
     - 배열 처리는?
@@ -2138,92 +2603,73 @@ class MemberApiControllerTest {
 ```
 </div>
 </details>
+**페이징 테스트 코드는 "MyBatis + Spring 파트" 참고**
+
+<br>
+
+<br>
+
+## JPA+Boot(리팩토링)
+
+**AOP(+캐시), 메시지와 외부설정, 검증과 예외 등 다양한 리팩토링**
+
+**application.properties(yml)**은 런타임 시 다양한 환경에서 동작할 수 있도록 필요한 옵션들을 제공하는데 사용된다.  
+
+- "부트"는 디폴트로 이 설정 파일을 사용하며, "순수스프링"은 기본 프로젝트에 애초에 없다.
+
+- "부트"는 보통 properties(yml) & java config 로 설정을 하며, "순수스프링"은 xml로 설정하는 편이다. (순수 스프링 XML은 "MyBatis + Spring 파트" 참고)
+
+- 요즘은 "부트"를 기본으로 사용하다보니 java config 방식을 잘 알아두자.
+
 <br><br>
 
-### InitDB -> 데이터 삽입 자동
+### (Java Config) application.yml
 
-`InitDB.java` **로 개발 모드에서 간편하게 시작과 동시에 데이터를 미리 넣어두려는 목적(테스트 용이)**
+**API와 WEB(타임리프), 테섭과 본섭(프로필 차이) 등**
 
-```java
-/**
- * 개발 모드에서 간편하게 시작과 동시에 데이터 생성 미리 넣어두려는 목적
- * 안 사용할 거면 스프링 빈 등록 안되게끔(스캔X) @Component 주석 ㄱㄱ + @PostConstruct 주석도 마찬가지
- * 실행흐름: InitService 라는 서비스를 inner class 로 간단히 추가 및 빈 등록하고, @PostConstruct 로 바로 실행
- */
-@Slf4j
-@Component
-@RequiredArgsConstructor // 생성자 주입
-public class InitDB {
-    private final InitService initService;
+**운영환경.yml TIP**: 
 
-    // 해당 클래스 인스턴스 생성(construct)된 후 자동 실행
-    @PostConstruct
-    public void init() {
-        initService.initItem();
-    }
-
-    @Service
-    @RequiredArgsConstructor
-    @Transactional // 쓰기모드 -> 바로 DB 저장
-    public static class InitService {
-        private final EntityManager em;
-        private final ItemRepository itemRepository;
-
-        public void initItem() {
-            Item item1 = Item.createItem("김익명", "123", "최근에 있었던 대외비", "최근에 이름 들으면 알 만한 회사랑 어떤 프로젝트 협업할 뻔했는데, 중간에 갑자기 뭐가 바껴서 결국 나랑 하기로 한 건 무산되었다. 너무 아까운 일이었는데 대외비라 어디에 이름 까고 말도 못해서 답답했음. 근데 최근에 보니까 그 프로젝트 초대박났더라고 하......^^^^;;; 또 생각해도 개빡치네*발ㅠㅠ", "test.jpeg");
-            Item item2 = Item.createItem("", "1234", "", "", "");
-            Item item3 = Item.createItem("철수", "123", "", "테스트", "test.jpeg");
-            itemRepository.save(item1);
-            itemRepository.save(item2);
-            itemRepository.save(item3);
-            List<Item> items = itemRepository.updateAllNo();
-//            for(int i= 0 ; i<150; i++) {
-//                String name = "test"+i;
-//                Item item = Item.createItem(name, "12345", "테스트", "테스트123123", "");
-//                itemRepository.save(item);
-//            }
-        }
-
-    }
-}
-```
+- 자동 DB생성하지 말자(실수로 깃에 올리면 머리아픔)
+- 외부 yml + 내부 resources하위 yml 둘다 사용하자(숨겨야 할 DB정보, 설정변경 용이)
 
 <br>
 
-<br>
+**application.yml(properties) 사용 코드 간단 설명**
 
-## application.yml
+- `spring: datasource: url, username, password...` 에서 h2 db 등 연결 세팅
+  - 이 한줄로 **DataSource 빈이 자동 등록!**
+  - **spring-boot-jpa** 사용 시 **이 부분을 주석 해야지 "자동 메모리DB" 사용.**
+    - **단, 테이블에 @Entity, @Id, @GeneratedValue로 JPA 어노테이션 사용 해야 "테이블 자동 생성"**
+  
+- `spring: jpa: hibernate, properties`
+  - **create, none** 옵션으로 "실행마다 테이블 생성" 또는 "기존 테이블 사용" 설정
+  - **show_sql**로 jpa가아닌 **실제 sql문** 체크(튜닝 하려면 sql 필수로 체크)
+    - 그러나 본인은 show_sql 사용 안하고, 아래 **logging.level의 SQL을 사용**
 
-**application.yml 에 세팅한 내용을 총 정리 -> API와 WEB(타임리프), 테섭과 본섭(프로필 차이 등)**
-
-사용법은 "목차"에서 알아서 찾아서 참고 (다 내용 정리 되어 있을거임)
-
-**운영환경.yml TIP**: 자동 DB생성하지 말자(실수로 깃에 올리면 머리아픔) + 외부 yml, 내부 resources하위 yml 둘다 사용하자.(DB정보 등 때문, yml 둘 다 사용하게 설정 간단)
-
-- `spring: datasource: url, username, password...` 에서 h2 db 연결 세팅
-  - **테스트에선 db연동 이부분을 주석 해야지 "메모리DB" 사용.**
-  - **db걱정 없음!! h2가 자바기반이라 제공**
-  - **단, boot-data-jpa 의존성 필요 + 테이블에 @Entity, @Id, @GeneratedValue로 JPA 어노테이션 사용 필수**
-- `spring: jpa: hibernate, properties` 에서 create, none 옵션으로 테이블 생성 또는 기존 테이블 사용 설정 + show_sql로 jpa가아닌 실제 sql문 체크(튜닝 하려면 sql 필수로 체크)
-  - 근데 show_sql 사용 안하고, 아래 **logging.level의 SQL을 사용 하자.**
-- `server: servlet: session: timout: 30m` 으로 세션 타임아웃 설정
-- `logging.level: org.hibernate.SQL: debug` 는 SQL쿼리를 디버그 레벨로 로깅
+- `server: servlet: session: timout: 30m` 으로 **세션 타임아웃** 설정 (세션값 30분 유지)
+- `logging.level: org.hibernate.SQL: debug` 는 **SQL쿼리를 디버그 레벨로 로깅(단, MyBatis는 안됨 -> 하이버네이트는 JPA 구현체)**
   - `com.level: debug`로 level설정도 debug로 하면 프로젝트 로그레벨은 debug 레벨 사용
-  - **로그레벨 (왼쪽 가장 상세): trace > debug > info > warn > error > fatal 포함 관계**
-- `management` 에서 endpoint 노출 설정했음. (모니터링 때문에)
+    - level하위 프로젝트의 debug 로그를 전부 볼 수 있게 됨.
+  - **로그레벨 포함 관계(왼쪽 가장 상세): trace > debug > info > warn > error > fatal**
+- `management` 에서 endpoint 노출 설정했음. (**모니터링**)
   - ex) shutdown 활성화해서 해당 앱을 외부에서 종료할 수 있게 엔드포인트 노출.
     - 기본적으로 비활성화지만 활성화하면 관리자가 **http 요청으로 앱 종료 가능**
-  - exclude옵션에는 env, beans 엔드포인트 노출을 제외했음. (환경정보, 빈 정보)
-- `spring.cache.caffeine.spec=maximumSize=100` 는 캐시 사이즈 설정이다. **물론 자바 코드에서도 설정 가능하다.**
-- `spring.messages.basename=message,errors` 로 **"메시지, 국제화 기능" 사용**
+  - exclude옵션에는 env, beans 엔드포인트 노출을 제외했음. (**환경정보, 빈 정보**)
+- `spring.cache.caffeine.spec=maximumSize=100` 는 캐시 사이즈 설정이다. 
+  - **물론 자바 코드에서도 설정 가능하다.(Java Config)**
+
+- `spring.messages.basename=message,errors` 로 **"메시지 기능" 사용**
   - `messages.properties` 에 공통 관리할 messages 내용 세팅
   - `erros.properties` 에도 가능. 즉, 여러개 추가 가능
+  - **"국제화"** 기능은 Java Config로! -> 아래 "메시지 국제화" 파트 참고
 - `spring.config.activate.on-profile: prod` 로 **프로필 설정 가능**
   - 아무 설정 안하면?? -> default 프로필로 실행 (기본값임)
-- `spring.thymeleaf.cache: false` 로 **thymeleaf 캐시 사용X** -> 실시간 reload
-- `my.datasource.imgPath: "C:/images/` 로 **"외부설정”** 사용 -> 경로 등등
+- `spring.thymeleaf.cache: false` 로 **thymeleaf 캐시 사용X** -> 실시간 reload (새로고침ㄱ)
+- `my.datasource.imgPath: "C:/images/` 로 **"외부설정”** 사용
+  - yml에 값을 @ConfigurationProperties로 불러와 사용하는게 현대적인 방법!
+
 - `server.port.8080` 로 포트 8080(개발용), 포트 80(배포용) 를 지정 가능
-  - http는 80포트를 기본값으로 사용
+  - 참고) http는 80포트, https는 443포트를 기본값으로 사용
 
 <details><summary><b>본섭API:application.yml</b></summary>
 <div markdown="1"><br>
@@ -2297,8 +2743,7 @@ com.lepl: debug
 ```
 </div>
 </details>
-
-<details><summary><b>프로필WEB:application.yml</b></summary>
+<details><summary><b>본섭&테섭WEB:application.yml -> 프로필 적용 ver</b></summary>
 <div markdown="1">
 ```yaml
 # default 프로필 -> 개발모드로 사용
@@ -2375,308 +2820,41 @@ logging:
 ```
 </div>
 </details>
-<br>
-
-<br>
-
-## 리팩토링 - AOP(+캐시), 메시지와 외부설정, 검증과 예외 등
-
-참고 동작: requset(HTTP) > Filter(서블릿필터) > Servlet(디스패처서블릿) > **Interceptor > Argument Resolver > AOP** > Controller
 
 <br><br>
 
-### AOP(공통 해결 관심사)
+### 메시지 국제화
 
-**기능 확장법 + 브라우저,서버 캐시 설정법**
+**순수스프링과 부트에서의 "메시지 국제화" 차이: 핸들러매핑, 인터셉터 이해**  
+**"디스패처 서블릿->HandlerMapping->인터셉터->컨트롤러 진입"** (MVC라이프사이클 기억)
 
-- 스프링은 주로 `WebMvcConfigurer` 를 **상속받아서 구현**하면 스프링 빈에 자동 등록과 기능확장!
-
-  * 주로 클래스단에 @Configuration 선언 후 @Override로 기능 확장! (물론 @Bean도 같이 써도 되는데, 이 경우엔 생략 가능. 그치만 구분위해 붙이자.)
-
-  * **예로 인터셉터, ArgumentResolver** 도 새로 구현한 후에는 이곳에 등록해서 확장(추가)해야 한다.
-
-    <details><summary><b>예시 코드<br>interceptor, argumentresolver, 정적이미지경로 핸들링과 브라우저 캐시, CORS 해결</b></summary>
-    <div markdown="1"><br>
-    정적이미지 경로 핸들링 + 브라우저 캐시(클라 쪽 메모리 활용) 추가 -> `addResoucreHandler()`<br>
-    CORS(Cross-Origin Resource Sharing) 해결 -> `addCorsMappings()`
-    ```java
-    @Configuration // 설정 파일임을 알림
-    @Slf4j
-    public class ApiConfig implements WebMvcConfigurer {
-    //
-      @Override
-      public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(new LoginMemberArgumentResolver());
-      }
-    //
-      @Override
-      public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new MemberCheckInterceptor())
-            .order(2)
-            .addPathPatterns("/**") // 모든 경로 접근
-            .excludePathPatterns("/", "/api/v1/members/login", "/api/v1/members/register",
-                "/api/v1/members/logout", "/api/v1/members/*",
-                "/image/**", "/css/**", "/*.ico", "/error"); // 제외 경로!
-      }
-    //
-      // 정적이미지 경로 핸들링 + 브라우저 캐시
-      // 경로 매핑 작업을 하는 오버라이딩이며 특정 경로(=static/) 에 브라우저 캐시까지 추가한 로직!!
-      @Override
-      public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        CacheControl cacheControl = CacheControl.maxAge(Duration.ofDays(365));
-        registry.addResourceHandler("/image/**")
-            .addResourceLocations("file:///C:/images-spring/") // LF 조심
-            .setCacheControl(cacheControl); // 브라우저 캐시 추가
-    //                .addResourceLocations("file:///var/www/images-spring/");
-      }
-    //
-      // CORS
-      @Override
-      public void addCorsMappings(CorsRegistry registry) {
-      	registry.addMapping("/**").allowedOrigins("http://localhost:9000");
-      }
-    }
-    ```
-    </div>
-    </details>
-    <details><summary><b>예시 코드<br>서버 메모리 캐시 위해 CachingConfigurerSupport 상속 및 구현(기능확장)</b></summary>
-    <div markdown="1"><br>
-    CacheManager를 오버라이딩!! 물론, 간단히 설정파일(yaml)에서 설정도 지원 중<br>
-    원래, main 함수있는 클래스에서 `@EnableCaching` 필수 선언!<br>=> 그러나 직접 빈 등록방식을 사용한다면 해당 설정 파일에서만 `@EnableCaching` 선언해도 됨!<br>
-    코드는 사용법과 만드는 법을 간단히 소개<br>
-    ```java
-    // 사용법: 서비스단 메소드에 이런식으로 적용
-    @Cacheable(value = "users", key = "#memberId", cacheNames = "users", cacheManager = "cacheManager2")
-    //
-    // 만드는 법: Caffeine 활용 하여 간단히 설정!
-    CaffeineCacheManager cacheManager = new CaffeineCacheManager("users");
-        cacheManager.setCaffeine(Caffeine.newBuilder()
-            .initialCapacity(1) // 내부 해시 테이블의 최소한의 크기 (캐릭터 어차피 1개만 기록)
-            .maximumSize(200) // 캐시에 포함할 수 있는 최대 엔트리 수 (멤버 200명 정도한테 적용하자)
-    //                .weakKeys() // 직접 키를 설정하므로 주석처리
-            .recordStats());
-    ```
-    아래 방식을 추천 -> 직접 빈 등록 설정 파일
-    ```java
-    @Configuration
-    @EnableCaching
-    public class CacheConfig extends CachingConfigurerSupport {
-      @Override
-      @Bean
-      public CacheManager cacheManager() {
-        CaffeineCacheManager cacheManager = new CaffeineCacheManager("members");
-        cacheManager.setCaffeine(Caffeine.newBuilder()
-            .initialCapacity(50) // 내부 해시 테이블의 최소한의 크기
-            .maximumSize(50) // 캐시에 포함할 수 있는 최대 엔트리 수
-    //                .weakKeys() // 직접 키를 설정하므로 주석처리
-            .recordStats());
-        return cacheManager;
-      }
-    //
-      @Bean
-      public CacheManager cacheManager2() {
-        CaffeineCacheManager cacheManager = new CaffeineCacheManager("users");
-        cacheManager.setCaffeine(Caffeine.newBuilder()
-            .initialCapacity(1) // 내부 해시 테이블의 최소한의 크기 (캐릭터 어차피 1개만 기록)
-            .maximumSize(200) // 캐시에 포함할 수 있는 최대 엔트리 수 (멤버 200명 정도한테 적용하자)
-    //                .weakKeys() // 직접 키를 설정하므로 주석처리
-            .recordStats());
-        return cacheManager;
-      }
-    }
-    ```
-    </div>
-    </details>
-
-- 일반적으로 스프링 빈 등록은 **클래스단에 @Configuration 선언 후 메소드 단에 @Bean을 여러개 등록(이 패턴을 주력으로 사용하자)**한다.
-
-  - 내 기억엔 @Configuration 선언 후 메소드 1개면 @Bean 생략 가능했던 것 같다.
-  - 그치만 그냥 안전하게 @Configuration 선언 후 메소드 단에 @Bean여러개 등록 패턴  사용하자
-
-- **@Component 로도 간단히 빈 등록**이 가능하다. 이를 가지면서 세분화 한 애노테이션은 **@Service, @Repository, @Entity** 이며 자동 빈 등록해준다.
+> 순수스프링은 xml에서 HandlerMapping지정 및 인터셉터 등록하면 해당 핸들러만 사용하다보니 문제없이 정상 동작하지만,  
+>
+> 부트는 항상 여러 HandlerMapping을 자동등록(로그보니 5개정도?) 하기 때문에 순수스프링처럼 지정해버리면 다른 HandlerMapping들에 인터셉터가 등록이 되지 않는 문제가 발생한다.  
+>
+> - 부트는 스프링MVC패턴을 위한 디스패처서블릿 등등 여러가지를 자동으로 등록하는 특징
+>
+> 부트 사용하는 프로젝트의 경우 xml에 `<mvc:interceptors>` 패턴이나 부트가 권장하는 Java Config를 사용해서 "모든 핸들러매핑에 인터셉터를 등록"하자.
 
 <br>
 
-#### 일반 상황(@Aspect, @Around)
+메시지 국제화 패턴은 **여러 외국어를 지원**하게 만들기 수월!!
 
-동작흐름 : **프록시 객체 생성 -> 실제 객체 생성 의 흐름**
+1. `application.properties` 에 `spring.messages.basename=messages` 를 추가!!  
+   덕분에, **MessageSource 빈을 부트가 자동 생성**
+   - 메시지 사용: **JSP라면**에서 `<spring:message code="Login.form.id"/>` 이런식으로 사용.(messages.propeties의 Login.form.id 매핑)
 
-만들 때 : **@Aspect** 사용 및 "**스프링 빈** 등록 필수"
+2. `message/meesages.properties, *_ko.properties, *_en.properties` 를 세팅
+   * 만약, `errors.properties` 추가한다고 하면 `spring.messages.basename=messages, errors` 이렇게 이어적으면 됨
 
-사용할 때 : **@Around**로 원하는 곳에 적용
+3. **메시지 국제화** 방법은 **LocaleChangeInterceptor빈과 LocaleResolver 빈**을 만들어서 **인터셉터 추가** 설정을 해야지 적용 됩니다!(테스트는 URL?lang=en 이런식)
 
-- **@Around**는 AOP의 어드바이스 타입 중 하나, **메서드 실행 전후** 로직 실행 지원
-- **proceed()** 를 통해 원하는 시점 때 **"실제 실행"**을 지원 -> AOP 말고 실제 메서드
+   - 국제화 사용: url에 `http://example.com?lang=en` 처럼 파라미터 담아 요청!  
 
-```java
-@Aspect // AOP
-@Component // "빈" 등록
-@Slf4j
-public class TimeTraceAop {
+   - lang파라미터 없어도 헤더에 자동 등록된 lang보고 국제화 사용 된다.
+   - 즉, 미국에서 접속 시 브라우저는 자국 언어인 en을 lang으로 헤더에 자동 등록되는 특징을 이용가능!
 
-  @Around("execution(* com.lepl..*(..))")
-  public Object execute(ProceedingJoinPoint joinPoint) throws Throwable {
-    // 프록시 실행
-    long start = System.currentTimeMillis();
-    log.debug("START: {}", joinPoint.toString());
-    try {
-      return joinPoint.proceed(); // 실제 실행
-    } finally {
-      long finish = System.currentTimeMillis();
-      long timeMs = finish - start;
-      log.debug("END: {} {}ms", joinPoint.toString(), timeMs);
-    }
-  }
-}
-```
-
-<br>
-
-#### 웹 통신(HTTP) 상황 - 필터, 인터셉터, 리졸버 등
-
-**동작흐름: HTTP 요청 -> WAS -> 필터 -> 서블릿 -> 인터셉터1 -> 인터셉터2 -> 컨트롤러**
-
-**interceptor 먼저 수행 후 -> argumentresolver 수행 순서**
-
-서블릿 필터 보다는 **“스프링 인터셉터” 와 "ArgumentResolver" 활용 권장**
-
-- **ArgumentResolver** 를 통해서 공통 작업할 때 컨트롤러를 더욱 편리하게 사용 가능 (**컨트롤러 메서드의 매개변수에 적절한 값을 바인딩**하는 과정을 담당)
-
-  - 서블릿(=Dispatcher Servlet) 과 컨트롤러(핸들러) 사이에는 사실 핸들러 어댑터가 동작을 하며, 이때 “**ArgumentResolver**” 가 중간에 있어서 이를 거치고 “**컨트롤러(핸들러)**” 가 동작
-
-  - **ArgumentResolver 덕분에 수많은 애노테이션 속 데이터들을 컨트롤러(핸들러)로 정상 전달**
-
-    - EX) **@Login** 애노테이션 만들어서 “멤버 정보” 객체 반환 이런게 가능!
-
-    - **기존** : `@SessionAttribute(name = "loginMember", required = false) Member loginMember`
-
-    - **적용** : `@Login Member loginMember`
-
-- “**인터셉터**” 는 “필터” 보다 더 많이 호출 (**컨트롤러 도달 전과 후에 공통 수행**)
-  - “로그인 인증” 을 예시로 구현 가능
-    - `preHandle` 에 “세션정보(쿠키)” 인증을 시도 및 실패시 다시 “로그인창” 으로 이동
-      - 이를 다양한 **URL 패턴으로 적용 가능** - 적용URL, 미적용URL 구분도 간편
-    - 컨트롤러 도달 후인 postHandle() 도 있다는 것만 기억.
-
-<details><summary><b>예시코드 - ArgumentResolver</b></summary>
-<div markdown="1"><br>
-Login.java(인터페이스) -> @Login 애노테이션 생성
-```java
-@Target(ElementType.PARAMETER) // 파라미터에 사용
-@Retention(RetentionPolicy.RUNTIME) // RUNTIME 까지 살아남게 설정
-public @interface Login {
-}
-```
-LoginMemberArgumentResolver.java -> 애노테이션이 @Login이고, 타입이 Long인지 체크 후 세션에 있는 memberId 반환해주는 로직
-```java
-@Slf4j
-public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
-//
-  @Override
-  public boolean supportsParameter(MethodParameter parameter) {
-    log.info("supportsParameter 실행");
-//
-    boolean hasLoginAnnotation = parameter.hasParameterAnnotation(Login.class);
-    boolean hasLongType = Long.class.isAssignableFrom(parameter.getParameterType());
-    // 어노테이션이 @Login 이고, 해당 파라미터 타입이 Long 라면 true 반환
-    return hasLoginAnnotation && hasLongType;
-  }
-//
-  // 위 supportsParameter 가 true 면 아래 함수가 실행
-  @Override
-  public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-      NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-    log.info("resolveArgument 실행");
-//
-    HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
-    HttpSession session = request.getSession(false); // false : 없으면 null
-    if (session == null) {
-      log.info("null");
-      return null;
-    }
-    Long memberId = Long.valueOf(session.getAttribute(SESSION_NAME_LOGIN).toString());
-    return memberId;
-  }
-}
-```
-ApiConfig.java -> ArgumentResolver 등록 방법
-```java
-@Configuration // 설정 파일임을 알림
-@Slf4j
-public class ApiConfig implements WebMvcConfigurer {
-//
-  @Override
-  public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-    resolvers.add(new LoginMemberArgumentResolver());
-  }
-}
-```
-</div>
-</details>
-
-<details><summary><b>예시코드 - Interceptor + 적용,미적용 URL 설정</b></summary>
-<div markdown="1"><br>
-MemberCheckInterceptor.java -> 로그인 인증 유무 체크 로직
-```java
-@Slf4j // log
-public class MemberCheckInterceptor implements HandlerInterceptor {
-//
-  @Override
-  public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-      throws Exception {
-    String requestURI = request.getRequestURI();
-    log.info("인증 체크 인터셉터 실행 {}", requestURI);
-//
-    HttpSession session = request.getSession();
-    if (session == null || session.getAttribute(SESSION_NAME_LOGIN) == null) {
-      log.info("미인증 사용자 요청");
-      // 회원 아님을 알림
-      response.setStatus(HttpStatus.UNAUTHORIZED.value()); // status code : 401
-      return false;
-    }
-    return true;
-  }
-}
-```
-ApiConfig.java -> Interceptor 적용법 + 인증 URL과 미인증 URL 설정 로직
-```java
-@Configuration // 설정 파일임을 알림
-@Slf4j
-public class ApiConfig implements WebMvcConfigurer {
-//
-  @Override
-  public void addInterceptors(InterceptorRegistry registry) {
-    registry.addInterceptor(new MemberCheckInterceptor())
-        .order(2)
-        .addPathPatterns("/**") // 모든 경로 접근
-        .excludePathPatterns("/", "/api/v1/members/login", "/api/v1/members/register",
-            "/api/v1/members/logout", "/api/v1/members/*",
-            "/image/**", "/css/**", "/*.ico", "/error"); // 제외 경로!
-  }
-}
-```
-</div>
-</details>
-
-<br><br>
-
-### 메시지 국제화 기능 + 외부설정(@Value -> @ConfigurationProperties)
-
-<br>
-
-#### 메시지 국제화
-
-메시지 국제화 패턴을 사용하면 좋은점이 **여러 외국어를 지원**하게 만들기 수월!!
-
-* `application.properties` 에 `spring.messages.basename=messages` 를 추가!! (properties에서 설정했으므로 따로 `MessageSource`를 스프링 빈에 수동 등록할 필요가 없어짐! 부트가 자동으로 만들어 줌!)
-  * 이후 `messages.properties` 에 공통 관리할 messages에 담을 내용을 세팅
-  * `MessageSource` 는 이렇게 등록한 메시지를 사용하게 해주는 빈 (@Autowired 로 간단히 주입해서 사용 ㄱㄱ)
-* 여러개 추가할거면?? 
-  * 예로 `errors.properties` 추가한다고 하면 `spring.messages.basename=message, errors` 이렇게 이어적으면 됨
-* 단, 부트 지원은 MessageSource 빈을 자동 만들어 주는거고(application.yml 설정 했다 가정)  
-  메시지 국제화는 LocaleChangeInterceptor빈과 LocaleResolver 빈을 만들어서 인터셉터 추가 설정을 해야지 적용 됩니다!(테스트는 URL?lang=en 이런식)
-
-<details><summary><b>예시 코드 - application.yml, messages.properties, messages_en.properties, TEST_CODE</b></summary>
+<details><summary><b>MessageSource 예시 - application.yml, messages.properties, messages_en.properties, TEST_CODE</b></summary>
 <div markdown="1"><br>
 application.yml 설정 -> 여기서 안하면 직접 클래스 만들어서 수동 스프링 빈 등록해야함(MessageSource메소드)
 ```java
@@ -2747,53 +2925,125 @@ public class MessageTest {
 </div>
 </details>
 
-<br>
+<details><summary><b>국제화 예시 - Java Config로</b></summary>
+    <div markdown="1"><br>
+        ```java
+        @Configuration
+        public class WebConfig implements WebMvcConfigurer {
+        @Override
+        public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(localeChangeInterceptor()); //국제화 인터셉터 등록
+        }
+        //국제화 빈 -> 파라미터 lang 가져오는 용도
+        @Bean
+        public LocaleChangeInterceptor localeChangeInterceptor() {
+        LocaleChangeInterceptor interceptor = new LocaleChangeInterceptor();
+        interceptor.setParamName("lang");
+        return interceptor;
+        }
+        //국제화 빈 -> 세션사용 및 Locale 자동 생성 용도
+        @Bean
+        public LocaleResolver localeResolver() {
+        SessionLocaleResolver resolver = new SessionLocaleResolver();
+        resolver.setDefaultLocale(Locale.KOREA); // 또는 원하는 기본 로케일
+        return resolver;
+        }
+        //메시지소스 빈 -> 국제화 빈과 항상 세트로 사용하자.
+        //yml에서 이미 등록했으니 생략해도 될걸?
+        @Bean
+        public MessageSource messageSource() {
+        ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+        messageSource.setBasenames(
+        "message.message-common", 
+        "org.egovframe.rte.fdl.idgnr.messages.idgnr",
+        "org.egovframe.rte.fdl.property.messages.properties"
+        );
+        messageSource.setCacheSeconds(60);
+        messageSource.setDefaultEncoding("UTF-8");
+        return messageSource;
+        }   
+        }
+        ```
+    </div>
+</details>
 
-#### 외부 설정 -> @ConfigurationProperties 사용 하자!
+<br><br>
 
-**외부 설정(application.yml) 에서 설정한 내용을 -> 자바객체로 바꿔서 -> 스프링 빈에 등록하여 사용하자는 방법! (messages랑 다른거다 오해하지말자!)**<br>
+### 외부설정(@Value -> @ConfigurationProperties)
+
+**외부 설정(application.yml) 에서 설정한 내용을 -> 자바객체로 바꿔서 -> 스프링 빈에 등록하여 사용하자는 방법! (messages랑 다른거다 오해하지말자!)**
+
 **특히,** `spring.config.import=optional:file:../prod.properties ` **로 외부의 설정 파일(ex:prod.properties가 우선순위)도 가져올 수 있다.(권장!)**
 
 - `application.yml` 에 **my.datasource.imgPath=값**를 설정해서 사용하고자 한다면?
-- `MyDataSourceProperties.java` 를 만들어서 **@ConfigurationProperties("my.datasource")** 로 설정 등록이 먼저다.
-  - @ConfigurationProperties로 application.properties 내용을 JVM에 로드
+- **@Value("${my.datasource.imgPath}")** 로 간단히 가져올 수 있지만, 우린 이걸 쓰려는게 아니니까 이건 잠시 잊자.
+- 우린 **@ConfigurationProperties이걸 사용**할 것이고 아래 코드를 보고 이해하자.
 
-- `MyDataSourceConfig.java` 를 만들어서 **@EnableConfigurationProperties(MyDataSourceProperties.class)** 로 추가 설정하고, 객체로 쉽게 사용할 수 있게 추가로 `MyDataSource.java` 를 **@Bean**로 스프링 빈 등록(기능확장)을 하면 끝이다.
-  - @EnableConfigurationProperties로 @ConfigurationProperties를 빈 사용 활성화
-  - 애초에 **@Value("${my.datasource.imgPath}")** 로 간단히 가져올 수 있지만, 우린 이걸 쓰려는게 아니니까 이건 잠시 잊자.
-
-
-<details><summary><b>자세한 예시 코드 - application.yml, MyDataSourceProperties.java, MyDataSourceConfig.java, MyDataSource.java, TEST_CODE</b></summary>
+<details><summary><b>@ConfigurationProperties 사용코드(+외부설정 포함): 이거 적용함</b></summary>
 <div markdown="1"><br>
-위 구현 순서대로 코드 나열하겠다.<br>
-application.yml (다시 언급하지만 메시지 국제화인 messages랑 다른거다!)
-```yaml
-my:
-  datasource:
-    imgPath: C:/images-spring/
+3개 자바파일 + 내부,외부 application.properties 필요<br>**application.properties -> 내부 resources에서 코드**
+```properties
+# 내부설정.property + 외부설정.properties(ex: pageUnit=10)
+# file:../prod.properties란 프로젝트 상위에 잇는 외부설정
+spring.config.import=optional:file:../prod.properties 
+my.datasource.pageUnit=10
+my.datasource.pageSize=10
+my.datasource.imgPath=C:/images-spring/
 ```
-MyDataSourceProperties.java
+**MyDataSource.java -> 객체로 사용할 클래스**
+```java
+@Slf4j
+@Data
+public class MyDataSource {
+	private int pageUnit;
+	private int pageSize;
+	private String imgPath;
+	// 생성자
+	public MyDataSource(int pageUnit, int pageSize, String imgPath) {
+		this.pageUnit = pageUnit;
+		this.pageSize = pageSize;
+		this.imgPath = imgPath;
+	}
+//
+	@PostConstruct // 로딩완료 후 바로 실행 (로그 확인용)
+	public void init() {
+		log.info("init: pageUnit={}, pageSize={}, imgPath={}", pageUnit, pageSize, imgPath);
+	}
+}
+```
+**MyDataSourceProperties.java -> @ConfigurationProperties로 application.properties 내용을 JVM에 로드**
 ```java
 /**
- * @ConfigurationProperties 로 application.yml 에 저장한 my.datasource 하위 내용
+ * 외부설정:
+ * @ConfigurationProperties 로 application.properties 에 저장한 my.datasource 하위 내용
  * 가져와서 "자바 객체" 로 변환 + 검증까지
  */
-@Getter
+@Slf4j
+@Getter @Setter
 @ConfigurationProperties("my.datasource")
-@Validated
+//@Validated
 public class MyDataSourceProperties {
-    @NotEmpty
+//    @NotEmpty
+    private int pageUnit;
+    private int pageSize;
     private String imgPath;
-    public MyDataSourceProperties(String imgPath) {
+    public MyDataSourceProperties() { // 기본 생성자
+    	log.info("properties 기본생성자 TEST");
+    }
+    public MyDataSourceProperties(int pageUnit, int pageSize, String imgPath) {
+    	log.info("properties 일반생성자 TEST");
+        this.pageUnit = pageUnit;
+        this.pageSize = pageSize;
         this.imgPath = imgPath;
     }
 }
 ```
-MyDataSourceConfig.java
+**MyDataSourceConfig.java -> @EnableConfigurationProperties로 @ConfigurationProperties를 빈 사용 활성화**<br>참고) 바로 사용해도 되지만 객체로 쉽게 사용할 수 있게 추가로 `MyDataSource.java` 를 빈 등록 했다.
 ```java
 /**
- * @EnableConfigurationProperties 로 MyDataSourceProperties 를 사용 및 스프링 빈 등록
- * @Import 를 통해서 "컴포넌트 스캔 대상!" -> 방식은 자유. 본인은 이걸로 스캔 했을 뿐
+ * 외부설정:
+ * @EnableConfigurationProperties 로 MyDataSourceProperties 를 사용 및 스프링 빈
+ * @Import 를 통해서 "컴포넌트 스캔 대상 꼭 지정하기!"
  */
 @Slf4j
 @EnableConfigurationProperties(MyDataSourceProperties.class)
@@ -2802,42 +3052,396 @@ public class MyDataSourceConfig {
     public MyDataSourceConfig(MyDataSourceProperties properties) {
         this.properties = properties;
     }
+//
     @Bean
     public MyDataSource getMyDataSource() {
-        log.info("BeanTest");
         return new MyDataSource(
-                properties.getImgPath()
+                properties.getPageUnit(), properties.getPageSize(), properties.getImgPath()
         );
     }
 }
 ```
-MyDataSource.java
-```java
-/**
- * @PostConstruct 는 로그 확인용으로 추가! 외부설정 내용!!
- */
-@Slf4j
-@Data
-public class MyDataSource {
-    private String imgPath;
-//
-    // 생성자
-    public MyDataSource(String imgPath) {
-        this.imgPath = imgPath;
-    }
-//
-    @PostConstruct // 로딩완료 후 바로 실행
-    public void init() {
-        log.info("imgPath={}", imgPath);
-    }
-}
-```
-TEST_CODE
+**TEST_CODE**
 ```java
 //필요한 곳에서 불러오고
-private final MyDataSourceConfig source; //MyDataSource 불러와 바로 사용해도 됨
-//이를 바로 사용하면 끝
+private final MyDataSourceConfig source; 
+//이를 바로 사용하면 끝!
 .addResourceLocations("file:///"+source.getMyDataSource().getImgPath());
+//MyDataSource 불러와 바로 사용해도 됨
+private final MydataSource source;
+log.info("{}", source.getImgPath());
+```
+</div>
+</details>
+
+<br><br>
+
+### 캐시(메모리, 브라우저)
+
+> reload: 타임리프는 properties에 캐시 사용X 하여 reload가 가능한데, JSP는 reloadable="true"가 기본값이라 톰캣이  자동 컴파일 하면서 reload가 이미 제공!
+>
+> XML에서 정적리소스 핸들러매핑 `<mvc:resources mapping="/**" location="classpath:/static/" />` 가능
+>
+> 그러나, setCacheControl 같은건 Java 코드로 해야해서 여기선 xml그냥 사용하지 말 것.
+
+**브라우저 캐시는?**   
+
+- `WebMvcConfigurer` 를 **상속받아서 구현**하면 스프링 빈에 자동 등록과 기능확장!
+
+* **캐시 뿐만 아니라 인터셉터, ArgumentResolver 등** 도 새로 구현한 후에는 이곳에 등록해서 확장(추가)해야 한다.
+
+  <details><summary><b>정적이미지경로 핸들링과 "브라우저 캐시" 예시 코드<br>+참고) interceptor 추가, argumentresolver 추가, CORS 해결</b></summary>
+  <div markdown="1"><br>
+  정적이미지 경로 핸들링 + 브라우저 캐시(클라 쪽 메모리 활용) 추가 -> `addResoucreHandler()`<br>
+  CORS(Cross-Origin Resource Sharing) 해결 -> `addCorsMappings()`
+  ```java
+  @Configuration // 설정 파일임을 알림
+  @Slf4j
+  public class ApiConfig implements WebMvcConfigurer {
+    private final MyDataSource source;
+  //
+    // 정적이미지 경로 핸들링 + 브라우저 캐시
+    // 경로 매핑 작업을 하는 오버라이딩이며 특정 경로(=static/) 에 브라우저 캐시까지 추가한 로직!!
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+      CacheControl cacheControl = CacheControl.maxAge(Duration.ofDays(365));
+      registry.addResourceHandler("/image/**")
+      //.addResourceLocations("file:///C:/images-spring/");
+      //.addResourceLocations("file:///var/www/images-spring/");
+      .addResourceLocations("file:///"+source.getImgPath());
+      //
+      registry.addResourceHandler("/**") // **/*.*, /resources/**
+      .addResourceLocations("classpath:/static/")
+      .setCacheControl(cacheControl); // 정적 리소스들 캐시 추가
+    }
+  //
+    @Override
+    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+      resolvers.add(new LoginMemberArgumentResolver());
+    }
+  //
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+      registry.addInterceptor(new MemberCheckInterceptor())
+          .order(2)
+          .addPathPatterns("/**") // 모든 경로 접근
+          .excludePathPatterns("/", "/api/v1/members/login", "/api/v1/members/register",
+              "/api/v1/members/logout", "/api/v1/members/*",
+              "/image/**", "/css/**", "/*.ico", "/error"); // 제외 경로!
+    }
+  //
+    // CORS
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+    	registry.addMapping("/**").allowedOrigins("http://localhost:9000");
+    }
+  }
+  ```
+  </div>
+  </details>
+
+**메모리캐시는?**
+
+- **spring-boot-starter-cache, @EnableCaching 설정은 기본**임!
+
+- **서비스단에서** `@Cacheable(value = "users", key = "#memberId", cacheNames = "users", cacheManager = "cacheManager2")` **이런식으로 사용!**
+
+  - 참고로 조건부도 지정 가능: `@Cacheable(value = "items", key = "#searchItem.searchKeyword + '_' + #searchItem.pageIndex", condition = "#searchItem.searchKeyword != null && !#searchItem.searchKeyword.isEmpty()")`
+  - **주의**: key를 Object로 접근할 경우 @EqualsAndHashCode로 값이 구분되게 꼭 설정해야 함.  
+    @EqualsAndHashCode는 이름 그대로 해당 메소드 자동 생성해주는 롬복
+
+- **수동 cacheManager 빈 등록 설정**으로 "캐시 메모리 용량"까지 설정하는걸 추천!
+
+  - <details><summary><b>예시 코드<br>서버 메모리 캐시 위해 CachingConfigurerSupport 상속 및 구현(기능확장)</b></summary>
+    <div markdown="1"><br>
+    CacheManager를 오버라이딩!! 물론, 간단히 설정파일(yaml)에서 설정도 지원 중<br><br>
+    main 함수있는 클래스에서 `@EnableCaching` 필수 선언!<br>=> 그러나 직접 빈 등록방식을 사용한다면 해당 설정 파일에서만 `@EnableCaching` 선언해도 됨!<br>
+    코드는 사용법과 만드는 법을 간단히 소개<br>
+    ```java
+    // 사용법: 서비스단 메소드에 이런식으로 적용
+    @Cacheable(value = "users", key = "#memberId", cacheNames = "users", cacheManager = "cacheManager2")
+    //
+    // 만드는 법: Caffeine 활용 하여 간단히 설정!
+    CaffeineCacheManager cacheManager = new CaffeineCacheManager("users");
+        cacheManager.setCaffeine(Caffeine.newBuilder()
+            .initialCapacity(1) // 내부 해시 테이블의 최소한의 크기 (캐릭터 어차피 1개만 기록)
+            .maximumSize(200) // 캐시에 포함할 수 있는 최대 엔트리 수 (멤버 200명 정도한테 적용하자)
+    //                .weakKeys() // 직접 키를 설정하므로 주석처리
+            .recordStats());
+    ```
+    아래 방식을 추천 -> 직접 빈 등록 설정 파일
+    ```java
+    @Configuration
+    @EnableCaching
+    public class CacheConfig extends CachingConfigurerSupport {
+      @Override
+      @Bean
+      public CacheManager cacheManager() {
+        CaffeineCacheManager cacheManager = new CaffeineCacheManager("members");
+        cacheManager.setCaffeine(Caffeine.newBuilder()
+            .initialCapacity(50) // 내부 해시 테이블의 최소한의 크기
+            .maximumSize(50) // 캐시에 포함할 수 있는 최대 엔트리 수
+    //                .weakKeys() // 직접 키를 설정하므로 주석처리
+            .recordStats());
+        return cacheManager;
+      }
+    //
+      @Bean
+      public CacheManager cacheManager2() {
+        CaffeineCacheManager cacheManager = new CaffeineCacheManager("users");
+        cacheManager.setCaffeine(Caffeine.newBuilder()
+            .initialCapacity(1) // 내부 해시 테이블의 최소한의 크기 (캐릭터 어차피 1개만 기록)
+            .maximumSize(200) // 캐시에 포함할 수 있는 최대 엔트리 수 (멤버 200명 정도한테 적용하자)
+    //                .weakKeys() // 직접 키를 설정하므로 주석처리
+            .recordStats());
+        return cacheManager;
+      }
+    }
+    ```
+    </div>
+    </details>
+
+- 기존 타임리프 플젝 웹에서 캐시는 "페이징 게시물 조회 캐시" 흐름이 좀 복잡 **-> eGov적용 해본 웹 플젝에서 개선 (eGov꺼로 여기서 정리하겠음)**  
+  *eGov 플젝에선 하필 URL을 studio/page/itemId 이런식으로 안해서 그냥 URL param으로 넘김 (이건 좀 아쉬움. 이건 JPA로 했던 플젝 방식이 더 좋은듯)*
+
+  - 게시물 페이지별 조회, 게시물 전체 개수: @Cacheable -> 캐시 없으면 기록 및 조회
+  - 게시물 페이지별 조회(게시물 수정): @CachePut -> 캐시 있어도 기록 및 조회
+    - **정정:** 그냥 수정도 @CacheEvict(key=해당 페이지) 로 해당 페이지만 캐시 초기화 하자.
+  - 게시물 추가, 게시물 삭제: @CacheEvict -> 캐시 초기화
+
+**테스트 방법**:
+
+- 웹은 F12-네트워크 체크, 
+- 메모리는 db쿼리 유무 체크(properties에서 쿼리 로그레벨 설정하여 쿼리체크)
+
+<details><summary><b>캐시 적용 코드 참고: JSP플젝임</b></summary>
+<div markdown="1"><br>
+pom.xml
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-cache</artifactId>
+</dependency>
+```
+application.properties
+```properties
+# MyBatis 관련 로깅 설정
+logging.level.org.mybatis=DEBUG
+logging.level.org.apache.ibatis=DEBUG
+```
+메인함수.java
+```java
+@EnableCaching // Spring Boot Cache 사용을 선언
+public class EgovBootApplication {...}
+```
+ItemDefault.java -> ItemServiceImpl에서 사용하는 파라미터
+```java
+@EqualsAndHashCode
+public class ItemDefault {...}
+```
+ItemServiceImpl.java
+```java
+//CRUD
+@Override
+@Transactional // 쓰기모드
+@CacheEvict(value = {"items", "totalCount"}, allEntries = true) //캐시 초기화
+public Long save(Item item) throws Exception {
+    return itemMapper.save(item);
+}
+@Override
+@Transactional // 쓰기모드
+@CacheEvict(value = {"items", "totalCount"}, allEntries = true)
+public Long delete(Item item) throws Exception {
+    // TODO Auto-generated method stub
+    return itemMapper.delete(item);
+}
+@Override
+@Transactional // 쓰기모드
+@CacheEvict(value = "items", key = "#item.pageIndex") //totalCount는 그대로
+public Long update(UpdateItemDto item) throws Exception {
+    // TODO Auto-generated method stub
+    return itemMapper.update(item);
+}
+//추가메소드
+@Override
+@Cacheable(value = "items", key = "#searchItem.pageIndex") //value 로 꼭 캐시 영역을 지정하여 구분
+public List<Item> findAllWithPage(ItemDefault searchItem) throws Exception {
+	// TODO Auto-generated method stub
+	return itemMapper.findAllWithPage(searchItem);
+}
+@Override
+@Cacheable(value = "totalCount") //totalCount는 공통으로 사용하니 key로 구분 필요 없지 
+public int findTotalCount(ItemDefault searchItem) throws Exception {
+	// TODO Auto-generated method stub
+	return itemMapper.findTotalCount(searchItem);
+}
+```
+</div>
+</details>
+
+<br><br>
+
+### 인터셉터, 리졸버, AOP
+
+요청 흐름: requset(HTTP) > Filter(서블릿필터) > Servlet(디스패처서블릿) > **Interceptor > Argument Resolver > AOP** > Controller
+
+<br>
+
+**AOP(공통 해결 관심사): 관점지향프로그래밍**
+
+- 동작흐름 : **프록시 객체 생성 -> 실제 객체 생성 의 흐름**
+
+- 만들 때 : **@Aspect** 사용 및 "**스프링 빈** 등록 필수"
+
+- 사용할 때 : **@Around**로 원하는 곳에 적용
+
+  - **@Around**는 AOP의 어드바이스 타입 중 하나, **메서드 실행 전후** 로직 실행 지원
+
+  - **proceed()** 를 통해 원하는 시점 때 **"실제 실행"**을 지원 -> AOP 말고 실제 메서드
+
+
+<details><summary><b>AOP 예시 코드 - 메소드 수행시간 기능</b></summary>
+<div markdown="1"><br>
+```java
+@Aspect // AOP
+@Component // "빈" 등록
+@Slf4j
+public class TimeTraceAop {
+  @Around("execution(* com.lepl..*(..))")
+  public Object execute(ProceedingJoinPoint joinPoint) throws Throwable {
+    // 프록시 실행
+    long start = System.currentTimeMillis();
+    log.debug("START: {}", joinPoint.toString());
+    try {
+      return joinPoint.proceed(); // 실제 실행
+    } finally {
+      long finish = System.currentTimeMillis();
+      long timeMs = finish - start;
+      log.debug("END: {} {}ms", joinPoint.toString(), timeMs);
+    }
+  }
+}
+```
+</div>
+</details>
+
+<br>
+
+"서블릿 필터" 보다는 **“Interceptor” 와 "ArgumentResolver" 활용 권장**
+
+- **ArgumentResolver** 를 통해서 공통 작업할 때 컨트롤러를 더욱 편리하게 사용 가능 (**컨트롤러 메서드의 매개변수에 적절한 값을 바인딩**하는 과정을 담당)
+  - 서블릿(=Dispatcher Servlet) 과 컨트롤러(핸들러) 사이에는 사실 핸들러 어댑터가 동작을 하며, 이때 “**ArgumentResolver**” 가 중간에 있어서 이를 거치고 “**컨트롤러(핸들러)**” 가 동작
+
+  - **ArgumentResolver 덕분에 수많은 "애노테이션" 속 데이터들을 컨트롤러(핸들러)로 정상 전달**
+    - EX) **@Login** 애노테이션 만들어서 “멤버 정보” 객체 반환 이런게 가능!
+
+    - **기존** : `@SessionAttribute(name = "loginMember", required = false) Member loginMember`
+
+    - **적용** : `@Login Member loginMember`
+- “**Interceptor **” 는 “필터” 보다 더 많이 호출 (**컨트롤러 도달 전과 후에 공통 수행**)
+  - “로그인 인증” 을 예시로 구현 가능
+    - `preHandle` 에 “세션정보(쿠키)” 인증을 시도 및 실패시 다시 “로그인 창” 으로 이동
+      - 이를 다양한 **URL 패턴으로 적용 가능** -> 적용URL, 미적용URL 구분도 간편
+    - 컨트롤러 도달 후인 postHandle() 도 있다는 것만 기억.
+
+아래 코드들은 `WebMvcConfigurer` 를 구현한 **Java Config 방식** 포함
+
+<details><summary><b>예시코드 - ArgumentResolver</b></summary>
+<div markdown="1"><br>
+Login.java(인터페이스) -> @Login 애노테이션 생성
+```java
+@Target(ElementType.PARAMETER) // 파라미터에 사용
+@Retention(RetentionPolicy.RUNTIME) // RUNTIME 까지 살아남게 설정
+public @interface Login {
+}
+```
+LoginMemberArgumentResolver.java -> 애노테이션이 @Login이고, 타입이 Long인지 체크 후 세션에 있는 memberId 반환해주는 로직
+```java
+@Slf4j
+public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
+//
+  @Override
+  public boolean supportsParameter(MethodParameter parameter) {
+    log.info("supportsParameter 실행");
+//
+    boolean hasLoginAnnotation = parameter.hasParameterAnnotation(Login.class);
+    boolean hasLongType = Long.class.isAssignableFrom(parameter.getParameterType());
+    // 어노테이션이 @Login 이고, 해당 파라미터 타입이 Long 라면 true 반환
+    return hasLoginAnnotation && hasLongType;
+  }
+//
+  // 위 supportsParameter 가 true 면 아래 함수가 실행
+  @Override
+  public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+      NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+    log.info("resolveArgument 실행");
+//
+    HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
+    HttpSession session = request.getSession(false); // false : 없으면 null
+    if (session == null) {
+      log.info("null");
+      return null;
+    }
+    Long memberId = Long.valueOf(session.getAttribute(SESSION_NAME_LOGIN).toString());
+    return memberId;
+  }
+}
+```
+ApiConfig.java -> ArgumentResolver 등록 방법
+```java
+@Configuration // 설정 파일임을 알림
+@Slf4j
+public class ApiConfig implements WebMvcConfigurer {
+//
+  @Override
+  public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+    resolvers.add(new LoginMemberArgumentResolver());
+  }
+}
+```
+</div>
+</details>
+
+<details><summary><b>예시코드 - Interceptor</b></summary>
+<div markdown="1"><br>
+MemberCheckInterceptor.java -> 로그인 인증 유무 체크 로직
+```java
+@Slf4j // log
+public class MemberCheckInterceptor implements HandlerInterceptor {
+//
+  @Override
+  public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+      throws Exception {
+    String requestURI = request.getRequestURI();
+    log.info("인증 체크 인터셉터 실행 {}", requestURI);
+//
+    HttpSession session = request.getSession();
+    if (session == null || session.getAttribute(SESSION_NAME_LOGIN) == null) {
+      log.info("미인증 사용자 요청");
+      // 회원 아님을 알림
+      response.setStatus(HttpStatus.UNAUTHORIZED.value()); // status code : 401
+      return false;
+    }
+    return true;
+  }
+}
+```
+ApiConfig.java -> Interceptor 적용법 + 인증 URL과 미인증 URL 설정 로직
+```java
+@Configuration // 설정 파일임을 알림
+@Slf4j
+public class ApiConfig implements WebMvcConfigurer {
+//
+  @Override
+  public void addInterceptors(InterceptorRegistry registry) {
+    registry.addInterceptor(new MemberCheckInterceptor())
+        .order(2)
+        .addPathPatterns("/**") // 모든 경로 접근
+        .excludePathPatterns("/", "/api/v1/members/login", "/api/v1/members/register",
+            "/api/v1/members/logout", "/api/v1/members/*",
+            "/image/**", "/css/**", "/*.ico", "/error"); // 제외 경로!
+  }
+}
 ```
 </div>
 </details>
@@ -2847,23 +3451,18 @@ private final MyDataSourceConfig source; //MyDataSource 불러와 바로 사용�
 ### 검증(Valid)과 예외처리(Exception)
 
 **API의 경우 클라쪽 "검증"은 서버가 할 일이 아니다(JS는 프론트쪽 개발진이 해야지!)**  
-**웹의 경우 클라와 서버쪽 둘 다 "검증"**해주는게 좋다.
+**웹의 경우 클라와 서버쪽 둘 다 "검증"**해주는게 좋다(POSTMAN 같은건 클라 검증 무시하니까)
 
 **API의 "예외"**의 경우 서버는 **JSON으로 변경된 데이터를 “Valid(검증)”**하는거라서 **JSON→DTO매핑될 때 에러나 그 시점에 다양한 에러(주로 서비스로직)들은 “Exception(예외)”**으로 해결!
-**=> 웹은 “검증”만으로 충분하지만 API는 “검증+예외”가 필요!**
-
-**Valid는 클라, 서버 둘다에서 하면 더 안전하고 좋다.** 왜 그런지는 아래를 참고
-
-- **id에는 적용하는가??? 언제써야 하는가???**
-  *  id에 왜 검증을 넣냐고 볼 수도 있지만, 클라단에서만 검증(JS)로직 사용시 POSTMAN같은 툴로 충분히 악의적 접근이 가능하기 때문에 "최종 검증은 서버에서 진행하는 것이 안전"
-  *  **즉, 필요한 경우가 있을때는 "서버에서 최종 검증" 을 하는것이 안전!**
+**=> 웹은 “검증”만으로 충분하지만 API는 “검증+예외”가 필요!**  
+=> 근데, 막상 해보니 **웹&API 둘다 "검증+예외"**를 적용 했다. eGov에선 웹에 에러페이지만 연동해주는게 아니라 "예외"까지 굳이 하더라?
 
 **검증과 예외 예시**
 
 * 예외처리 예시 => ex: String 타입에 int가 넘어온 에러를 처리
 * 검증 예시 => ex: 0~9999 숫자범위를 지정
 
-**예외란??** -> **Error**는 주로 JVM에서 발생하는 문제라서 에러처리 하지 않아도 된다. Exception을 보자.
+**예외(Exception):** Error는 주로 JVM에서 발생하여 무시하고, Exception을 보자.
 
 <img src="https://github.com/user-attachments/assets/e192334c-077e-42d8-a2a0-4f70a4c89e96" alt="image" style="zoom: 50%;" /> 
 
@@ -2880,20 +3479,35 @@ private final MyDataSourceConfig source; //MyDataSource 불러와 바로 사용�
 
 - **주의점:** 스프링 프레임워크가 제공하는 **선언적 트랜잭션(@Transactional)**안에서 **에러 발생 시 체크 예외는 롤백이 되지 않고, 언체크 예외는 롤백이 된다.** 이는 **자바 언어와는 무관**하게 프레임워크의 기능임을 반드시 알고 넘어가도록 하자. (물론 옵션을 변경할 수 있다.)<br>**또한, 예외변환** `throw new 커스텀예외(e);` 는 현재 error를 담는 e를 꼭 생성자 매개변수에 넘겨줘야 하위의 에러내용들을 다 기록한다는걸 기억!
 
-**검증이란** Form 데이터같은 것들이 POST 요청왔을때 원하는 "검증"을 진행하는 것  
+**검증:** Param, Form, JSON 등이 POST 요청왔을때 원하는 "검증"을 진행하는 것  
 
 * HTTP 요청 **"Form데이터, URL파라미터" 는 "검증"** 만으로 충분 - @ModelAttribute
 * HTTP 요청 **"API" 는 "검증 + 예외처리"** 까지 필요 - @RequestBody
-  * 또한, **API의 경우에는 여기서 사용한 메커니즘들을 활용하되 메시지는 꼭 API스펙에 맞춰 잘 반환**해주면 됨
+  * 또한, **API의 경우 API스펙에 맞춰 잘 반환**
 
 <br>
 
-#### 검증(Valid)
+#### 검증(Bean Validation)
 
-Bean Validation 방식을 설명한다. (일반적인 스프링 제공 검증 방식)    
-⇒ eGov 플젝이 다른 방식이였음
+API 방식으로 주로 정리 -> 웹(JSP)인 "MyBatis + Spring(JSP) 파트" 참고
 
-**Valid검증: “@Validated + {HTTP요청 + BindingResult} + 검증 애노테이션 + errors.properties(메시지)”**
+**Bean Validation 방식을 설명한다.** (일반적인 스프링 제공 검증 방식)    
+⇒ eGov 플젝은 다른 방식 (Jakarta Valid)
+
+1. DTO 클래스에 검증 어노테이션(`@NotNull` 등) 적용하여 검증기에게 규칙 전달
+2. 컨트롤러에서 `@Validated` 어노테이션으로 검증 활성화 (스프링프레임워크의 LocalValidatorFactoryBean이 사용됨)
+3. `BindingResult`로 검증 결과 수집
+4. 오류출력: 타임리프는 th:error로 자동으로 bindingresult에서 해당필드 검증 오류있나 체크해서 등록해둔 오류메시지-@NotNull("이미지가 없습니다")를 출력  
+   JSP는 form:error로 할 수 있고,  
+   직접 bindingresult를 가져와 사용해도 된다.
+
+<br>
+
+**클라단 Valid검증: "직접 JS코드로 작성"** -> 프론트 사람있으면 애초에 프론트 담당꺼
+
+<br>
+
+**서버단 Valid검증: “@Validated + {HTTP요청 + BindingResult} + 검증 애노테이션 + errors.properties(메시지)”**
 
 - ex: `public ResponseEntity<ApiResponse<String>> login(@RequestBody @Validated LoginMemberRequestDto loginDto, BindingResult bindingResult, HttpServletRequest request) {}`
 
@@ -2912,9 +3526,9 @@ Bean Validation 방식을 설명한다. (일반적인 스프링 제공 검증 �
     Max={0}, 최대 {1}
     ```
 
-    * NotBlanck 보다 NotBlank.item.itemName 같이 세부 필드를 더 우선순위 높게 출력
+    * NotBlanck 보다 NotBlank.item.itemName 같이 **세부 필드를 더 우선순위** 높게 출력
 
-- **bindingresult 미사용 시?** @Valid랑 @NotNull 사용했다 가정하면, 검증 오류 발생 시 **"자동 처리"**
+- **bindingresult 미사용 시?** 검증 오류 발생 시 **"자동 처리"**
 
   - 참고: **실제 객체말고 DTO**에서 @NotNull 하는게 좋다!! 안전하기도 하고!
 
@@ -2951,12 +3565,11 @@ Bean Validation 방식을 설명한다. (일반적인 스프링 제공 검증 �
       * `bindingResult.hasErrors()` 는 errors가 있는지 여부를 반환하고, 
       * `errors` 에는 "검증결과 에러" 들을 기록하며 이는 "검증 애노테이션"에 걸린 에러들을 의미
 
-    - GET 조회도 외부입력이 필요할 수 있어서 보안을 위해서는 사용하는게 좋긴 하겠지?  
-      근데 **POST**에서는 꼭 사용해주자. **외부 입력이 대부분 들어오니까**
-    
+    - GET, POST 뭐든 입력 들어오는건 "검증" 사용하자.
+
     - 아래 예제에선 errors.properties는 굳이 안썼다. 메시지 국제화에는 좋겠지만 뭐 기본제공 메시지도 넘 좋고, **@NotNull("메시지내용")** 처럼 직접 작성도 있어서!
-    
-      <details><summary><b>코드 예시</b></summary>
+
+      <details><summary><b>코드 예시 - 이미지 포함</b></summary>
       <div markdown="1"><br>
       FiledError 예시
       ```java
@@ -2971,8 +3584,8 @@ Bean Validation 방식을 설명한다. (일반적인 스프링 제공 검증 �
           ApiResponse res = ApiResponse.success(HttpStatus.OK.value(), SUCCESS_LOGIN);
           return ResponseEntity.status(HttpStatus.OK)
       ```
-      ![image](https://github.com/user-attachments/assets/bb52c3c4-3040-4194-8726-167afa20136b)
-      <br>
+      <img src="https://github.com/user-attachments/assets/bb52c3c4-3040-4194-8726-167afa20136b" alt="image" style="zoom:80%;" />
+      <br><br>
       ObjectError 예시
       ```java
       //이런 느낌으로 사용 -> ObjectError
@@ -2986,18 +3599,17 @@ Bean Validation 방식을 설명한다. (일반적인 스프링 제공 검증 �
           }
       }
       ```
-      ![image](https://github.com/user-attachments/assets/5dcb9c41-1332-4ccb-94e4-b9065bba7bcd)
+      <img src="https://github.com/user-attachments/assets/5dcb9c41-1332-4ccb-94e4-b9065bba7bcd" alt="image" style="zoom:80%;" />
       </div>
       </details>
 
-**타임리프에서 검증**
+- **타임리프에서 검증 -> "MyBatis + Spring(JSP) 파트"도 보길 추천**
+  * `th:field, th:errors, th:errorclass` 문법을 주로 같이 활용
+    * `<div th:errors="*{id}"...` 등 이런형태로 바로 사용!! 에러 시 해당 태그 출력!!
+    * **@ModelAttribute("item") 사용**이 중요!!
+      * 왜냐하면, 컨트롤러 단에서 파라미터로 `AddItemDto form` 로 선언하면 Model에 **"AddItemDto"객체 형태로 자동**으로 담기 때문!
+      * 타임리프의 th:object를 "item"로 사용한다면, 반드시 Model에 "item"으로 담아야 **null문제 피함.**
 
-* `th:field, th:errors, th:errorclass` 문법을 주로 같이 활용
-  * `<div th:errors="*{id}"...` 등 이런형태로 바로 사용!! 에러 시 해당 태그 출력!!
-  * @ModelAttribute("item") 사용이 중요!!
-    * 왜냐하면, 컨트롤러 단에서 파라미터로 `AddItemDto form` 로 선언하면 Model에 "AddItemDto"객체 형태로 자동으로 담기 때문!
-    * 하지만, 여기선 타임리프의 th:object를 "item"로 사용하여 반드시 Model에 "item"으로 담아야 한다는 점!
-    * **그래서 @ModelAttribute("item") 방식을 사용해서 Model에 "item"객체 형태로 담자!**
 
 <br>
 
@@ -3013,14 +3625,14 @@ Bean Validation 방식을 설명한다. (일반적인 스프링 제공 검증 �
 
 **예외를 처리하는 계층의 흐름 이해:**
 
-1. 서비스계층의 비즈니스 로직의 예외 발생하면 정상화하거나 공통 처리위해 던지기
+1. 서비스계층의 비즈니스 로직의 예외 발생하면 "정상화"하거나 "공통 처리" 위해 던지기
 2. 컨트롤러에서 웹이면 서비스의 Exception을 JSP 뷰로 매핑, API면 JSON으로 응답
 
 <br>
 
 **예외처리 - Spring Exception**
 
-* **html**
+* **웹(타임리프) -> "MyBatis + Spring(JSP) 파트"도 보길 추천**
 
   * **자동으로 에러에 필요한 로직을 등록하므로 바로 활용가능 (스프링 부트가 에러 페이지도 자동으로 제공해준다는 것!! 물론 직접 추가도 되고)**
 
@@ -3035,7 +3647,6 @@ Bean Validation 방식을 설명한다. (일반적인 스프링 제공 검증 �
        - resources/templates/error/500.html
 
        - html resources/templates/error/5xx.html
-
     2. 정적리소스( static , public ) resources/
 
        - static/error/400.html
@@ -3043,9 +3654,10 @@ Bean Validation 방식을 설명한다. (일반적인 스프링 제공 검증 �
        - resources/static/error/404.html
 
        - resources/static/error/4xx.html
-
     3. 적용대상이없을 때뷰이름( error )
        - resources/templates/error.html
+
+  * 여기 타임리프 플젝 코드는  "공통 처리-ExceptionHandler" 없이 개발.
 
     <details><summary><b>html 적용 예시</b></summary>
     <div markdown="1"><br>
@@ -3193,14 +3805,6 @@ Bean Validation 방식을 설명한다. (일반적인 스프링 제공 검증 �
 
 <br>
 
-![Image](https://github.com/user-attachments/assets/ced9d38e-6a3b-402a-bd9e-01a16e1f1934) 
-
-![Image](https://github.com/user-attachments/assets/a82f59c7-6e22-4756-b53b-ed4c904a8ce1) 
-
-<img src="https://github.com/user-attachments/assets/a82f59c7-6e22-4756-b53b-ed4c904a8ce1" alt="image" style="zoom:100%;" /> 
-
-
-
 <br>
 
 ## 배포 (+원하는 프로필로)
@@ -3210,7 +3814,7 @@ Bean Validation 방식을 설명한다. (일반적인 스프링 제공 검증 �
 **jar vs war**
 
 - **jar은 내부 톰캣 사용, war은 외부 서버 사용**으로 이해하면 됨 -> 보통 본인은 그냥 내부 톰캣 사용해서 배포
-- 주의: 외부 톰캣에서 **webapp 경로**를 사용하는 편인데, 실제로 war은 사용가능하나 jar은 사용불가
+- 주의: 외부 톰캣에서 **webapp 경로**를 사용하는 편인데, war은 사용가능하나 jar은 사용불가
 
 <br>
 
@@ -3228,19 +3832,19 @@ Bean Validation 방식을 설명한다. (일반적인 스프링 제공 검증 �
 
 **"실행 시점" 에 원하는 프로필 사용!!**
 
-1. IDE에서 Application 에 `--spring.profiles.active=prod` 하거나 (물론 값도 가능)
+1. **IDE**에서 Application 에 `--spring.profiles.active=prod` 하거나 (물론 값도 가능)
 
    <details><summary><b>인텔리J에서 활용한 예시(사진)</b></summary>
    <div markdown="1"><br>
-   ![image](https://github.com/user-attachments/assets/a4cebe08-935c-44fe-ac9c-2ab3ad7ebd3c)<br>
+   <img src="https://github.com/user-attachments/assets/a4cebe08-935c-44fe-ac9c-2ab3ad7ebd3c" alt="image" style="zoom:80%;" /><br>
    **prod(배포 프로필)**
-   ![image](https://github.com/user-attachments/assets/45ae772d-5122-45ac-9fb4-6f564d29c8be)<br>
+   <img src="https://github.com/user-attachments/assets/45ae772d-5122-45ac-9fb4-6f564d29c8be" alt="image" style="zoom:80%;" /><br>
    **default(개발 프로필)**
-   ![image](https://github.com/user-attachments/assets/5df1afac-634c-4fc6-b7ac-0a8c0cc1a356)
+   <img src="https://github.com/user-attachments/assets/5df1afac-634c-4fc6-b7ac-0a8c0cc1a356" alt="image" style="zoom:80%;" />
    </div>
    </details>
 
-2. 터미널에서 명령어로 jar or war 실행. 2가지 방법 소개 (해당 파일 경로에서 꼭 입력)
+2. **터미널**에서 명령어로 jar or war 실행. 2가지 방법 소개 (해당 파일 경로에서 꼭 입력)
 
    nohup은 백그라운드에서 실행!! -> nohup.out에 로그남음
 
@@ -3251,6 +3855,17 @@ Bean Validation 방식을 설명한다. (일반적인 스프링 제공 검증 �
 <br>
 
 <br>
+
+ㅇㅕ긔 부 텨 해야하긴 하는데;  
+타임리프파트 위 컨트롤러에 먼저 정리해야 해효;;
+
+
+
+
+
+
+
+
 
 ## JPQL(JPA-ORM) vs SQL(MyBatis-SQL Mapper)
 
@@ -5437,7 +6052,15 @@ EXIT 또는 QUIT   -- SQL*Plus 종료[3]
 ## 스프링 부트의 애노테이션들
 
 중요: **스프링 빈** 설정은 자동 설정보다 **수동 설정이 우선순위 높다.**   
-예로, @Bean으로 수동 등록과 @Service, @Component같이 자동 등록이면 @Bean 등록 우선
+예로, @Bean으로 수동 등록과 @Service, @Component같이 자동 등록이면 @Bean 등록 우선인듯?
+
+**Java Config 방식의 빈 등록 방법:**
+
+- @Component 로 빈 등록
+  - @Service, @Repository 처럼 **클래스 단**에서 자동 빈 등록
+- @Configuration 과 @Bean 조합
+  - @Bean을 **메소드 단**에 적용하여 자동 빈 등록 -> 메소드 1개면 생략 가능
+  - @Configuration에 @Component가 포함되어 **클래스 단**도 자동 빈 등록
 
 <details><summary><b>엔티티</b></summary>
 <div markdown="1">
@@ -6102,6 +6725,8 @@ tasks.named('test') {
 ### (3) Thymeleaf TIP - 필독!
 
 참고 공식문서: [부트스트랩 공문](https://getbootstrap.com/docs/5.3/components/navbar/#toggler), [타임리프 공문](https://www.thymeleaf.org/doc/tutorials/3.1/usingthymeleaf.html#including-template-fragments)
+
+반환타입 void일 때: 자동으로 뷰리졸버는 요청URL과 동일한 뷰를 탐색해서 반환! (직접 String반환 안해도!)
 
 **웹 개발은 VSCode(정적) + IntelliJ(동적)로 개발 -> 본인은 그냥 IntelliJ로 개발! (캐시설정ㄱㄱ)**
 
@@ -6871,6 +7496,8 @@ tasks.named('test') {
 
 참고로 jQuery 를 많이 사용하기에 jQuery 공식홈페이지 보는것도 추천! (Ajax, 엘리먼트 등에 많이 활용)  
 리액트 이런거 사용하는게 아니면 JSP+jQuery+Ajax 방식은 기본.
+
+반환타입 void일 때: 자동으로 뷰리졸버는 요청URL과 동일한 뷰를 탐색해서 반환! (직접 String반환 안해도!)
 
 <br><br>
 
@@ -9693,34 +10320,224 @@ $(document).ready(function(){
 4. **pom.xml** -> Maven 빌드 툴 사용 (gradle이면 build.gradle 사용)
 </div>
 </details>
+<br>
 
 **WEB-INF 하위의 context-servlet.xml과 resources 하위의 context-*.xml 들이 설정이 많이 겹치는데 역할이 다르다.**
 
 <img src="https://github.com/user-attachments/assets/d8e08cd6-6882-4b5b-b8a3-65b283a1495c" alt="Image" style="zoom:80%;" /> 
 
-- **WEB-INF 하위 XML(오른쪽-Child)** → 컨트롤러 및 웹 관련 빈 관리
-  - 예로 컴포넌트스캔(Controller), mvc:interceptors, mvc:view-controller 등
-  - 특히, mvc:view-controller 는 컨트롤러 메소드 없이 **직접 URL을 뷰에 매핑**
-- **resources 하위 XML(왼쪽-Root)** → 서비스, 리포지토리 및 공통 빈 관리
-  - 예로 컴포넌트스캔(Repository, Service) 등
-- 어디서 설정하든 적용은 사실 둘 다 되는데, 유지보수 위해서라도 구분 짓자!
+**순수스프링 기본설정은 크게 2가지 계층 XML + 젤 최상위 web.xml:**   
 
-참고: 순수스프링은 web.xml에 필터, 디스패처 서블릿 다 세팅한 덕분에 main함수직접 작성 안해도 톰캣 위에서 동작  
+1. **WEB-INF 하위 XML(오른쪽-Child)** → 컨트롤러 및 웹 관련 빈 관리
 
-> **ContextLoaderListener**는 **web.xml** 파일에 설정되어, 웹 애플리케이션이 시작될 때 **Spring** 애플리케이션 **컨텍스트를 초기화**
->
-> 이 리스너는 **contextConfigLocation** 파라미터를 통해 **XML** 파일의 위치를 지정받고, 해당 파일을 로드하여 빈을 등록
->
-> 이를 담당해주는 web.xml이 없으면 당연히 "자바코드"로 직접 작성해서 main함수로 실행해줘야 할거임.
+   - 예로 컴포넌트스캔(Controller), mvc:interceptors, mvc:view-controller 등
 
-헷갈리는 스프링의 xml 같은 config 파일들 인식 방법:
+   - 특히, mvc:view-controller 는 컨트롤러 메소드 없이 **직접 URL을 뷰에 매핑**
 
-- web.xml에서 xml들 다 인식하게 설정하는건 자명.
-- web.xml이 없다면?
-  - Test코드라면 `@ContextConfiguration(locations = {"classpath:...*.xml"}` 이런식 등록
-  - 부트라면 `@ImportResource("classpath...xml")` 이렇게 간단히 가능하다.
-  - 추가방법(GPT): Java Config로 등록 or ClassPathXmlApplicationContext 로 등록 법이 있음  
-    => 둘다 main함수에서 직접 applicationContext초기화 방식
+2. **resources 하위 XML(왼쪽-Root)** → 서비스, 리포지토리 및 공통 빈 관리
+
+   - 예로 컴포넌트스캔(Repository, Service) 등
+
+3. **최상위(그림X)**: 톰캣이 항상 체크하는 web.xml -> 젤 최상위 설정
+   - 예로 필터, 서블릿(ex:디스패처서블릿), 1번과 2번 XML 등록 등
+
+**참고:**
+
+1. **1번, 2번 xml 설정**을 반드시 맞출 필요없지만, **유지보수 위해서라도 개념적으로 구분 하는 것!**
+
+2. web.xml에 필터, 디스패처 서블릿 등 덕분에 main함수 없어도 톰캣 위에서 정상 실행
+
+   **ContextLoaderListener**는 **web.xml** 파일에 설정되어, 웹 애플리케이션이 시작될 때 **Spring** 애플리케이션 **컨텍스트를 초기화**
+
+   이 리스너는 **contextConfigLocation** 파라미터를 통해 **XML** 파일의 위치를 지정받고, 해당 파일을 로드하여 빈을 등록
+
+   이를 담당해주는 web.xml이 없으면 당연히 "자바코드"로 직접 작성해서 main함수로 실행해줘야 할거임.
+
+3. 헷갈리는 스프링의 설정 인식 방법:
+
+   web.xml에서 xml들 다 인식하게 설정하는건 자명. (web.xml은 반드시 톰캣에 의해 수행되기도 하고)
+
+   web.xml이 없다면?
+
+   - Test코드라면 `@ContextConfiguration(locations = {"classpath:...*.xml"}` 이런식 등록
+   - 부트라면 `@ImportResource("classpath...xml")` 이렇게 간단히 가능하다.
+   - 추가방법(GPT): Java Config로 등록 or ClassPathXmlApplicationContext 로 등록 법이 있음  
+     => 둘다 main함수에서 직접 applicationContext초기화 방식
+
+<details><summary><b>예시 코드 XML 설정 3개</b></summary>
+<div markdown="1"><br>
+**webapp/WEB-INF/web.xml**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app id="WebApp_ID" version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee; http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
+	<display-name>Lab301-mvc</display-name>
+	<filter>
+		<filter-name>encodingFilter</filter-name>
+		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>utf-8</param-value>
+		</init-param>
+	</filter>
+<!--  -->
+	<filter-mapping>
+		<filter-name>encodingFilter</filter-name>
+		<url-pattern>*.do</url-pattern>
+	</filter-mapping>
+<!--  -->
+	<!-- Spring  context configuration -->
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>classpath*:spring/context-*.xml</param-value>
+	</context-param>
+<!--  -->
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+<!--  -->
+	<!-- Spring WEB context configuration -->
+	<servlet>
+		<servlet-name>mvcAction</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>/WEB-INF/config/springmvc/context-*.xml</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+<!--  -->
+	<servlet-mapping>
+		<servlet-name>mvcAction</servlet-name>
+		<url-pattern>*.do</url-pattern>
+	</servlet-mapping>
+<!--  -->
+	<welcome-file-list>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
+	<login-config>
+		<auth-method>BASIC</auth-method>
+	</login-config>
+</web-app>
+```
+**webapp/WEB-INF/config/context-servlet.xml**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+				http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+<!--  -->
+	<!-- set component scan -> include:Controller -->
+	<context:component-scan base-package="com.easycompany">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Service"/>
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Repository"/>
+	</context:component-scan>
+<!-- -->	
+	<mvc:annotation-driven/>
+	<!-- 모든 핸들러매핑에 인터셉터 등록하는 부트와 유사한 방식! 
+	인터셉터가 적용될 URL 매핑과 exclude로 제외할 URL을 지정할 수 있다. -->
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/*Employee.do" />
+			<mvc:mapping path="/employeeList.do" />
+			<bean class="com.easycompany.cmm.interceptor.AuthenticInterceptor" />
+		</mvc:interceptor>
+	</mvc:interceptors>
+<!--  -->	
+	<!-- set view resolver -->
+	<!-- TODO [Step 1-1-1] ViewResolver - View를 처리할 해결사를 설정하자 (이거하면 /WEB-INF/jsp/ 접근가능) -->
+	<bean  class="org.springframework.web.servlet.view.InternalResourceViewResolver"
+		p:prefix="/WEB-INF/jsp/" p:suffix=".jsp" /> 
+    <!-- 컨트롤러 메소드 필요없이 직접 매핑! login.jsp와 validator.jsp로 매핑
+	validator.jsp는 JavaScript 유효성 검사 코드를 생성하는 역할을 합니다. -->
+	<mvc:view-controller path="/login.do"/>
+	<mvc:view-controller path="/validator.do"/>
+<!--  -->
+	<!-- set message source -->
+	<!-- TODO [Step 1-2-1] SpringMessage - messageSource 활성화 설정 -->
+	<!-- messageSource 활성화하는 부분 -->
+	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basenames">
+			<list>
+				<value>messages.message-common</value>
+			</list>
+		</property>
+	</bean>
+<!--  -->
+	<!-- setting Locale -->
+	<!-- setting Locale Locale Interceptor 설정하기  -->   
+	<!-- TODO [Step 1-3-1] Internalization - 국제화 관련 bean 설정  -->
+	<!-- *HandlerMapping 설정방법 참고 -->
+	<bean id="localeChangeInterceptor" class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"
+		p:paramName="lang" />
+	<bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver" />
+	<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping">
+		<property name="interceptors">
+			<list>
+				<ref bean="localeChangeInterceptor"/>
+			</list>
+		</property>
+	</bean>
+	<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter" />
+</beans>
+```
+**src/main/resources/spring/context-common.xml**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+				http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+<!--  -->	
+    <!-- set component scan -> include: Service, Repository -->
+	<context:component-scan base-package="com.easycompany">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Service"/>
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Repository"/>
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+	</context:component-scan>
+<!--  -->
+	<bean id="leaveaTrace" class="org.egovframe.rte.fdl.cmmn.trace.LeaveaTrace">
+		<property name="traceHandlerServices">
+			<list>
+				<ref bean="traceHandlerService" />
+			</list>
+		</property>
+	</bean>
+	<bean id="traceHandlerService" class="org.egovframe.rte.fdl.cmmn.trace.manager.DefaultTraceHandleManager">
+		<property name="reqExpMatcher">
+			<ref bean="antPathMater" />
+		</property>
+		<property name="patterns">
+			<list>
+				<value>*</value>
+			</list>
+		</property>
+		<property name="handlers">
+			<list>
+				<ref bean="defaultTraceHandler" />
+			</list>
+		</property>
+	</bean>
+	<bean id="antPathMater" class="org.springframework.util.AntPathMatcher" />
+	<bean id="defaultTraceHandler" class="org.egovframe.rte.fdl.cmmn.trace.handler.DefaultTraceHandler" />
+<!-- 	 -->
+	<!-- For Pagination Tag -->
+	<bean id="imageRenderer" class="com.easycompany.cmm.tag.ImagePaginationRenderer"/>
+	<bean id="paginationManager" class="org.egovframe.rte.ptl.mvc.tags.ui.pagination.DefaultPaginationManager">
+		<property name="rendererType">
+			<map>
+				<entry key="image" value-ref="imageRenderer"/> 
+			</map>
+		</property>
+	</bean>
+</beans>
+```
+</div>
+</details>
 
 <br>
 
@@ -9851,6 +10668,185 @@ public void loginSuccess() {
 ## 참고 지식
 
 **여러가지**
+
+<br><br>
+
+### HTTP 중요지식
+
+<details><summary><b>redirect vs forward</b></summary>
+<div markdown="1">
+- **비유 예시(고객:클라, 상담원:서버, 123or124:URL)**
+  - **첫번째 사례(redirect)**
+    1. 고객이 고객센터로 상담원에게 123번으로 전화를 건다.
+    2. 상담원은 고객에게 다음과 같이 이야기한다. "고객님 해당 문의사항은 124번으로 다시 문의 해주시겠어요?"
+    3. 고객은 다시 124번으로 문의해서 일을 처리한다.
+  - **두번째 사례(forward)**
+    1. 고객이 고객센터로 상담원에게 123번으로 전화를 건다.
+    2. 상담원은 해당 문의사항에 대해 잘 알지 못해서 옆의 다른 상담원에게 해당 문의사항에 답을 얻는다.
+    3. 상담원은 고객에게 문의사항을 처리해준다.
+* **redirect의 경우 최초 요청을 받은 URL1에서 클라이언트에 redirect할 URL2를 리턴하고, 클라이언트에게 전혀 새로운 요청을 생성하여 URL2에 다시 요청을 보낸다. 따라서 처음 보냈던 최초의 요청정보는 더이상 유효하지 않게된다.**
+  * web container는 redirect 명령이 들어오면 웹 브라우저에게 다른 페이지로 이동하라는 명령을 내린다.(첫번째 사례의 경우, 고객은 전화를 끊고 124번으로 다시 전화를 건다)
+    * 다른 web container에 있는 주소로 이동 가능(ex: 123 -> 124)
+  * 새로운 페이지에서는 request, response객체가 새롭게 생성된다.(123번에서 고객이 요청했던 문의사항은 사라지고 124번으로 다시 걸어서 요청한 문의사항을 다시 말해야한다.)
+* **forwar방식은 다음 이동한 URL로 요청정보를 그대로 전달한다. 말 그대로 forward(건네주기)하는 것이다. 그렇기 때문에 사용자가 최초로 요청한 요청정보는 다음 URL에서도 유효하다.**
+  * web container 차원**(서버단)**에서의 페이지 이동, 실제로 웹 브라우저는 다른 페이지로 이동했는지 알 수 없다.(두번째 사례의 경우, 고객은 상담원이 누구한테 물어봤는지 알 수 없다.)
+    * 동일한 web container에 있는 페이지로만 이동이 가능하다.
+  * 현재 실행중인 페이지와 forward에 의해 호출될 페이지는 request, response 객체를 공유한다.(고객이 요청한 문의사항은 고객이 전화를 끊을 때까지 유효하다.)
+* **차이점**
+  * URL의 변화여부: redirect(변화O), forward(변화X)
+  * 객체의 재사용여부 : redirect(재사용X), forward(재사용O)
+* **언제 사용하는게 바람직한가?**
+  * 시스템(session, DB)에 변화가 생기는 요청(로그인, 회원가입, 글쓰기)의 경우 **redirect**방식으로 응답하는 것이 바람직
+  * 시스템에 변화가 생기지 않는 단순조회(리스트보기, 검색)의 경우 **forward**방식으로 응답하는 것이 바람직
+</div>
+</details>
+
+<br>
+
+<details><summary><b>PRG Post/Redirect/Get - POST를 무한한 재요청 문제 해결 패턴</b></summary>
+<div markdown="1">
+* **웹 브라우저의 새로고침은 마지막 서버에 전송한 데이터를 다시 전송한다.**  
+* **따라서 POST 적용후 새로고침을 하면 계속 POST 보내는 문제가 발생하므로 이를 Redirect를 통해서 GET으로 요청하는 방식으로 해결할 수 있다.**
+  * Redirect를 사용해야지만 POST 보내는 URL을 벗어나기 때문!!
+* **RedirectAttributes 추천** -> Redirect는 원래 연결 끊어지니까 자원 재전송 필요시!!
+  * Redirect 할때 Model처럼 파라미터를 추가해서 간편히 넘겨줄 수 있고, URL 인코딩 문제에서 자유롭다!
+    * `"redirect:/basic/items/" + item.getId()` 는 인코딩 문제가 발생할 수 있는데,
+    * `"redirect:/basic/items/{itemId}"` 는 인코딩 문제에서 자유롭다.
+  * **특히 Status 정보를 파라미터로 넘김으로써 `th:if` 문법으로 "저장완료" 표시도 나타내는데 많이 사용한다.**
+    <div markdown="1">
+    ```java
+    // 저장 성공 상태를 파라미터로 전달 (파라미터로 URL에 추가됨)
+    // ex: URL...?status=success
+    redirectAttributes.addAttribute("status", "success");
+    <!-- "저장 완료" 메시지 표시 -->
+    <div th:if="${status == 'success'}">
+        <p>저장 완료!</p>
+    </div>
+    ```
+    </div>
+  * **따라서 Redirect 할때는 RedirectAttributes.addAttribute() 추천, html 반환(렌더링) 할때는 Model.addAttribute() 추천**
+    * `redirectAttributes.addAttribute` 는 파라미터로 전송되므로 **@RequestParam(defaultValue = "")** 등으로 간편히 사용가능!!
+    * 참고: `redirectAttributes.addFlashAttribute` 의 경우 불가능!! 파라미터 전송이 아니고 딱 한번 세션에 저장해서 전달하는 방식이라서!! 아마 @ModelAttribute로 받아질걸??
+</div>
+</details>
+
+<br>
+
+<details><summary><b>웹 브라우저에서의 redirect 특징</b></summary>
+<div markdown="1"><br>
+웹 브라우저는 3xx 응답의 결과에 **Location 헤더가 있으면, Location 위치로 자동 이동**한다.<br>
+<img src="https://github.com/user-attachments/assets/888d11b2-be6e-4089-b52b-5b6f852e9eb3" alt="Image" style="zoom:80%;" />
+<br>
+1. url : /event로 get을 요청
+2. 하지만 url이 /event에서 /new-event로 바뀌어서 서버가 다시 Location으로 응답
+3. 자동 리다이렉트로 url 변경, 클라이언트 단에서 스스로 자동 리다이렉트
+4. 다시 /new-event로 get 요청 -> 처음부터 다시 요청한다.
+5. 정상적으로 성공했기에 200 OK 응답
+</div>
+</details>
+
+
+<br>
+
+**Content-Type 헤더 기반 Media Type 과 Accept 헤더 기반 Media Type**
+
+* text/html, application/json 같은 content-type 을 의미
+* **요청때나 응답할때나 body를 사용할때는 필수로 존재 및 서로 맞게 요청해야 함**
+
+<br>
+
+**API URI 설계에는 "리소스"가 중요하다. "행위"는 메서드(get, post 등)로 구분하자.**  
+**단, 실무에서는 행위(동사)를 URI에 작성해야 할 때도 좀 있는데 이를 "컨트롤 URI"라 부른다.**
+
+<details><summary><b>HTTP로 클라이언트 -> 서버 데이터 전송 4가지 상황 (참고: 전달 방식은 크게 2가지-쿼리 파라미터, 메시지 바디)</b></summary>
+<div markdown="1"><br>
+1. **정적** 데이터 조회 -> 쿼리 파라미터 미사용
+   - 이미지, 정적 텍스트 문서
+2. **동적** 데이터 조회 -> 쿼리 파라미터 사용
+   - 주로 검색, 게시판 목록에서 정렬 필터(검색어)
+3. **HTML Form**을 통한 데이터 전송 -> GET은 쿼리 파라미터로, POST는 메시지 바디로 자동 작성!
+   - 회원 가입, 상품 주문, 데이터 변경 
+   - Content-Type: application/x-www-form-urlencoded
+     - form의 내용을 메시지 바디를 통해서 전송(POST로 해보면 나옴)
+     - 전송 데이터를 url encoding 처리
+       - 예) abc김 -> abc%EA%B9%80
+   - Content-Type: multipart/form-data
+     - 파일 업로드 같은 바이너리 데이터 전송시 사용
+     - 다른 종류의 여러 파일과 폼의 내용 함께 전송 가능(그래서 이름이 multipart)
+4. **HTTP API**를 통한 데이터 전송 -> 이하 동문
+   - 회원 가입, 상품 주문, 데이터 변경
+   - 서버 to 서버, 앱 클라이언트, 웹 클라이언트(Ajax)
+   - Content-Type: application/json
+</div>
+</details>
+
+<details><summary><b>HTTP API 설계 2가지로 "컬렉션 기반"과 "스토어 기반" (+HTML FORM)</b></summary>
+<div markdown="1"><br>
+**크게 2가지로 "컬렉션 기반"과 "스토어 기반"으로 나눠볼 수 있다. (대부분 컬렉션 방식 씀)**<br>
+**HTML FORM 방식은 애초에 GET, POST만 지원한다. (PUT기반 아니니까 컬렉션이지)**
+<br>
+**1. API 설계 - 컬렉션 기반(POST)**
+- 회원 목록 /members -> GET  
+  회원 등록 /members -> POST  
+  회원 조회 /members/{id} -> GET  
+  **회원 수정 /members/{id} -> PATCH, PUT, POST**  
+  회원 삭제 /members/{id} -> DELETE
+  - **회원 수정에 개념적으론 PATCH 사용이 제일 좋다.**
+- 클라이언트는 등록될 리소스의 URI를 모른다.
+  - 회원 등록 /members -> POST
+  - POST /members
+- **서버가 새로 등록된 리소스 URI를 생성**해준다.
+  - HTTP/1.1 201 Created   
+    Location: /members/100
+- 컬렉션(Collection)
+  - 서버가 관리하는 리소스 디렉토리
+  - 서버가 리소스의 URI를 생성하고 관리
+  - 여기서 **컬렉션은 /members**
+</div><div markdown="1"><br>
+**2. API 설계 - 스토어 기반(PUT)**
+- 파일 목록 /ﬁles -> GET  
+  파일 조회 /ﬁles/{ﬁlename} -> GET  
+  파일 등록 /ﬁles/{ﬁlename} -> PUT  
+  파일 삭제 /ﬁles/{ﬁlename} -> DELETE  
+  파일 대량 등록 /ﬁles -> POST
+- 클라이언트가 리소스 URI를 알고 있어야 한다.
+  - 파일 등록 /ﬁles/{ﬁlename} -> PUT
+  - PUT /ﬁles/star.jpg
+- **클라이언트가 직접 리소스의 URI를 지정**한다.
+- 스토어(Store)
+  - 클라이언트가 관리하는 리소스 저장소
+  - 클라이언트가 리소스의 URI를 알고 관리
+  - 여기서 **스토어는 /ﬁles**
+</div><div markdown="1"><br>
+**3. HTML FORM 사용 - GET, POST**
+- 회원 목록     /members -> GET  
+  **회원 등록 폼 /members/new -> GET**  
+  **회원 등록     /members/new, /members -> POST**  
+  회원 조회     /members/{id} -> GET  
+  회원 수정 폼 /members/{id}/edit -> GET  
+  회원 수정     /members/{id}/edit, /members/{id} -> POST  
+  회원 삭제     /members/{id}/delete -> POST
+  - URI 안바뀌는 /members/new 방식을 좀 더 선호하고, /members로 등록하는 사람도 있음.
+  - GET, POST만 지원하니까 이런 제약을 해결하고자 동사를 사용한 **컨트롤 URI 방식도 많이 사용.**
+<br>
+**참고 문서: https://restfulapi.net/resource-naming**
+- 문서(document)
+  - 단일 개념(파일 하나, 객체 인스턴스, 데이터베이스 row)
+  - 예) /members/100, /ﬁles/star.jpg
+- 컬렉션(collection) -> **주로 이 방식만 접할거임.ㅇㅇ.**
+  - 서버가 관리하는 리소스 디렉터리
+  - 서버가 리소스의 URI를 생성하고 관리
+  - 예) /members
+- 스토어(store) 
+  - 클라이언트가 관리하는 자원 저장소
+  - 클라이언트가 리소스의 URI를 알고 관리
+  - 예) /ﬁles
+- 컨트롤러(controller), 컨트롤 URI
+  - 문서, 컬렉션, 스토어로 해결하기 어려운 추가 프로세스 실행
+  - 동사를 직접 사용
+  - 예) /members/{id}/delete<
+</div></div>
+</details>
 
 <br><br>
 
