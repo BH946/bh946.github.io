@@ -1293,7 +1293,7 @@ JPA는 즉시 or 지연 로딩 중에서 무조건 **"지연 로딩"** 으로 �
 
 - **타입컨버터 사용**으로 데이터가 나중에 **사용할 때 정해둔 pattern 방식으로 LocalDateTime->String 반환되는 것!**
 
-  - 예로 @DateTimeFormat 있다.
+  - 예로 @DateTimeFormat, @NumberFormat 있다.
 
     <details><summary><b>타입컨버터 예시 코드</b></summary>
     <div markdown="1">
@@ -1312,6 +1312,42 @@ JPA는 즉시 or 지연 로딩 중에서 무조건 **"지연 로딩"** 으로 �
     item.date1 = LocalDateTime.now().format(formatter1);
     item.date2 = LocalDateTime.now().format(formatter2);
     ```
+    </div>
+    </details>
+
+    <details><summary><b>(보충) 타입 컨버터</b></summary>
+    <div markdown="1">
+    * **(1) 웹 - `@Requestparam, @ModelAttribute, @PathVariable` 스프링이 기본 지원**
+      * 예로 `@PathVariable Long itemId` 는 자동으로 String->Long 타입변환
+      * "확장 가능" 하고, "**애노테이션**"을 제공
+        * **@DateTimeFormat**예시 : DB엔 LocalDateTime타입, Thymeleaf는 지정한 pattern 사용
+        * **예로) th:field="*\{\{date1}}" 이런식으로 사용**
+        <div markdown="1">
+        ```java
+        @Data
+        static class Form {
+            @NumberFormat(pattern = "###,###") // 타입 컨버터
+            private Integer number;
+            @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+            private LocalDateTime localDateTime; 
+            // db엔 LocalDateTime 형태로 저장
+            // Thymeleaf에선 지정한 "패턴"으로 출력
+        }
+        ```
+        </div>
+    * **(2) HTTP API (@ResponseBody 등) - 의 경우 지원하지 않는다(HttpMessageConverter 는 "컨버전 서비스 적용 불가")**
+      * **이 경우에는 `Jackson 같은` 라이브러리에서 포맷터를 찾아 사용**
+      * JSON->객체,  객체->JSON 등등 쉽게 타입 변환 가능
+    * **자세히 정리하자면?**
+      * **(1) 일반적인 폼 전송 (웹 애플리케이션)**
+        - **Thymeleaf** 같은 템플릿 엔진을 사용해 **HTML 폼**을 전송할 때, Spring은 **자동으로 타입 변환**을 지원합니다. 예를 들어, 문자열을 **숫자**나 **날짜**로 변환하는 경우, `@RequestParam`, `@ModelAttribute`, `@PathVariable` 등의 애노테이션을 사용하여 **자동 타입 변환**이 됩니다.
+        - 이때 **Spring의 ConversionService**를 사용하여 **String -> Integer** 또는 **String -> LocalDate** 같은 변환이 가능합니다.
+      * **(2) HTTP API 응답 (`@ResponseBody`)**
+        - **`@ResponseBody`**를 사용하는 경우, **HTML을 반환하는 게 아니라 데이터 (JSON, XML 등)를 반환**하는 것입니다. 이때 **Spring의 ConversionService는 적용되지 않습니다**.
+        - 대신, **JSON 변환**을 처리하기 위해 **`HttpMessageConverter`**가 사용됩니다. 일반적으로는 **Jackson** 라이브러리가 Spring Boot에 포함되어 있어 **객체를 JSON으로 변환**해줍니다.
+      * **중요한 차이점**은:
+        - **HTTP API 응답**에서는 **타입 변환은 `HttpMessageConverter`가 담당**하며, **자동 타입 변환(ConversionService)는 적용되지 않습니다**.
+        - **ConversionService**는 주로 **폼 데이터**(예: 템플릿 렌더링)에서 쓰이고, **`HttpMessageConverter`는 JSON 변환**처럼 **HTTP 메시지 본문을 처리**할 때 사용됩니다.
     </div>
     </details>
 
@@ -1963,37 +1999,49 @@ public void initCacheMembers() {
 - 반환타입 void: 뷰리졸버는 요청URL과 동일한 뷰를 탐색해서 반환!
 - **반환타입 String**: 해당 반환 문자열과 동일한 뷰를 탐색해서 반환! -> **주로 사용**
 
-**@RequestParam, @PathVariable, @ModelAttributes 헷갈릴 때:** [쳌리-애노테이션-컨트롤러](https://bh946.github.io/checklist/CHECK_LIST_SPRING/#%EC%8A%A4%ED%94%84%EB%A7%81-%EB%B6%80%ED%8A%B8%EC%9D%98-%EC%95%A0%EB%85%B8%ED%85%8C%EC%9D%B4%EC%85%98%EB%93%A4)  
+**@RequestParam, @PathVariable, @ModelAttributes 헷갈릴 때:**
 
 - **@ModelAttributes는 자세한 기능을 알고 사용**하자. 웬만하면 **GET엔 @RequestParam이나 @PathVariable(권장!) 쓰자.**
-- @ModelAttributes의 자세한 동작은 Model로 addAttribute하는걸 자동화 함.
+  - **@PathVariable** - URL 뒤의 값 바로 사용 (자주 사용)
+  - **@RequestParam** - 쿼리 파라미터 값 가져올때 자주사용 (기본값 설정도 가끔사용)
+- **@ModelAttributes의 자세한 동작**은 Model로 addAttribute하는걸 자동화 함.
   - Model은 MVC의 M부분이다.
   - @ModelAttributes는 넘어온 데이터가 없다면 **빈 객체**를 자동으로 Model에 담거나, `@ModelAttributes("item") ItemDto dto`이면 form 데이터를 자동으로 ItemDto에 매핑 및 Model엔 item이름으로 기록한다.  
   - 주의: form으로 넘길 때는 선언한 name(id)필드는 전부 매핑이 되어야함. 
     - ex: `메서드(@ModelAttribute UpdateItemDto dto)` 라면 form의 필드들이 최소한 UpdateItemDto에 전부 있어야 함
 
-**return "jsp/gallery", {return "redirect:/gallery", return "forward:/gallery"}, return this.gallery(item, model) 헬갈릴 때:** [쳌리-PRG패턴](https://bh946.github.io/checklist/CHECK_LIST_SPRING/#3-thymeleaf-tip---%ED%95%84%EB%8F%85)
+**return "jsp/gallery", {return "redirect:/gallery", return "forward:/gallery"}, return this.gallery(item, model) 헬갈릴 때:**
 
 - **jsp반환**은 "직접 뷰 반환"
 - **redirect&forward**는 "HTTP URL로 매핑"
-- **메소드**는 "일반 메소드 생각"
+- **메소드**는 "일반 메소드 생각" -> 사실 forward랑은 URL패턴으로 호출하냐 안하냐 차이라 생각
 
-**PRG 패턴** 값 넘길 때 **redirectAttributes**를 주로 활용함. (메소드: addAttribute, addFlashAttribute)
+**PRG 패턴 적용: 무한 POST 방지** -> PRG 패턴이 궁금하다면 "HTTP 중요지식" 파트 참고
 
-```java
-//서버 사용 예시 코드
-redirectAttributes.addAttribute("itemId", itemId);
-redirectAttributes.addAttribute("test", test);
-redirectAttributes.addFlashAttribute("status", "updateOFF");
-return "redirect:/gallery/itemDetail/{itemId}"; // 기존 화면 다시 로딩
-```
+- **자원 재활용(forward) : 폼 분리 가능한건 분리해서 작성 권장 - addForm, editForm**
 
-- **addAttribute**는 자동으로 URL에 붙어서(쿼리 파라미터) 넘어간다.  
-  - 예로 위 코드에선 itemId는 이미 URL에 있으니 test만 URL에 추가로 **"?test=값"** 형태로 넘어간다.
-- **addFlashAttribute**를 사용하면 1번만 값을 넘겨주고 **자동으로 지워준다.** 
-  - **왜써?** PRG패턴으로 무한 POST를 피해도 클라URL-status값 보고 alert를 띄운다면, GET이여도 새로고침하면 클라 자체에서 계속 alert가 뜨는 불편함이 있는데 이를 피할 수 있는 유용한 기능이다.<br>**반면,** alert가 아니라 html에 "저장완료"를 출력해야 하는 상황이라면 **"상태 유지"위해 addAttribute 사용이 옳다.**
-    - 근데, 무한POST 피한 상태라면 alert 여러번 떠도 사용자 입장에선 크게 상관은 없을것 같긴함. **그냥 addAttribute 사용으로 통일**하는것도 좋아보임.
-  - **클라 사용법**: 웹에서 `<body data-status="${status}">` 이렇게 해줘야 `document.body.getAttribute('data-status');` 로 상태값을 js에서 잘 활용할 수 있다.
+  * GET에 꼭 빈 값이라도 엔티티 Model에 삽입 -> 널 에러 방지
+  * forward 사용가능한 건 forward 형태로 하는게 효과적
+  * BindingResult장점은 검증 실패시 html로 바로 return!  
+    -> forward 이기 때문에 자원 재활용!! (redirect 안해도 되는거즤~)
+
+- **PRG 패턴** 값 넘길 때 **redirectAttributes**를 주로 활용함. (메소드: addAttribute, addFlashAttribute) 
+
+  - ```java
+    //서버 사용 예시 코드
+    redirectAttributes.addAttribute("itemId", itemId);
+    redirectAttributes.addAttribute("test", test);
+    redirectAttributes.addFlashAttribute("status", "updateOFF");
+    return "redirect:/gallery/itemDetail/{itemId}"; // 기존 화면 다시 로딩
+    ```
+
+  - **addAttribute**는 자동으로 URL에 붙어서(쿼리 파라미터) 넘어간다.  
+    - 예로 위 코드에선 itemId는 이미 URL에 있으니 test만 URL에 추가로 **"?test=값"** 형태로 넘어간다.
+
+  - **addFlashAttribute**를 사용하면 1번만 값을 넘겨주고 **자동으로 지워준다.** 
+    - **왜써?** PRG패턴으로 무한 POST를 피해도 클라URL-status값 보고 alert를 띄운다면, GET이여도 새로고침하면 클라 자체에서 계속 alert가 뜨는 불편함이 있는데 이를 피할 수 있는 유용한 기능이다.<br>**반면,** alert가 아니라 html에 "저장완료"를 출력해야 하는 상황이라면 **"상태 유지"위해 addAttribute 사용이 옳다.**
+      - 근데, 무한POST 피한 상태라면 alert 여러번 떠도 사용자 입장에선 크게 상관은 없을것 같긴함. **그냥 addAttribute 사용으로 통일**하는것도 좋아보임.
+      - **클라 사용법**: 웹에서 `<body data-status="${status}">` 이렇게 해줘야 `document.body.getAttribute('data-status');` 로 상태값을 js에서 잘 활용할 수 있다.
 
 **검증(Valid)** 적용할 때 **웹은 클라단도** JS만들어 **적용**하기
 
@@ -2003,9 +2051,652 @@ return "redirect:/gallery/itemDetail/{itemId}"; // 기존 화면 다시 로딩
 
 #### Thymeleaf
 
+서버로 실행(뷰 템플릿 사용)하면 타임리프 문법들이 적용해서 **동적으로 변경!**
+
+* 스프링 부트는 "뷰 리졸버" 를 자동 등록하는데, 이때 설정파일에 등록한  `spring.mvc.view.prefix , spring.mvc.view.suffix` 정보를 사용해서 등록한다.
+* "뷰 리졸버" 에 **필요한 "경로" 를 설정**하는 부분인데 요즘 Thymeleaf 는 이것도 자동으로 등록해줘서 설정할 필요가 없다.
+  * **JSP 사용할 경우에는 이부분 기억**
+
+> 참고 공식문서: [부트스트랩 공문](https://getbootstrap.com/docs/5.3/components/navbar/#toggler), [타임리프 공문](https://www.thymeleaf.org/doc/tutorials/3.1/usingthymeleaf.html#including-template-fragments)
+
+<br>
+
+**개발은 VSCode(정적) + IntelliJ(동적)로 개발 -> 본인은 귀찮아서 인텔리J로만 함**
+
+- **보통 VSCode 가 html 문법 잘 지원해서(플러그인 다양함+Go Live로 바로 실행 지원) 이것으로 개발<br>IntelliJ는 서버 실행하여 Thymeleaf 문법 적용할 때 주로 사용**
+  - 근데, 이것도 캐시만 잘 설정하면 reload를 빠르게 가능!! -> 본인은 그래서 IntelliJ로 개발
+  - 설정 법: `spring.thymeleaf.cache=false`,  `spring.thymeleaf.prefix=file:src/main/resources/templates/`
+    - 배포할땐 꼭 true로!
+- **html+타임리프 작성 예: \<span class="pt-2" th:field="\*\{\{date1}}" th:text="*\{\{date1}}">23.05.22.16:00k\</span>**
+  - 서버 동작 없이 html(정적)에서 텍스트 확인 위해 span태그 사이에 "23.05.22.16:00k"입력까지 한 것
 
 
+<br>
 
+**반응형 웹 개발을 위해 "부트스트랩(+인라인스타일링)"+"basic.css(전체), 커스텀.css(부분)"**
+
+* 부트스트랩은 자동으로 반응형(해상도)에 맞게 스타일 지정되어 있다. 따라서 가져다 사용만 하면 됨!<br>**단, 원하는 스타일대로 커스텀하고 싶다면 “부트스트랩 문법에 인라인 style" or "일반 CSS를 직접 커스텀” 하자. 이때, 반복(재사용)되는것들은 공통CSS로 묶자** 
+
+* **본인은 보통 basic.css로 전체 페이지에 적용할 css파일 만들고, 부분적으로 커스텀할 부분은 gallery.css같이 해당 페이지명으로 만들어서 적용 중이다.**
+
+  <details><summary><b>css 문법 주의점</b></summary>
+  <div markdown="1">
+  - **부트스트랩**은 수 많은 것을 **자동 제공!!**
+    - 일반적인 방식 `font-size:100px;` 는 `100px`로 글자가 **"고정"**
+      - **따라서 반응형 웹 CSS는 원래 em, rem, vw, vh 같은 단위를 사용해줘야 한다.**
+        - **em은 "부모"의 font-size의 크기에 따라서 결정**
+        - **rem은?? -> em과 동일하지만 제일 root 부모의 font-size를 따름**
+        - **vw, vh는 뷰포트 화면(장치:예로 브라우저)크기에 따라 사이즈 결정됨**
+      - **따라서 본인은 `vw, vh`로 "부모"부분 먼저 크기 결정후 `em`으로 "자식" 부분 크기 결정** (장치 기준이 젤 부모가 되는게 좋다고 생각해서)
+    - 부트스트랩 방식 `fs-1, fs-2 등` 은 **"반응형"** 으로 글자 크기 제공 (fs: font-size)
+    - 부트스트랩만으로 해결이 안되어서 **css 혼합하여 커스텀 예시**
+      - `<div class="d-flex custom-header-flex">`
+      - **d-flex**는 부트스트랩이 제공하는 display:flex를 의미 (flex:1을 지원안함 ㅠ)
+      - 따라서 **custom-header-flex** 부분은 style태그로 따로 flex:1을 적용한 방식
+  - **스타일 우선순위**: inline stylet속성 -> style태그 -> css파일 (차례대로 우선순위)
+  - **class, id 별 접근자**: id=#, class=.
+  - **웹 폰트 적용??**: `font-family: 'SUITE-Regular', sans-serif;` 로써 해당 우선순위대로 폰트 적용 (suite 폰트는 외부파일)
+  - **전역 변수 정의??: basic.css**
+      <div markdown="1">
+      ```css
+      // 글꼴, 색상, 스타일 전역변수 정의
+      @font-face {
+        font-family: 'SUITE-Regular';
+        /* src: url('../static/SUITE-Regular.woff2') format('woff2'); */
+        src: url('/SUITE-Regular.woff2') format('woff2');
+        font-weight: 400;
+        font-style: normal;
+      }
+      :root {
+        --line: #393A40;
+        --main-1: #0C0C0C;
+        --main-2: #323338;
+        --text-2: #8E8F9B;
+      }
+      ```
+      </div>
+  - `&times;` **는 "X" 표시**: close 버튼을 이것으로 입력된 구조가 많음
+  - **웹(프론트)에서의 검증(ex:비밀번호)**: 정규식 검사하는 js 문법 활용
+    - `onkeypress` 방식을 사용! 단, 복붙을 구별X. 따라서 서버단에서도 추가 검증이 더욱 안전
+      <div markdown="1">
+      ```html
+      <input type="password" class="no-spin" th:field="*{password}" id="password" name="password" pattern="\d+" required onkeypress='return checkNumber(event)'/>
+      <script th:fragment="scripts3">
+        // 비밀번호 정규식 등록
+        function checkNumber(event) {
+          var pw = event.key
+          if (/^\d+$/.test(pw)) {
+              return true;
+            } else {
+              return false;
+            }
+          return false;
+        }
+      </script>
+      ```
+      </div>
+  * **텍스트 가로유지(텍스트 크기 초과 방지)**: `white-space: nowrap;` 스타일 적용
+  * **flex로 0.98:0.02 로 비율 나눠도 덮어 씌어질 경우**: `max-width:92%` 로 해결
+  * **hover, active 문법 실수 조심** : `.page-link:hover` 과 `.page-link.active` 처럼 hover은 ":", active는 "." 사용
+  * **백그라운드 컬러 변경으로 개발 테스트 용이**: `bg-info, primary, secondary` 등으로 간편하게 적용!
+  * **border은 항상 style을 지정**:  `solid` 나 굵기는 `width` 함께해야 잘 적용!
+  </div>
+  </details>
+
+<details><summary><b>HTML 태그 위치별 사용 구조</b></summary>
+<div markdown="1"><br>
+- - **\<html>** → thymeleaf 선언
+    - **\<head>**
+      - **\<meta>** → utf-8(문자인코딩), viewport(모바일 뷰크기 설정) : 이 2개는 필수 사용
+      - **\<link>** → 주로 bootstrap(css), 커스텀css(ex:/basic.css) 선언
+        - bootstrap(js)의 경우 \<script>에서!!!!
+        - **css코드 예시?! basic.css, custom.css**<br>basic은 전역(기본) css, custom은 basic말고 적용하려고 추가로 만든 css
+          <details><summary><b>basic.css → 글꼴, 색상, 스타일 전역변수 정의도 함!</b></summary>
+          <div markdown="1">
+          ```css
+          /*
+           * 글꼴, 색상, 스타일 전역변수 정의
+           */
+          @font-face {
+            font-family: 'SUITE-Regular';
+            /* src: url('../static/SUITE-Regular.woff2') format('woff2'); */
+            src: url('/SUITE-Regular.woff2') format('woff2');
+            font-weight: 400;
+            font-style: normal;
+          }
+          :root {
+            --line: #393A40;
+            --main-1: #0C0C0C;
+            --main-2: #323338;
+            --text-2: #8E8F9B;
+          }
+          /*
+           * Base structure
+           */
+           body {
+              background-color: var(--main-1);
+              /* SUITE 못 찾으면 sans-serif 사용 */
+              font-family: 'SUITE-Regular', sans-serif;
+              margin-top: 15vh;
+           }
+           .field-error {
+              color: red; font-weight: 700; padding:10px;
+           }
+          /*
+           * Header
+           */
+            nav {
+              border-left-width: 0px;
+              border-right-width: 0px;
+              border-top-width: 0px;
+              border-bottom-width: 0px;
+              border-style: solid;
+              border-color: var(--line);
+            }
+            .nav-item {
+              position: relative;
+              text-align: center;
+              font-size: 1.2vw;
+              width: 15vw;
+              padding: 20px;
+              padding-bottom: 30px;
+            border-left-width: 0px;
+            border-right-width: 1px;
+            border-top-width: 0px;
+            border-bottom-width: 0px;
+            border-style: solid;
+            border-color: var(--line);
+          }
+          /* 여기서 header는 navbar-nav 의 높이를 기준으로 정해진다고 볼 수 있음 */
+          .navbar-nav {
+            height: 15vh;
+          }
+          #nav-item-first {border-left-width: 1px; }
+          .nav-link {
+            color: white; font-weight: 700;
+          }
+          #custom-nav-item:hover,
+          #custom-nav-item:active,
+          #custom-nav-item.visited {
+            background-color: var(--main-2);
+          }
+          .nav-item-inner {
+            position:absolute; 
+            bottom:0;
+            left:0;
+            font-size: 0.7em;
+            color:white; font-weight: 400; letter-spacing: -0.14px; opacity: 0.6;
+            padding: 16px;
+          }
+          /*
+           * Main
+           */
+              .custom-container-default {
+              padding-top: 5vh;
+              padding-bottom: 5vh;
+              padding-left: 15vw;
+              padding-right: 15vw;
+              }
+              #enterBtn {
+              background-color: var(--main-1); color: white;
+              border-radius: 0px;
+              }
+              #enterBtn:hover{
+              background-color: white;
+              color: var(--main-1);
+              border-radius: 10px;
+              }
+            /* 모달에 스타일링 */
+            /* 스크롤을 숨기는 스타일 */
+            .no-scroll::-webkit-scrollbar {
+            width: 0px;
+            }
+            /* 스핀 버튼 숨기기 */
+            input[type="number"]::-webkit-inner-spin-button,
+            input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            }
+            /*
+          * Footer
+          */
+          .custom-footer {
+            color:var(--text-2);
+            display: flex;
+            justify-content: center; 
+            align-items: center; 
+            border-style: solid;
+            border-top-width: 1px;
+            border-left-width: 0px;
+            border-right-width: 0px;
+            border-bottom-width: 0px;
+            border-color: var(--line);
+            margin-left: 15vw; /* custom-container-default 의 padding 과 너비 맞출것 */
+            margin-right: 15vw;
+          }
+          ```
+          </div>
+          </details>
+          <details><summary><b>custom.css(=gallery.css)</b></summary>
+          <div markdown="1">
+          ```css
+          .gallery-item-first{
+            display: flex;
+            flex-direction: row;
+            padding-top: 20px;
+            padding-bottom: 30px;
+            /*height: 25vh;*/
+          }
+          .gallery-item-many{
+            display: flex;
+            flex-direction: row;
+            padding-top: 20px;
+            padding-bottom: 30px;
+            /*height: 25vh;*/
+            /* first와 차이점은 아래 border부분뿐 */
+            border-color: var(--line);
+            border-style: solid;
+            border-left-width: 0px;
+            border-right-width: 0px;
+            border-bottom-width: 0px;
+            border-top-width: 1px;
+          }
+          .page-link{
+          background-color: var(--main-1);
+          border-width:0px;
+          font-weight: 500;
+          text-align: center;
+          color:white;
+          }
+          .page-link.active{
+          background-color: white;
+          color:var(--main-1);
+          }
+          .page-link:hover{
+          background-color: var(--main-2);
+          color:white;
+          }
+          ```
+          </div>
+          </details>
+      - **\<title>** → 브라우저의 URL링크 상단바에 실제 제목
+    - **\<body>** → 배경색, 커서 설정하기 좋지, 전체 폰트도~!
+      - **\<style>** → css처럼 스타일링. 위 \<link> 스타일 보다 더 높은레벨 (실제 \<div style=""> 처럼 태그안에 스타일은 최상위레벨)
+      - **\<nav>** → header 부분으로 시작~!
+      - **\<div class="container">** 처럼 이제 쭉 레이아웃 형성 + 실제 웹 화면 구성 ㄱㄱ
+      - **\<footer>** → 마지막은 footer로 마무리~!
+    - **\<script>** → javascript 관련 모든 것 (+jquery, bootstrap 설치도 포함)
+      bootstrap4까지는 jquery 사용 때문에 jquery먼저 설치코드 필요하지만, bootstrap5부터는 그런 의존성 없애서 꼭 상관없다~
+      **물론, jquery 유용하니까 항상 설정하는것도 좋지.**
+    <details><summary><b>html 전체 코드</b></summary>
+    <div markdown="1">
+    ```html
+    <!doctype html>
+    <html xmlns:th="http://www.thymeleaf.org">
+      <head th:replace="fragments/head :: head('갤러리')">
+      </head>
+      <body>
+        <style>
+          .page-link{
+            font-size:1.2vw;
+            padding: 1vw;
+          }
+          /* body태그, id=enterBtn 에 적용 */
+          @media all and (min-width: 1921px) and (max-width: 4096px) {
+              body, #enterBtn {
+                  cursor: url('/cursor.svg') 10 60, auto;
+              }
+          }
+          @media all and (max-width: 1920px) {
+              body, #enterBtn {
+                  cursor: url('/cursor_1920.svg') 10 60, auto;
+              }
+          }
+        </style>
+        <!-- header -->
+        <nav th:replace="fragments/header :: header">
+        </nav>
+        <!-- main 개발 -->
+        <!-- 메인 그림 -->
+        <div class="container-fluid p-0">
+          <img class="img-fluid" src="../static/6.png" 
+            th:attr="src=@{/6.png},title=#{logo},alt=#{logo}"
+          style="width:100%;"/>
+        </div>
+        <!-- 본문  -->
+        <div class="custom-container-default">
+          <!-- 제목(층수) -->
+          <div class="d-flex flex-column" style="min-height: 0vh; padding-bottom: 5vh;">
+            <div class="container" style="text-align: center;">
+            ...
+            </div>
+          </div>
+          <!-- 작품 나열 -->
+          <div class="d-flex flex-column" style="min-height: 80vh;"
+          th:replace="fragments/item :: item">
+            <div class="gallery-item-first">
+              ...
+            </div>
+            <div class="gallery-item-many">
+              ...
+            </div>
+          </div>
+          <!-- pagination -->
+          <br><br><br><br>
+          <nav aria-label="Page navigation">
+            <ul id="dyn_ul" class="pagination" style="justify-content: center;">
+            </ul>
+          </nav>
+        </div>
+        <!-- footer -->
+        <footer th:replace="fragments/footer :: footer"
+        class="custom-footer">
+        </footer>
+        <!-- Jquery CDN 로드 : 항상 최신 버전 사용 -->
+        <script th:replace="fragments/scripts :: scripts4" src="https://code.jquery.com/jquery-latest.min.js"></script>
+        <!-- bootstrap5(JS) CDN 로드 -->
+        <script th:replace="fragments/scripts :: scripts1"  src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous">
+        </script>
+        <script th:replace="fragments/scripts :: scripts2">
+          // nav 클릭때마다 배경색 변경 커스텀
+          // 스크롤시 NavBar 불투명도 변경
+        </script>
+        <!-- 페이징 -->
+        <!--    var pageCount = /*[[${(totalCount/10)+1}]]*/ null; // 총 페이지 크기 -> 통신으로 받음-->
+        <script th:inline="javascript">
+        ...
+        </script>
+      </body>
+    </html>
+    ```
+    </div>
+    </details>
+</div>
+</details>
+
+<details><summary><b>HTML 문법 주의점</b></summary>
+<div markdown="1"><br>
+- **conatiner+flex+position?! -> div태그로 class=container 사용해서 레이아웃 구성 꼭 해주고! 필요에 따라 flex, position사용을 하면서 구현 ㄱㄱ**
+  - **container** 는 보통 위에서 아래로 쌓지. 그럼 내부엔 수직, 수평, 절대위치로 삽입하고 싶다?
+  - 난 grid는 안쓰고 **flex** 사용해서 하는중. **아래 속성도 유용함.**
+    - `text-center` : 텍스트 중앙 정렬(좌우)
+    - `align-items-start,center,end` : items 정렬이므로 자신의 자식들 정렬
+    - `align-self-start,center,end` : self 정렬이므로 자신이 정렬
+  - 절대위치는 그냥 **position:absolute랑 relative** 씀
+    - absolute 사용하는데, 중앙에 위치하고 싶어서 `top:50%, left:50%, transform: translate(-50%, -50%)` 
+      - `top: 50%;`: 이 요소의 상단이 부모 요소의 50% 위치에 배치됩니다.<br>`left: 50%;`: 이 요소의 왼쪽이 부모 요소의 50% 위치에 배치됩니다.<br>`transform: translate(-50%, -50%);`: 이 속성은 요소를 자신의 너비와 높이의 50%만큼 위와 왼쪽으로 이동시킵니다. 결과적으로 이 두 가지 설정을 조합하면 요소가 화면 중앙에 위치하게 됩니다.
+- **padding, margin?! → 굉장히 많이 사용!! 이것도 위와 같이 사용 굉장히 많이 함!**
+  - `padding` : 요소 “내부”의 여백을 설정
+    - **내부다 보니 배경색에 영향O**
+    - **내부다 보니 전체 너비와 높이에 “포함”**
+  - `margin` : 요소 “외부”의 여백을 설정
+    - **외부다 보니 배경색에 영향X**
+    - **외부다 보니 전체 너비와 높이에 “추가”!!!!!!!!**
+    <details><summary><b>동작원리(사진포함)</b></summary>
+    <div markdown="1"><br>
+    **총 3개 박스: margin, padding, margin + padding**
+    ```html
+    <div style="margin: 20px; background-color: lightblue;">
+      콘텐츠가 있는 박스
+    </div>
+    <div style="padding: 20px; background-color: lightblue;">
+      콘텐츠가 있는 박스
+    </div>
+    <div style="padding: 20px; margin: 20px; background-color: lightblue;">
+      콘텐츠가 있는 박스
+    </div>
+    ```
+    <br>
+    <img src="https://github.com/user-attachments/assets/da89b7e3-849d-4c82-b1e9-d5793d0800ba" alt="image" style="zoom:80%;" /><br>
+    <img src="https://github.com/user-attachments/assets/ee779963-18e1-4fc8-a9de-db2540c18ed9" alt="image" style="zoom:80%;" /><br>
+    <img src="https://github.com/user-attachments/assets/f3817275-edb9-422b-800e-1255bc10ba9f" alt="image" style="zoom:80%;" /><br>
+    <img src="https://github.com/user-attachments/assets/6b0b8162-0d79-4c39-a002-12cc4c865bce" alt="image" style="zoom:80%;" />
+    </div>
+    </details>
+* **fragment를 head, header, footer, modal, scripts는 꼭 사용 중**
+  - head는 \<head>에, header는 \<nav>에, footer은 \<footer>에, modal은 \<div>(class명은 modal)에, scripts는 \<script>에 사용 중!
+  - **modal은 공.문 참고!**
+* **데이터 표현** : `table, td, tr 등등` 또는 `div로 잘 구현`
+  * `th:each` + `<th:block>` 도 적절히 함께 활용
+    <details><summary><b>참고 코드</b></summary>
+    <div markdown="1">
+    ```html
+    <!-- 렌더링시 제거 block -->
+    <th:block th:each="item : ${items}" th:object="${item}">
+      <div th:class="${item.id==items[0].id}? 'gallery-item-first' : 'gallery-item-many'"
+      style="flex:1; padding-top: 30px;">
+        <div class="d-flex flex-column pe-4" style="flex:0.15;">
+          <span class="" style="font-weight: 500; color: white; font-size: 1.2vw;" th:text="'No.'+*{No}">No.15</span>
+          <span class="pt-2" style="font-weight: 400; color: var(--text-2); font-size: 1vw; letter-spacing: -0.16px;
+          " th:field="*{{date1}}" th:text="*{{date1}}">23.05.22.16:00k</span>
+        </div>
+        <div class="d-flex flex-column pe-4" style="flex:0.42;">
+          <span class="text-truncate" style="font-weight: 500; color: white; font-size: 1.2vw; width:25vw;" th:text="*{title}">최근에 있엇던 대외비</span>
+          <span class="text-truncate pt-2" style="font-weight: 400; color: var(--text-2); font-size: 1vw; letter-spacing: -0.16px; width:25vw;
+          " th:text="*{nickName} ">방문자가작성한닉네임</span>
+          <a class="btn btn-light mt-4" type="button" id="enterBtn" onclick="redirectSavedBgm()"
+          style="font-size: 1vw;
+          align-self: flex-start; width: 12vw; padding:0.5em;"
+          href="#" th:href="@{|/gallery/${pageId}/itemDetail/*{id}|}">
+            <span class="fw-bold" id="enterBtn1" style="font-size: 1em; white-space: nowrap;" th:text="|*{No}전시실 입장|">15전시실 입장 test용</span>
+          </a>
+        </div>
+        <div class="d-flex flex-column" style="flex:0.43;">
+          <img class="img-fluid" src="../static/6.png"
+             th:src="@{|/image/*{imgSrc}|}"
+          style="height:15vh; border-radius: 10vh 10vh 0 0;"/>
+        </div>
+      </div>
+    </th:block>
+    ```
+    </div>
+    </details>
+* **FORM 데이터** : `label, input, 체크박스 등등` 권장
+  * `th:field`(name,id,value자동생성) 와 `*{...}` 랑 `th:object`(데이터 관리쉽게) 함께 사용 권장
+  * `th:errors` 등등 도 함께 사용<br>-> ex: `<div class="field-error" th:errors="${item.imgSrc}">이미지 오류</div>`
+    * 이 문장은 **`item.imgSrc` 필드에 오류가 발생했을 경우**에만 해당 `<div>` 태그가 렌더링되며, 오류 메시지가 출력됩니다. 오류 없으면 이 태그는 렌더링 되지 않음!
+    * \<div> 태그의 기본 텍스트 "이미지 오류"는 오류 메시지가 없을 경우 기본 메시지로 사용할 수 있습니다. 그러나 보통은 **Spring Validation에서 오류 메시지를 자동**으로 가져옵니다.
+* **문법 잘 활용**
+  * \|\...\| : `<span th:text="|Welcome to our application, ${user.name}!|">`
+  * @{} : 간편) -`th:href="@{|/basic/items/${item.id}|}"`
+  * 등등 아래 문법 정리 참고...
+  </div>
+  </details>
+
+<br>
+
+<details><summary><b>타임리프 문법</b></summary>
+<div markdown="1">
+* **타임리프 사용 선언**
+  * `<html xmlns:th="http://www.thymeleaf.org">`
+* **속성 변경**
+  * `th:href="@{/css/bootstrap.min.css}"`
+  * `th:onclick="|location.href='@{/basic/items/add}'|"`
+  * `<td th:text="${item.price}">10000</td>`
+  * `th:value="${item.id}"`
+  * `th:action`
+  * ... 등등 매우 다양
+* **URL 링크표현식 - @{...}**
+  * `th:href="@{/css/bootstrap.min.css}"`
+  * `th:href="@{/basic/items/{itemId}(itemId=${item.id})}"`
+    * 생성된 링크: `http://localhost:8080/basic/items/1`
+  * `th:href="@{gallery/productDetail/(id=${item.id})}"`
+    * 생성된 링크: `http://localhost:8080/gallery/productDetail/?id=1`
+    * 심화) `th:href="@{/basic/items/{itemId}(itemId=${item.id}, query='test')}" `
+      * 위 2개 둘 다 사용한 방식임. **{itemId}(itemId=${item.id})랑 (id=${item.id})**
+      * 생성된 링크: `http://localhost:8080/basic/items/1?query=test`
+  * **간편) `th:href="@{|/basic/items/${item.id}|}"`**
+    * **"리터럴 대체" 문법도 적용가능 => 이거 함께 쓰자(아래 참고)**
+* **리터럴 대체 - \|\...\|**
+  * 타임리프에서 **문자**와 **표현식** 등은 분리되어 있기 때문에 **더해서 사용**해야 한다.
+    * `<span th:text="'Welcome to our application, ' + ${user.name} + '!'">`
+  * 다음과같이 리터럴 대체문법을 사용하면, **더하기 없이 편리**하게 사용할 수 있다.
+    * `<span th:text="|Welcome to our application, ${user.name}!|">`
+    * `th:onclick="|location.href='@{/basic/items/{itemId}/edit(itemId=${item.id})}'|"`
+* **변수표현식 - ${...}**
+  * `<td th:text="${item.price}">10000</td>`
+* **반복출력 - th:each**
+  * `<tr th:each="item : ${items}">`
+  * 컬렉션의 수 만큼 `<tr>..</tr>` 이 하위 태그 반복 생성!
+  * ```html
+    <table>
+        <tr th:each="item : ${items}">
+            <td th:text="${item.id}"></td>
+            <td th:text="${item.name}"></td>
+            <td th:text="${item.price}"></td>
+        </tr>
+    </table>
+    ```
+* **조건문 - th:if or Default**
+  * **th:if 문들은 false인 경우 아예 태그를 렌더링을 안함. 그럴 경우 사용!!**  
+    param?의 ?는 null safe 처리 지원
+    * `<h2 th:if="${param?.status}" th:text="'저장 완료'"></h2>`
+    * `<h2 th:unless="${param?.status}" th:text="'저장 실패'"></h2>`
+  * **삼항 연산자 + Default(=Elvis 연산자) 경우**
+    * 삼항 연산자: `th:text="|B1 ~ B${(totalCount!=null) ? (totalCount/10+1) : '??'}F|"`
+      * 실제로 **B1 ~ B4F** 이런식으로 출력
+    * Default(=Elvis 연산자) 활용 : `th:text="|B1 ~ B${(totalCount) ?: '??'}F|"`
+      * Default는 **totalCount**가 유효한 값이 있으면 그 값을 사용!<br>0이거나 null이면 **"??"가 출력!** -> 즉, 자동으로 null을 잡아줌! 
+      * 다만, `(totalCount/10+1)` 이라면?<br>null/10+1 로 에러떠서 이런 경우는 위처럼 **it-then-else 사용**
+    * 추가정보) `"${data}? : _"` 라면? 
+      * No-Operation : "_" 로써 마치 타임리프 실행 안한것처럼 동작
+* **변수선언 - th:with**
+  * `th:with="first=${users[0]}"` -> frist 로 재사용 가능
+  * ```html
+    <div th:with="first=${users[0]}">
+        <p th:text="${first.name}">User Name</p>
+    </div>
+    ```
+* **태그 인식 유무 - text, utext == [[...]], [(...)]**
+  * text vs utext -> 속성 사용
+    - th:text = Hello \<b>Spring!\</b>
+    - th:utext = Hello **Spring!** -> 진하게 태그(\<b>) 자동 적용된 모습
+  * [[...]] vs [(...)] -> 속성이 아니라 컨텐츠 안에서 직접 출력!
+    - [[...]] = Hello \<b>Spring!\</b>
+    - [(...)] = Hello **Spring!**
+* **편의 객체 제공 - param, session 등**
+  * `param.title` 같이 파라미터 바로 접근 가능하게 **편의 객체를 제공**
+  * `session.user.name` 은 세션 바로 접근
+* **비교연산(ex: >) - HTML 엔티티 주의!!** 
+  * `>` : gt 로 표기 한다.
+* **타임리프 파서 주석 :** `<!--/* [[${data}]] */-->`
+  * 참고로 `/*사이에서 여러줄 가능*/`
+  * 일반 HTML 주석과 비슷하지만, `/*`와 `*/` 사이에 있는 내용은 **타임리프의 파서에 의해 처리 된 후 렌더링 때 삭제**되는 것
+* **블록 - \<th:block>**
+  * `<th:block>` 는 타임리프가 제공하는 유일한 자체 **"태그"**
+  * **렌더링 할때는 아예 태그가 삭제**
+  * **\<div> 로 데이터 잘 표현 했을 경우 \<th:block> 추가하면 깔끔**
+  * ```html
+    <!-- 렌더링 후 아래 div 태그만 남게 되는 것 -->
+    <th:block th:each="item : ${items}" th:object="${item}">
+      <div th:class="${item.id==items[0].id}? 'gallery-item-first' : 'gallery-item-many'" style="flex:1; padding-top: 30px;">
+      </div>
+    </th:block>
+    ```
+* **fragment, js**
+  * fragment : 코드 재사용
+    * fragment생성: `<head th:fragment="head(title)">`
+    * ```html
+      <!DOCTYPE html>
+      <html xmlns:th="http://www.thymeleaf.org">
+        <head th:fragment="head(title)">
+          <!-- Required meta tags -->
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <!-- Bootstrap CSS -->
+          <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+          <!-- 커스텀(기본) CSS -->
+          <link rel="stylesheet" type="text/css" media="all" 
+                href="../static/basic.css" th:href="@{/basic.css}"/>
+          <title th:text="${title}">타이틀 화면</title>
+        </head>
+        <body>    
+        </body>
+      </html>
+      ```
+    * fragment 적용: `<head th:replace="fragments/head :: head('스튜디오')">`<br>**fragments/head** 는 **resources/templates/fragments/head.html** 경로를 의미
+    * ```html
+      <head th:replace="fragments/head :: head('스튜디오')">
+      </head>
+      ```
+  * js : 타임리프 문법 inline으로 javascript 에서 사용 가능 + css도 마찬가지
+    * ```html
+      <script th:inline="javascript">
+      var pageCount = /*[[${(totalCount/10)+1}]]*/ null;
+      // 물론, /* */ 주석을 제거해도됨. 단지 빨간줄 떠서 추가함.
+      ```
+* **\<input>과\<label> 에서 th:for로 id값 연결 하는 편 -> 보통 form 에 잘 구성**
+  * 동적 id 인식도 지원 됨! - `#ids.prev()`
+  * 참고: \#ids.prev('regions')를 사용한 이유는 label에서 for 속성에 input의 id 속성과 맞추기 위해서 입니다.
+    이것을 맞추어 두어야 label을 선택했을 때, 그러니까 **글자를 선택했을 때도 input 요소가 선택되기 때문**입니다.
+  * HTML의 기본 동작: `label`의 `for` 속성이 `input`의 `id`와 일치하면, 사용자가 `label`을 클릭할 때 브라우저가 자동으로 해당 `input` 요소에 포커스를 주도록 설계되어 있습니다.
+    ```html
+    <!-- 대충 이런느낌으로 연결 해두면 된다는 거~! -->
+    <div class="container" th:each="region : ${regions}">
+        <label th:for="${region.id}">지역 선택:</label>
+        <input type="text" th:id="${region.id}" placeholder="지역을 입력하세요">
+    ```
+* **보통 \<table> \<tr> \<td> \<th> 형태로 데이터를 표현** 
+* **젤 중요!! th:field 는 "검증"에 매우 유용해서 무조건 사용**<br>**여러개 쓸땐 th:object로 관리쉽게끔 함께 고고**
+  * value 속성에 값 자동 삽입 + **id, name 속성 자동 생성** + 체크박스도 자동체크 등 -> **input태그나 체크박스**에 주로 사용 (그냥 다 사용하면 되긴 해~)
+  * `*{...}` : 선택 변수 식으로써 **th:object** 에서 선택한 객체에 접근
+    * **\*\{\{...}}**: `*{date1}` 은 @DateTimeFormat 표현식(타입컨버터)이 안 먹히기 때문에 \*\{\{date1}} 로 지정하는 것이다.
+</div>
+</details>
+
+<details><summary><b>타임리프 + 스프링 통합 문법</b></summary>
+<div markdown="1">
+* **th:object, th:field, *{itemName} 활용**
+  * Form과 함께 Input, 체크박스, 라디오버튼, 셀렉트 박스에서 주로 활용
+  * TIP) addForm, editForm 이렇게 2개 따로 만드는게 개발하기 수월
+* **(중요)"메시지, 국제화 기능"**
+  * `application.properties` 에 `spring.messages.basename=messages` 를 추가!!
+  * `messages.properties` 를 생성해서 messages에 담을 내용을 세팅
+    * properties에 `page.addItem=상품 등록` 메시지 추가
+    * 타임리프로 `<h2 th:text="#{page.addItem}">상품 등록</h2>` `
+  * 여러개 추가할거면?? 예로 errors.properties 추가한다고 하면 =message, errors 이렇게 이어적으면 됨
+* **(참고) nullsafe**
+  * `th:if="${errors?.containsKey('globalError')}"` 에서 ?를 통해 null 로 나타나므로 if는 false로 반환
+  * ?가 없으면 null.containesKey... 로 에러
+* **"컨트롤러"에서 @GET** 으로 페이지 로딩할때 **item을 빈값이라도 선언**해둬서 Model에 담아 반환하는걸 권장
+  * **검증 실패 때 forward로 "자원 재활용"이 됨.**
+  * HTML 코드도 더 깔끔 -  if문으로 null인지 확인하는 코드 필요없이 그냥 item을 타임리프 문법으로 사용하면 되기때문
+  * **Model에 빈 객체를 미리 담아 전달**하면, 타임리프가 폼을 렌더링할 때 **객체가 null인지 확인할 필요 없이 바로 사용할 수 있기 때문 (코드 더 깔끔)**
+    * **폼 페이지에서 제출된 데이터**가 검증에 실패하면, 다시 폼 페이지로 돌아가야 합니다. 이때, 새로운 GET 요청(redirect)을 발생시키지 않고, **forward**로 같은 페이지를 다시 렌더링합니다.
+    * 이렇게 하면 **입력한 값들이 그대로 유지**되므로, 사용자는 데이터를 다시 입력할 필요가 없습니다.<br>타임리프에서 `th:field`를 사용하면, **검증 실패 시 자동으로 폼 필드에 사용자가 입력한 값**을 다시 채워줍니다. 이게 가능하려면, 컨트롤러에서 **빈 값이 아닌 객체**를 넘겨주는 것이 중요합니다.
+  * ```java
+    @Controller
+    public class ItemController {
+        @GetMapping("/items/new")
+        public String showItemForm(Model model) {
+            // 빈 Item 객체를 Model에 추가
+            model.addAttribute("item", new Item());
+            return "itemForm";  // form 템플릿을 반환
+        }
+        @PostMapping("/items/new")
+        public String createItem(@ModelAttribute("item") Item item, 
+                                 BindingResult bindingResult,
+                                 RedirectAttributes redirectAttributes) {
+            // 검증 실패 시
+            if (bindingResult.hasErrors()) {
+                return "itemForm";  // 다시 폼을 forward하여 자원 재활용
+            }
+            // 성공적으로 저장한 후
+            redirectAttributes.addAttribute("status", "success");
+            return "redirect:/items/" + item.getId();
+        }
+    }
+    ```
+  * ```html
+    <form th:object="${item}" th:action="@{/items/new}" method="post">
+        <label for="name">Item Name</label>
+        <input type="text" th:field="*{name}" id="name" />
+        <label for="price">Price</label>
+        <input type="number" th:field="*{price}" id="price" />
+        <button type="submit">Save</button>
+    </form>
+    ```
+</div>
+</details>
 
 <br><br>
 
@@ -3076,7 +3767,7 @@ log.info("{}", source.getImgPath());
 
 <br><br>
 
-### 캐시(메모리, 브라우저)
+### 캐시(메모리, 브라우저) + gzip 압축
 
 > reload: 타임리프는 properties에 캐시 사용X 하여 reload가 가능한데, JSP는 reloadable="true"가 기본값이라 톰캣이  자동 컴파일 하면서 reload가 이미 제공!
 >
@@ -3084,7 +3775,11 @@ log.info("{}", source.getImgPath());
 >
 > 그러나, setCacheControl 같은건 Java 코드로 해야해서 여기선 xml그냥 사용하지 말 것.
 
-**브라우저 캐시는?**   
+**gzip 압축**은 보통 이미지나 동영상은 이미 압축되어 있는 상태라 **HTML,CSS,JS 만 압축!!**
+
+- 하는법은 구글링 ㄱㄱㄹ
+
+**브라우저 캐시는?**  
 
 - `WebMvcConfigurer` 를 **상속받아서 구현**하면 스프링 빈에 자동 등록과 기능확장!
 
@@ -3807,6 +4502,2069 @@ API 방식으로 주로 정리 -> 웹(JSP)인 "MyBatis + Spring(JSP) 파트" 참
 
 <br>
 
+## MyBatis+Spring+Boot+eGov 파트 (MVC)
+
+<details><summary><b>적용 지침서 보기: 공홈>알림마당>관련참고문서>정보시스템 구축 발주자를 위한 표준프레임워크 적용가이드</b></summary>
+<div markdown="1">
+- 권고사항: 
+  - 수정없이 사용: "실행환경", "모바일표준프레임워크" 
+  - 수정가능: "개발환경"(다른 상용 솔루션 조합도 가능), "운영환경 및 공통컴포넌트"
+- **기본 2가지 적용 확인:**
+  1. 표준프레임워크 실행환경의 정상적인 설치 여부 점검
+     - 운영서버(WAS)의 "[웹어플리케이션 루트 디렉토리]/WEB-INF/lib/" 폴더에 "org.egovframe.rte"로 시작하는 .jar 파일이 존재하는지 확인  
+       **=> 즉, egovframe 라이브러리 사용하는지 체크**
+  2. 실제 소스코드에서 실행환경이 활용되고 있는지 점검
+     - import org.egovframe.rte 검색되는지 체크
+     - EgovAbstractDAO(EgovAbstractMapper) 와 EgovAbstractServiceImpl(또는 AbstractServiceImpl) 클래스를 상속한 구문이 존재하는지 체크
+       - (예: public class NotificationDAO extends EgovAbstractDAO)
+       - (예: public class NotificationServiceImpl extends EgovAbstractServiceImpl)
+- 상세한 적용 확인:
+  1. 아키텍처 규칙 
+     - Annotation 기반 Spring MVC 준수 : **@Controller 및 @RequestMapping**을 통한 URL mapping 활용 (View 부분과 model(business logic 및 data) 부분을 controller를 통해 분리) 
+     - Annotation 기반 layered architecture 준수 : 화면처리, 업무처리, 데이터처리에 부분에 대하여 각각 **@Controller, @Service, @Repository** 활용 (인접 layer간 호출만 가능) 
+     - 업무처리를 담당하는 서비스 클래스(@Service)는 **EgovAbstractServiceImpl**(또는 AbstractServiceImpl)을 확장하고 업무에 대한 특정 인터페이스를 구현하여야 함 
+     - 데이터처리를 담당하는 DAO 클래스(@Repository)는 EgovAbstractDAO(iBatis) 또는 **EgovAbstractMapper**(MyBatis)를 상속하여야 함 (**Hibernate/JPA를 적용한 경우는 예외**이며 자세한 사항은 하단 ‘데이터처리 규칙’ 참조) 
+  2. 데이터처리 규칙 
+     - Data Access 서비스 준수 : 데이터처리 부분은 iBatis 활용 (SqlMapClientDaoSupport 를 상속한 EgovAbstractDAO 활용) 또는 MyBatis 활용 (SqlSessionDaoSupport를 상속 한 **EgovAbstractMapper** 활용)<br>※ MyBatis의 경우 **Mapper interface 방식**으로 사용가능(권장)하며, 이 경우는 **interface 상에 @Mapper를 지정**하여 사용되어야 함 
+     - ORM 서비스 준수 : 데이터처리 부분은 Hibernate/JPA 적용 (DAO에서 SessionFactory 또는 EntityManagerFactory 설정을 통해 HibernateTemplate/JpaTemplate를 활용하거나, HibernateDaoSupport/JpaDaoSupport를 상속하여 활용) 
+     - Data 서비스 준수 : 데이터 처리 부분은 다양한 persistence store(Big Data, NoSQL 등)를 지원하기 위한 Spring Data 적용 (**DAO에서 CrudRepository를 상속하는 interface 방식의 Repository를 활용**) 
+       - JpaRepository와 다르게 진짜 CRUD만 제공
+  3. 활용 및 확장 규칙 
+     - 표준프레임워크 실행환경 준수 : 표준프레임워크 실행환경은 적극적으로 활용되어야 함 (실행환경 부분 임의 변경 금지) 
+     - 확장 규칙 : 업무 클래스는 org.egovframe.rte 패키지 내에 정의될 수 없음 
+  4. 기타 
+     - 이외에 개발환경, 운영환경 및 공통컴포넌트 부분은 선택적으로 적용 가능하며, 임의 변경 및 확장 가능함 
+     - UI부분에 RIA(Rich Internet Appliation)가 적용되는 경우는 UI Adaptor 또는 RESTful 방식을 적용 활용해야 함
+</div>
+</details>
+
+> eGov 가이드가 있으니 공홈 참고 or 블로그 eGov 게시물 참고
+
+eGov적용해본 플젝은 부트도 사용했지만 일부러 xml을 좀 경험하고자 **xml+java config** 둘 다 섞어 봤음
+
+**[공식 홈페이지](https://www.egovframe.go.kr/home/sub.do?menuNo=94)의 eGovFframeDev-4.2.0 사용 -> Eclipse 2022-12 (4.26.0) 사용 및 JDK17 로 구동**  
+**eGovFrame -> stater -> boot web 플젝 생성**  
+개발하면서 라이브러리에 **Egov꺼 보이면 우선**으로 사용한 편!
+
+참고: 순수스프링은 web.xml에 필터, 디스패처 서블릿 다 세팅한 덕분에 main함수 직접 작성 안해도 톰캣 위에서 동작  
+
+> **ContextLoaderListener**는 **web.xml** 파일에 설정되어, 웹 애플리케이션이 시작될 때 **Spring** 애플리케이션 **컨텍스트를 초기화**
+>
+> 이 리스너는 **contextConfigLocation** 파라미터를 통해 **XML** 파일의 위치를 지정받고, 해당 파일을 로드하여 빈을 등록
+>
+> 이를 담당해주는 web.xml이 없으면 당연히 "자바코드"로 직접 작성해서 main함수로 실행해줘야 함.  
+> ApplicationContext(스프링 컨테이너)를 초기화 하면 되고, 빈도 사용할 수 있다.  
+> => XML 방식: ApplicationContext context = new ClassPathXmlApplicationContext("application.xml");  
+> => Java Config 방식: ApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfig.class);  
+> AppConfig 클래스에 @Configuration 필수  
+> => 부트는 스프링 컨테이너 초기화 자동 제공(@SpringBootApplication): SpringApplication.run(메인.class);
+
+<br>
+
+**JSP 사용하게 Setting:**
+
+- pom.xml:
+  - jar 도 가능: 어차피 boot-starter의 내장톰캣으로 실행 됨.  
+    - 나중에 외부 톰캣 쓰고 싶으면?   
+      war변경+starter의존성provided+web.xml 구성 or SpringBootServletInitializer를 오버라이드(main함수 대신)
+  - JSP 용 톰캣인 tomcat-embed-jasper 의존성 추가 및 타임리프 의존성은 주석
+- WEB-INF 하위에 index.jsp 만들고, application.properties 세팅
+  - spring.mvc.view.prefix=/WEB-INF/  
+    spring.mvc.view.suffix=.jsp
+
+**Boot에서 정적 파일(js,css,images 등) 사용하게 Setting:**
+
+- 기존 순수 스프링(WAR)는 src/main/webapp하위 사용이 표준 구조.   
+  그러나, Boot는 src/resources, static, templates 등이 표준 구조. 
+  - 뷰는 templates보는게 기본값이라서 위에서 webapp/WEB-INF 하위 jsp를 사용하게 뷰를 설정했었다.
+- 따라서 Boot 사용할거면 본인은 정적파일을 src/resources/static 하위에 두기로!
+
+<br><br>
+
+### VO
+
+**JPA파트도 참고(연결해서 보기)**
+
+> MyBatis만 사용할거면 JPA 어노테이션(ex:@OneToMany) 사용할 필요 없음. SQL 매퍼(xml)에서 해야함.  
+> => JPA는 엔티티 개념을 사용했지만, MyBatis는 직접SQL이라 DB개념으로 좀 더 생각하자.  
+>
+> 즉, JPA의 영속성 컨텍스트로 도메인 패턴 필요 없음.   
+> update도 더티체킹 없이 전부 SQL로 처리 해야 함.
+>
+> PK값 자동증가 ID도 SQL 매퍼에서 MySQL은 useGeneratedKeys로 적용(auto_increment)  
+> => [Mybatis 키 자동 생성 - useGeneratedKeys(MySQL), selectKey(Oracle)](https://sesoc.tistory.com/41)
+>
+> N+1 문제는 JPA-"페치조인(즉시로딩)+컬렉션은 distinct까지" 로 해결  
+> MyBatis는 SQL문 사용하므로 조인이나 서브쿼리 덕분에 직면할 문제가 아님
+>
+> update는 JPA에선 더티체킹 방식이지만, SQL인 MyBatis는 아님.  
+> @Transactional에서 JPA는 영속성컨텍스트 덕분에 쿼리모아서 한번에 전송지만, MyBatis는 매순간 전송
+
+<br>
+
+PK값 자동증가 ID의 경우 eGov-GenId껀 @Deprecated니까 사용하지 말고,  
+MySQL이니 MyBatis의 useGeneratedKeys(=auto_increment) 쓰자.   
+JPA라면 @GeneratedValue(strategy = GenerationType.IDENTITY) 가 auto_increment 역할!
+
+JPA 사용 안하더라도 boot-jpa-data 의존성으로 "테스트DB + 자동 테이블생성"을 활용한다면,   
+@Entity+@Id+@GeneratedValue 선언은 필수! (JPA한테 알려주는것) -> 자세한건 test case 작성파트를 참고
+
+JPA의 더티체킹을 위한 엔티티에 update로직이나 연관메서드 등 MyBatis에선 사용할 필요가 없어짐.
+
+<br><br>
+
+### Mybatis DAO & Service
+
+**JPA파트도 참고(연결해서 보기)**
+
+**eGov는 crudRepository... 활용해야 eGov 정책에 맞다. 물론, 여기선 MyBatis를 사용하므로 자세한 언급은 하지 않겠따.**
+
+@Repository, @Service로 구분 -> @Mapper 방식 사용 시 레포로 봐도 될 듯.  
+EgovAbstractMapper, EgovAbstractServiceImpl 상속 필수(단, @Mapper 사용 시 첫번째꺼 생략가능)
+
+생성자 빈 주입방식 사용! -> @RequiredArgsConstructor + final  
+DBIO로 쿼리 작성도 좋음.  
+인터페이스에 주석 넣어서 구현할 때 무슨 메소드인지 보기좋게 하자. (서비스 인터페이스에 했음)
+
+(mybatis 1)MyBatis 인터페이스 방식 구현(=@Mapper 방식): ItemService 인터페이스 + ItemServiceImpl 클래스(@Service로 자동 빈) + ItemMapper 인터페이스(@Mapper로 프록시로 자동 빈)  
+=> 특히, ItemServiceImpl 클래스 = EgovAbstractServiceImpl 상속 + ItemService 구현체 역할
+
+(mybatis 2)xml설정부분: Mybatis-boot-starter 의존성 없으면(=순수스프링ver) context-mybatis.xml 필수(=빈 등록: SqlSessionFactoryBean:sql-mybatis-config.xml등록, MapperConfigurer:@Mapper 인터페이스 자동 스캔 위치 지정) +  
+sql-mybatis-config.xml 에서 \<mapper Item.xml> + lazy설정, 별칭, 캐시 등 ㄱㄱ +  
+Item.xml 에는 SQL문 작성!  
+
+(mybatis3)xml 사용 위해 main함수위에 `@ImportResource("classpath:/spring/*.xml")` 로 등록   
+참고) context-common.xml 도 추가했음. (eGov서비스에 leaveaTrace빈 때매) 
+
+**자세한 사용과 문법은 "DB필독 MyBatis 파트" 참고**
+
+<details><summary><b>전체코드와 사용 파일 한눈에 보기</b></summary>
+<div markdown="1"><br>
+{src/main/resources/}spring/context-mybatis.xml -> sqlSession빈<br>
+{src/main/resources/}sqlmap/sql-mybatis-config.xml -> Item.xml(매퍼)연결 및 별칭,캐시 등<br> 
+{src/main/resources/}sqlmap/mappers/Item.xml -> SQL<br>
+{src/main/java/}...service.impl/ItemMapper.java -> @Mapper<br>
+{src/main/java/}...service.impl/ItemServiceImpl.java -> @Service<br>
+{src/main/java/}...service/ItemService.java -> (그냥 확장성 위해 인터페이스 추가한거일 뿐)<br>
+**context-mybatis.xml**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+	<!-- 애초에 boot-mybatis-starter 라이브러리 사용했으면 이부분 자동 설정해 줌. 안 사용해서 추가한거임. -->
+<!-- -->
+	<!-- SqlSession setup for MyBatis Database Layer -->
+	<!-- MyBatis와 Spring 연동 설정
+	물론, 스프링부트는 java 파일에서 빈 등록을 권장 -->
+	<bean id="sqlSession"
+		class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation"
+			value="classpath:/sqlmap/sql-mybatis-config.xml" />
+		<!-- <property name="mapperLocations" value="classpath:**/lab-*.xml" /> -->
+	</bean>
+	<!-- MapperConfigurer setup for @Mapper -->
+	<!-- MyBatis의 Mapper Interface 자동스캔 설정 
+	물론, 스프링부트는 java 파일에서 빈 등록을 권장 -->
+	<bean class="org.egovframe.rte.psl.dataaccess.mapper.MapperConfigurer ">
+		<property name="basePackage"
+			value="com.secretgallery.service.impl" />
+	</bean>
+</beans>	
+```
+**sql-mybatis-config.xml**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+<!--  -->
+	<settings>
+		<setting name="cacheEnabled" value="true" />
+		<setting name="lazyLoadingEnabled" value="true" />
+		<setting name="multipleResultSetsEnabled" value="true" />
+		<setting name="mapUnderscoreToCamelCase" value="true" />
+	</settings>
+	<!-- 별칭 지정시 sql문쪽 resultType 이런곳에서 "클래스명"만으로 바로 사용 가능! 
+	단, 클래스단위임. 패키지 단위는 application.properties에서 해야함. -->
+	<typeAliases>
+		<typeAlias alias="Item"
+			type="com.secretgallery.vo.Item" />
+	</typeAliases>
+<!--  -->
+	<typeHandlers>
+		<typeHandler
+			handler="org.egovframe.rte.psl.dataaccess.typehandler.CalendarMapperTypeHandler" />
+	</typeHandlers>
+<!--  -->
+	<mappers>
+		<mapper resource="sqlmap/mappers/Item.xml" />
+	</mappers>
+</configuration>
+```
+**Item.xml**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.secretgallery.service.impl.ItemMapper">
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		insert
+		into item (nickname, password, title, content, img_src, date1, date2)
+		values (#{nickname}, #{password}, #{title}, #{content}, #{imgSrc},
+		#{date1}, #{date2})
+	</insert>
+	<update id="update">
+		update item
+		set password=#{password},
+		title=#{title},
+		content=#{content}
+		where item_id = #{id}
+	</update>
+	<select id="findById" resultType="Item">
+		select item_id as id, nickname,
+		password, title, content, img_src, date1,
+		date2
+		from item
+		where item_id =
+		#{id}
+	</select>
+	<delete id="delete">
+		delete from item where item_id = #{id}
+	</delete>
+	<select id="findAll" resultType="Item">
+		select item_id as id, nickname,
+		password, title, content, img_src,
+		date1,
+		date2
+		from item
+	</select>
+<!--  -->
+	<!-- DBIO 써보기 + as별칭 말고 resultMap 써보기 -->
+	<resultMap id="item" type="Item">
+		<result property="id" column="item_id" />
+		<result property="nickname" column="nickname" />
+		<result property="password" column="password" />
+		<result property="title" column="title" />
+		<result property="content" column="content" />
+		<result property="imgSrc" column="img_src" />
+		<result property="date1" column="date1" />
+		<result column="date2" property="date2" />
+	</resultMap>
+	<!-- (동적쿼리)검색+페이징 -->
+	<select id="findAllWithPage" resultMap="item">
+		SELECT *
+		FROM item
+		<where>
+			<if test="searchKeyword != null and searchKeyword != ''">
+				<choose>
+					<when test="searchCondition == 0">
+						and id like concat('%', #{searchKeyword}, '%')
+					</when>
+					<when test="searchCondition == 1">
+						and title like concat('%', #{searchKeyword}, '%')
+					</when>
+				</choose>
+			</if>
+		</where>
+		order by item_id DESC 
+		LIMIT #{recordCountPerPage} OFFSET #{firstIndex}
+	</select>
+	<select id="findTotalCount" resultType="int">
+		SELECT count(*) FROM Item
+		<where>
+			<if test="searchKeyword != null and searchKeyword != ''">
+				<choose>
+					<when test="searchCondition == 0">
+						and id like concat('%', #{searchKeyword}, '%')
+					</when>
+					<when test="searchCondition == 1">
+						and title like concat('%', #{searchKeyword}, '%')
+					</when>
+				</choose>
+			</if>
+		</where>
+	</select>
+	<!-- 자동검색(ajax) -->
+	<select id="findTitleListForSuggest" resultType="string">
+		SELECT TITLE
+		FROM item
+		where title like '%' || #{value} || '%'
+		<!-- where title like concat('%', #{value}, '%') -->
+	</select>
+	<select id="findPrevNextById" resultMap="item">
+		<![CDATA[
+		SELECT * FROM Item WHERE
+		item_id >= #{prevId} and item_id <= #{nextId}
+		]]>
+	</select>
+</mapper>
+```
+**ItemMapper.java**
+```java
+//Mapper Interface - 메서드명과 쿼리ID를 매핑하여 쿼리호출
+@Mapper
+public interface ItemMapper {
+	public Long save(Item item);
+	public Long update(Item item);
+	public Long delete(Item item);
+	public Item findById(Long id);
+	public List<Item> findAll();
+//	
+	public List<Item> findAllWithPage(ItemDefault searchItem);
+	public int findTotalCount(ItemDefault searchItem);
+	public List<String> findTitleListForSuggest(String value);
+	public List<Item> findPrevNextById(@Param("prevId") Long prevId, @Param("nextId") Long nextId);
+}
+```
+**ItemServiceImpl.java**
+```java
+@Service
+@Transactional(readOnly = true) 
+@RequiredArgsConstructor
+@Slf4j
+public class ItemServiceImpl extends EgovAbstractServiceImpl implements ItemService {
+	private final ItemMapper itemMapper;
+	//CRUD
+	@Override
+	@Transactional // 쓰기모드
+	public Long save(Item item) throws Exception {
+		return itemMapper.save(item);
+	}
+	@Override
+	@Transactional // 쓰기모드
+	public Long update(Item item) throws Exception {
+		// TODO Auto-generated method stub
+		return itemMapper.update(item);
+	}
+	@Override
+	@Transactional // 쓰기모드
+	public Long delete(Item item) throws Exception {
+		// TODO Auto-generated method stub
+		return itemMapper.delete(item);
+	}
+	@Override
+	public Item findById(Long id) throws Exception {
+		return itemMapper.findById(id);
+	}
+	@Override
+	public List<Item> findAll() throws Exception {
+		// TODO Auto-generated method stub
+		return itemMapper.findAll();
+	}
+//
+	//추가 함수
+	@Override
+	public List<Item> findAllWithPage(ItemDefault searchItem) throws Exception {
+		// TODO Auto-generated method stub
+		return itemMapper.findAllWithPage(searchItem);
+	}
+	@Override
+	public int findTotalCount(ItemDefault searchItem) throws Exception {
+		// TODO Auto-generated method stub
+		return itemMapper.findTotalCount(searchItem);
+	}
+	@Override
+	public List<String> findTitleListForSuggest(String value) throws Exception {
+		// TODO Auto-generated method stub
+		return itemMapper.findTitleListForSuggest(value);
+	}
+	@Override
+	public List<Item> findPrevNextById(Long id) throws Exception {
+		// TODO Auto-generated method stub
+		return itemMapper.findPrevNextById(id-1, id+1);
+	}
+}
+```
+**ItemService.java**
+```java
+/**
+ * CRUD + 
+ * findAllWithPage + findTotalCount + findTitleListForSuggest + findPrevNextById
+ 	* 총 게시물 수 구하는 함수: findTotalCount()
+ 	* 이전, 이후 전시실 버튼 생성용: findPrevNextById()
+ 	* 검색 자동완성 함수: findTitleListForSuggest()
+ */
+public interface ItemService {
+	/**
+	 * CRUD - C
+	 * @param item
+	 * @return count(개수)
+	 * @throws Exception
+	 */
+	public Long save(Item item) throws Exception;
+	/**
+	 * CRUD - U
+	 * @param item
+	 * @return count(개수)
+	 * @throws Exception
+	 */
+	public Long update(Item item) throws Exception;
+	/**
+	 * CRUD - D
+	 * @param item
+	 * @return count(개수)
+	 * @throws Exception
+	 */
+	public Long delete(Item item) throws Exception;
+	/**
+	 * CRUD - R
+	 * @param id
+	 * @return 
+	 * @throws Exception
+	 */
+	public Item findById(Long id) throws Exception;
+	/**
+	 * CRUD - R
+	 * @return 
+	 * @throws Exception
+	 */
+	public List<Item> findAll() throws Exception;
+	//
+	//추가 함수
+	/**
+	 * 해당 페이지 Item 전부 조회 by desc
+	 * @param pageId
+	 * @return
+	 * @throws Exception
+	 */
+	public List<Item> findAllWithPage(ItemDefault searchItem) throws Exception;
+	/**
+	 * 전체 Item의 총 개수
+	 * @return
+	 * @throws Exception
+	 */
+	public int findTotalCount(ItemDefault searchItem) throws Exception;
+	/**
+	 * 검색에 자동완성 기능
+	 * @param value
+	 * @return
+	 * @throws Exception
+	 */
+	public List<String> findTitleListForSuggest(String value) throws Exception;
+	/**
+	 * Item의 이전, 이후 Item 구하기
+	 * @param id
+	 * @return
+	 * @throws Exception
+	 */
+	public List<Item> findPrevNextById(Long id) throws Exception;
+}
+```
+</div>
+</details>
+
+<br><br>
+
+### Controller JSP
+
+**JPA파트도 참고(연결해서 보기)**
+
+@Controller 및 @RequestMapping 로 Spring MVC 준수 필수!  
+=> 어차피 @GetMapping, @PostMapping 와 사용법도 기능도 유사하다. 오히려 유지보수좋게 이걸로 ㄱ  
+=> 클래스 단에는 @RequestMapping 유용하니 써줘도 좋고! (공통URL)  
+
+참고: 타임리프 플젝에서 좀 엉망인 "주석"을 eGov적용 웹 플젝에서 좀 다듬었다.
+
+반환타입 void일 때: 자동으로 뷰리졸버는 요청URL과 동일한 뷰를 탐색해서 반환! (직접 String반환 안해도!)
+
+**특히, JSP는 타임리프꺼 복붙하여 문법 JSP로 바꾸는게 전부.**  
+예로: fragment -> jsp:include, th:src -> c:url, th:text -> spring:message, text -> c:out, th:each -> c:forEach,  th:if -> c:if, th:error -> form:error 등 코드는 아래 참고
+
+<details><summary><b>타임리프 -> JSP 예시: img, message, fragment, text, forEach, if, error</b></summary>
+<div markdown="1"><br>
+```jsp
+<!-- img 예시 -->
+<img class="img-fluid" src="<c:url value='/images/gallery/6-2.svg'/>"
+     style="width: 100%;"/>
+<!-- message 예시 -->
+<span class="px-3" style="font-size: 2vw; font-weight: 700; color: white; white-space: nowrap;">
+    <spring:message code="page.gallery" text="전시실" />
+</span>
+<!-- fragment 예시 (param 도 가능) -->
+<jsp:include page="fragments/header.jsp"/>
+<jsp:include page="fragments/head.jsp">
+    <jsp:param value="갤러리" name="title" />
+</jsp:include>
+<!-- text 예시 (c:out, fmt: 등 다양함) -->
+<span class="nav-item-inner">B1 ~ B<fmt:formatNumber value="${paginationInfo.getTotalRecordCount() / paginationInfo.getRecordCountPerPage()}" pattern="#" />F
+</span>
+<span style="font-weight: 500; color: white; font-size: 1.4vw;">B
+    <c:out value='${paginationInfo.getCurrentPageNo()}'/>F
+</span>
+<!-- text 번외: fmt는 Date만 지원, LocalDate는?? -->
+<%@ page import="java.time.format.DateTimeFormatter" %>
+${itemResDto.date1.format(DateTimeFormatter.ofPattern('yy.MM.dd.HH:mm'))}
+<!-- forEach 예시 (반복문) -->
+<c:forEach items="${itemsResDto}" var="itemResDto" varStatus="status">
+    ...
+</c:forEach>
+<!-- if 예시 Java or JSP-->
+<%
+if (item != null && item.getImgSrc() != null) {
+%>
+    <img src="<%= item.getImgSrc() %>" alt="이미지">
+<%
+}
+%>
+<c:if test="${item != null && item.imgSrc != null}">
+    <img src="${item.imgSrc}" alt="이미지">
+</c:if>
+<!-- error 예시: th:error처럼 form:error로 표현 가능 -->
+<!-- th:error, form:error 둘다 bindingResult의 검증결과를 활용하여 메시지 출력 -->
+<!-- 자세한건 뒤에 검증 파트를 보는걸 추천 --> 
+<!-- 아래 코드는 "직접 bindingResult 다루는 예시" -->
+컨트롤러에서 bindingResult를 model에 담아서 반환했다 가정:
+<div class="field-error">
+    <c:if test="${not empty bindingResult.fieldErrors}">
+        비밀번호 오류
+        <%-- 비밀번호 오류: <c:out value="${bindingResult.fieldErrors['password']}" /> --%>
+    </c:if>
+</div>
+```
+</div>
+</details>
+
+"게시물 페이징, 자동완성(검색)"에 AJAX를 적용했다! (SPA 방식. BGM 사용중이면 끊길 걱정도 없어짐)  
+=> 아래 eGov 방식의 "검색(동적쿼리)+페이징, 자동완성(검색)" 파트 참고
+
+<br>
+
+#### JSP
+
+**"HTTP 중요 지식" 파트와 "타임리프 파트"를 먼저 참고할 것**
+
+구조분석
+
+<details><summary><b>구조분석</b></summary>
+<div markdown="1">
+**스프링부트에서 "타임리프"와 "JSP" 접근 비교:** 
+- 타임리프?
+  - 웹 브라우저 -> 톰캣(서블릿 컨테이너) -> 스프링 컨테이너 순으로 이동하여,  
+    Controller를 찾고 있으면 자동 등록된 **viewResolver**로 화면에 응답.
+  - 이때, templates/hello.html 처럼 Thymeleaf 템플릿 엔진 처리가 **"기본 경로"**로 가능!
+    - 즉, **boot-starter-thymeleaf 의존성이 있다면** 부트가 "뷰 리졸버" 자동 등록 + "경로 설정" 자동 등록
+    - 애초에 뷰 리졸버랑 이런건 **boot-starter-web 의존성** 덕분에 기본적으로 부트가 자동 지원.
+- JSP?
+  - 부트를 사용하니 의존성들 덕분에 뷰 리졸버 이런 등록은 자동이다. (순수 스프링은 하나부터 열까지 직접 xml로...)
+  - 단, **"JSP 템플릿 엔진 처리"**를 따로 라이브러리로 설치해야하고 **"경로도 설정"**해야 한다.
+<br>
+**왼쪽 스프링부트+JSP / 오른쪽 일반 스프링부트 구조 비교: src/main/webapp/WEB-INF 가 있음!**<br>
+<img src="https://github.com/user-attachments/assets/65986172-ecce-4a97-9912-1ac386b40341" alt="Image" style="zoom:80%;" /> <br> <img src="https://github.com/user-attachments/assets/d3f7731a-54e9-4aa0-a3c5-3c133c887ea2" alt="Image" style="zoom:80%;" /> 
+</div>
+</details>
+
+<details><summary><b>실행과정 - 3가지만 지키자</b></summary>
+<div markdown="1">
+**3가지만 지키자:** 
+- JAR는 골치아파서 JSP엔 WAR 사용! -> **(정정: 부트의 경우 내장콤캣 덕분에 JAR도 똑같이 잘 구동)**
+- 의존성: 
+  - implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'
+  - 이거 추가 안하면, jsp용 톰캣이없어서 jsp 접근시 걍 파일설치로 뜸.
+- application.properties: 
+  - spring.mvc.view.prefix=/WEB-INF/views/   
+    spring.mvc.view.suffix=.jsp
+  - WEB-INF 하위 경로는 클라 URL로 접근 안된다. 서버에서만 접근 가능하다. (보안위해)
+  - 그래서 서버(스프링)한테 경로를 알려주는것! (예상이지만 원래는 /templates 일 듯)<br>
+<img src="https://github.com/user-attachments/assets/c5f41f27-f2af-4e23-acd0-a25c18a6214d" alt="Image" style="zoom:80%;" /> <br>
+**컨트롤러 코드보면 기존 스프링부트(+타임리프)로 개발한거랑 다를게 없음! 편.안.**<br>
+ <img src="https://github.com/user-attachments/assets/c599c025-c601-4128-96ce-d0e9c66d0c08" alt="Image" style="zoom:80%;" />
+</div>
+</details>
+
+<details><summary><b>JSP 문법</b></summary>
+<div markdown="1">
+- **스크립트 요소**: JSP에서 자바 코드를 작성하는 곳 = 스크립트릿(Scriptlet)
+  - 형식: `<% 자바 코드 %>`
+  - 지역변수이며, 메서드 선언은 불가능(불가능이였던가?)
+- **선언문**: 변수나 메서드를 선언하는 곳.
+  - 형식: `<%! 자바 코드 %>`
+  - JSP -> 서블릿 변환될 때 클래스, 멤버로 변환
+- **표현식**: 값을 웹 브라우저에 출력할 때 사용하는 곳
+  - 형식: `<%= 자바 코드 %>`
+  - 세미콜론(;)을 붙이지 않는다.
+- **주석 두 가지 방식:**
+  - 형식1: `<!-- HTML 주석 -->`
+  - HTML 주석: 브라우저 소스 보기에서 보임
+  - 형식2: `<%-- JSP 주석입니다 --%>`
+    - JSP 주석 (브라우저 출력되지 않음)
+- **지시어**: JSP 페이지의 전반적인 처리 방식을 설정
+  - 형식: `<%@ 자바 코드 %>`
+  - | 지시어  | 설명                      | 예시                                                |
+    | ------- | ------------------------- | --------------------------------------------------- |
+    | page    | 페이지 설정 정보          | `<%@ page contentType="text/html; charset=UTF-8"%>` |
+    | include | 다른 파일 포함            | `<%@ include file="header.jsp" %>`                  |
+    | taglib  | 태그 라이브러리 사용 선언 | `<%@ taglib uri="..." prefix="c"%>`                 |
+- **액션태그**: JSP 문서 내에서 간단하게 다양한 구현을 할 수 있도록 만든 태그
+  - 형식: `<jsp:?>`
+  - | 액션 태그       | 설명                                |
+    | --------------- | ----------------------------------- |
+    | jsp:include     | 다른 페이지를 현재 페이지에 포함    |
+    | jsp:forward     | 현재 페이지에서 다른 페이지로 이동  |
+    | jsp:useBean     | 자바 빈 객체 생성                   |
+    | jsp:setProperty | 자바 빈 객체의 프로퍼티 값을 설정   |
+    | jsp:getProperty | 자바 빈 객체의 프로퍼티 값을 가져옴 |
+  - 헷갈리는 부분 체크: `include` 의 경우 -> [지시어 include, 액션태그 include 동작차이](https://doublesprogramming.tistory.com/64)
+    - 예로 footer에 "저작권표시"는 정적으로써 지시어 include 사용하면 될거다.
+    - "현재 시간"은 해당 파일이 실행될 때 나타내줘야 하니까 동적으로써 액션태그 사용!
+      - 즉, 모듈화할 때 사용한다.(웹 특정 영역을 독립된 파일로 나눈다공)
+- **내장객체**: JSP에서는 별도의 선언 없이 사용할 수 있는 내장 객체가 있다.
+  - `request`: 클라이언트 요청 정보를 담고 있는 객체
+  - `response`: 클라이언트에게 응답을 보내기 위한 객체
+  - `out`: 출력 스트림을 통해 데이터를 출력하기 위한 객체
+  - `session`: 세션 정보를 저장하고 관리하는 객체
+  - `application`: 웹 애플리케이션 전체에서 공유되는 데이터를 저장하는 객체
+- **JSTL**: 자주 사용하는 로직(조건문, 반복문 등)을 태그 형태로 제공하는 JSP 표준 태그 라이브러리
+  - | 태그 라이브러리     | URI                                      | prefix(접두어) | 주요 기능                           |
+    | ------------------- | ---------------------------------------- | -------------- | ----------------------------------- |
+    | Core(가장많이 사용) | `http://java.sun.com/jsp/jstl/core`      | `c`            | 조건문, 반복문, 변수 선언, URL 처리 |
+    | Formatting          | `http://java.sun.com/jsp/jstl/fmt`       | fmt            | 숫자, 날짜, 시간 포맷 및 국제화     |
+    | Functions           | `http://java.sun.com/jsp/jstl/functions` | fn             | 문자열 처리 함수 제공               |
+    | XML                 | `http://java.sun.com/jsp/jstl/xml`       | x              | XML 문서 처리                       |
+    | SQL                 | `http://java.sun.com/jsp/jstl/sql`       | sql            | JSP 내에서 SQL 처리                 |
+</div>
+</details>
+
+<details><summary><b>JSP 문법 예시 코드:</b></summary>
+<div markdown="1"><br>
+**제일 좋은건 JSP로 진행했던 플젝 보는게..!**
+```jsp
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>JSP Example</title>
+</head>
+<body>
+<!-- 선언부(선언만 가능) -->
+<%! String name = "김철수"; %>
+<%! 
+    public String greeting(String name) {
+        return "안녕하세요, " + name + "님!";
+    }
+%>
+<!-- 스크립트릿 + 내장객체(request) -->
+<%
+    String userName = request.getParameter("user");
+    if(userName == null) {
+        userName = "손님";
+    }
+%>
+<h2>환영합니다!</h2>
+<!-- 표현식 -->
+<p><%= greeting(userName) %></p>
+<!-- 액션 태그 -->
+<jsp:include page="footer.jsp" />
+```
+```jsp
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<html>
+<body>
+<h2>안녕하세요 테스트 입니다.</h2>
+<!-- 컨트롤러에서 모델에 담긴 변수명 'custNm' -->
+<c:choose>
+    <c:when test="${custNm == '홍길동'}">
+        홍길동님 환영합니다.
+    </c:when>
+    <c:when test="${custNm == '이순신'}">
+        이순신님 환영합니다.
+    </c:when>
+    <c:otherwise>
+        등록되지 않은 사용자입니다.
+    </c:otherwise>
+</c:choose>
+</body>
+</html>
+```
+</div>
+</details>
+
+<br><br>
+
+### +) 검색(동적쿼리)+페이징, 자동완성(검색)
+
+**페이징은 eGov꺼 라이브러리(PaginationInfo, Manager, Renderer) 사용**
+
+1. **"동적쿼리(검색), 페이징" 위한 엔티티 부모 만들어 상속! -> 페이징, 검색조건을 가짐**  
+
+   egov 예제의 SampleDefaultVO.java 형태를 사용! (Serializable 제외)
+
+   <details><summary><b>SampleDefaultVO.java</b></summary>
+   <div markdown="1"><br>
+   ```java
+   @Getter @Setter
+   @NoArgsConstructor
+   @EqualsAndHashCode //메모리캐시 때문에 넣음(원래도 있는게 좋긴하지)
+   public class ItemDefault {
+   	/** 검색조건->카테고리 ID, NAME 등 선택 */
+   	private String searchCondition = "";
+   	/** 검색Keyword */
+   	private String searchKeyword = "";
+   	/** 검색사용여부 */
+   	private String searchUseYn = "";
+   	/** 현재페이지 */
+   	private int pageIndex = 1;
+   	/** 페이지갯수->페이지당 뷰에 나타낼 게시물 수 */
+   	private int pageUnit = 10;
+   	/** 페이지사이즈->5면 하단 네비게이션에 1 2 3 4 5 까지 표시 */
+   	private int pageSize = 10;
+   	/** firstIndex->페이지 출력 시작할 게시물 위치: (pageIndex-1)*recordCountPerPage */
+   	private int firstIndex = 1;
+   	/** lastIndex->페이지 출력 마지막 게시물 위치: (pageIndex)*recordCountPerPage */
+   	private int lastIndex = 1;
+   	/** recordCountPerPage->limit 쿼리용 */
+   	private int recordCountPerPage = 10;
+   }
+   ```
+   </div>
+   </details>
+
+2. **기능개발+TEST -> "검색(동적쿼리)+페이징, 자동완성(검색)"**
+
+   **메소드 추가 및 XML쿼리 작성** -> 동적쿼리(검색)+페이징, 자동완성(검색)  
+
+   - **동적쿼리(검색)+페이징을 합친이유**: 기본 게시물조회 자체가 검색 키워드 빈값("")과 동일하기 때문  
+     따라서 전체 조회 쿼리에 "동적쿼리 where,if-searchKeyword" + "limit,offset"구조를 사용!  
+     +) 페이징을 위해 전체 게시물 수 조회 쿼리도 필수!
+
+   - **페이징에 필요한 것 2가지**: 변수3개(pageUnit, pageSize, pageIndex) + PaginationInfo클래스(egov)
+
+     - **직접 설정**하는 변수: pageUnit, pageSize
+       - 페이지당 뷰에 나타낼 게시물 수: pageUnit
+       - 하단 네비게이션 바에 표시할 페이지 수: pageSize  
+         예: pageSize=5 라면, 1 2 3 4 5 가 출력
+     - **웹에서 받아야**할 변수(=현재 페이지 번호): pageIndex
+     - **PaginationInfo클래스(egov): Required Fields**, Not Required Fields
+       - **Required Fields: 이 필드들은 페이징 계산을 위해 반드시 입력되어야 하는 필드 값**
+         - **currentPageNo : 현재 페이지 번호 -> pageIndex 매치**
+         - **recordCountPerPage : 한 페이지당 게시되는 게시물 건 수 -> pageUnit 매치**
+         - **pageSize : 페이지 리스트에 게시되는 페이지 건 수 -> pageSize 매치**
+         - **totalRecordCount : 전체 게시물 건 수 -> 서비스 로직으로 구하기 (+데이터도)**
+       - Not Required Fields: 이 필드들은 Required Fields 값을 바탕으로 **"자동 계산"**된 필드 값
+         - totalPageCount: 페이지 개수
+         - firstPageNoOnPageList : 페이지 리스트의 첫 페이지 번호
+         - lastPageNoOnPageList : 페이지 리스트의 마지막 페이지 번호
+         - firstRecordIndex : 페이징 SQL의 조건절에 사용되는 시작 rownum. 
+         - lastRecordIndex : 페이징 SQL의 조건절에 사용되는 마지막 rownum.
+
+   - <details><summary><b>페이징 쿼리 계산 원리와 자동완성(검색) 원리</b></summary>
+     <div markdown="1"><br>
+     - 페이징 쿼리 계산 원리: `LIMIT #{recordCountPerPage} OFFSET #{firstIndex}`  
+       (참고: jpa의 jpql은 페이징의 limit쿼리 사용불가하고 제공되는 메소드를 사용)
+       - pageUnit값이 recordCountPerPage가 된다.
+       - (pageIndex-1)\*recordCountPerPage 수식이 firstIndex(**페이지 출력 시작** 게시물 위치)가 된다.   
+         (pageIndex)\*recordCountPerPage 수식이 lastIndex(**페이지 출력 마지막** 게시물 위치)가 된다.  
+         - pageUnit=5, pageIndex=2 라면 시작 게시물 위치는 (2-1)\*5=5이고 마지막은 2\*5=10이다.
+     - 자동완성(검색) 원리: SampleDefaultVO의 searchCondition, searchKeyword를 활용!
+       - searchCondition는 어떤 카테고리로 검색할지 담당하고,
+       - searchKeyword는 검색 키워드를 담당한다.
+     </div>
+     </details>
+
+   **컨트롤러에서 페이징과 자동완성 검색** 마무리 해보자.
+
+      - 자동완성은 검색 키워드로 매칭되는 데이터 찾아서 JSON으로 응답하면 됨
+
+        - <details><summary><b>자동완성 컨트롤러 예시 코드</b></summary>
+          <div markdown="1"><br>
+          ```java
+          //Ajax 사용한 컨트롤러 -> 페이징도 사용했지만 그건 GalleryController 꺼로 함.
+          @Controller
+          @RequiredArgsConstructor
+          @Slf4j
+          public class AjaxController {
+          	private final ItemServiceImpl itemService;
+          //
+          	@ResponseBody
+          	@PostMapping("/suggestKeyword")
+          	public List<String> suggestKeyword(HttpServletRequest request) throws Exception {
+          	    String searchKeyword = URLDecoder.decode(request.getParameter("searchKeyword"), "utf-8");
+          	    List<String> results = itemService.findTitleListForSuggest(searchKeyword);
+          	    return results; // 자동으로 JSON으로 변환되어 응답됨
+          	}
+          }
+          ```
+          </div>
+          </details>
+
+
+      - 페이징은 PaginationInfo(페이징 데이터)와 ItemDefault(=1번에서 만든 SampleDefaultVO) 필요
+
+
+      - 서비스 메소드 findAllWithPage, findTotalCount 를 사용해 각각 model, paginationInfo에 담음
+
+        - <details><summary><b>페이징 컨트롤러 예시 코드</b></summary>
+          <div markdown="1"><br>
+          ```java
+          @GetMapping()
+          public String search(@ModelAttribute Item item, Model model) throws Exception {
+          	return this.gallery(item, model); //HTTP말고 그냥 메소드 호출한거.(포워드,리다이렉트 아님)
+          }
+          @PostMapping() // ...?pageIndex=1 이런식으로 페이지 파라미터 넘어 올거임(pageIndex란 Item이 상속받고 있는 DefaultItem의 필드)
+          public String gallery(@ModelAttribute Item item, Model model) throws Exception {
+          	// item.setPageUnit(myDataSource.getPageUnit());
+          	// item.setPageSize(myDataSource.getPageSize());
+          	item.setPageUnit(10);
+          	item.setPageSize(10);
+          //
+          	// pagination setting
+          	PaginationInfo paginationInfo = new PaginationInfo();
+          	paginationInfo.setCurrentPageNo(item.getPageIndex());
+          	paginationInfo.setRecordCountPerPage(item.getPageUnit());
+          	paginationInfo.setPageSize(item.getPageSize());
+          //
+          	item.setFirstIndex(paginationInfo.getFirstRecordIndex());
+          	item.setLastIndex(paginationInfo.getLastRecordIndex());
+          	item.setRecordCountPerPage(paginationInfo.getRecordCountPerPage());
+          //
+          	// List
+              List<Item> items = itemService.findAllWithPage(item);
+              List<ItemResDto> itemsResDto = items.stream().map(o -> new ItemResDto(o)).collect(Collectors.toList());
+              int totCnt = itemService.findTotalCount(item);
+          //
+              model.addAttribute("itemsResDto", itemsResDto);
+              paginationInfo.setTotalRecordCount(totCnt);
+              // Pagination
+              model.addAttribute("paginationInfo", paginationInfo);
+              log.info("cnt: {}, resultList: {}", totCnt, items);
+              return "jsp/gallery";
+          }
+          ```
+          </div>
+          </details>
+
+3. **페이징과 검색란 JSP**
+
+   **(1)"페이징"**은 `<ui: pagination` **형태로 사용 -> 이것이 PaginationTag 이다.**  
+   ui 태그 라이브러리 선언 + linkPage 함수 작성 후 ui 태그 사용
+
+   <details><summary><b>jsp 예시 코드 Ver1 - 페이징</b></summary>
+   <div markdown="1"><br>
+   ```jsp
+   <%@ taglib prefix="ui" uri="http://egovframework.gov/ctl/ui"%>
+   ...
+   <script type="text/javascript">
+       //pageNo는 사용한 ui태그가 알아서 담아준다.
+   	function linkPage(pageNo) {
+   		location.href = "/gallery?pageIndex=" + pageNo;
+   	}
+   </script>
+   <body>
+   ...
+   ${resultList}
+   	<ui:pagination paginationInfo="${paginationInfo}" type="image"
+   		jsFunction="linkPage" />
+   ...
+   </body>
+   ```
+   </div>
+   </details>
+
+
+   <details><summary><b>jsp 예시 코드 Ver2 - 페이징(AJAX 적용)</b></summary>
+   <div markdown="1"><br>
+   **현대식으로 AJAX를 추가하여 SPA와 유사한 방식 적용법**<br>
+   Ver1방식은 페이지 자체가 새로고침되는 거라면, 이 방식은 화면의 원하는 부분만 바뀐다.<br>
+   **기존 코드의 js 함수부분 수정(태그변경, AJAX통신) + 변경할 태그에 id 지정하면 됨!**<br>
+   jquery 문법을 활용해서 ajax 적용 했음. (jstl은 jpa 표준 태그 라이브러리 - c, fmt 등)
+   ```jsp
+   <%@ page contentType="text/html; charset=UTF-8"%>
+   <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+   <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+   <%@ taglib prefix="ui" uri="http://egovframework.gov/ctl/ui"%>
+   <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
+   <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+   <!DOCTYPE html>
+   <html>
+   <head>
+   <meta charset="UTF-8">
+   <title>Insert title here</title>
+   <link rel="stylesheet" href="/css/basic.css"/>
+   <link rel="stylesheet" href='/css/gallery.css'/>
+   <link rel="stylesheet" href='/css/jqueryui.css'/>
+   <script src="<c:url value='/js/jquery.js'/>"></script>
+   <script src="<c:url value='/js/jqueryui.js'/>"></script>
+   </head>
+   <script type="text/javascript">
+   	//ui:pagination에서 pageNo 파라미터 자동으로 구해옴
+   	function linkPageAjax(pageNo) {
+   		//location.href = "/gallery?pageIndex=" + pageNo;
+           $.ajax({
+               url: '/gallery',
+               type: 'post',
+               data: {
+                   pageIndex: pageNo
+               }
+           }).done(function(fragment) {
+               $('#content_area').html(fragment);
+           });
+   	}
+   </script>
+   <body>
+   <div id="content_area" >
+   	${resultList} ... 생략
+       <ui:pagination paginationInfo="${paginationInfo}" type="image"
+                      jsFunction="linkPageAjax" />
+   </div>
+   </body>
+   </html>
+   ```
+   </div>
+   </details>
+
+   **(2)"검색의 자동완성"**은 애초에 검색란에 검색 시 ajax+jquery의 auto 사용하여 로드
+
+   <details><summary><b>jsp 예시 코드 - 검색란(+자동완성): 얜 애초에 AJAX</b></summary>
+   <div markdown="1"><br>
+   jquery 기능인 autocomplete(자동완성)이 중요. 특히, jquryui.js 가 꼭 필요.
+   ```javascript
+   // ajax사용 - 자동완성 
+   $(function() {
+   	// jquery autocomplete 코드를 생성한다.
+   	$("#searchKeyword")
+   			.autocomplete(
+   					{
+   						source : function(request, response) {
+   							$
+   									.ajax({
+   										url : '/suggestKeyword',
+   										type : 'post',
+   										contentType : "application/x-www-form-urlencoded; charset=UTF-8",
+   										data : {
+   											searchKeyword : request.term
+   										},
+   										dataType : 'json',
+   										success : function(returnData) {
+   											// @ResponseBody 사용 시: response(returnData);
+   											// ModelAndView 사용 시: response(returnData.nameList);
+   											response(returnData);
+   										}
+   									});
+   						},
+   						minLength : 1,
+   						select : function(event, ui) {
+   							$("#searchKeyword").val(this.value);
+   						}
+   					});
+   });
+   function notNullCheck(value) {
+   	return !(value === '' || value == null || (typeof value == 'object' && !Object
+   			.keys(value).length));
+   }
+   // ajax사용 - 검색 작업 -> HTTP URL이 페이징과 동일!
+   function sampleSearch() {
+   	if (notNullCheck($('#searchKeyword').val())) {
+   		$.ajax(
+   				{
+   					url : '/gallery',
+   					type : 'post',
+   					data : {
+   						searchCondition : $(
+   								'#searchCondition option:selected').val(),
+   						searchKeyword : $('#searchKeyword').val()
+   					}
+   				}).done(function(fragment) {
+   			$('#content_area').replaceWith(fragment);
+   		});
+   	} else {
+   		const errorMessage = '<spring:message code="search.error" />';
+   		alert(errorMessage);
+   	}
+   }
+   ```
+   - source 함수: Autocomplete의 소스코드 설정 -> 사용자가 입력 필드에 텍스트를 입력할 때마다 호출 (input 이벤트 감지는 Autocomplete API에 구현되어 있을거임)
+   - request.term: 사용자가 입력 필드에 입력한 현재 텍스트
+   - encodeURIComponent(request.term): 입력한 텍스트를 URL 인코딩하여 서버로 전송 -> 특수 문자가 올바르게 전송
+   - minLength: 1: 최소 1글자 이상 입력해야 자동 완성 기능이 작동
+   - select: 자동 완성 목록에서 항목을 선택할 때 호출 -> searchName 필드로 선택 값(this.value) 저장
+   </div>
+   </details>
+
+4. **하단 네비게이션바 커스텀은? -> [공식문서](https://www.egovframe.go.kr/wiki/doku.php?id=egovframework%3Arte%3Aptl%3Aview%3Apaginationtag) 잘 정리되어 있음**
+
+   **XML에 Pagination빈 등록** 필요 -> Renderer(egov꺼 상속&구현), Manager(egov꺼 바로사용)
+
+   - 빈 등록 안해도 jsp에서 ui태그 불러와 paginationInfo속성으로 사용해도 기본값으로 되긴 함.
+   - 단, 이 빈까지 등록해야 하단 네비게이션바를 직접 꾸밀 수 있다.
+
+   **동작 설명**: PaginationTag인 ui태그 사용 시
+
+   1. 어떤 PaginationRenderer를 사용할지 PaginationManager에게 위임
+
+   2. 실제 페이징을 위한 작업은 PaginationManager가 반환한 PaginationRenderer이 담당
+      - 그럼 PaginationRenderer 을 커스텀 해야겠지?
+
+   3. PaginationInfo는 페이징 기능 렌더링에 필요한 데이터들이 담겨있는 클래스
+
+   **PaginationRenderer 커스텀 예시:**
+
+   - **AbstractPaginationRenderer를 상속받고 생성자를 만들면 됨. 이때, "<a태그와 <img태그"를 건들 수 있음**
+   - 생성되는 하단 페이지 이동란 태그를 직접 커스텀 할 수 있어서 적당한 class를 지정하여 폰트도 css로 쉽게 적용해주자.
+   - 부트 사용 시 resources/static 하위에 img를 둬서 관리하자.
+
+   <details><summary><b>ImagePaginationRenderer 클래스 구현 예시 코드</b></summary>
+   <div markdown="1"><br>
+   ```java
+   public class ImagePaginationRenderer extends AbstractPaginationRenderer implements ServletContextAware {
+   	private ServletContext servletContext;
+   	public ImagePaginationRenderer() {
+   	}
+   //
+   	public void initVariables(ServletContext servletContext) {
+   		// String strWebDir =
+   //		String strWebDir = servletContext.getContextPath() + "/images/pagination/";
+   		String strWebDir = "/images/pagination/"; //boot는 resources/static 하위 자동으로 탐색
+   		//class='page-link'와 class='page-link-act'는 css 적용위해 설정.
+   		firstPageLabel = "<a class='page-link' href=\"#\" onclick=\"{0}({1}); return false;\">" + "<image src='" + strWebDir
+   				+ "bt_first.gif' border=0/></a>&#160;";
+   		previousPageLabel = "<a class='page-link' href=\"#\" onclick=\"{0}({1}); return false;\">" + "<image src='" + strWebDir
+   				+ "bt_prev.gif' border=0/></a>&#160;";
+   		currentPageLabel = "<a class='page-link-act'><strong>{0}</strong></a>&#160;";
+   		otherPageLabel = "<a class='page-link' href=\"#\" onclick=\"{0}({1}); return false;\">{2}</a>&#160;";
+   		nextPageLabel = "<a class='page-link' href=\"#\" onclick=\"{0}({1}); return false;\">" + "<image src='" + strWebDir
+   				+ "bt_next.gif' border=0/></a>&#160;";
+   		lastPageLabel = "<a class='page-link' href=\"#\" onclick=\"{0}({1}); return false;\">" + "<image src='" + strWebDir
+   				+ "bt_last.gif' border=0/></a>&#160;";
+   	}
+   //
+   	public void setServletContext(ServletContext servletContext) {
+   		this.servletContext = servletContext;
+   		initVariables(servletContext);
+   	}
+   }
+   ```
+   </div>
+   </details>
+   <details><summary><b>xml 빈 등록 예시 코드</b></summary>
+   <div markdown="1"><br>
+   resources/spring/context-common.xml
+   ```xml
+   <!-- For Pagination Tag -->
+   <bean id="imageRenderer" class="com.secretgallery.tag.ImagePaginationRenderer"/>
+   <bean id="paginationManager" class="org.egovframe.rte.ptl.mvc.tags.ui.pagination.DefaultPaginationManager">
+       <property name="rendererType">
+           <map>
+               <entry key="image" value-ref="imageRenderer"/> 
+           </map>
+       </property>
+   </bean>
+   ```
+   </div>
+   </details>
+
+5. **자동완성란 css 스타일링 방법은?**
+
+   아래처럼 ui를 활용하자. 이렇게 해야 css 스타일링이 적용 됨.
+
+   ```css
+   .ui-autocomplete {
+   color: black;
+   background: white;
+   width: 120px;
+   }
+   ```
+
+<br><br>
+
+### Test Code
+
+**JPA파트도 참고(연결해서 보기)**
+
+eGov4.2 순수 스프링은 jUnit4를 사용, 부트는 jUnit5를 사용. -> 문법 다른점 주의.  
+
+> 부트여도 jUnit4로 강제로 사용 당연히 가능
+
+이클립스: 우클릭>new>junit test case>파일이름 설정 + Browse에서 테스트할 클래스(com.secretgallery...) > 이후 테스트 코드 작성. (tdd로 자동완성했던 방식으로 ㄱㄱ)
+
+테스트를 위해 "메모리DB"를 사용하려는데 boot-jpa-data 의존성은 application.properties에 DB설정 없으면 메모리DB 자동 제공 및 테이블도 만들어 줌!   
+따라서 의존성을 추가 및 테이블에 @Entity, @Id, @GeneratedValue를 VO에서 붙였었음(본인은 이게 편함)  
+=> 가이드에선 테스트코드에 @Before에 hsqld의 쿼리문 호출하여 메모리DB에 table생성했다.  
+예: `ScriptUtils.executeSqlScript(dataSource.getConnection(), new ClassPathResource("META-INF/testdata/sample_schema_hsql.sql"));`
+
+<details><summary><b>MyBatis 테스트를 위해 꼭 참고할 점:</b></summary>
+<div markdown="1"><br>
+1. main/resources하위 XML수동 빈 등록은 test/resources 하위로 복제하자  
+   (단, XML내 빈에 property로 연동한 XML은 복제 안해도 됨. 자동으로 main하위도 찾아줌.  
+   예로 XML내 빈에 연동된 XML이 아닌 context-common.xml의 경우  `@ImportResource("classpath:/spring/*.xml")` 로 main함수위에 직접 등록해야하는데,  
+   빈 내에서 XML연동한 파일의 경우 "test하위로 복제 안해도 main에서 찾아 주더라"  
+   **=> 따라서 SQL을 작성한 XML은(=따로 빈에서 연동된) main에서만 관리하면 됨!**
+   테스트를 위한 XML 관리법을 다시 정리하자면,   
+   **부트니까 @SpringBootTest 를 사용하여 메인환경의 빈을 자동 등록(자동 빈, 수동 빈 둘다)  
+   메인환경의 수동 빈 등록법은 "@ImportResource("classpath:..) 필수 + 테스트환경에 ImportResource로 등록한 XML 파일 복제"**
+2. boot-jpa-data 의존성으로 자동 테이블 생성 사용 시 "데이터 타입 매핑과 자동 언더스코어(db)에서 카멜케이스(java)"를 알자.  
+   테이블 자동 생성 JPA: `Long` → `bigint`, `String` → `varchar(255)`, `LocalDateTime` → `datetime(6)`    
+   `@Id+@GeneratedValue(strategy = GenerationType.IDENTITY)` → `PK+not null auto_increment`  
+   **MyBatis에서 맞춰주자: XML에서 언더스코어에서 카멜케이스 자동 매핑 설정.   **
+   **예: sql에 ${imgSrc} <- img_src 매핑**  
+   **객체 매핑 주의점:** sql에 아예 필드명 다른건 select **item_id as id** .. where item_id = #{id} 이런식으로 하거나,  
+   **Result Maps**을 사용 -> **as 별칭을 대체!**
+</div>
+</details>
+
+controller 테스트는 JSP 웹을 보면서 개발했으니 생략하자. (API면 반드시 Mock으로 ㄱㄱ)
+
+<details><summary><b>서비스단 테스트코드 - 페이징 포함:</b></summary>
+<div markdown="1"><br>
+```java
+package com.secretgallery.service.impl;
+import static org.assertj.core.api.Assertions.*;
+import java.util.List;
+import org.egovframe.rte.ptl.mvc.tags.ui.pagination.PaginationInfo;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
+import com.secretgallery.vo.Item;
+import com.secretgallery.vo.ItemDefault;
+import com.secretgallery.vo.UpdateItemDto;
+import lombok.extern.slf4j.Slf4j;
+@SpringBootTest // @SpringBootApplication을 찾아서 테스트를 위한 Bean을 생성
+@Transactional // 쓰기모드 -> 서비스코드에 트랜잭션 유무 반드시 확인
+@Slf4j
+class ItemServiceImplTest {
+	@Autowired
+	private ItemServiceImpl itemService;
+	@Test
+	void 저장과조회() throws Exception {
+		// 테스트 데이터 준비
+		Item item = Item.createItem("테스트 닉네임", "비밀번호", "테스트 제목", "테스트 내용", "이미지 경로");
+		// 저장 후 ID 확인 -> 1,2 id
+		Long cnt = itemService.save(item);
+		log.info("itemId: {}", item.getId());
+		itemService.save(item);
+		log.info("itemId: {}", item.getId());
+		assertThat(cnt).isNotNull();
+		// 저장된 데이터 조회
+		Item findItem = itemService.findById(item.getId());
+		log.info("nickname: {}", findItem.getNickname());
+		assertThat(findItem.getNickname()).isEqualTo(item.getNickname());
+		assertThat(findItem.getTitle()).isEqualTo(item.getTitle());
+	}
+	@Test
+	public void 수정() throws Exception {
+		// given
+		Item item = Item.createItem("테스트 닉네임", "비밀번호", "테스트 제목", "테스트 내용", "이미지 경로");
+		itemService.save(item);
+		log.info("itemId: {}, title: {}", item.getId(), item.getTitle());
+		// when
+		UpdateItemDto updateItem = new UpdateItemDto();
+		updateItem.setId(item.getId());
+		updateItem.setNickname(item.getNickname());
+		updateItem.setPassword("비번");
+		updateItem.setTitle("제목");
+		updateItem.setContent("내용");
+		itemService.update(updateItem);
+		Item findItem = itemService.findById(item.getId());
+		// then
+		assertThat(findItem).isNotNull();
+		assertThat(findItem.getId()).isEqualTo(updateItem.getId());
+		assertThat(findItem.getTitle()).isEqualTo(updateItem.getTitle());
+		log.info("itemId: {}, title: {}", findItem.getId(), findItem.getTitle());
+	}
+	@Test
+	public void 삭제() throws Exception {
+		// given
+		Item item = Item.createItem("테스트 닉네임", "비밀번호", "테스트 제목", "테스트 내용", "이미지 경로");
+		itemService.save(item);
+		Long itemId = item.getId();
+		// when
+		log.info("delete 전: {}", item);
+		itemService.delete(item);
+		Item findItem = itemService.findById(itemId);
+		log.info("delete 후: {}", findItem);
+		// then
+		assertThat(findItem).isNull();
+	}
+	@Test
+	public void 전체조회_검색조건조회() throws Exception {
+		// given
+		Item item = Item.createItem("테스트 닉네임", "비밀번호", "테스트 제목", "테스트 내용", "이미지 경로");
+		itemService.save(item);
+		itemService.save(item);
+		itemService.save(item);
+		// when
+		List<Item> findItems = itemService.findAll();
+		// then
+		assertThat(findItems).isNotNull();
+		for (Item i : findItems) {
+			log.info("itemId: {}, title: {}", i.getId(), i.getTitle());
+		}
+	}
+	// CRUD 테스트 끝
+	// 추가 함수 테스트 시작
+	@Test
+	public void 페이지내아이템_페이징조회() throws Exception {
+		// given
+		for (int i = 0; i < 15; i++) { // 테스트 데이터 15개 생성
+			Item item = Item.createItem("테스트 닉네임" + i, "비밀번호", "테스트 제목" + i, "테스트 내용", "이미지 경로");
+			itemService.save(item);
+		}
+		ItemDefault searchItem = new ItemDefault();
+//
+		// when
+		// pagination setting
+		// 첫 번째 페이지 조회 (최신 10개)
+		searchItem.setPageIndex(1);
+		PaginationInfo paginationInfo = new PaginationInfo();
+		paginationInfo.setCurrentPageNo(searchItem.getPageIndex());
+		paginationInfo.setRecordCountPerPage(searchItem.getPageUnit());
+		paginationInfo.setPageSize(searchItem.getPageSize());
+//
+		searchItem.setFirstIndex(paginationInfo.getFirstRecordIndex());
+		searchItem.setLastIndex(paginationInfo.getLastRecordIndex());
+		searchItem.setRecordCountPerPage(paginationInfo.getRecordCountPerPage());
+//
+		List<Item> firstPage = itemService.findAllWithPage(searchItem);
+//
+		// 두 번째 페이지 조회 (나머지 5개)
+		searchItem.setPageIndex(2);
+		paginationInfo.setCurrentPageNo(searchItem.getPageIndex()); // 2페이지로 설정
+//
+		searchItem.setFirstIndex(paginationInfo.getFirstRecordIndex());
+		searchItem.setLastIndex(paginationInfo.getLastRecordIndex());
+		searchItem.setRecordCountPerPage(paginationInfo.getRecordCountPerPage());
+//
+		List<Item> secondPage = itemService.findAllWithPage(searchItem);
+		// then
+		assertThat(firstPage).isNotNull();
+		assertThat(firstPage.size()).isEqualTo(10);
+		assertThat(secondPage).isNotNull();
+		assertThat(secondPage.size()).isEqualTo(5);
+		// 첫 번째 페이지의 id가 두 번째 페이지보다 큰지 확인 (내림차순 정렬)
+		assertThat(firstPage.get(0).getId()).isGreaterThan(secondPage.get(0).getId());
+		// 로그 출력
+		log.info("=== 첫 번째 페이지 ===");
+		for (Item i : firstPage) {
+			log.info("itemId: {}, title: {}", i.getId(), i.getTitle());
+		}
+		log.info("=== 두 번째 페이지 ===");
+		for (Item i : secondPage) {
+			log.info("itemId: {}, title: {}", i.getId(), i.getTitle());
+		}
+	}
+//
+	@Test
+	public void 아이템이전이후_조회() throws Exception {
+		// given
+		Item item = null;
+		for (int i = 0; i < 5; i++) { // 테스트 데이터 5개 생성
+			item = Item.createItem("테스트 닉네임" + i, "비밀번호", "테스트 제목" + i, "테스트 내용", "이미지 경로");
+			itemService.save(item);
+		}
+		// when
+		List<Item> findItems = itemService.findPrevNextById(item.getId() - 1); // 마지막id-2, 마지막id-1, 마지막id 가 나와야 정상
+		List<Item> findItemsFirst = itemService.findPrevNextById(item.getId() - 4); // 첫번째id, 첫번째id+1 가 나와야 정상
+		List<Item> findItemsLast = itemService.findPrevNextById(item.getId()); // 마지막id-1, 마지막id 가 나와야 정상
+		// then
+		assertThat(findItems).isNotNull();
+		assertThat(findItems.size()).isEqualTo(3);
+		assertThat(findItemsFirst).isNotNull();
+		assertThat(findItemsFirst.size()).isEqualTo(2);
+		assertThat(findItemsLast).isNotNull();
+		assertThat(findItemsLast.size()).isEqualTo(2);
+		// 로그 출력
+		log.info("=== 아이템 이전 이후: findItems ===");
+		for (Item i : findItems) {
+			log.info("itemId: {}, title: {}", i.getId(), i.getTitle());
+		}
+		log.info("=== 아이템 이전 이후: findItemsFirst ===");
+		for (Item i : findItemsFirst) {
+			log.info("itemId: {}, title: {}", i.getId(), i.getTitle());
+		}
+		log.info("=== 아이템 이전 이후: findItemsLast ===");
+		for (Item i : findItemsLast) {
+			log.info("itemId: {}, title: {}", i.getId(), i.getTitle());
+		}
+	}
+//
+	@Test
+	public void 아이템총개수_조회() throws Exception {
+		// given
+		for (int i = 0; i < 10; i++) { // 테스트 데이터 10개 생성
+			Item item = Item.createItem("테스트 닉네임" + i, "비밀번호", "테스트 제목" + i, "테스트 내용", "이미지 경로");
+			itemService.save(item);
+		}
+		// when
+		ItemDefault searchItem = Item.createItem(null, null, null, null, null);
+		int findCnt = itemService.findTotalCount(searchItem);
+		// then
+		assertThat(findCnt).isNotNull();
+		assertThat(findCnt).isEqualTo(10);
+		// 로그 출력
+		log.info("=== 아이템 총 개수 findCnt:{} ===", findCnt);
+	}
+//
+	@Test
+	public void 검색자동완성() throws Exception {
+		// given
+		for (int i = 0; i < 10; i++) { // 테스트 데이터 10개 생성
+			Item item = Item.createItem("테스트 닉네임" + i, "비밀번호", "테스트 제목" + i, "테스트 내용", "이미지 경로");
+			itemService.save(item);
+		}
+		// when
+		List<String> result = itemService.findTitleListForSuggest("테스트 제");
+		// then
+		assertThat(result).isNotNull();
+		log.info("=== 자동완성 result: {} ===", result);
+	}
+}
+```
+</div>
+</details>
+
+<br>
+
+<br>
+
+## MyBatis+Spring+Boot+eGov 파트 (리팩토링)
+
+"순수스프링"은 xml이 web.xml > context-servlet.xml > context-common.xml 순으로 크게 나뉜다.  
+("스프링, 스프링부트 비교" 파트 참고)
+
+대부분 부트 사용해서 Java Config 방식을 알면 되지만, 레거시한 프로젝트는 xml 많이 사용하므로 알아두자.
+
+<br><br>
+
+### 메시지국제화,외부설정,캐시
+
+**(1)메시지 국제화 - XML**
+
+context-common.xml에 messageSource빈과 국제화빈 등록,  
+context-servlet.xml에 해당 인터셉터를 등록  
+message/meesage-common.properties, *\_ko.properties, *\_en.properties 를 생성
+
+**메시지 국제화**는 "핸들러매핑에 인터셉터"를 등록하는 부분이 필요하다.   
+"디스패처서블릿->HandlerMapping->인터셉터 거쳐서 컨트롤러 진입"을 해야하기 때문! (Locale 위해)
+
+- Java Config나 \<mvc:interceptors>(xml)패턴으로 인터셉터를 추가하게 되면 부트는 "모든 핸들러매핑"에 인터셉터를 추가해준다!
+
+<details><summary><b>XML 코드: (이거 적용함)</b></summary>
+<div markdown="1"><br>
+resources/spring/context-common.xml
+```xml
+<!-- -->
+	<!-- 메시지소스와 국제화 -->
+	<!-- set message source -->
+	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basenames">
+			<list>
+				<value>messages.message-common</value>
+			</list>
+		</property>
+	</bean>
+	<!-- setting Locale -->   
+	<bean id="localeChangeInterceptor" class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"
+		p:paramName="lang" />
+	<bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver" />
+```
+resources/spring/context-servlet.xml
+```xml
+	<!-- 부트처럼 "모든 핸들러매핑에 인터셉터 등록" 방안 -->
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/*" />
+			<ref bean = "localeChangeInterceptor" /> <!-- 메시지 국제화 등록 -->
+		</mvc:interceptor>
+	</mvc:interceptors>
+```
+</div>
+</details>
+
+<br>
+
+**(2)외부설정, 캐시는** **JPA 방식꺼 보기. 이건... 비추**
+
+eGov 라이브러리 사용하여 빈 등록해서 XML이나 Java에서 간단히 할 수 있게 지원 중이다.   
+=> JAVA ex: EgovPropertyServiceImpl 빈 등록하며 setProperties()로 사용할 변수(Map) 넣으면 됨.  
+
+근데, 위 방식처럼 application.properties에 변수 등록해서 사용하는게 더 좋을것 같음(할 수 있는게 많으니)
+
+<details><summary><b>eGov 사용코드(Java Config):</b></summary>
+<div markdown="1"><br>
+외부설정 (그냥 따로 클래스 사용하는 느낌인디..)
+```java
+@Configuration
+public class EgovConfigProperties {
+	@Bean(destroyMethod="destroy")
+	public EgovPropertyServiceImpl propertiesService() {
+		Map<String, String> properties = new HashMap<>();
+		properties.put("pageUnit", "10");
+		properties.put("pageSize", "10");
+//
+		EgovPropertyServiceImpl egovPropertyServiceImpl = new EgovPropertyServiceImpl();
+		egovPropertyServiceImpl.setProperties(properties);
+		return egovPropertyServiceImpl;
+	}
+}
+//
+//test code: 다양한 get메소드 제공
+private final EgovPropertyService propertiesService; //빈 가져옴
+propertiesService.getInt("pageUnit"); //10
+```
+</div>
+</details>
+
+<br><br>
+
+### 검증(Validation-Jakarta Commons) - XML
+
+> **API의 경우 클라쪽 "검증"은 서버가 할 일이 아니다(JS는 프론트쪽 개발진이 해야지!)**  
+> **웹의 경우 클라와 서버쪽 둘 다 "검증"**해주는게 좋다.
+>
+> **API의 "예외"**의 경우 서버는 **JSON으로 변경된 데이터를 “Valid(검증)”**하는거라서 **JSON→DTO매핑될 때 에러나 그 시점에 다양한 에러(주로 서비스로직)들은 “Exception(예외)”**으로 해결!
+> **=> 웹은 “검증”만으로 충분하지만 API는 “검증+예외”가 필요!**  
+> => 근데, 막상 해보니 웹&API 둘다 "검증+예외"를 적용 했다. eGov에선 웹에 에러페이지만 연동해주는게 아니라 "예외"까지 굳이 하더라?
+>
+> eGov가이드에선 계속 Jakarta Valid 방식을 사용하더라.
+>
+> 순수스프링의 Bean Validation 방식이 내가하던 기존 방식이고, 자카트라 방식과는 조금 다름.  
+> Bean Vaildation 방식 예시:
+>
+> 1. DTO 클래스에 검증 어노테이션(`@NotNull` 등) 적용하여 검증기에게 규칙 전달
+> 2. 컨트롤러에서 `@Validated` 어노테이션으로 검증 활성화 (스프링프레임워크의 LocalValidatorFactoryBean이 사용됨)
+> 3. `BindingResult`로 검증 결과 수집
+> 4. 오류출력: 타임리프는 th:error로 자동으로 bindingresult에서 해당필드 검증 오류있나 체크해서 등록해둔 오류메시지-@NotNull("이미지가 없습니다")를 출력  
+>    JSP는 form:error로 할 수 있고,  
+>    직접 bindingresult를 가져와 사용해도 된다.
+
+자카트라는 JSP에 validator 태그 사용시 "자동으로 JS검증 코드 생성"해줌. 즉, 클라쪽도 검증 자동 지원.  
+=> 원래 Bean Validation방식은 컨트롤러 쪽에서 검증(서버단)하고 클라에선 직접 JS검증 코드 만들었었음.
+
+빈은 스프링 모듈의 DefaultBeanValidator, DefaultValidatorFactory 사용
+
+**Jakarta Commons Validation 방식 예시**:
+
+1. 제공된 **validator-rules.xml** 사용 및 기본제공 룰 말고 **커스텀 룰 추가**하는법: [공문](https://www.egovframe.go.kr/wiki/doku.php?id=egovframework:rte:ptl:validation:add_rules_in_commons_validator)
+
+2. **validation.xml, validator.jsp, URL매핑** : 공통 규칙 정의 (서버+클라이언트)
+
+   1. validation.xml로 원하는 규칙 정의 + 원하는 메시지 설정(=5번에서 설명) message-common.properties
+
+   2. context-common.xml에 빈 등록 - DefaultBeanValidator, DefaultValidatorFactory
+
+   3. context-servlet.xml이나 컨트롤러에 validator.jsp URL등록 (태그로 JS검증 코드 자동생성 목적)  
+      부트는 그냥 "컨트롤러"에서 해라!! 자동 설정이랑 겹쳐서 머리아프다.
+
+      참고: validator.jsp -> "/validator.do" 와 매핑 (자동으로 룰에 따른 메소드가 생성되는것 같더라)
+
+      ```xml
+      <!-- validator.jsp -->
+      <%@ page language="java" contentType="javascript/x-javascript" %>
+      <%@ taglib prefix="validator" uri="http://www.springmodules.org/tags/commons-validator" %>
+      <validator:javascript dynamicJavascript="false" staticJavascript="true"/>
+      ```
+
+3. JSP validator 태그 적용해보기 -> **클라단 검증**
+
+   적용 예시: 버튼 type을 submit이 아닌 button으로 하여 js함수(=test) 검증 후 submit하도록 하기!
+
+   ```xml
+   <%@ taglib prefix="validator" uri="http://www.springmodules.org/tags/commons-validator" %> 
+   <!-- ...등 import -->
+   <script type="text/javascript" src="<c:url value="/validator.do"/>"></script>
+   <validator:javascript formName="updateItemDto" staticJavascript="false" xhtml="true" cdata="false"/>
+   <script type="text/javascript">
+   function test(form){
+   	if(!validateUpdateItemDto(form)){ //자동 생성된 검증 메소드 사용한 것
+   		return;
+   	}else{
+   		form.submit(); //valid 통과!
+   	}
+   }
+   </script>
+   <button class="btn btn-light m-0" type="button" onclick="redirectSavedBgm(), test(this.form)" .../>
+   ```
+
+4. Spring MVC Controller 적용해보기 -> **서버단 검증**
+
+   적용 예시: form taglib를 활용하자 + modelAttribute필수 + form:error필수
+
+   ```java
+   private final DefaultBeanValidator beanValidator; //빈 주입
+   @PostMapping("item/{itemId}")
+   public String studioIdUpdate(@ModelAttribute UpdateItemDto form, Model model) throws Exception {
+       beanValidator.validate(form, bindingResult); //@Validated 미사용은 직접 해줘야 함.
+       if(bindingResult.hasErrors()) return 수정폼;
+   ```
+
+   ```xml
+   <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
+   <form:form action=""
+              method="post" modelAttribute="updateItemDto">
+   <input type="password" class="no-spin" id="password" name="password" value="${item.password}" ...생략 />
+   <form:errors id="password" name="password" path="password" />
+   ```
+
+   +번외) 직접 bindingResult가져와 jsp에서 사용하고 싶은경우?
+
+   ```java
+   @PostMapping("item/{itemId}")
+   public String studioIdUpdate(@ModelAttribute UpdateItemDto form, Model model) throws Exception {
+       beanValidator.validate(form, bindingResult); //@Validated 미사용은 직접 해줘야 함.
+       if(bindingResult.hasErrors()) {
+           model.addAttribute("bindingResult", bindingResult); //서버단 Valid결과 알려주는것 (직접 에러 커스텀 하려고 추가했음. form:error만 사용할경우 이 코드 필요없음)
+   ... 생략
+   ```
+
+   ```xml
+   <div class="field-error">
+   	<%-- <c:if test="${not empty bindingResult.fieldErrors['password']}"> --%>
+       <c:if test="${not empty bindingResult.fieldErrors}">
+           비밀번호 오류
+           <%-- 비밀번호 오류: <c:out value="${bindingResult.fieldErrors}" /> --%>
+       </c:if>
+   </div>
+   ```
+
+5. validator 태그 검증한 클라 에러 메시지와 controller에 bindingresult에 검증한 서버 에러 메시지
+
+   **클라단 검증**의 경우 validater-rule.xml 를 보면 msg="errors.required" 이런 코드 체크!  
+   message.properties에서 errors.required 관련 메시지로 검증 메시지(alert)를 출력한다.
+
+   **서버단 검증**의 경우 타임리프로 했던 th:error와 유사하게 form:error으로 가능  
+   둘 다 bindingResult 결과로 검증결과를 얻어서 message.properties의 메시지로 폼에 출력해주고  
+   Bean Valid 방식으로 @NotNull("메시지")로 했다면 해당 메시지를 출력해준다.   
+
+   **직접** 모든걸 하고 싶으면 model로 bindingResult를 넘겨서 jsp에서 가공하여 출력해도 된다.
+
+   여기선 message-common.properties를 활용했다.  
+   연동은 validator.xml에서 설정 가능하고, validator-rule.xml의 msg에서도 설정 가능하다.
+
+   ```properties
+   #validator.xml에 연동한 메시지
+   updateItemDto.password=비밀번호는 필수 입력 항목입니다.~!
+   #validator-rule.xml에 msg필드에 자동으로 연동된 메시지
+   errors.required={0} 은 필수 입력값입니다.~!~!
+   ```
+
+   - 클라단 메시지든 서버단 메시지든 두 메시지가 전부 출력된다. 하나로 통일해서 사용하자.  
+     예로 updateItemDto.password를 지우고 errors.required만 사용
+
+**클라 검증 메시지, 서버 검증 메시지 예시:**
+
+<img src="/images/2023-12-02-CHECK_LIST_SPRING/image-20250406231747392.png" alt="image-20250406231747392" style="zoom:80%;" /> 
+
+<img src="/images/2023-12-02-CHECK_LIST_SPRING/image-20250406231709336.png" alt="image-20250406231709336" style="zoom:80%;" />
+
+**번외인 직접 bindingresult가져와 jsp에서 커스텀한 방식 예시(코드는 앞에서 언급한것 동일):**
+
+<img src="/images/2023-12-02-CHECK_LIST_SPRING/image-20250406231558527.png" alt="image-20250406231558527" style="zoom: 80%;" /> 
+
+<details><summary><b>xml 설정 코드와 message 예시:</b></summary>
+<div markdown="1"><br>
+**validator-rule.xml**
+```xml
+<form-validation>
+   <global>
+      <validator name="required"
+            classname="org.springmodules.validation.commons.FieldChecks"
+               method="validateRequired"
+         methodParams="java.lang.Object,
+                       org.apache.commons.validator.ValidatorAction,
+                       org.apache.commons.validator.Field,
+                       org.springframework.validation.Errors"
+                  msg="errors.required">
+          ...
+```
+**validator.xml**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE form-validation PUBLIC 
+    "-//Apache Software Foundation//DTD Commons Validator Rules Configuration 1.1//EN" 
+    "http://jakarta.apache.org/commons/dtds/validator_1_1.dtd">
+<form-validation>
+    <formset>
+        <form name="updateItemDto">
+            <!-- id 필드: 필수 값 -->
+            <field property="id" depends="required">
+                <arg0 key="updateItemDto.id" />
+            </field>
+            <!-- nickname 필드: 필수 값 -->
+            <field property="nickname" depends="required">
+                <arg0 key="updateItemDto.nickname" />
+            </field>
+            <!-- password 필드: 숫자만 허용 -->
+            <field property="password" depends="required,integer">
+                <arg0 key="updateItemDto.password" />
+                <arg1 key="updateItemDto.password.integer" />
+            </field>
+            <!-- title 필드: 필수 값 -->
+            <field property="title" depends="required">
+                <arg0 key="updateItemDto.title" />
+            </field>
+            <!-- content 필드: 필수 값 -->
+            <field property="content" depends="required">
+                <arg0 key="updateItemDto.content" />
+            </field>
+            <!-- pageIndex 필드 -->
+            <field property="pageIndex" >
+            </field>
+        </form>
+    </formset>
+</form-validation>
+```
+**context-common.xml**
+```xml
+<!-- jakarta common validation 빈 등록 -->
+<!-- Integration Apache Commons Validator by Spring Modules -->		
+<bean id="beanValidator" class="org.springmodules.validation.commons.DefaultBeanValidator">
+    <property name="validatorFactory" ref="validatorFactory"/>
+</bean>
+<bean id="validatorFactory" class="org.springmodules.validation.commons.DefaultValidatorFactory">
+    <property name="validationConfigLocations">
+        <list>
+            <!-- 공통기술 -->
+            <value>classpath:/validator/validator-rules.xml</value>
+            <value>classpath:/validator/**/*.xml</value>  
+        </list>
+    </property>
+</bean>
+```
+**validator.jsp**
+```jsp
+<%@ page language="java" contentType="javascript/x-javascript" %>
+<%@ taglib prefix="validator" uri="http://www.springmodules.org/tags/commons-validator" %>
+<validator:javascript dynamicJavascript="false" staticJavascript="true"/>
+```
+**controller.java**
+```java
+@GetMapping("/validator.do")
+public String validator() {
+    return "jsp/validator"; // Jakarta common validation 활용 위해
+}
+```
+**message-common.properties**
+```properties
+# -- validator errors -- #
+updateItemDto.id=ID는 필수 입력 항목입니다.
+updateItemDto.nickname=닉네임은 필수 입력 항목입니다.
+updateItemDto.password=비밀번호는 필수 입력 항목입니다.~!
+updateItemDto.password.integer=비밀번호는 숫자로 입력해주세요.테스트임!!
+updateItemDto.title=제목은 필수 입력 항목입니다.
+updateItemDto.content=내용은 필수 입력 항목입니다.
+#
+fail.common.msg=에러가 발생했습니다!
+fail.common.sql=sql 에러가 발생했습니다! error code: {0}, error msg: {1}
+info.nodata.msg=해당 데이터가 없습니다.
+errors.prefix=<div class="error"> 
+errors.suffix=</div><br/>
+errors.required={0} 은 필수 입력값입니다.~!~!
+errors.minlength={0} 은 {1}자 이상 입력해야 합니다.
+errors.maxlength={0} 은 {1}자 이상 입력할수 없습니다.
+errors.invalid={0} 은 유효하지 않은 값입니다.
+errors.byte={0} 은 byte 타입이어야 합니다.
+errors.short={0} 은 short 타입이어야 합니다.
+errors.integer={0} 은 integer 타입이어야 합니다.
+errors.long={0} 은 long 타입이어야 합니다.
+errors.float={0} 은 float 타입이어야 합니다.
+errors.double={0} 은 double 타입이어야 합니다.
+errors.date={0} 은 날짜 유형이 아닙니다.
+errors.range={0} 은 {1} 과 {2} 사이의 값이어야 합니다.
+errors.creditcard={0} 은 유효하지 않은 신용카드 번호입니다.
+errors.email={0} 은 유효하지 않은 이메일 주소입니다.
+errors.ihidnum=유효하지 않은 주민등록번호입니다.
+errors.korean={0}은 한글을 입력하셔야 합니다.
+```
+</div>
+</details>
+
+
+<details><summary><b>Bean 방식 vs Jakarta 방식 코드 예시(+JS직접,자동): th:error vs form:errors</b></summary>
+<div markdown="1"><br>
+th:error, form:errors는 유사하다. 오히려 Bean, Jakarta 방식의 다른점을 비교해야 한다.<br>
+"클라단 검증" 과 "메시지 설정" 및 xml설정은 위 정리글 보고,<br>
+**"서버단 검증"을 중점적으로 비교**
+```java
+/*
+차이점:
+@Validated 유무로 인해 beanValidator.validate(form, bindingResult); 생략 유무
+@Pattern(regexp = "^[0-9]+", message = "비밀번호는 숫자로 입력 해주세요.") 처럼 DTO에 바로 적용 메시지 유무
+*/
+//Bean Validation
+@PostMapping("item/{itemId}")
+    public String studioIdUpdate(@Validated @ModelAttribute UpdateItemDto form, @RequestParam int pageIndex, BindingResult bindingResult,
+                                 @PathVariable Long itemId, RedirectAttributes redirectAttributes, Model model) throws Exception {
+        if(bindingResult.hasErrors()) {
+            log.info("error={}", bindingResult);
+            model.addAttribute("bindingResult", bindingResult); //서버단 Valid결과 알려주는거
+            return "jsp/studio_item"; //다시 폼으로 이동
+            // 어차피 "검증" 에 걸려서 DB 사용안하기에 PRG 패턴 상관없움
+        }
+        form.setPageIndex(pageIndex);
+        itemService.update(form);
+      redirectAttributes.addFlashAttribute("status", "updateON");
+      redirectAttributes.addAttribute("itemId", itemId);
+      return "redirect:/gallery/itemDetail/{itemId}";   
+//DTO
+@Data
+public class UpdateItemDto {
+	  @NotNull
+	  private Long id;
+	  @NotNull
+	  private String nickname;
+	  @NotNull
+	  @Pattern(regexp = "^[0-9]+", message = "비밀번호는 숫자로 입력 해주세요.")
+	  private String password;
+	  @NotNull
+	  private String title;
+	  @NotNull
+	  private String content;
+	  private int pageIndex;
+}
+//
+//
+//Jakarta Validation
+private final DefaultBeanValidator beanValidator;
+@PostMapping("item/{itemId}")
+public String studioIdUpdate(@ModelAttribute UpdateItemDto form, @RequestParam int pageIndex, BindingResult bindingResult,
+                             @PathVariable Long itemId, RedirectAttributes redirectAttributes, Model model) throws Exception {
+	beanValidator.validate(form, bindingResult); //@Validated 사용 안하면 직접 해줘야 함.
+	if(bindingResult.hasErrors()) {
+        log.info("error={}", bindingResult);
+        model.addAttribute("bindingResult", bindingResult); //서버단 Valid결과 알려주는거 (직접 에러 커스텀도 해가지고 추가했음. form:error만 사용할경우 이 코드 필요없음)
+        return this.studioCompleteId(itemId, pageIndex, model); //다시 폼으로 이동 (item/{itemId}로 이동해야해서 내무메소드로 호출하겠음. 애초에 수정폼은 따로 둬서 폼바로 호출해야 했다. 이 방식은 비추다 ㅠ.)
+    }
+    form.setPageIndex(pageIndex);
+    itemService.update(form);
+  redirectAttributes.addFlashAttribute("status", "updateON");
+  redirectAttributes.addAttribute("itemId", itemId);
+  return "redirect:/gallery/itemDetail/{itemId}";  
+}
+//DTO
+@Data
+public class UpdateItemDto {
+	  private Long id;
+	  private String nickname;
+	  private String password;
+	  private String title;
+	  private String content;
+	  private int pageIndex;
+}
+```
+```xml
+<!-- form:errors 출력! th:error는 방식 유사하여 생략 -->
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
+<form:form action=""
+           method="post" modelAttribute="updateItemDto">
+<input type="password" class="no-spin" id="password" name="password" value="${item.password}" ...생략 />
+<form:errors id="password" name="password" path="password" />
+<!-- -->
+<!-- -->
+<!-- 번외로 소개한 bindingResult model에 담아 가져와 직접 커스텀 방식 -->
+<div class="field-error">
+	<%-- <c:if test="${not empty bindingResult.fieldErrors['password']}"> --%>
+    <c:if test="${not empty bindingResult.fieldErrors}">
+        비밀번호 오류
+        <%-- 비밀번호 오류: <c:out value="${bindingResult.fieldErrors}" /> --%>
+    </c:if>
+</div>
+```
+</div>
+</details>
+
+<br><br>
+
+### 예외처리와 AOP - XML
+
+> **API의 경우 클라쪽 "검증"은 서버가 할 일이 아니다(JS는 프론트쪽 개발진이 해야지!)**  
+> **웹의 경우 클라와 서버쪽 둘 다 "검증"**해주는게 좋다.
+>
+> **API의 "예외"**의 경우 서버는 **JSON으로 변경된 데이터를 “Valid(검증)”**하는거라서 **JSON→DTO매핑될 때 에러나 그 시점에 다양한 에러(주로 서비스로직)들은 “Exception(예외)”**으로 해결!
+> **=> 웹은 “검증”만으로 충분하지만 API는 “검증+예외”가 필요!**  
+> => 근데, 막상 해보니 웹&API 둘다 "검증+예외"를 적용 했다. eGov에선 웹에 에러페이지만 연동해주는게 아니라 "예외"까지 굳이 하더라?
+>
+> **예외를 처리하는 방법 크게 2가지**
+>
+> 1. 예외를 잡아서 정상화 하는 방법 ⇒ 예로 try, catch
+>
+> 2. 예외를 해결할 수 없는 문제로 인정하고 공통 처리하는 방법(사용자에게 죄송합니다. 같은 화면을 보여주는 방법) ⇒ 예로 @ExceptionHandler + @ControllerAdvice
+>
+>    특히, API(JSON)의 경우 대부분 2번으로 해결 됨. 직접 예외를 throw로 던져서 공통 관리해도 되니까.
+>
+> 예외를 처리하는 계층의 흐름 이해:
+>
+> 1. 서비스계층의 비즈니스 로직의 예외 발생하면 정상화하거나 공통 처리위해 던지기
+> 2. 컨트롤러에서 웹이면 서비스의 Exception을 JSP 뷰로 매핑, API면 JSON으로 응답
+
+**서비스계층의 예외 처리:**
+
+- eGov에선 서비스계층의 비즈니스 로직 예외처리를 위해 **EgovAbstractServiceImpl** 를 사용하며,  
+  EgovBizException 발생 메소드(**processException**) 와 Exception 발생없이 후처리 로그 메소드(**leaveaTrace**)를 제공한다.
+
+  - **다국어 지원 메시지, 확장성, 표준화 로직** 때문에 사용!
+
+- **leaveaTrace -> EgovBizException 발생 없이 로그 생성(메시지소스를 사용하는게 특징)**
+
+  - 메소드 원리: traceHandler빈을 참조한 leaveaTrace빈을 xml이나 java로 등록 후 leaveaTrace빈을 주입해 사용하여 핸들링한다.
+
+  - MessageSource 빈에 등록된 메시지를 로그(Info)로 제공
+
+  - <details><summary><b>xml 설정 코드 예시:</b></summary>
+    <div markdown="1"><br>
+    **context-common.xml (비즈니스단 계층용 설정파일)**
+    ```xml
+    <!-- EgovAbstractServiceImpl가 제공하는 leaveaTrace(예외처리 관련) 사용 위해 빈 등록 필수! -->
+    <bean id="leaveaTrace"
+    	class="org.egovframe.rte.fdl.cmmn.trace.LeaveaTrace">
+    	<property name="traceHandlerServices">
+    		<list>
+    			<ref bean="traceHandlerService" />
+    		</list>
+    	</property>
+    </bean>
+    <bean id="traceHandlerService"
+    	class="org.egovframe.rte.fdl.cmmn.trace.manager.DefaultTraceHandleManager">
+    	<property name="reqExpMatcher">
+    		<ref bean="antPathMater" />
+    	</property>
+    	<property name="patterns">
+    		<list>
+    			<value>*</value>
+    		</list>
+    	</property>
+    	<property name="handlers">
+    		<list>
+    			<ref bean="defaultTraceHandler" />
+    		</list>
+    	</property>
+    </bean>
+    <bean id="antPathMater"
+    	class="org.springframework.util.AntPathMatcher" />
+    <bean id="defaultTraceHandler"
+    	class="org.egovframe.rte.fdl.cmmn.trace.handler.DefaultTraceHandler" />
+    ```
+    </div>
+    </details>
+
+  - **leaveaTrace 메소드 적용 예시:**
+
+  - ```java
+    //EgovAbstractServiceImpl를 상속한 서비스로직이라 가정
+    try{
+        //비즈니스 로직
+    }catch {
+        //fail.common.msg=에러가 발생했습니다! 라고 message.properties에 있음
+        leaveaTrace("fail.common.msg"); 
+    }
+    ```
+
+- **processException -> 예외들을 EgovBizException 예외로 바꿈 + 로그 생성(메시지소스를 사용)**
+
+  - 메소드 원리: 발생한 예외를 EgovBizException 로 감싸는 방식
+
+  - MessageSource 빈에 등록된 메시지를 로그(Info)로 제공
+
+  - ```java
+    //EgovAbstractServiceImpl를 상속한 서비스로직이라 가정
+    try{
+        int i = 1/0;
+    }catch(ArithmeticException ae){
+        throw processException("fail.common.msg");
+    }
+    ```
+
+- **예시 결과:**
+
+  <img src="/images/2023-12-02-CHECK_LIST_SPRING/image-20250406231902976.png" alt="image-20250406231902976" style="zoom:80%;" />
+
+**컨트롤러계층(+AOP)의 예외 처리:**
+
+> 웹 플젝 스프링 부트는 ErrorPage, BasicErrorController를 자동등록하여 예외 핸들링 에러페이지 자동
+>
+> API는 부트든 아니든 @ExceptionHandelr + @ControllerAdvice로 예외 공통 관리 및 JSON 응답 젤 편함!
+
+- 웹 플젝 eGov에서는 부트가 한 **에러페이지** 자동등록 설정을 SimpleMappingExceptionResolver빈 등록으로 직접 하는편. (리졸버뷰를 생각하자)
+
+  - **jsp에도 MessageSource 빈의 메시지가 출력이 됨**.(exception.message로 서버상에서 MessageSource 빈 메시지를 기록해둔다고 예상)
+
+  - <details><summary><b>xml 설정과 error-page(jsp) 코드 예시:</b></summary>
+    <div markdown="1"><br>
+    **context-servlet.xml (컨트롤러단 계층용 설정파일)**
+    ```xml
+    <!-- 직접 원하는 Exception과 에러뷰를 매핑 확장 가능 -->
+    <bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+        <property name="defaultErrorView" value="jsp/cmmn/genneralException" />
+        <property name="exceptionMappings">
+            <props>
+                <prop key="org.egovframe.rte.fdl.cmmn.exception.EgovBizException">jsp/cmmn/egovBizException</prop>
+                <prop key="org.springframework.dao.DataAccessException">jsp/cmmn/egovBizException</prop>
+                <prop key="org.springframework.transaction.TransactionException">jsp/cmmn/egovBizException</prop>
+            </props>
+        </property>
+    </bean>
+    ```
+    **egovBizException.jsp**
+    ```jsp
+    <%@ page language="java" contentType="text/html; charset=UTF-8" %>
+    <html>
+    <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>에러가 발생하였습니다.종류는 EgovBizException 입니다.</title>
+    </head>
+    <body>
+    에러가 발생하였습니다.종류는 EgovBizException 입니다. 메세지는${exception.message} 입니다.
+    </body>
+    </html>
+    ```
+    ```**genneralException.jsp**
+    <%@ page language="java" contentType="text/html; charset=UTF-8" %>
+    <html>
+    <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>일반적인 에러가 발생하였습니다.</title>
+    </head>
+    <body>
+    일반적인 에러가 발생하였습니다. 메세지는${exception.message} 입니다.
+    </body>
+    </html>
+    ```
+    </div>
+    </details>
+
+- @ExceptionHandelr 로 예외 공통 관리하던걸 **"eGov의 ExceptionHandler인터페이스"**를 구현하여 **AOP를 직접 설정**하자. (예시 부분의 콘솔을 봐라)
+
+  - **주의:** "부트"(순수스프링 아님)에선 자동으로 예외처리기를 제공하다보니 아래 AOP적용한 예외처리기와 중복 사용될 수 있다. (로그상에서 예외가 1번더 출력됨을 확인)
+
+  - <details><summary><b>xml 설정과 ExceptionHandler 구현 코드 예시:</b></summary>
+    <div markdown="1"><br>
+    **ExceptionHandler 구현 코드 java**
+    ```java
+    @Slf4j
+    public class SecretGalleryExceptionHandler implements ExceptionHandler {
+        public void occur(Exception exception, String packageName) {
+        	log.debug(" EasyCompanyExceptionHandler run...............{}", ((EgovBizException) exception).getWrappedException());
+            try {
+                if (exception instanceof EgovBizException) {
+                    Exception exx = (Exception) ((EgovBizException) exception).getWrappedException();
+                    if (exx != null) {
+                    	log.debug(" sending a alert mail  is completed ");
+                        exx.printStackTrace();
+                    }
+                }
+            } catch (Exception e) { //일반 예외
+                e.printStackTrace();
+            }
+        }
+    }
+    ```
+    **context-aspect.xml**
+    ```xml
+    <?xml version="1.0" encoding="UTF-8"?>
+    <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    	xmlns:aop="http://www.springframework.org/schema/aop"
+    	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+    		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd">
+    <!-- -->
+    	<aop:config>
+    		<aop:pointcut id="serviceMethod" expression="execution(* com.secretgallery..impl.*Impl.*(..))" />
+    		<aop:aspect ref="exceptionTransfer">
+    			<aop:after-throwing throwing="exception" pointcut-ref="serviceMethod" method="transfer" />
+    		</aop:aspect>
+    	</aop:config>
+    <!-- -->
+    	<bean id="exceptionTransfer" class="org.egovframe.rte.fdl.cmmn.aspect.ExceptionTransfer">
+    		<property name="exceptionHandlerService">
+    			<list>
+    				<ref bean="defaultExceptionHandleManager" />
+    			</list>
+    		</property>
+    	</bean>
+    <!-- -->
+    	<bean id="defaultExceptionHandleManager" class="org.egovframe.rte.fdl.cmmn.exception.manager.DefaultExceptionHandleManager">
+    		<property name="reqExpMatcher">
+    			<ref bean="antPathMater" />
+    		</property>
+    		<property name="patterns">
+    			<list>
+    				<value>**service.impl.**</value>
+    			</list>
+    		</property>
+    		<property name="handlers">
+    			<list>
+    				<ref bean="exceptionHandler" />
+    			</list>
+    		</property>
+    	</bean>
+    <!-- -->
+    	<bean id="exceptionHandler" class="com.secretgallery.exception.SecretGalleryExceptionHandler" />
+    </beans>
+    ```
+    </div>
+    </details>
+
+  - **사용예시 코드:**
+
+    등록한 EasyCompanyExceptionHandler빈을 통해 공통으로 예외처리 관리 가능
+
+    ```java
+    //EgovBizException 관련 공통예외처리 로직 수행 (ExceptionHandler 구현로직 참고)
+    throw processException("msg.exception.case1", new RuntimeException("실제 원인"));
+    //일반 공통예외처리 로직 수행 (ExceptionHandler 구현로직 참고)
+    throw new Exception(); 
+    ...
+    ```
+
+    - 특히, "msg.exception.case1=에러테스트를 위한 에러를 발생시킵니다." 으로 기록된 메시지를 JSP에 출력
+
+- **전체적 흐름 이해하기:** 
+
+  1. 서비스계층의 leaveaTrace, processException 를 적절히 활용하여 예외 처리하고 싶은부분에 사용(leaveaTrace빈이 잘 동작)
+
+     예외 정상으로? leaveaTrace  
+     예외 EgovBizException 으로 바꾸려면? processException   
+     예외 일반은? 그냥 원하는 예외로 throw 하거나 그냥 둬도 AOP에서 잘 처리
+
+  2. 컨트롤러,AOP단에서 exceptionTransfer빈이 동작하여 예외를 가로채고 EasyCompanyExceptionHandler빈으로 공통으로 예외처리(보통 콘솔에 메시지 출력)
+
+  3. 컨트롤러,AOP단에서 SimpleMappingExceptionResolver빈이 동작하여 예외일때 리졸버뷰로써 잘 동작
+
+     예외 EgovBizException은? 등록한 egovBizException.jsp 출력  
+     예외 DataAccessException은? 등록한 egovBizException.jsp 출력   
+     예외 TransactionException은? 등록한 egovBizException.jsp 출력  
+     예외 일반은? 등록한 genneralException.jsp 출력
+
+- **예시 결과:**
+
+  홈페이지
+
+  <img src="/images/2023-12-02-CHECK_LIST_SPRING/image-20250407001802824.png" alt="image-20250407001802824" style="zoom:80%;" />
+
+  콘솔
+
+  <img src="/images/2023-12-02-CHECK_LIST_SPRING/image-20250407001849320.png" alt="image-20250407001849320" style="zoom:80%;" />
+
+**번외) 메소드 수행시간 측정 AOP는 Java Config로 해보겠다.**
+
+- <details><summary><b>TimeTraceAop.java 코드 예시:</b></summary>
+  <div markdown="1"><br>
+  ```java
+  @Aspect // AOP
+  @Component // "빈" 등록
+  @Slf4j
+  public class TimeTraceAop {
+    @Around("execution(* com.secretgallery..*(..)) && !within(com.secretgallery.security..*)")
+    public Object execute(ProceedingJoinPoint joinPoint) throws Throwable {
+      // 프록시 실행
+      long start = System.currentTimeMillis();
+      log.debug("START: {}", joinPoint.toString());
+      try {
+        return joinPoint.proceed(); // 실제 실행
+      } finally {
+        long finish = System.currentTimeMillis();
+        long timeMs = finish - start;
+        log.debug("END: {} {}ms", joinPoint.toString(), timeMs);
+      }
+    }
+  }
+  ```
+  </div>
+  </details>
+
+<br>
+
+<br>
+
 ## 배포 (+원하는 프로필로)
 
 **AWS나 cafe24나 로컬 등에 서버 배포(구동) ㄱ ㄱ ㄱ**
@@ -3856,18 +6614,188 @@ API 방식으로 주로 정리 -> 웹(JSP)인 "MyBatis + Spring(JSP) 파트" 참
 
 <br>
 
-ㅇㅕ긔 부 텨 해야하긴 하는데;  
-타임리프파트 위 컨트롤러에 먼저 정리해야 해효;;
+## 스프링&스프링부트 애노테이션 한눈에 보기 
+
+중요: **스프링 빈** 설정은 자동 설정보다 **수동 설정이 우선순위 높다.**   
+예로, @Bean으로 수동 등록과 @Service, @Component같이 자동 등록이면 @Bean 등록 우선인듯?
+
+**Java Config 방식의 빈 등록 방법:**
+
+- @Component 로 빈 등록
+  - @Service, @Repository 처럼 **클래스 단**에서 자동 빈 등록
+- @Configuration 과 @Bean 조합
+  - @Bean을 **메소드 단**에 적용하여 자동 빈 등록 -> 메소드 1개면 생략 가능
+  - @Configuration에 @Component가 포함되어 **클래스 단**도 자동 빈 등록
+
+<br>
+
+예시 애노테이션 모음 (딱히 정리가 별루 이부분)
+
+<details><summary><b>엔티티</b></summary>
+<div markdown="1">
+* @Entity : 스프링빈 자동 등록
+* @Inheritance(strategy = InheritanceType.SINGLE_TABLE) : 상속을 **SINGLE_TABLE** 전략 사용선언
+  * @DiscriminatorColumn(name = "dtype") : 상속의 **부모** 구분
+  * @DiscriminatorValue("A") : 상속의 **자식** 구분
+* @Getter @Setter : getter, setter 제공 -> lombok
+* @Id @GeneratedValue - JPA : PK 할때 세트로 활용 -> @ID:PK, @GeneratedValue:자동숫자생성
+* @Table(...) @Column(name = "member_id") : 테이블명, 컬럼명 매핑
+* @ManyToOne(fetch=LAZY) - JPA : 지연로딩(LAZY), 다대일 관계 표시
+  * @JoinColumn(name = "member_id") : 외래키 사용 - 주인이 할 일
+  * @OneToMany(mappedBy = "member") : 주인은 Order라서 Order의 member를 의미
+  * @JsonIgnore : 양방향 무한 반복의 문제를 해결 -> 안쓸거임.
+    * **하지만 지양하고 DTO 방식으로 해결하는걸 지향한다.**
+* @Embedded : JPA 내장 타입 쓸 때 사용
+  * @Embeddable : JPA 내장 타입 선언
+</div>
+</details>
+
+<br>
+
+<details><summary><b>레포지토리</b></summary>
+<div markdown="1">
+* @Repository : 스프링빈으로 등록, JPA 예외를 스프링 기반 예외로 예외 변환
+* @PersistenceContext : 엔티티메니저( EntityManager ) 주입
+* @PersistenceUnit : 엔티티메니터팩토리( EntityManagerFactory ) 주입
+* **`@RequiredArgsConstructor` : lombok의 어노테이션이며 `final` 조합으로 `엔티티매니저` 주입 같이 등록된 빈 주입을 제공! 레포지토리, 서비스 둘다에서 활용하는것을 권장**
+  * 예를 들면, @Repository 로 스프링 빈에 등록한 레퍼지토리를 다른 코드에서 사용하고 싶을때 "주입" 을 통해서 사용할 수 있다.
+  * @Autowired를 생성자위에 선언하면 "생성자 주입" 으로 사용할 수 있고, 필드위에 선언하면 "필드주입" 으로 사용할 수 있다.
+    * 여기서 **"생성자 주입"** 관점이 **@RequiredArgsConstructor** 로 대체 가능하다.
+    * 자동으로 생성자 생성해서 제공해준다.
+* 보통 만드는 DB와 연관 메서드 : save(), findOne(), findAll(), findByName() 등등...
+  * `EntityManager` 의 함수들은 잘 구현되어있어서 `find()` 함수를 쓸때 값 없을때 null로 잘 반환해줌
+  * **우리가 직접 쿼리문 날려서 `find()` 함수를 구현할 때는 이 null 처리를 잘 해줘야한다는점**
+    * **TIP : `getResultList()` 형태로 (즉, List) 값을 받으면 null처리가 매우 간단**
+</div>
+</details>
+
+<br>
+
+<details><summary><b>서비스</b></summary>
+<div markdown="1">
+* @Service : 스프링빈으로 등록
+* @Transactional : 트랜잭션, 영속성 컨텍스트
+  - readOnly=true : 데이터의 변경이 없는 읽기 전용 메서드에 사용, **영속성 컨텍스트를 flush 하지 않으므로 약간의 성능 향상**(읽기 전용에는 다 적용)
+  - 데이터베이스 드라이버가 지원하면 DB에서 성능향상
+  - **이와 같은 이유로 `@Transactional(readOnly = true)` 로 사용 및 쓰기모드 필요할때면 해당 메소드단에 `Transactional` 을 또 선언해서 쓰기모드까지 사용**
+    - 기본값이 `readOnly=false` 
+* @Autowired : 필드 주입
+  - **앞전에 언급한것처럼 `@Autowired` 대신에 `@RequiredArgsConstructor` 와 `final ` 를 활용**
+- 보통 만드는 비지니스 로직 메서드 : join(), findMembers(), findOne() 등등...
+</div>
+</details>
+
+<br>
+
+<details><summary><b>컨트롤러</b></summary>
+<div markdown="1">
+* @Controller : 스프링빈으로 등록, 핸들러 매핑 대상으로 기억
+* @RequestMapping, @GetMapping, @PostMapping 등등..  : HTTP 매핑
+  * **@RequestMapping을 클래스단**에 **@GetMapping, @PostMapping 을 메서드단**에 사용 권장
+    * @RequestMapping은 **전역으로 경로** 지정하기 좋기 때문
+    * @RequestMapping 은 GET,POST,PUT... 등 전부 허용하기 때문
+  * @PostConstruct : 테스트용 데이터를 코드 실행하자마자 바로 넣을 수 있음 (테스트하기 수월!) => 이름 그대로 생성자 생성된 후 시점으로 생각하자!
+* @RestController : 뷰로 반환하는게 아닌 HTTP Body에 반환값 기입반환 **(API 만들시 적극 권장)**
+  * @RestController는 @Contorller, **@ResponseBody** 등등을 포함하는 어노테이션
+* @PathVariable("userId"), @RequestParam => @PathVariable 방식 권장
+  - @RequestParam : 기존 url 쿼리 파라미터 방식 : ?userId=userA
+    - 단, POST-HTML Form 방식도 body를 쓰지만 쿼리 파라미터 형식으로 저장되기 때문에 @RequestParam 을 사용 가능
+    - 또한, 생략도 가능한데 **본인은 넣는걸 권장** 
+    - 값이 반드시 넘어오지 않아도 됨을 명시할 수 있음 (required=false)
+    - 기본값 설정도 가능 (defaultValue = "-1")!!
+      - 널 뿐만아니라 "/username=" 이렇게 "" 빈값으로 넘어온 데이터도 기본값을 설정해줌
+    - Map, MultiValueMap 형태로 값을 받아올수도 있음
+  - @PathVariable("itemId") : 최신 트랜드인 경로 변수 방식 : /mapping/userA
+    - 중요한점은 @PathVariable 로 매핑한 userA가 따로 Model을 활용하지 않아도,
+    - 백엔드뿐만 아니라 프론트에서도 userA값을 사용가능하단 점이다.
+      - 프론트에서 URL 문자열을 가져와 사용할 수 있으니까.
+    - 물론, 그냥 **Model을 항상 데이터 보내는 용도로 사용**하고,
+    - **@PathVariable을 url로 받은 값을 사용하는 목적**으로 활용하는게 젤 좋아보임.
+* @ModelAttribute("form")
+  * 모든 소스의 request parameter를 맵핑할 수 있다.(즉 GET, POST 둘 다 상관없지만 GET에 주로 사용)
+  * "초기화 -> 바인딩" 을 거치므로 값이 전달되지 않아도 초기화 값을 사용
+  * model.addAttribute 에도 담기고, form서밋 때 html에 있는 form 데이터를 매핑해서 변수에도 자동으로 담아줘서 변수선언도 따로 할 필요 없음
+  * 또한, @ModelAttribute 를 생략하고 바로 **HelloData** 가 와도 동일하게 가능
+  * **단, 너무 생략하면 햇갈릴 수 있어서 조심하자**
+<div markdown="1">
+```java
+public String modelAttributeV1(@ModelAttribute HelloData helloData) {
+  log.info(helloData.getUsername()); // 바로 변수 사용 가능!!
+}
+```
+</div>
+**참고로 특별한 사용법인 전역으로 Model에 항상 적용법**<br>
+물론 static으로 따로 구현해두는게 성능상 더 좋음
+<div markdown="1">
+```java
+@ModelAttribute("regions") // regions 이름으로 Model에 넣음
+public Map<String, String> regions() {
+  Map<String, String> regions = new LinkedHashMap<>();
+  regions.put("SEOUL", "서울");
+  regions.put("BUSAN", "부산");
+  regions.put("JEJU", "제주"); 
+  return regions;
+}
+```
+</div>
+* @RequestBody, @ResponseBody : HttpEntity 처럼 **HTTP 메시지 컨버터**가 **HTTP 메시지 바디**의 내용을 우리가 원하는 문자나 **객체 등으로 자동 변환**!!
+  * 요청파라미터 @RequestParam, @ModelAttribute 랑은 전혀 관계없으니까 혼동 X
+    * **왜냐하면, HTTP 메시지 Body 를 통해서 데이터가 넘어오는 경우이기 때문!!**
+  * **요청오는건 RequestBody, 응답으론 ResponseBody**
+    * **@RequestBody**를 활용할거면 꼭 Dto 형태 타입으로 인수 받을것(경험상)
+      * **ObjectMapper 필요없이 자동**으로 바꿔줘서 편리
+    * 요청으로 들어오는 json 데이터를 @RequestBody HelloData data 로 인해 Hellodata 객체로 바꾸고,
+    * 반환 타입을 String이 아닌 HelloData로 하면 @ResponseBody 로 인해 return할때 응답body에 문자로 넣어준다 했는데 덕분에 json로 집어넣어준다.
+    * 즉, json(요청)->객체->json(응답) 로 동작한다.
+  * **(핵심!) 만약 @ResponseBody 가 없으면 뷰 리졸버가 실행 되어서 뷰를 찾아서 렌더링!!**
+    * **참고로 @RestController 는 @ResponseBody 가지고있음!!**
+<div markdown="1">
+```java
+@ResponseBody
+@PostMapping("/request-body-json-v5")
+public HelloData requestBodyJsonV5(@RequestBody HelloData data) {
+  log.info(data.getUsername());
+  return data;
+}
+```
+</div>
+* 뷰 반환, 데이터 반환 정리
+  * **@Controller - View 반환**
+  * @Controller + @ResponseBody - Data 반환
+  * **@RestController - Data 반환**
+* 쿠키 편리하게 조회 **@CookieValue**
+</div>
+</details>
 
 
+<br>
 
+<details><summary><b>ETC</b></summary>
+<div markdown="1">
+* @Slf4j : 로그를 바로 log로 사용 가능
+  * **Log Level : error > warn > info(기본값) > debug > trace**
+  * 보통 debug를 "개발서버용", info를 "운영서버용" 으로 사용
+  * 기본값이 info라서 debug로 개발서버 프로필에 따로 설정 해주자
+* @NotEmpty("에러 메세지 관련")
+* @Data -> 롬복 -> **toString과 Equals오버라이딩도 자동**
+  * @Getter, @Setter, @ToString, @EqualsAndHashCode, @RequiredArgsConstructor 적용
+  * `member.equals(findMember)` 바로 사용 가능
+* @SpringBootApplication : 톰캣 내장(서버)
+* @Valid + @NotEmpty(message="회원 정보필수") 이런식으로 같이 사용
+  * 예전꺼라서 의존성 추가 필수
+  * `implementation 'org.springframework.boot:spring-boot-starter-validation'`
+* **@AllArgsConstructor : 생성자 대신 만들어줘서 필드만 선언**
+  * 참고로 EM 생성자 주입 방식인 `@RequiredArgsConstructor` 와 햇갈리지 말것
+* @Value : application.properties에 선언한 변수 사용
+* @EnableCaching : Spring Boot Cache 사용을 선언
+</div>
+</details>
 
+<br>
 
+<br>
 
-
-
-
-## JPQL(JPA-ORM) vs SQL(MyBatis-SQL Mapper)
+## 필독! JPQL(JPA-ORM) vs SQL(MyBatis-SQL Mapper)
 
 **MyBatis는 "스프링 DB 관련 추가 지식" -> "MyBatis" 파트를 보자  **
 => JPA와 MyBatis 개발은 확연히 다르단걸 인지하자. 그차이도 "MyBatis"파트를 보자
@@ -3878,7 +6806,7 @@ ORM과 SQL Mapper 는 둘 다 객체와 SQL 매핑을 도와줘서 유사하긴 
 
 - ORM은 SQL을 작성 할 필요 없을 정도로 더 많은 걸 지원한다. (JPQL을 작성 하긴 함)
 
-- SQL Mapper는 Java 코드와 SQL(XML) 문을 아예 분ㄴ리 + 동적쿼리를 세밀하게 지원 해준다.
+- SQL Mapper는 Java 코드와 SQL(XML) 문을 아예 분리 + 동적쿼리를 세밀하게 지원 해준다.
 
 <br><br>
 
@@ -5286,8 +8214,6 @@ DataSource 가 `(1)my.datasource.하위` 와 `(2)spring: datasource: url, userna
 <img src="https://github.com/user-attachments/assets/e7639c7e-498d-40b3-aa93-998b66719ed0" alt="image" style="zoom:80%;" />
 </div>
 </details>
-
-
 - **라이브러리 추가**: `implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.2.0' //spring boot mybatis`
 
 - **사용 흐름**
@@ -6049,4622 +8975,6 @@ EXIT 또는 QUIT   -- SQL*Plus 종료[3]
 
 <br>
 
-## 스프링 부트의 애노테이션들
-
-중요: **스프링 빈** 설정은 자동 설정보다 **수동 설정이 우선순위 높다.**   
-예로, @Bean으로 수동 등록과 @Service, @Component같이 자동 등록이면 @Bean 등록 우선인듯?
-
-**Java Config 방식의 빈 등록 방법:**
-
-- @Component 로 빈 등록
-  - @Service, @Repository 처럼 **클래스 단**에서 자동 빈 등록
-- @Configuration 과 @Bean 조합
-  - @Bean을 **메소드 단**에 적용하여 자동 빈 등록 -> 메소드 1개면 생략 가능
-  - @Configuration에 @Component가 포함되어 **클래스 단**도 자동 빈 등록
-
-<details><summary><b>엔티티</b></summary>
-<div markdown="1">
-* @Entity : 스프링빈 자동 등록
-* @Inheritance(strategy = InheritanceType.SINGLE_TABLE) : 상속을 **SINGLE_TABLE** 전략 사용선언
-  * @DiscriminatorColumn(name = "dtype") : 상속의 **부모** 구분
-  * @DiscriminatorValue("A") : 상속의 **자식** 구분
-* @Getter @Setter : getter, setter 제공 -> lombok
-* @Id @GeneratedValue : PK 할때 세트로 활용 -> @ID:PK, @GeneratedValue:자동숫자생성
-* @Table(...) @Column(name = "member_id") : 테이블명, 컬럼명 매핑
-* @ManyToOne(fetch=LAZY) : 지연로딩(LAZY), 다대일 관계 표시
-  * @JoinColumn(name = "member_id") : 외래키 사용 - 주인이 할 일
-  * @OneToMany(mappedBy = "member") : 주인은 Order라서 Order의 member를 의미
-  * @JsonIgnore : 양방향 무한 반복의 문제를 해결 -> 안쓸거임.
-    * **하지만 지양하고 DTO 방식으로 해결하는걸 지향한다.**
-* @Embedded : JPA 내장 타입 쓸 때 사용
-  * @Embeddable : JPA 내장 타입 선언
-</div>
-</details>
-
-<br>
-
-<details><summary><b>레포지토리</b></summary>
-<div markdown="1">
-* @Repository : 스프링빈으로 등록, JPA 예외를 스프링 기반 예외로 예외 변환
-* @PersistenceContext : 엔티티메니저( EntityManager ) 주입
-* @PersistenceUnit : 엔티티메니터팩토리( EntityManagerFactory ) 주입
-* **`@RequiredArgsConstructor` : lombok의 어노테이션인데 이것도 `엔티티매니저` 주입을 제공해주므로, 이것과 `final` 조합으로 리포지토리, 서비스 둘다에서 활용하는것을 권장**
-  * 예를 들면, @Repository 로 스프링 빈에 등록한 레퍼지토리를 다른 코드에서 사용하고 싶을때 "주입" 을 통해서 사용할 수 있다.
-  * @Autowired를 생성자위에 선언하면 "생성자 주입" 으로 사용할 수 있고, 필드위에 선언하면 "필드주입" 으로 사용할 수 있다.
-    * 여기서 **"생성자 주입"** 관점이 **@RequiredArgsConstructor** 로 대체 가능하다.
-    * 자동으로 생성자 생성해서 제공해준다.
-* 보통 만드는 DB와 연관 메서드 : save(), findOne(), findAll(), findByName() 등등...
-  * `EntityManager` 의 함수들은 잘 구현되어있어서 `find()` 함수를 쓸때 값 없을때 null로 잘 반환해줌
-  * **우리가 직접 쿼리문 날려서 `find()` 함수를 구현할 때는 이 null 처리를 잘 해줘야한다는점**
-    * **TIP : `getResultList()` 형태로 (즉, List) 값을 받으면 null처리가 매우 간단**
-</div>
-</details>
-<br>
-
-<details><summary><b>서비스</b></summary>
-<div markdown="1">
-* @Service : 스프링빈으로 등록
-* @Transactional : 트랜잭션, 영속성 컨텍스트
-  - readOnly=true : 데이터의 변경이 없는 읽기 전용 메서드에 사용, **영속성 컨텍스트를 flush 하지 않으므로 약간의 성능 향상**(읽기 전용에는 다 적용)
-  - 데이터베이스 드라이버가 지원하면 DB에서 성능향상
-  - **이와 같은 이유로 `@Transactional(readOnly = true)` 로 사용 및 쓰기모드 필요할때면 해당 메소드단에 `Transactional` 을 또 선언해서 쓰기모드까지 사용**
-    - 기본값이 `readOnly=false` 
-* @Autowired : 필드 주입
-  - **앞전에 언급한것처럼 `@Autowired` 대신에 `@RequiredArgsConstructor` 와 `final ` 를 활용**
-- 보통 만드는 비지니스 로직 메서드 : join(), findMembers(), findOne() 등등...
-</div>
-</details>
-<br>
-
-<details><summary><b>컨트롤러</b></summary>
-<div markdown="1">
-* @Controller : 스프링빈으로 등록, 핸들러 매핑 대상으로 기억
-* @RequestMapping, @GetMapping, @PostMapping 등등..  : HTTP 매핑
-  * **@RequestMapping을 클래스단**에 **@GetMapping, @PostMapping 을 메서드단**에 사용 권장
-    * @RequestMapping은 **전역으로 경로** 지정하기 좋기 때문
-    * @RequestMapping 은 GET,POST,PUT... 등 전부 허용하기 때문
-  * @PostConstruct : 테스트용 데이터를 코드 실행하자마자 바로 넣을 수 있음 (테스트하기 수월!)  
-    => 이름 그대로 생성자 생성된 후 시점으로 생각하자!
-* @RestController : 뷰로 반환하는게 아닌 HTTP Body에 반환값 기입반환 **(API 만들시 적극 권장)**
-  * @RestController는 @Contorller, **@ResponseBody** 등등을 포함하는 어노테이션
-* @PathVariable("userId"), @RequestParam => @PathVariable 방식 권장
-  - @RequestParam : 기존 url 쿼리 파라미터 방식 : ?userId=userA
-    - 단, POST-HTML Form 방식도 body를 쓰지만 쿼리 파라미터 형식으로 저장되기 때문에 @RequestParam 을 사용 가능
-    - 또한, 생략도 가능한데 **본인은 넣는걸 권장** 
-    - 값이 반드시 넘어오지 않아도 됨을 명시할 수 있음 (required=false)
-    - 기본값 설정도 가능 (defaultValue = "-1")!!
-      - 널 뿐만아니라 "/username=" 이렇게 "" 빈값으로 넘어온 데이터도 기본값을 설정해줌
-    - Map, MultiValueMap 형태로 값을 받아올수도 있음
-  - @PathVariable("itemId") : 최신 트랜드인 경로 변수 방식 : /mapping/userA
-    - 중요한점은 @PathVariable 로 매핑한 userA가 따로 Model을 활용하지 않아도,
-    - 백엔드뿐만 아니라 프론트에서도 userA값을 사용가능하단 점이다.
-      - 프론트에서 URL 문자열을 가져와 사용할 수 있으니까.
-    - 물론, 그냥 **Model을 항상 데이터 보내는 용도로 사용**하고,
-    - **@PathVariable을 url로 받은 값을 사용하는 목적**으로 활용하는게 젤 좋아보임.
-* @ModelAttribute("form")
-  * 모든 소스의 request parameter를 맵핑할 수 있다.(즉 GET, POST 둘 다 상관없지만 GET에 주로 사용)
-  * "초기화 -> 바인딩" 을 거치므로 값이 전달되지 않아도 초기화 값을 사용
-  * model.addAttribute 에도 담기고, form서밋 때 html에 있는 form 데이터를 매핑해서 변수에도 자동으로 담아줘서 변수선언도 따로 할 필요 없음
-  * 또한, @ModelAttribute 를 생략하고 바로 **HelloData** 가 와도 동일하게 가능
-  * **단, 너무 생략하면 햇갈릴 수 있어서 조심하자**
-<div markdown="1">
-```java
-public String modelAttributeV1(@ModelAttribute HelloData helloData) {
-  log.info(helloData.getUsername()); // 바로 변수 사용 가능!!
-}
-```
-</div>
-**참고로 특별한 사용법인 전역으로 Model에 항상 적용법**<br>
-물론 static으로 따로 구현해두는게 성능상 더 좋음
-<div markdown="1">
-```java
-@ModelAttribute("regions") // regions 이름으로 Model에 넣음
-public Map<String, String> regions() {
-  Map<String, String> regions = new LinkedHashMap<>();
-  regions.put("SEOUL", "서울");
-  regions.put("BUSAN", "부산");
-  regions.put("JEJU", "제주"); 
-  return regions;
-}
-```
-</div>
-* @RequestBody, @ResponseBody : HttpEntity 처럼 **HTTP 메시지 컨버터**가 **HTTP 메시지 바디**의 내용을 우리가 원하는 문자나 **객체 등으로 자동 변환**!!
-  * 요청파라미터 @RequestParam, @ModelAttribute 랑은 전혀 관계없으니까 혼동 X
-    * **왜냐하면, HTTP 메시지 Body 를 통해서 데이터가 넘어오는 경우이기 때문!!**
-  * **요청오는건 RequestBody, 응답으론 ResponseBody**
-    * **@RequestBody**를 활용할거면 꼭 Dto 형태 타입으로 인수 받을것(경험상)
-      * **ObjectMapper 필요없이 자동**으로 바꿔줘서 편리
-    * 요청으로 들어오는 json 데이터를 @RequestBody HelloData data 로 인해 Hellodata 객체로 바꾸고,
-    * 반환 타입을 String이 아닌 HelloData로 하면 @ResponseBody 로 인해 return할때 응답body에 문자로 넣어준다 했는데 덕분에 json로 집어넣어준다.
-    * 즉, json(요청)->객체->json(응답) 로 동작한다.
-  * **(핵심!) 만약 @ResponseBody 가 없으면 뷰 리졸버가 실행 되어서 뷰를 찾아서 렌더링!!**
-    * **참고로 @RestController 는 @ResponseBody 가지고있음!!**
-<div markdown="1">
-```java
-@ResponseBody
-@PostMapping("/request-body-json-v5")
-public HelloData requestBodyJsonV5(@RequestBody HelloData data) {
-  log.info(data.getUsername());
-  return data;
-}
-```
-</div>
-* 뷰 반환, 데이터 반환 정리
-  * **@Controller - View 반환**
-  * @Controller + @ResponseBody - Data 반환
-  * **@RestController - Data 반환**
-* 쿠키 편리하게 조회 **@CookieValue**
-</div>
-</details>
-
-<br>
-
-<details><summary><b>ETC</b></summary>
-<div markdown="1">
-* @Slf4j : 로그를 바로 log로 사용 가능
-  * **Log Level : error > warn > info(기본값) > debug > trace**
-  * 보통 debug를 "개발서버용", info를 "운영서버용" 으로 사용
-  * 기본값이 info라서 debug로 개발서버 프로필에 따로 설정 해주자
-* @NotEmpty("에러 메세지 관련")
-* @Data -> 롬복 -> **toString과 Equals오버라이딩도 자동**
-  * @Getter, @Setter, @ToString, @EqualsAndHashCode, @RequiredArgsConstructor 적용
-  * `member.equals(findMember)` 바로 사용 가능
-* @SpringBootApplication : 톰캣 내장(서버)
-* @Valid + @NotEmpty(message="회원 정보필수") 이런식으로 같이 사용
-  * 예전꺼라서 의존성 추가 필수
-  * `implementation 'org.springframework.boot:spring-boot-starter-validation'`
-* **@AllArgsConstructor : 생성자 대신 만들어줘서 필드만 선언**
-  * 참고로 EM 생성자 주입 방식인 `@RequiredArgsConstructor` 와 햇갈리지 말것
-* @Value : application.properties에 선언한 변수 사용
-* @EnableCaching : Spring Boot Cache 사용을 선언
-</div>
-</details>
-
-<br>
-
-<br>
-
-## Thymeleaf 로 웹 개발 TIP
-
-<details><summary><b>build.gradle 참고</b></summary>
-<div markdown="1">
-```groovy
-plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.0.2'
-	id 'io.spring.dependency-management' version '1.1.0'
-}
-group = 'com.dau'
-version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '17'
-configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
-}
-repositories {
-	mavenCentral()
-}
-dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-devtools' // 빠른 reload
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	runtimeOnly 'com.h2database:h2' // H2
-	// https://docs.spring.io/spring-boot/docs/current/reference/html/dependency-versions.html#appendix.dependency-versions.coordinates
-	implementation group: 'com.mysql', name: 'mysql-connector-j', version: '8.0.33' // MYSQL
-	//test lombok 사용
-	testCompileOnly 'org.projectlombok:lombok'
-	testAnnotationProcessor 'org.projectlombok:lombok'
-	// 검증기 사용
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation 'org.springframework.boot:spring-boot-starter'
-	// 캐시
-	implementation 'org.springframework.boot:spring-boot-starter-cache'
-}
-tasks.named('test') {
-	useJUnitPlatform()
-}
-```
-</div>
-</details>
-
-<br><br>
-
-### (1) HTTP 중요지식
-
-<details><summary><b>redirect vs forward</b></summary>
-<div markdown="1">
-- **비유 예시(고객:클라, 상담원:서버, 123or124:URL)**
-  - **첫번째 사례(redirect)**
-    1. 고객이 고객센터로 상담원에게 123번으로 전화를 건다.
-    2. 상담원은 고객에게 다음과 같이 이야기한다. "고객님 해당 문의사항은 124번으로 다시 문의 해주시겠어요?"
-    3. 고객은 다시 124번으로 문의해서 일을 처리한다.
-  - **두번째 사례(forward)**
-    1. 고객이 고객센터로 상담원에게 123번으로 전화를 건다.
-    2. 상담원은 해당 문의사항에 대해 잘 알지 못해서 옆의 다른 상담원에게 해당 문의사항에 답을 얻는다.
-    3. 상담원은 고객에게 문의사항을 처리해준다.
-* **redirect의 경우 최초 요청을 받은 URL1에서 클라이언트에 redirect할 URL2를 리턴하고, 클라이언트에게 전혀 새로운 요청을 생성하여 URL2에 다시 요청을 보낸다. 따라서 처음 보냈던 최초의 요청정보는 더이상 유효하지 않게된다.**
-  * web container는 redirect 명령이 들어오면 웹 브라우저에게 다른 페이지로 이동하라는 명령을 내린다.(첫번째 사례의 경우, 고객은 전화를 끊고 124번으로 다시 전화를 건다)
-    * 다른 web container에 있는 주소로 이동 가능(ex: 123 -> 124)
-  * 새로운 페이지에서는 request, response객체가 새롭게 생성된다.(123번에서 고객이 요청했던 문의사항은 사라지고 124번으로 다시 걸어서 요청한 문의사항을 다시 말해야한다.)
-* **forwar방식은 다음 이동한 URL로 요청정보를 그대로 전달한다. 말 그대로 forward(건네주기)하는 것이다. 그렇기 때문에 사용자가 최초로 요청한 요청정보는 다음 URL에서도 유효하다.**
-  * web container 차원**(서버단)**에서의 페이지 이동, 실제로 웹 브라우저는 다른 페이지로 이동했는지 알 수 없다.(두번째 사례의 경우, 고객은 상담원이 누구한테 물어봤는지 알 수 없다.)
-    * 동일한 web container에 있는 페이지로만 이동이 가능하다.
-  * 현재 실행중인 페이지와 forward에 의해 호출될 페이지는 request, response 객체를 공유한다.(고객이 요청한 문의사항은 고객이 전화를 끊을 때까지 유효하다.)
-* **차이점**
-  * URL의 변화여부: redirect(변화O), forward(변화X)
-  * 객체의 재사용여부 : redirect(재사용X), forward(재사용O)
-* **언제 사용하는게 바람직한가?**
-  * 시스템(session, DB)에 변화가 생기는 요청(로그인, 회원가입, 글쓰기)의 경우 **redirect**방식으로 응답하는 것이 바람직
-  * 시스템에 변화가 생기지 않는 단순조회(리스트보기, 검색)의 경우 **forward**방식으로 응답하는 것이 바람직
-</div>
-</details>
-<br>
-
-<details><summary><b>PRG Post/Redirect/Get - POST를 무한한 재요청 문제 해결 패턴</b></summary>
-<div markdown="1">
-* **웹 브라우저의 새로고침은 마지막 서버에 전송한 데이터를 다시 전송한다.**  
-* **따라서 POST 적용후 새로고침을 하면 계속 POST 보내는 문제가 발생하므로 이를 Redirect를 통해서 GET으로 요청하는 방식으로 해결할 수 있다.**
-  * Redirect를 사용해야지만 POST 보내는 URL을 벗어나기 때문!!
-* **RedirectAttributes 추천** -> Redirect는 원래 연결 끊어지니까 자원 재전송 필요시!!
-  * Redirect 할때 Model처럼 파라미터를 추가해서 간편히 넘겨줄 수 있고, URL 인코딩 문제에서 자유롭다!
-    * `"redirect:/basic/items/" + item.getId()` 는 인코딩 문제가 발생할 수 있는데,
-    * `"redirect:/basic/items/{itemId}"` 는 인코딩 문제에서 자유롭다.
-  * **특히 Status 정보를 파라미터로 넘김으로써 `th:if` 문법으로 "저장완료" 표시도 나타내는데 많이 사용한다.**
-    <div markdown="1">
-    ```java
-    // 저장 성공 상태를 파라미터로 전달 (파라미터로 URL에 추가됨)
-    // ex: URL...?status=success
-    redirectAttributes.addAttribute("status", "success");
-    <!-- "저장 완료" 메시지 표시 -->
-    <div th:if="${status == 'success'}">
-        <p>저장 완료!</p>
-    </div>
-    ```
-    </div>
-  * **따라서 Redirect 할때는 RedirectAttributes.addAttribute() 추천, html 반환(렌더링) 할때는 Model.addAttribute() 추천**
-    * `redirectAttributes.addAttribute` 는 파라미터로 전송되므로 **@RequestParam(defaultValue = "")** 등으로 간편히 사용가능!!
-    * 참고: `redirectAttributes.addFlashAttribute` 의 경우 불가능!! 파라미터 전송이 아니고 딱 한번 세션에 저장해서 전달하는 방식이라서!! 아마 @ModelAttribute로 받아질걸??
-</div>
-</details>
-<br>
-
-<details><summary><b>웹 브라우저에서의 redirect 특징</b></summary>
-<div markdown="1"><br>
-웹 브라우저는 3xx 응답의 결과에 **Location 헤더가 있으면, Location 위치로 자동 이동**한다.<br>
-<img src="https://github.com/user-attachments/assets/888d11b2-be6e-4089-b52b-5b6f852e9eb3" alt="Image" style="zoom:80%;" />
-<br>
-1. url : /event로 get을 요청
-2. 하지만 url이 /event에서 /new-event로 바뀌어서 서버가 다시 Location으로 응답
-3. 자동 리다이렉트로 url 변경, 클라이언트 단에서 스스로 자동 리다이렉트
-4. 다시 /new-event로 get 요청 -> 처음부터 다시 요청한다.
-5. 정상적으로 성공했기에 200 OK 응답
-</div>
-</details>
-
-<br>
-
-**Content-Type 헤더 기반 Media Type 과 Accept 헤더 기반 Media Type**
-
-* text/html, application/json 같은 content-type 을 의미
-* **요청때나 응답할때나 body를 사용할때는 필수로 존재 및 서로 맞게 요청해야 함**
-
-<br>
-
-**API URI 설계에는 "리소스"가 중요하다. "행위"는 메서드(get, post 등)로 구분하자.**  
-**단, 실무에서는 행위(동사)를 URI에 작성해야 할 때도 좀 있는데 이를 "컨트롤 URI"라 부른다.**
-
-<details><summary><b>HTTP로 클라이언트 -> 서버 데이터 전송 4가지 상황 (참고: 전달 방식은 크게 2가지-쿼리 파라미터, 메시지 바디)</b></summary>
-<div markdown="1"><br>
-1. **정적** 데이터 조회 -> 쿼리 파라미터 미사용
-   - 이미지, 정적 텍스트 문서
-2. **동적** 데이터 조회 -> 쿼리 파라미터 사용
-   - 주로 검색, 게시판 목록에서 정렬 필터(검색어)
-3. **HTML Form**을 통한 데이터 전송 -> GET은 쿼리 파라미터로, POST는 메시지 바디로 자동 작성!
-   - 회원 가입, 상품 주문, 데이터 변경 
-   - Content-Type: application/x-www-form-urlencoded
-     - form의 내용을 메시지 바디를 통해서 전송(POST로 해보면 나옴)
-     - 전송 데이터를 url encoding 처리
-       - 예) abc김 -> abc%EA%B9%80
-   - Content-Type: multipart/form-data
-     - 파일 업로드 같은 바이너리 데이터 전송시 사용
-     - 다른 종류의 여러 파일과 폼의 내용 함께 전송 가능(그래서 이름이 multipart)
-4. **HTTP API**를 통한 데이터 전송 -> 이하 동문
-   - 회원 가입, 상품 주문, 데이터 변경
-   - 서버 to 서버, 앱 클라이언트, 웹 클라이언트(Ajax)
-   - Content-Type: application/json
-</div>
-</details>
-
-<details><summary><b>HTTP API 설계 2가지로 "컬렉션 기반"과 "스토어 기반" (+HTML FORM)</b></summary>
-<div markdown="1"><br>
-**크게 2가지로 "컬렉션 기반"과 "스토어 기반"으로 나눠볼 수 있다. (대부분 컬렉션 방식 씀)**<br>
-**HTML FORM 방식은 애초에 GET, POST만 지원한다. (PUT기반 아니니까 컬렉션이지)**
-<br>
-**1. API 설계 - 컬렉션 기반(POST)**
-- 회원 목록 /members -> GET  
-  회원 등록 /members -> POST  
-  회원 조회 /members/{id} -> GET  
-  **회원 수정 /members/{id} -> PATCH, PUT, POST**  
-  회원 삭제 /members/{id} -> DELETE
-  - **회원 수정에 개념적으론 PATCH 사용이 제일 좋다.**
-- 클라이언트는 등록될 리소스의 URI를 모른다.
-  - 회원 등록 /members -> POST
-  - POST /members
-- **서버가 새로 등록된 리소스 URI를 생성**해준다.
-  - HTTP/1.1 201 Created   
-    Location: /members/100
-- 컬렉션(Collection)
-  - 서버가 관리하는 리소스 디렉토리
-  - 서버가 리소스의 URI를 생성하고 관리
-  - 여기서 **컬렉션은 /members**
-<br>
-**2. API 설계 - 스토어 기반(PUT)**
-- 파일 목록 /ﬁles -> GET  
-  파일 조회 /ﬁles/{ﬁlename} -> GET  
-  파일 등록 /ﬁles/{ﬁlename} -> PUT  
-  파일 삭제 /ﬁles/{ﬁlename} -> DELETE  
-  파일 대량 등록 /ﬁles -> POST
-- 클라이언트가 리소스 URI를 알고 있어야 한다.
-  - 파일 등록 /ﬁles/{ﬁlename} -> PUT
-  - PUT /ﬁles/star.jpg
-- **클라이언트가 직접 리소스의 URI를 지정**한다.
-- 스토어(Store)
-  - 클라이언트가 관리하는 리소스 저장소
-  - 클라이언트가 리소스의 URI를 알고 관리
-  - 여기서 **스토어는 /ﬁles**
-<br>
-**3. HTML FORM 사용 - GET, POST**
-- 회원 목록     /members -> GET  
-  **회원 등록 폼 /members/new -> GET**  
-  **회원 등록     /members/new, /members -> POST**  
-  회원 조회     /members/{id} -> GET  
-  회원 수정 폼 /members/{id}/edit -> GET  
-  회원 수정     /members/{id}/edit, /members/{id} -> POST  
-  회원 삭제     /members/{id}/delete -> POST
-  - URI 안바뀌는 /members/new 방식을 좀 더 선호하고, /members로 등록하는 사람도 있음.
-  - GET, POST만 지원하니까 이런 제약을 해결하고자 동사를 사용한 **컨트롤 URI 방식도 많이 사용.**
-<br>
-**참고 문서: https://restfulapi.net/resource-naming**
-- 문서(document)
-  - 단일 개념(파일 하나, 객체 인스턴스, 데이터베이스 row)
-  - 예) /members/100, /ﬁles/star.jpg
-- 컬렉션(collection) -> **주로 이 방식만 접할거임.ㅇㅇ.**
-  - 서버가 관리하는 리소스 디렉터리
-  - 서버가 리소스의 URI를 생성하고 관리
-  - 예) /members
-- 스토어(store) 
-  - 클라이언트가 관리하는 자원 저장소
-  - 클라이언트가 리소스의 URI를 알고 관리
-  - 예) /ﬁles
-- 컨트롤러(controller), 컨트롤 URI
-  - 문서, 컬렉션, 스토어로 해결하기 어려운 추가 프로세스 실행
-  - 동사를 직접 사용
-  - 예) /members/{id}/delete
-</div>
-</details>
-
-<br><br>
-
-### (2) Thymeleaf 문법
-
-**타임리프 문법**
-
-* **핵심** : 서버로 실행(뷰 템플릿 사용)하면 타임리프 문법들이 적용해서 **동적으로 변경!**
-  
-  * 스프링 부트는 "뷰 리졸버" 를 자동 등록하는데, 이때 설정파일에 등록한  `spring.mvc.view.prefix , spring.mvc.view.suffix` 정보를 사용해서 등록한다.
-  * "뷰 리졸버" 에 **필요한 "경로" 를 설정**하는 부분인데 요즘 Thymeleaf 는 이것도 자동으로 등록해줘서 설정할 필요가 없다.
-    * **혹시나 JSP 사용할 경우에는 이부분 기억해두자.**
-  
-* **타임리프 사용 선언**
-  
-  * `<html xmlns:th="http://www.thymeleaf.org">`
-  
-* **속성 변경**
-
-  * `th:href="@{/css/bootstrap.min.css}"`
-  * `th:onclick="|location.href='@{/basic/items/add}'|"`
-  * `<td th:text="${item.price}">10000</td>`
-  * `th:value="${item.id}"`
-  * `th:action`
-  * ... 등등 매우 다양
-  
-* **URL 링크표현식 - @{...}**
-  
-  * `th:href="@{/css/bootstrap.min.css}"`
-  * `th:href="@{/basic/items/{itemId}(itemId=${item.id})}"`
-    * 생성된 링크: `http://localhost:8080/basic/items/1`
-  * `th:href="@{gallery/productDetail/(id=${item.id})}"`
-    * 생성된 링크: `http://localhost:8080/gallery/productDetail/?id=1`
-    * 심화) `th:href="@{/basic/items/{itemId}(itemId=${item.id}, query='test')}" `
-      * 위 2개 둘 다 사용한 방식임. **{itemId}(itemId=${item.id})랑 (id=${item.id})**
-      * 생성된 링크: `http://localhost:8080/basic/items/1?query=test`
-  * **간편) `th:href="@{|/basic/items/${item.id}|}"`**
-    * **"리터럴 대체" 문법도 적용가능 => 이거 함께 쓰자(아래 참고)**
-  
-* **리터럴 대체 - \|\...\|**
-  
-  * 타임리프에서 **문자**와 **표현식** 등은 분리되어 있기 때문에 **더해서 사용**해야 한다.
-    * `<span th:text="'Welcome to our application, ' + ${user.name} + '!'">`
-  * 다음과같이 리터럴 대체문법을 사용하면, **더하기 없이 편리**하게 사용할 수 있다.
-    * `<span th:text="|Welcome to our application, ${user.name}!|">`
-    * `th:onclick="|location.href='@{/basic/items/{itemId}/edit(itemId=${item.id})}'|"`
-  
-* **변수표현식 - ${...}**
-
-  * `<td th:text="${item.price}">10000</td>`
-  
-* **반복출력 - th:each**
-
-  * `<tr th:each="item : ${items}">`
-  
-  * 컬렉션의 수 만큼 `<tr>..</tr>` 이 하위 태그 반복 생성!
-  
-  * ```html
-    <table>
-        <tr th:each="item : ${items}">
-            <td th:text="${item.id}"></td>
-            <td th:text="${item.name}"></td>
-            <td th:text="${item.price}"></td>
-        </tr>
-    </table>
-    ```
-  
-* **조건문 - th:if or Default**
-  
-  * **th:if 문들은 false인 경우 아예 태그를 렌더링을 안함. 그럴 경우 사용!!**  
-    param?의 ?는 null safe 처리 지원
-    * `<h2 th:if="${param?.status}" th:text="'저장 완료'"></h2>`
-    * `<h2 th:unless="${param?.status}" th:text="'저장 실패'"></h2>`
-  * **삼항 연산자 + Default(=Elvis 연산자) 경우**
-    * 삼항 연산자: `th:text="|B1 ~ B${(totalCount!=null) ? (totalCount/10+1) : '??'}F|"`
-      * 실제로 **B1 ~ B4F** 이런식으로 출력
-    * Default(=Elvis 연산자) 활용 : `th:text="|B1 ~ B${(totalCount) ?: '??'}F|"`
-      * Default는 **totalCount**가 유효한 값이 있으면 그 값을 사용!<br>0이거나 null이면 **"??"가 출력!** -> 즉, 자동으로 null을 잡아줌! 
-      * 다만, `(totalCount/10+1)` 이라면?<br>null/10+1 로 에러떠서 이런 경우는 위처럼 **it-then-else 사용**
-    * 추가정보) `"${data}? : _"` 라면? 
-      * No-Operation : "_" 로써 마치 타임리프 실행 안한것처럼 동작
-  
-* **변수선언 - th:with**
-  
-  * `th:with="first=${users[0]}"` -> frist 로 재사용 가능
-  
-  * ```html
-    <div th:with="first=${users[0]}">
-        <p th:text="${first.name}">User Name</p>
-    </div>
-    ```
-  
-* **태그 인식 유무 - text, utext == [[...]], [(...)]**
-  
-  * text vs utext -> 속성 사용
-    - th:text = Hello \<b>Spring!\</b>
-    - th:utext = Hello **Spring!** -> 진하게 태그(\<b>) 자동 적용된 모습
-  
-  * [[...]] vs [(...)] -> 속성이 아니라 컨텐츠 안에서 직접 출력!
-    - [[...]] = Hello \<b>Spring!\</b>
-    - [(...)] = Hello **Spring!**
-  
-* **편의 객체 제공 - param, session 등**
-  
-  * `param.title` 같이 파라미터 바로 접근 가능하게 **편의 객체를 제공**
-  * `session.user.name` 은 세션 바로 접근
-  
-* **비교연산(ex: >) - HTML 엔티티 주의!!** 
-  
-  * `>` : gt 로 표기 한다.
-  
-* **타임리프 파서 주석 :** `<!--/* [[${data}]] */-->`
-  
-  * 참고로 `/*사이에서 여러줄 가능*/`
-  * 일반 HTML 주석과 비슷하지만, `/*`와 `*/` 사이에 있는 내용은 **타임리프의 파서에 의해 처리 된 후 렌더링 때 삭제**되는 것
-  
-* **블록 - \<th:block>**
-  
-  * `<th:block>` 는 타임리프가 제공하는 유일한 자체 **"태그"**
-  
-  * **렌더링 할때는 아예 태그가 삭제**
-  
-  * **\<div> 로 데이터 잘 표현 했을 경우 \<th:block> 추가하면 깔끔**
-  
-  * ```html
-    <!-- 렌더링 후 아래 div 태그만 남게 되는 것 -->
-    <th:block th:each="item : ${items}" th:object="${item}">
-      <div th:class="${item.id==items[0].id}? 'gallery-item-first' : 'gallery-item-many'" style="flex:1; padding-top: 30px;">
-      </div>
-    </th:block>
-    ```
-  
-* **fragment, js**
-  
-  * fragment : 코드 재사용
-  
-    * fragment생성: `<head th:fragment="head(title)">`
-  
-    * ```html
-      <!DOCTYPE html>
-      <html xmlns:th="http://www.thymeleaf.org">
-        <head th:fragment="head(title)">
-          <!-- Required meta tags -->
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1">
-      
-          <!-- Bootstrap CSS -->
-          <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
-      
-          <!-- 커스텀(기본) CSS -->
-          <link rel="stylesheet" type="text/css" media="all" 
-                href="../static/basic.css" th:href="@{/basic.css}"/>
-      
-          <title th:text="${title}">타이틀 화면</title>
-      
-        </head>
-        <body>    
-        </body>
-      </html>
-      ```
-  
-    * fragment 적용: `<head th:replace="fragments/head :: head('스튜디오')">`<br>**fragments/head** 는 **resources/templates/fragments/head.html** 경로를 의미
-  
-    * ```html
-      <head th:replace="fragments/head :: head('스튜디오')">
-      </head>
-      ```
-  
-  * js : 타임리프 문법 inline으로 javascript 에서 사용 가능 + css도 마찬가지
-  
-    * ```html
-      <script th:inline="javascript">
-      var pageCount = /*[[${(totalCount/10)+1}]]*/ null;
-      // 물론, /* */ 주석을 제거해도됨. 단지 빨간줄 떠서 추가함.
-      ```
-  
-* **\<input>과\<label> 에서 th:for로 id값 연결 하는 편 -> 보통 form 에 잘 구성**
-  
-  * 동적 id 인식도 지원 됨! - `#ids.prev()`
-  
-  * 참고: \#ids.prev('regions')를 사용한 이유는 label에서 for 속성에 input의 id 속성과 맞추기 위해서 입니다.
-  
-    이것을 맞추어 두어야 label을 선택했을 때, 그러니까 **글자를 선택했을 때도 input 요소가 선택되기 때문**입니다.
-  
-  * HTML의 기본 동작: `label`의 `for` 속성이 `input`의 `id`와 일치하면, 사용자가 `label`을 클릭할 때 브라우저가 자동으로 해당 `input` 요소에 포커스를 주도록 설계되어 있습니다.
-  
-    ```html
-    <!-- 대충 이런느낌으로 연결 해두면 된다는 거~! -->
-    <div class="container" th:each="region : ${regions}">
-        <label th:for="${region.id}">지역 선택:</label>
-        <input type="text" th:id="${region.id}" placeholder="지역을 입력하세요">
-    ```
-  
-* **보통 \<table> \<tr> \<td> \<th> 형태로 데이터를 표현** 
-
-* **젤 중요!! th:field 는 "검증"에 매우 유용해서 그냥 사용가능하면 무조건 사용**<br>**여러개 쓸땐 th:object로 관리쉽게끔 함께 고고**
-  
-  * value 속성에 값 자동 삽입 + **id, name 속성 자동 생성** + 체크박스도 자동체크 등 -> **input태그나 체크박스**에 주로 사용 (그냥 다 사용하면 되긴 해~)
-  * `*{...}` : 선택 변수 식으로써 **th:object** 에서 선택한 객체에 접근
-    * **\*\{\{...}}**: `*{date1}` 은 @DateTimeFormat 표현식(타입컨버터)이 안 먹히기 때문에 \*\{\{date1}} 로 지정하는 것이다.
-
-<br>
-
-
-**타임리프 + 스프링 통합 문법**
-
-* **th:object, th:field, *{itemName} 활용**
-  
-  * Form과 함께 Input, 체크박스, 라디오버튼, 셀렉트 박스에서 주로 활용
-  * TIP) addForm, editForm 이렇게 2개 따로 만드는게 개발하기 수월
-  
-* **(중요)"메시지, 국제화 기능"**
-  
-  * `application.properties` 에 `spring.messages.basename=messages` 를 추가!!
-  * `messages.properties` 를 생성해서 messages에 담을 내용을 세팅
-    * properties에 `page.addItem=상품 등록` 메시지 추가
-    * 타임리프로 `<h2 th:text="#{page.addItem}">상품 등록</h2>` `
-  * 여러개 추가할거면?? 예로 errors.properties 추가한다고 하면 =message, errors 이렇게 이어적으면 됨
-  
-* **(참고) nullsafe**
-  * `th:if="${errors?.containsKey('globalError')}"` 에서 ?를 통해 null 로 나타나므로 if는 false로 반환
-  * ?가 없으면 null.containesKey... 로 에러
-
-* **"컨트롤러"에서 @GET** 으로 페이지 로딩할때 **item을 빈값이라도 선언**해둬서 Model에 담아 반환하는걸 권장
-
-  * **검증 실패 때 forward로 "자원 재활용"이 됨.**
-
-  * HTML 코드도 더 깔끔 -  if문으로 null인지 확인하는 코드 필요없이 그냥 item을 타임리프 문법으로 사용하면 되기때문
-
-  * **Model에 빈 객체를 미리 담아 전달**하면, 타임리프가 폼을 렌더링할 때 **객체가 null인지 확인할 필요 없이 바로 사용할 수 있기 때문 (코드 더 깔끔)**
-
-    * **폼 페이지에서 제출된 데이터**가 검증에 실패하면, 다시 폼 페이지로 돌아가야 합니다. 이때, 새로운 GET 요청(redirect)을 발생시키지 않고, **forward**로 같은 페이지를 다시 렌더링합니다.
-    * 이렇게 하면 **입력한 값들이 그대로 유지**되므로, 사용자는 데이터를 다시 입력할 필요가 없습니다.<br>타임리프에서 `th:field`를 사용하면, **검증 실패 시 자동으로 폼 필드에 사용자가 입력한 값**을 다시 채워줍니다. 이게 가능하려면, 컨트롤러에서 **빈 값이 아닌 객체**를 넘겨주는 것이 중요합니다.
-
-  * ```java
-    @Controller
-    public class ItemController {
-    
-        @GetMapping("/items/new")
-        public String showItemForm(Model model) {
-            // 빈 Item 객체를 Model에 추가
-            model.addAttribute("item", new Item());
-            return "itemForm";  // form 템플릿을 반환
-        }
-    
-        @PostMapping("/items/new")
-        public String createItem(@ModelAttribute("item") Item item, 
-                                 BindingResult bindingResult,
-                                 RedirectAttributes redirectAttributes) {
-            // 검증 실패 시
-            if (bindingResult.hasErrors()) {
-                return "itemForm";  // 다시 폼을 forward하여 자원 재활용
-            }
-    
-            // 성공적으로 저장한 후
-            redirectAttributes.addAttribute("status", "success");
-            return "redirect:/items/" + item.getId();
-        }
-    }
-    ```
-
-  * ```html
-    <form th:object="${item}" th:action="@{/items/new}" method="post">
-        <label for="name">Item Name</label>
-        <input type="text" th:field="*{name}" id="name" />
-    
-        <label for="price">Price</label>
-        <input type="number" th:field="*{price}" id="price" />
-    
-        <button type="submit">Save</button>
-    </form>
-    ```
-
-<br><br>
-
-### (3) Thymeleaf TIP - 필독!
-
-참고 공식문서: [부트스트랩 공문](https://getbootstrap.com/docs/5.3/components/navbar/#toggler), [타임리프 공문](https://www.thymeleaf.org/doc/tutorials/3.1/usingthymeleaf.html#including-template-fragments)
-
-반환타입 void일 때: 자동으로 뷰리졸버는 요청URL과 동일한 뷰를 탐색해서 반환! (직접 String반환 안해도!)
-
-**웹 개발은 VSCode(정적) + IntelliJ(동적)로 개발 -> 본인은 그냥 IntelliJ로 개발! (캐시설정ㄱㄱ)**
-
-- **보통 VSCode 가 html 문법 잘 지원해서(플러그인 다양함+Go Live로 바로 실행 지원) 이것으로 개발<br>IntelliJ는 서버 실행하여 Thymeleaf 문법 적용할 때 주로 사용**
-  - 근데, 이것도 캐시만 잘 설정하면 reload를 빠르게 가능!! -> 본인은 그래서 IntelliJ로 개발
-  - 배포할땐 꼭 true로!! : `spring.thymeleaf.cache=false`,  `spring.thymeleaf.prefix=file:src/main/resources/templates/`
-
-- **서버 동작 없이 html(정적)에서 텍스트 확인 위해 span태그 사이에 "23.05.22.16:00k"입력까지 한 것**<br>**\<span class="pt-2" th:field="\*\{\{date1}}" th:text="*\{\{date1}}">23.05.22.16:00k\</span>**
-
-<br>
-
-**반응형 웹 개발을 위해 "부트스트랩(+인라인스타일링)"+"basic.css(전체), 커스텀.css(부분)"**
-
-* 부트스트랩은 자동으로 반응형(해상도)에 맞게 스타일 지정되어 있다. 따라서 가져다 사용만 하면 됨!<br>**단, 원하는 스타일대로 커스텀하고 싶다면 “부트스트랩 문법에 인라인 style" or "일반 CSS를 직접 커스텀” 하자.** 이때, 반복(재사용)되는것들만 일반CSS로 따로 커스텀하고, 그게 아니면 부트스트랩 사용하면서 인라인 스타일로 바로 작성하는게 좋겠다.
-* **본인은 보통 basic.css로 전체 페이지에 적용할 css파일 만들고, 부분적으로 커스텀할 부분은 gallery.css같이 해당 페이지명으로 만들어서 적용 중이다.**
-
-  <details><summary><b>주의점?</b></summary>
-  <div markdown="1">
-  - **부트스트랩**은 수 많은 것을 **자동 제공!!**
-    - 일반적인 방식 `font-size:100px;` 는 `100px`로 글자가 **"고정"**
-      - **따라서 반응형 웹 CSS는 원래 em, rem, vw, vh 같은 단위를 사용해줘야 한다.**
-        - **em은 "부모"의 font-size의 크기에 따라서 결정**
-        - **rem은?? -> em과 동일하지만 제일 root 부모의 font-size를 따름**
-        - **vw, vh는 뷰포트 화면(장치:예로 브라우저)크기에 따라 사이즈 결정됨**
-      - **따라서 본인은 `vw, vh`로 "부모"부분 먼저 크기 결정후 `em`으로 "자식" 부분 크기 결정** (장치 기준이 젤 부모가 되는게 좋다고 생각해서)
-    - 부트스트랩 방식 `fs-1, fs-2 등` 은 **"반응형"** 으로 글자 크기 제공 (fs: font-size)
-    - 부트스트랩만으로 해결이 안되어서 **css 혼합하여 커스텀 예시**
-      - `<div class="d-flex custom-header-flex">`
-      - **d-flex**는 부트스트랩이 제공하는 display:flex를 의미 (flex:1을 지원안함 ㅠ)
-      - 따라서 **custom-header-flex** 부분은 style태그로 따로 flex:1을 적용한 방식
-  - **스타일 우선순위**: inline stylet속성 -> style태그 -> css파일 (차례대로 우선순위)
-  - **class, id 별 접근자**: id=#, class=.
-  - **웹 폰트 적용??**: `font-family: 'SUITE-Regular', sans-serif;` 로써 해당 우선순위대로 폰트 적용 (suite 폰트는 외부파일)
-  - **전역 변수 정의??: basic.css**
-      <div markdown="1">
-      ```css
-      // 글꼴, 색상, 스타일 전역변수 정의
-      @font-face {
-        font-family: 'SUITE-Regular';
-        /* src: url('../static/SUITE-Regular.woff2') format('woff2'); */
-        src: url('/SUITE-Regular.woff2') format('woff2');
-        font-weight: 400;
-        font-style: normal;
-      }
-      :root {
-        --line: #393A40;
-        --main-1: #0C0C0C;
-        --main-2: #323338;
-        --text-2: #8E8F9B;
-      }
-      ```
-      </div>
-  - `&times;` **는 "X" 표시**: close 버튼을 이것으로 입력된 구조가 많음
-  - **웹(프론트)에서의 검증(ex:비밀번호)**: 정규식 검사하는 js 문법 활용
-    - `onkeypress` 방식을 사용! 단, 복붙을 구별X. 따라서 서버단에서도 추가 검증이 더욱 안전
-      <div markdown="1">
-      ```html
-      <input type="password" class="no-spin" th:field="*{password}" id="password" name="password" pattern="\d+" required onkeypress='return checkNumber(event)'/>
-      <script th:fragment="scripts3">
-        // 비밀번호 정규식 등록
-        function checkNumber(event) {
-          var pw = event.key
-          if (/^\d+$/.test(pw)) {
-              return true;
-            } else {
-              return false;
-            }
-          return false;
-        }
-      </script>
-      ```
-      </div>
-  * **텍스트 가로유지(텍스트 크기 초과 방지)**: `white-space: nowrap;` 스타일 적용
-  * **flex로 0.98:0.02 로 비율 나눠도 덮어 씌어질 경우**: `max-width:92%` 로 해결
-  * **hover, active 문법 실수 조심** : `.page-link:hover` 과 `.page-link.active` 처럼 hover은 ":", active는 "." 사용
-  * **백그라운드 컬러 변경으로 개발 테스트 용이**: `bg-info, primary, secondary` 등으로 간편하게 적용!
-  * **border은 항상 style을 지정**:  `solid` 나 굵기는 `width` 함께해야 잘 적용!
-  </div>
-  </details>
-
-<br>
-
-**Page 생성 기본!!**
-
-- **HTML 태그 위치별 기본 사용 구조**
-
-  - **\<html>** → thymeleaf 선언
-
-    - **\<head>**
-
-      - **\<meta>** → utf-8(문자인코딩), viewport(모바일 뷰크기 설정) : 이 2개는 필수 사용
-
-      - **\<link>** → 주로 bootstrap(css), 커스텀css(ex:/basic.css) 선언
-
-        - bootstrap(js)의 경우 \<script>에서!!!!
-
-        - **css코드 예시?! basic.css, custom.css**<br>basic은 전역(기본) css, custom은 basic말고 적용하려고 추가로 만든 css
-
-          <details><summary><b>basic.css → 글꼴, 색상, 스타일 전역변수 정의도 함!</b></summary>
-          <div markdown="1">
-          ```css
-          /*
-           * 글꼴, 색상, 스타일 전역변수 정의
-           */
-          @font-face {
-            font-family: 'SUITE-Regular';
-            /* src: url('../static/SUITE-Regular.woff2') format('woff2'); */
-            src: url('/SUITE-Regular.woff2') format('woff2');
-            font-weight: 400;
-            font-style: normal;
-          }
-          :root {
-            --line: #393A40;
-            --main-1: #0C0C0C;
-            --main-2: #323338;
-            --text-2: #8E8F9B;
-          }
-          /*
-           * Base structure
-           */
-           body {
-              background-color: var(--main-1);
-              /* SUITE 못 찾으면 sans-serif 사용 */
-              font-family: 'SUITE-Regular', sans-serif;
-              margin-top: 15vh;
-           }
-           .field-error {
-              color: red; font-weight: 700; padding:10px;
-           }
-          /*
-           * Header
-           */
-            nav {
-              border-left-width: 0px;
-              border-right-width: 0px;
-              border-top-width: 0px;
-              border-bottom-width: 0px;
-              border-style: solid;
-              border-color: var(--line);
-            }
-            .nav-item {
-              position: relative;
-              text-align: center;
-              font-size: 1.2vw;
-              width: 15vw;
-              padding: 20px;
-              padding-bottom: 30px;
-            border-left-width: 0px;
-            border-right-width: 1px;
-            border-top-width: 0px;
-            border-bottom-width: 0px;
-            border-style: solid;
-            border-color: var(--line);
-          }
-          /* 여기서 header는 navbar-nav 의 높이를 기준으로 정해진다고 볼 수 있음 */
-          .navbar-nav {
-            height: 15vh;
-          }
-          #nav-item-first {border-left-width: 1px; }
-          .nav-link {
-            color: white; font-weight: 700;
-          }
-          #custom-nav-item:hover,
-          #custom-nav-item:active,
-          #custom-nav-item.visited {
-            background-color: var(--main-2);
-          }
-          .nav-item-inner {
-            position:absolute; 
-            bottom:0;
-            left:0;
-            font-size: 0.7em;
-            color:white; font-weight: 400; letter-spacing: -0.14px; opacity: 0.6;
-            padding: 16px;
-          }
-          /*
-           * Main
-           */
-              .custom-container-default {
-              padding-top: 5vh;
-              padding-bottom: 5vh;
-              padding-left: 15vw;
-              padding-right: 15vw;
-              }
-              #enterBtn {
-              background-color: var(--main-1); color: white;
-              border-radius: 0px;
-              }
-              #enterBtn:hover{
-              background-color: white;
-              color: var(--main-1);
-              border-radius: 10px;
-              }
-            /* 모달에 스타일링 */
-            /* 스크롤을 숨기는 스타일 */
-            .no-scroll::-webkit-scrollbar {
-            width: 0px;
-            }
-            /* 스핀 버튼 숨기기 */
-            input[type="number"]::-webkit-inner-spin-button,
-            input[type="number"]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            }
-            /*
-          * Footer
-          */
-          .custom-footer {
-            color:var(--text-2);
-            display: flex;
-            justify-content: center; 
-            align-items: center; 
-            border-style: solid;
-            border-top-width: 1px;
-            border-left-width: 0px;
-            border-right-width: 0px;
-            border-bottom-width: 0px;
-            border-color: var(--line);
-            margin-left: 15vw; /* custom-container-default 의 padding 과 너비 맞출것 */
-            margin-right: 15vw;
-          }
-          ```
-          </div>
-          </details>
-          
-          <details><summary><b>custom.css(=gallery.css)</b></summary>
-          <div markdown="1">
-          ```css
-          .gallery-item-first{
-            display: flex;
-            flex-direction: row;
-            padding-top: 20px;
-            padding-bottom: 30px;
-            /*height: 25vh;*/
-          }
-          .gallery-item-many{
-            display: flex;
-            flex-direction: row;
-            padding-top: 20px;
-            padding-bottom: 30px;
-            /*height: 25vh;*/
-            /* first와 차이점은 아래 border부분뿐 */
-            border-color: var(--line);
-            border-style: solid;
-            border-left-width: 0px;
-            border-right-width: 0px;
-            border-bottom-width: 0px;
-            border-top-width: 1px;
-          }
-          .page-link{
-          background-color: var(--main-1);
-          border-width:0px;
-          font-weight: 500;
-          text-align: center;
-          color:white;
-          }
-          .page-link.active{
-          background-color: white;
-          color:var(--main-1);
-          }
-          .page-link:hover{
-          background-color: var(--main-2);
-          color:white;
-          }
-          ```
-          </div>
-          </details>
-
-      - **\<title>** → 브라우저의 URL링크 상단바에 실제 제목
-
-    - **\<body>** → 배경색, 커서 설정하기 좋지, 전체 폰트도~!
-
-      - **\<style>** → css처럼 스타일링. 위 \<link> 스타일 보다 더 높은레벨 (실제 \<div style=""> 처럼 태그안에 스타일은 최상위레벨)
-      - **\<nav>** → header 부분으로 시작~!
-      - **\<div class="container">** 처럼 이제 쭉 레이아웃 형성 + 실제 웹 화면 구성 ㄱㄱ
-      - **\<footer>** → 마지막은 footer로 마무리~!
-
-    - **\<script>** → javascript 관련 모든 것 (+jquery, bootstrap 설치도 포함)
-       bootstrap4까지는 jquery 사용 때문에 jquery먼저 설치코드 필요하지만, bootstrap5부터는 그런 의존성 없애서 꼭 상관없다~
-       **물론, jquery 유용하니까 항상 설정하는것도 좋지.**
-
-    <details><summary><b>html 전체 코드</b></summary>
-    <div markdown="1">
-    ```html
-    <!doctype html>
-    <html xmlns:th="http://www.thymeleaf.org">
-      <head th:replace="fragments/head :: head('갤러리')">
-      </head>
-      <body>
-        <style>
-          .page-link{
-            font-size:1.2vw;
-            padding: 1vw;
-          }
-          /* body태그, id=enterBtn 에 적용 */
-          @media all and (min-width: 1921px) and (max-width: 4096px) {
-              body, #enterBtn {
-                  cursor: url('/cursor.svg') 10 60, auto;
-              }
-          }
-          @media all and (max-width: 1920px) {
-              body, #enterBtn {
-                  cursor: url('/cursor_1920.svg') 10 60, auto;
-              }
-          }
-        </style>
-        <!-- header -->
-        <nav th:replace="fragments/header :: header">
-        </nav>
-        <!-- main 개발 -->
-        <!-- 메인 그림 -->
-        <div class="container-fluid p-0">
-          <img class="img-fluid" src="../static/6.png" 
-            th:attr="src=@{/6.png},title=#{logo},alt=#{logo}"
-          style="width:100%;"/>
-        </div>
-        <!-- 본문  -->
-        <div class="custom-container-default">
-          <!-- 제목(층수) -->
-          <div class="d-flex flex-column" style="min-height: 0vh; padding-bottom: 5vh;">
-            <div class="container" style="text-align: center;">
-            ...
-            </div>
-          </div>
-          <!-- 작품 나열 -->
-          <div class="d-flex flex-column" style="min-height: 80vh;"
-          th:replace="fragments/item :: item">
-            <div class="gallery-item-first">
-              ...
-            </div>
-            <div class="gallery-item-many">
-              ...
-            </div>
-          </div>
-          <!-- pagination -->
-          <br><br><br><br>
-          <nav aria-label="Page navigation">
-            <ul id="dyn_ul" class="pagination" style="justify-content: center;">
-            </ul>
-          </nav>
-        </div>
-        <!-- footer -->
-        <footer th:replace="fragments/footer :: footer"
-        class="custom-footer">
-        </footer>
-        <!-- Jquery CDN 로드 : 항상 최신 버전 사용 -->
-        <script th:replace="fragments/scripts :: scripts4" src="https://code.jquery.com/jquery-latest.min.js"></script>
-        <!-- bootstrap5(JS) CDN 로드 -->
-        <script th:replace="fragments/scripts :: scripts1"  src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous">
-        </script>
-        <script th:replace="fragments/scripts :: scripts2">
-          // nav 클릭때마다 배경색 변경 커스텀
-          // 스크롤시 NavBar 불투명도 변경
-        </script>
-        <!-- 페이징 -->
-        <!--    var pageCount = /*[[${(totalCount/10)+1}]]*/ null; // 총 페이지 크기 -> 통신으로 받음-->
-        <script th:inline="javascript">
-        ...
-        </script>
-      </body>
-    </html>
-    ```
-    </div>
-    </details>
-
-- **conatiner+flex+position?! -> div태그로 class=container 사용해서 레이아웃 구성 꼭 해주고! 필요에 따라 flex, position사용을 하면서 구현 ㄱㄱ**
-
-  - **container** 는 보통 위에서 아래로 쌓지. 그럼 내부엔 수직, 수평, 절대위치로 삽입하고 싶다?
-  - 난 grid는 안쓰고 **flex** 사용해서 하는중. **아래 속성도 유용함.**
-    - `text-center` : 텍스트 중앙 정렬(좌우)
-    - `align-items-start,center,end` : items 정렬이므로 자신의 자식들 정렬
-    - `align-self-start,center,end` : self 정렬이므로 자신이 정렬
-  - 절대위치는 그냥 **position:absolute랑 relative** 씀
-    - absolute 사용하는데, 중앙에 위치하고 싶어서 `top:50%, left:50%, transform: translate(-50%, -50%)` 
-      - `top: 50%;`: 이 요소의 상단이 부모 요소의 50% 위치에 배치됩니다.<br>`left: 50%;`: 이 요소의 왼쪽이 부모 요소의 50% 위치에 배치됩니다.<br>`transform: translate(-50%, -50%);`: 이 속성은 요소를 자신의 너비와 높이의 50%만큼 위와 왼쪽으로 이동시킵니다. 결과적으로 이 두 가지 설정을 조합하면 요소가 화면 중앙에 위치하게 됩니다.
-
-- **padding, margin?! → 굉장히 많이 사용!! 이것도 위와 같이 사용 굉장히 많이 함!**
-
-  - `padding` : 요소 “내부”의 여백을 설정
-    - **내부다 보니 배경색에 영향O**
-    - **내부다 보니 전체 너비와 높이에 “포함”**
-    
-  - `margin` : 요소 “외부”의 여백을 설정
-    - **외부다 보니 배경색에 영향X**
-    - **외부다 보니 전체 너비와 높이에 “추가”!!!!!!!!**
-    
-    <details><summary><b>동작원리(사진포함)</b></summary>
-    <div markdown="1"><br>
-    **총 3개 박스: margin, padding, margin + padding**
-    ```html
-    <div style="margin: 20px; background-color: lightblue;">
-      콘텐츠가 있는 박스
-    </div>
-    <div style="padding: 20px; background-color: lightblue;">
-      콘텐츠가 있는 박스
-    </div>
-    <div style="padding: 20px; margin: 20px; background-color: lightblue;">
-      콘텐츠가 있는 박스
-    </div>
-    ```
-    <br>
-    ![image](https://github.com/user-attachments/assets/da89b7e3-849d-4c82-b1e9-d5793d0800ba)<br>
-    ![image](https://github.com/user-attachments/assets/ee779963-18e1-4fc8-a9de-db2540c18ed9)<br>
-    ![image](https://github.com/user-attachments/assets/f3817275-edb9-422b-800e-1255bc10ba9f)<br>
-    ![image](https://github.com/user-attachments/assets/6b0b8162-0d79-4c39-a002-12cc4c865bce)
-    </div>
-    </details>
-  
-
-* **fragment를 head, header, footer, modal, scripts는 꼭 사용 중**
-  
-  - head는 \<head>에, header는 \<nav>에, footer은 \<footer>에, modal은 \<div>(class명은 modal)에, scripts는 \<script>에 사용 중!
-  - **modal은 공.문 참고!**
-  
-* **데이터 표현** : `table, td, tr 등등` 또는 `div로 잘 구현`
-
-  * `th:each` + `<th:block>` 도 적절히 함께 활용
-
-    <details><summary><b>참고 코드</b></summary>
-    <div markdown="1">
-    ```html
-    <!-- 렌더링시 제거 block -->
-    <th:block th:each="item : ${items}" th:object="${item}">
-      <div th:class="${item.id==items[0].id}? 'gallery-item-first' : 'gallery-item-many'"
-      style="flex:1; padding-top: 30px;">
-        <div class="d-flex flex-column pe-4" style="flex:0.15;">
-          <span class="" style="font-weight: 500; color: white; font-size: 1.2vw;" th:text="'No.'+*{No}">No.15</span>
-          <span class="pt-2" style="font-weight: 400; color: var(--text-2); font-size: 1vw; letter-spacing: -0.16px;
-          " th:field="*{{date1}}" th:text="*{{date1}}">23.05.22.16:00k</span>
-        </div>
-        <div class="d-flex flex-column pe-4" style="flex:0.42;">
-          <span class="text-truncate" style="font-weight: 500; color: white; font-size: 1.2vw; width:25vw;" th:text="*{title}">최근에 있엇던 대외비</span>
-          <span class="text-truncate pt-2" style="font-weight: 400; color: var(--text-2); font-size: 1vw; letter-spacing: -0.16px; width:25vw;
-          " th:text="*{nickName} ">방문자가작성한닉네임</span>
-          <a class="btn btn-light mt-4" type="button" id="enterBtn" onclick="redirectSavedBgm()"
-          style="font-size: 1vw;
-          align-self: flex-start; width: 12vw; padding:0.5em;"
-          href="#" th:href="@{|/gallery/${pageId}/itemDetail/*{id}|}">
-            <span class="fw-bold" id="enterBtn1" style="font-size: 1em; white-space: nowrap;" th:text="|*{No}전시실 입장|">15전시실 입장 test용</span>
-          </a>
-        </div>
-        <div class="d-flex flex-column" style="flex:0.43;">
-          <img class="img-fluid" src="../static/6.png"
-             th:src="@{|/image/*{imgSrc}|}"
-          style="height:15vh; border-radius: 10vh 10vh 0 0;"/>
-        </div>
-      </div>
-    </th:block>
-    ```
-    </div>
-    </details>
-
-* **FORM 데이터** : `label, input, 체크박스 등등` 권장
-  * `th:field`(name,id,value자동생성) 와 `*{...}` 랑 `th:object`(데이터 관리쉽게) 함께 사용 권장
-  * `th:errors` 등등 도 함께 사용<br>-> ex: `<div class="field-error" th:errors="${item.imgSrc}">이미지 오류</div>`
-    * 이 문장은 **`item.imgSrc` 필드에 오류가 발생했을 경우**에만 해당 `<div>` 태그가 렌더링되며, 오류 메시지가 출력됩니다. 오류 없으면 이 태그는 렌더링 되지 않음!
-    * \<div> 태그의 기본 텍스트 "이미지 오류"는 오류 메시지가 없을 경우 기본 메시지로 사용할 수 있습니다. 그러나 보통은 **Spring Validation에서 오류 메시지를 자동**으로 가져옵니다.
-
-* **문법 잘 활용**
-
-  * \|\...\| : `<span th:text="|Welcome to our application, ${user.name}!|">`
-  * @{} : 간편) -`th:href="@{|/basic/items/${item.id}|}"`
-  * 등등 문법 정리 챕터 참고...
-
-<br>
-
-**PRG 패턴 적용(위에 PRG 정리한 내용 참고) - 무한 POST 방지**
-
-* **Post는 PRG패턴 위해 꼭 redirect 고려하자. 대부분 접근할 곳에 Get엔드포인트가 있어서 redirect 많이 사용할 거임. 없으면 forward로 ㄱㄱ**
-  * **forward 사용가능한 건 forward 형태로 하는게 효과적**
-
-
-- **자원 재활용(forward) : 폼... 분리 가능한건 분리해서 작성 권장 - addForm, editForm**
-
-  * **GET에 꼭 빈 값이라도 엔티티 Model에 삽입 - th:object 함께 사용**  
-
-    * 예로 `@ModelAttribute("item") Item item` 사용 시 "넘어온 form데이터 없어도 Item은 생성!"
-    * Employee employee = new Employee();  
-      //... 데이터있으면 필드 setter  
-      model.addAttribute("employee", employee); 를 자동으로 해주거덩 (그냥 Model이면 직접해야!)
-  
-  * POST에는 `@Validated @ModelAttribute("item") AddItemDto form, BindingResult bindingResult, RedirectAttributes redirectAttributes)` 이런식으로 여러 파라미터 고려!
-  
-    * Valid와 BindingResult**장점은 검증 실패시 html로 바로 return!! -> forward 이기 때문에 자원 재활용!! (redirect 안해도 되는거즤~)**
-  
-      * ```java
-        if(bindingResult.hasErrors()) {
-          log.info("error={}", bindingResult);
-          return "studio-complete"; // studio-complete.html 반환 -> forward 로 자원 재활용
-          // 어차피 "검증" 에 걸려서 DB 사용안하기에 PRG 패턴 상관없움
-        }
-        //성공로직...
-        return "redirect:/gallery/{pageId}/itemDetail/{itemId}"; // PRG 패턴 적용
-        ```
-  
-    * PRG 패턴 값 넘길 때 redirectAttributes를 주로 활용 특징: addAttribute, addFlashAttribute
-  
-      ```java
-      redirectAttributes.addAttribute("itemId", itemId);
-      redirectAttributes.addAttribute("test", test);
-      redirectAttributes.addFlashAttribute("status", "updateOFF");
-      return "redirect:/gallery/itemDetail/{itemId}"; // 기존 화면 다시 로딩
-      ```
-  
-      - addAttribute는 자동으로 URL에 붙어서(쿼리파라미터) 넘어가는데, itemId는 이미 URL에 있으니 test만 추가로 "?test=값" 형태로 넘어간다.
-      - addFlashAttribute를 사용하면 1번만 값을 넘겨주고 자동으로 지워준다. 
-        - PRG패턴으로 무한 POST를 피해도 클라에서 status값 보고 alert를 띄운다면, GET이여도 새로고침하면 클라 자체에서 계속 alert가 뜨는 불편함이 있는데 이를 피할 수 있는 유용한 기능이다.
-        - 중요한점: JSP에서 `<body data-status="${status}">` 이렇게 해줘야 `document.body.getAttribute('data-status');` 로 상태값을 js에서 잘 활용할 수 있다.
-
-- **헷갈리는 return "jsp/gallery", {return "redirect:/gallery", return "forward:/gallery"}, return this.gallery(item, model) ??**
-  - **jsp 반환은 뷰를 바로 반환하는 거고** -> ex: 뷰리졸버가 jsp/gallery.jsp 를 호출
-  - **redirect->get와 forward->post는 컨트롤러에 메서드로 구현한 URL을 매핑하여 동작** -> ex: @GetMapping("/gallery")
-  - **메소드는 HTTP 말고 그냥 컨트롤러의 메소드를 호출(GET, POST와 관계 없으며 서버에서 바로 호출한거니 forward에 가까움)**
-
-<br>
-
-<details><summary><b>Model, @ModelAttribute("item"), forward, RedirectAttributes, UpdateItemDto, @PathVariable, @RequestParam</b></summary>
-<div markdown="1">
-* **API 말고 여기 웹 개발 컨트롤러에서 주로 사용한 것들인데 꼭 동작을 전부 이해해둬야 함**
-* **Model 과 @ModelAttribute 잘 구분** <br>@ModelAttribute는 넘어온 form값을 Model.addAttribute() 를 자동! 결국 둘다 Model인거고, 직접 addAttribute() 할 거를 @를 붙여서 구현된 애노테이션을 활용해서 더 쉽게 해주는것
-  * **(1)html로 return**때 데이터 자주 넘겨줬음(**forward로 볼 수 있음**)
-  * **(2)return을 forward:/ 형태로 동일 컨트롤러내에서는 다른 곳으로 요청가능(서버내에서)**
-    * **즉, forward로써 서버 내에서 요청을 다시 처리하는 것**이기 때문에, 실제로 **페이지가 이동하지 않고(URL변경X)** 서버 내부에서 **다른 컨트롤러 메서드로 요청을 넘기는** 역할(forward뜻=전달)
-  * **(3)return을 html이 아닌 redirect로** 넘길시 새롭게 웹브라우저가 다시요청 하는것이므로 Model 값 사라져서 이땐 사용안하고 **RedirectAttributes 를 사용**
-    * RedirectAttributes 로 데이터 쉽게 다시 넘겨줄 수 있기 때문
-  * `@ModelAttribute("item") UpdateItemDto form` - Post때 주로 사용하며 Form데이터 자동 매핑 후 **Model에 item 이름으로 기록!** 
-    * **UpdateItemDto** 만 사용시 @ModelAttribute 과 동일하되 Model에 UpdateItemDto 이름으로 기록하므로 이렇게 한 것!
-    * form 데이터 넘길땐 UpdateItemDto 관련 데이터를 전부 서버로 form에서 넘겨줘야하며 이때 View에 안 보여줄 데이터는 **\<input> + hidden** 으로 넘겨주면 간단하다.
-  <div markdown="1">
-  * ```java
-    //예시 컨트롤러 -> forward와 redirect
-    @GetMapping() // default
-    public String gallery() {
-        log.debug("debug 테스트");
-        log.debug("gallery() : 입장");
-        return "forward:gallery/1"; // -> galleryPage() 함수로 토스 (서버 내에서)
-    }
-    @GetMapping("/{pageId}")
-    public String galleryPage(@PathVariable int pageId, Model model) {
-        log.debug("galleryPage() : 입장");
-        log.debug("pageId : {}", pageId);
-        List<Item> items = itemService.findAllWithPage(pageId);
-        Long totalCount = itemService.findTotalCount();
-        log.debug("items : {}, totalCount : {}", items.size(), totalCount);
-        List<ItemDto> itemsDto = items.stream()
-            .map(o -> new ItemDto(o))
-            .collect(Collectors.toList());
-        //        log.debug("item Id check : {}",items.get(0).getId());
-        model.addAttribute("items", itemsDto); // gallery.html 에 넘길 데이터
-        model.addAttribute("totalCount", totalCount);
-        for(Item it : items)
-            log.debug("itemId : {}, itemNo : {}", it.getId(), it.getNo());
-        return "gallery"; // gallery.html 반환 (forward일걸)
-    }
-    @PostMapping("{pageId}/delete/{itemId}")
-    public String deleteGalleryItem(@PathVariable Long pageId, @PathVariable Long itemId, @RequestParam String password, RedirectAttributes redirectAttributes) {
-        Item item = itemService.findOne(itemId); // 이미 없으면 null
-        if (item != null) {
-            if(item.getPassword().equals(password)){
-                log.debug("비번통과");
-                itemService.initCachePosts(); // 캐시 초기화(페이지들 새로 No 업데이트 하기 때문)
-                itemService.remove(item);
-                //                List<Item> items = itemService.findAllWithNoPage(pageId.intValue()); // 캐싱
-                List<Item> items = itemService.updateAllNo();
-                itemService.updateTotalCount(); // 캐싱
-                redirectAttributes.addAttribute("status", "deleteON");
-                return "redirect:/gallery"; // gallery() 함수로 이동
-            }
-            else log.debug("비번실패");
-        }
-        redirectAttributes.addAttribute("pageId", pageId);
-        redirectAttributes.addAttribute("itemId", itemId);
-        redirectAttributes.addAttribute("status", "deleteOFF");
-        return "redirect:/gallery/{pageId}/itemDetail/{itemId}"; // 기존 화면 다시 로딩
-        // PRG 패턴 위해 Redirect
-    }
-    ```
-  </div>
-* **RedirectAttributes** -> return을 html이 아닌 **redirect로** 넘길시 새롭게 웹브라우저가 다시요청 하는것이므로 Model 값 사라져서(forward면 안사라지지만!) 이땐 사용안하고 **RedirectAttributes 를 사용**
-  * **Model과 RedirectAttributes 사용방식이 파라미터에 선언해서 사용!! (코드 속 파라미터 참고)**
-  <div markdown="1">
-  * ```java
-    @GetMapping("studio") // URL 매핑(GET)
-    public String studio(Model model) {
-        Long totalCount = itemService.findTotalCount();
-        model.addAttribute("totalCount", totalCount);
-        return "studio"; // studio.html 반환
-    }
-    //
-    // @ModelAttribute("item") 매우중요!!
-    //=> th:object를 item 사용하므로 반드시 Model에 "item"으로 담기게끔!
-    @PostMapping("studioComplete")
-    public String studioAdd(@Validated @ModelAttribute("item") AddItemDto form, BindingResult bindingResult,
-                            RedirectAttributes redirectAttributes) throws IOException {
-        redirectAttributes.addAttribute("status", "addON");
-        return "redirect:/gallery/{pageId}/itemDetail/{itemId}";
-    ```
-  </div>
-* **@PathVariable** - URL 뒤의 값 바로 사용 (자주 사용)
-* **@RequestParam** - 쿼리 파라미터 값 가져올때 자주사용 (기본값 설정도 가끔사용)
-* **상식**: get은 쿼리파라미터(url) 방식이고, post는 body에 데이터 담겨옴. from 데이터는 name,value 방식으로써 데이터 바인딩하기 수월
-</div>
-</details>
-
-<br>
-
-**타입 컨버터**
-
-* DB에는 LocalDateTime(원하는..) 형태로 저장 후 HTML 출력 때 원하는 "타입 컨버터" 사용
-
-* `@DateTimeFormat(pattern = "yy.MM.dd.HH:mm"), @NumberFormat(pattern = "###,###")` 등등 사용 가능
-
-* 타임리프에 적용법 : **th:field=*\{\{\...}}**
-
-  <details><summary><b>(보충) 타입 컨버터</b></summary>
-  <div markdown="1">
-  * **(1) 웹 - `@Requestparam, @ModelAttribute, @PathVariable` 스프링이 기본 지원**
-    * 예로 `@PathVariable Long itemId` 는 자동으로 String->Long 타입변환
-    * "확장 가능" 하고, "**애노테이션**"을 제공
-      * **@DateTimeFormat**예시 : DB엔 LocalDateTime타입, Thymeleaf는 지정한 pattern 사용
-      * **예로) th:field="*\{\{date1}}" 이런식으로 사용**
-      <div markdown="1">
-      ```java
-      @Data
-      static class Form {
-          @NumberFormat(pattern = "###,###") // 타입 컨버터
-          private Integer number;
-          @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-          private LocalDateTime localDateTime; 
-          // db엔 LocalDateTime 형태로 저장
-          // Thymeleaf에선 지정한 "패턴"으로 출력
-      }
-      ```
-      </div>
-  * **(2) HTTP API (@ResponseBody 등) - 의 경우 지원하지 않는다(HttpMessageConverter 는 "컨버전 서비스 적용 불가")**
-    * **이 경우에는 `Jackson 같은` 라이브러리에서 포맷터를 찾아 사용**
-    * JSON->객체,  객체->JSON 등등 쉽게 타입 변환 가능
-  * **자세히 정리하자면?**
-    * **(1) 일반적인 폼 전송 (웹 애플리케이션)**
-      - **Thymeleaf** 같은 템플릿 엔진을 사용해 **HTML 폼**을 전송할 때, Spring은 **자동으로 타입 변환**을 지원합니다. 예를 들어, 문자열을 **숫자**나 **날짜**로 변환하는 경우, `@RequestParam`, `@ModelAttribute`, `@PathVariable` 등의 애노테이션을 사용하여 **자동 타입 변환**이 됩니다.
-      - 이때 **Spring의 ConversionService**를 사용하여 **String -> Integer** 또는 **String -> LocalDate** 같은 변환이 가능합니다.
-    * **(2) HTTP API 응답 (`@ResponseBody`)**
-      - **`@ResponseBody`**를 사용하는 경우, **HTML을 반환하는 게 아니라 데이터 (JSON, XML 등)를 반환**하는 것입니다. 이때 **Spring의 ConversionService는 적용되지 않습니다**.
-      - 대신, **JSON 변환**을 처리하기 위해 **`HttpMessageConverter`**가 사용됩니다. 일반적으로는 **Jackson** 라이브러리가 Spring Boot에 포함되어 있어 **객체를 JSON으로 변환**해줍니다.
-    * **중요한 차이점**은:
-      - **HTTP API 응답**에서는 **타입 변환은 `HttpMessageConverter`가 담당**하며, **자동 타입 변환(ConversionService)는 적용되지 않습니다**.
-      - **ConversionService**는 주로 **폼 데이터**(예: 템플릿 렌더링)에서 쓰이고, **`HttpMessageConverter`는 JSON 변환**처럼 **HTTP 메시지 본문을 처리**할 때 사용됩니다.
-  </div>
-  </details>
-
-<br>
-
-**예외처리(HTML 페이지 기본제공 사용)**
-
-* 웹 에러 처리의 경우에는 기존 "스프링 부트 기본제공" (BasicErrorController) 을 규칙에 맞게끔 사용
-  * `/error` 경로의 html을 기본 접근
-* **뷰선택 우선순위(BasicErrorController 가 제공하는 기능)**
-  * **1. 뷰템플릿**
-    * resources/templates/error/500.html
-    * html resources/templates/error/5xx.html
-  * **2. 정적리소스( static , public ) resources/**
-    * static/error/400.html
-    * resources/static/error/404.html 
-    * resources/static/error/4xx.html
-  * **3. 적용대상이없을 때뷰이름( error )**
-    * resources/templates/error.html
-
-<br>
-
-**정적파일 전부 캐싱 + gzip압축 (속도개선)**
-
-* gzip 압축 -> 보통 이미지나 동영상은 이미 압축되어 있는 상태라 **HTML,CSS,JS 만 압축!!**
-* 단, 개발할 땐 캐싱 주석해둘것 -> 캐싱때문에 이미지 바꿔도 적용안된걸로 착각할 위험이 있음
-
-<br>
-
-<details><summary><b>페이지 네비게이션 구현 코드</b></summary>
-<div markdown="1">
-```html
-<!-- 페이징 -->
-<!--    var pageCount = /*[[${(totalCount/10)+1}]]*/ null; // 총 페이지 크기 -> 통신으로 받음-->
-<script th:inline="javascript">
-  var totalCount = /*[[${totalCount}]]*/ null;
-  if(totalCount % 10 == 0) {var pageCount = totalCount/10;}
-  else {var pageCount = totalCount/10 +1;} // 총 페이지 크기 -> 통신으로 받은값으로 계산
-  var pageMax = 10; // 보여줄 페이지 수
-  var activePage = /*[[${pageId}]]*/ null; // 현재 페이지 -> 통신으로 받음(active)
-  // 보여줄 시작 페이지(계산 여기서 하겠음)
-  // 현재페이지/보여줄페이지수 몫 * 보여줄페이지수
-  // ex) 23 / 10 * 10 -> 2*10 -> 20
-  var startIndex = parseInt((activePage-1)/pageMax)*pageMax + 1;
-  var endIndex = startIndex + pageMax -1;
-  if(endIndex > pageCount)
-    endIndex = startIndex + (pageCount%startIndex);
-  // 동적 스타일링
-  var arrowLeft = "<img class='img-fluid' src='/arrow-left.svg' style='width:1.2vw;' onclick='redirectSavedBgm()'/>"
-  var arrowRight = "<img class='img-fluid' src='/arrow-right.svg' style='width:1.2vw;' onclick='redirectSavedBgm()'/>"
-  // [동적 ul 페이징 처리 실시]
-  if(pageCount == 1){ //생성해야할 페이지가 1페이지인 경우
-    var insertUl = "<li class='page-item'>"; // 변수 선언
-    insertUl += insertUl + "<a class='page-link active' href='/gallery/1' onclick = 'redirectSavedBgm()'>";
-    insertUl += "1</a></li>";
-    $("#dyn_ul").append(insertUl); //jquery append 사용해 동적으로 추가 실시
-  }
-  else if(pageCount >= 2){ //생성해야할 페이지가 2페이지 이상인 경우
-    // (Previous)이전 페이지 추가 실시
-    var insertSTR = "<li class='page-item'>"; // 변수 선언
-    if(activePage===1) insertSTR = insertSTR + "<a class='page-link disabled' style='background-color: var(--main-1); opacity:0.3;' href='/gallery/"+(activePage)+"' onclick = 'redirectSavedBgm()'>";
-    else insertSTR = insertSTR + "<a class='page-link' href='/gallery/"+(activePage-1)+"' onclick = 'redirectSavedBgm()'>";
-    // insertSTR = insertSTR + "Previous";
-    insertSTR = insertSTR + arrowLeft;
-    insertSTR = insertSTR + "</a></li>";
-    $("#dyn_ul").append(insertSTR); //jquery append 사용해 동적으로 추가 실시
-    // ... 페이지 추가 (앞에 페이지 더 있을경우 맨앞 페이지로 이동)
-    if((activePage > pageMax)) {
-      var insertMID = "<li class='page-item'>"; // 변수 선언
-      insertMID = insertMID + "<a class='page-link' href='/gallery/"+(1)+"' onclick = 'redirectSavedBgm()'>";
-      insertMID = insertMID + "...";
-      insertMID = insertMID + "</a></li>";
-      $("#dyn_ul").append(insertMID); //jquery append 사용해 동적으로 추가 실시
-    }
-    // 1, 2, 3 .. 페이지 추가 실시
-    var count = 1;
-    for(var i=startIndex; i<=pageCount; i++){
-      if(count > pageMax){ //최대로 생성될 페이지 개수가 된 경우
-        page = i - pageMax; //생성된 페이지 초기값 저장 (초기 i값 4 탈출 인경우 >> 1값 저장)
-        break; //for 반복문 탈출
-      }
-      var insertUl = "<li class='page-item'>"; // 변수 선언
-      if(i===activePage) insertUl = insertUl + "<a class='page-link active' href='/gallery/"+i+"' onclick = 'redirectSavedBgm()'>";
-      else insertUl = insertUl + "<a class='page-link' href='/gallery/"+i+"' onclick = 'redirectSavedBgm()'>";
-      insertUl = insertUl + String(i);
-      insertUl = insertUl + "</a></li>";
-      $("#dyn_ul").append(insertUl); //jquery append 사용해 동적으로 추가 실시
-      count ++;
-    }
-    // ... 페이지 추가 (뒤에 페이지 더 있을경우 끝 페이지로 이동)
-    if((activePage < pageCount) && (activePage >= pageMax) && (endIndex < pageCount)) {
-      var insertMID = "<li class='page-item'>"; // 변수 선언
-      insertMID = insertMID + "<a class='page-link' href='/gallery/"+(pageCount)+"' onclick = 'redirectSavedBgm()'>";
-      insertMID = insertMID + "...";
-      insertMID = insertMID + "</a></li>";
-      $("#dyn_ul").append(insertMID); //jquery append 사용해 동적으로 추가 실시
-    }
-    // (Next)다음 페이지 추가 실시
-    var insertEND = "<li class='page-item'>"; // 변수 선언
-    if(activePage === pageCount)  insertEND = insertEND + "<a class='page-link disabled' style='background-color: var(--main-1); opacity:0.3;' href='/gallery/"+(activePage)+"' onclick = 'redirectSavedBgm()'>";
-    else insertEND = insertEND + "<a class='page-link' href='/gallery/"+(activePage+1)+"' onclick = 'redirectSavedBgm()'>";
-    // insertEND = insertEND + "Next";
-    insertEND = insertEND + arrowRight;
-    insertEND = insertEND + "</a></li>";
-    $("#dyn_ul").append(insertEND); //jquery append 사용해 동적으로 추가 실시
-  }
-</script>
-```
-</div>
-</details>
-
-<br>
-
-<br>
-
-## JSP 로 웹 개발 TIP
-
->  스프링 부트 + 타임리프 조합으로 이미 웹 개발을 하여 어느정도 지식이 있다고 가정한다.
-
-일반 순수자바나 순수스프링이 아닌 **"스프링부트 + JSP" 경험**을 작성하고자 한다.
-
-참고로 jQuery 를 많이 사용하기에 jQuery 공식홈페이지 보는것도 추천! (Ajax, 엘리먼트 등에 많이 활용)  
-리액트 이런거 사용하는게 아니면 JSP+jQuery+Ajax 방식은 기본.
-
-반환타입 void일 때: 자동으로 뷰리졸버는 요청URL과 동일한 뷰를 탐색해서 반환! (직접 String반환 안해도!)
-
-<br><br>
-
-### (1) 구조 분석
-
->  구조 비교에 참고한 문헌: [일반 부트와 구조 비교](https://backendcode.tistory.com/121#google_vignette)
-
-**스프링 부트에서 "타임리프"와 "JSP" 접근 비교:** 
-
-- 타임리프?
-  - 웹 브라우저 -> 톰캣(서블릿 컨테이너) -> 스프링 컨테이너 순으로 이동하여,  
-    Controller를 찾고 있으면 자동 등록된 **viewResolver**로 화면에 응답.
-  - 이때, templates/hello.html 처럼 Thymeleaf 템플릿 엔진 처리가 **"기본 경로"**로 가능!
-    - 즉, **boot-starter-thymeleaf 의존성이 있다면** 부트가 "뷰 리졸버" 자동 등록 + "경로 설정" 자동 등록
-    - 애초에 뷰 리졸버랑 이런건 **boot-starter-web 의존성** 덕분에 기본적으로 부트가 자동 지원.
-- JSP?
-  - 부트를 사용하니 의존성들 덕분에 뷰 리졸버 이런 등록은 자동이다. (순수 스프링은 하나부터 열까지 직접 xml로...)
-  - 단, **"JSP 템플릿 엔진 처리"**를 따로 라이브러리로 설치해야하고 **"경로도 설정"**해야 한다.
-
-<br>
-
-**왼쪽 스프링부트+JSP / 오른쪽 일반 스프링부트 구조 비교: src/main/webapp/WEB-INF 가 있음!**
-
-![Image](https://github.com/user-attachments/assets/65986172-ecce-4a97-9912-1ac386b40341)  ![Image](https://github.com/user-attachments/assets/d3f7731a-54e9-4aa0-a3c5-3c133c887ea2) 
-
-<br><br>
-
-### (2) 실행 과정
-
-**3가지만 지키자:** 
-
-- JAR는 골치아파서 JSP엔 WAR 사용! -> **(정정: 부트의 경우 내장콤캣 덕분에 JAR도 똑같이 잘 구동)**
-
-- 의존성: 
-
-  - implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'
-  - 이거 추가 안하면, jsp용 톰캣이없어서 jsp 접근시 걍 파일설치로 뜸.
-
-- application.properties: 
-
-  - spring.mvc.view.prefix=/WEB-INF/views/   
-    spring.mvc.view.suffix=.jsp
-
-  - WEB-INF 하위 경로는 클라 URL로 접근 안된다. 서버에서만 접근 가능하다. (보안위해)
-
-  - 그래서 서버(스프링)한테 경로를 알려주는것! (예상이지만 원래는 /templates 일 듯)
-
-![Image](https://github.com/user-attachments/assets/c5f41f27-f2af-4e23-acd0-a25c18a6214d) 
-
-**컨트롤러 코드보면 기존 스프링부트(+타임리프)로 개발한거랑 다를게 없음! 편.안.**
-
- ![Image](https://github.com/user-attachments/assets/c599c025-c601-4128-96ce-d0e9c66d0c08) 
-
-<br><br>
-
-### (3) JSP 문법
-
-**스크립트 요소**: JSP에서 자바 코드를 작성하는 곳 = 스크립트릿(Scriptlet)
-
-- 형식: `<% 자바 코드 %>`
-- 지역변수이며, 메서드 선언은 불가능(불가능이였던가?)
-
-**선언문**: 변수나 메서드를 선언하는 곳.
-
-- 형식: `<%! 자바 코드 %>`
-
-- JSP -> 서블릿 변환될 때 클래스, 멤버로 변환
-
-**표현식**: 값을 웹 브라우저에 출력할 때 사용하는 곳
-
-- 형식: `<%= 자바 코드 %>`
-- 세미콜론(;)을 붙이지 않는다.
-
-**주석 두 가지 방식:**
-
-- 형식1: `<!-- HTML 주석 -->`
-- HTML 주석: 브라우저 소스 보기에서 보임
-- 형식2: `<%-- JSP 주석입니다 --%>`
-  - JSP 주석 (브라우저 출력되지 않음)
-
-**지시어**: JSP 페이지의 전반적인 처리 방식을 설정
-
-- 형식: `<%@ 자바 코드 %>`
-
-- | 지시어  | 설명                      | 예시                                                |
-  | ------- | ------------------------- | --------------------------------------------------- |
-  | page    | 페이지 설정 정보          | `<%@ page contentType="text/html; charset=UTF-8"%>` |
-  | include | 다른 파일 포함            | `<%@ include file="header.jsp" %>`                  |
-  | taglib  | 태그 라이브러리 사용 선언 | `<%@ taglib uri="..." prefix="c"%>`                 |
-
-**액션태그**: JSP 문서 내에서 간단하게 다양한 구현을 할 수 있도록 만든 태그
-
-- 형식: `<jsp:?>`
-
-- | 액션 태그       | 설명                                |
-  | --------------- | ----------------------------------- |
-  | jsp:include     | 다른 페이지를 현재 페이지에 포함    |
-  | jsp:forward     | 현재 페이지에서 다른 페이지로 이동  |
-  | jsp:useBean     | 자바 빈 객체 생성                   |
-  | jsp:setProperty | 자바 빈 객체의 프로퍼티 값을 설정   |
-  | jsp:getProperty | 자바 빈 객체의 프로퍼티 값을 가져옴 |
-
-- 헷갈리는 부분 체크: `include` 의 경우 -> [지시어 include, 액션태그 include 동작차이](https://doublesprogramming.tistory.com/64)
-
-  - 예로 footer에 "저작권표시"는 정적으로써 지시어 include 사용하면 될거다.
-  - "현재 시간"은 해당 파일이 실행될 때 나타내줘야 하니까 동적으로써 액션태그 사용!
-    - 즉, 모듈화할 때 사용한다.(웹 특정 영역을 독립된 파일로 나눈다공)
-
-**내장객체**: JSP에서는 별도의 선언 없이 사용할 수 있는 내장 객체가 있다.
-
-- `request`: 클라이언트 요청 정보를 담고 있는 객체
-- `response`: 클라이언트에게 응답을 보내기 위한 객체
-- `out`: 출력 스트림을 통해 데이터를 출력하기 위한 객체
-- `session`: 세션 정보를 저장하고 관리하는 객체
-- `application`: 웹 애플리케이션 전체에서 공유되는 데이터를 저장하는 객체
-
-**JSTL**: 자주 사용하는 로직(조건문, 반복문 등)을 태그 형태로 제공하는 JSP 표준 태그 라이브러리
-
-- | 태그 라이브러리     | URI                                      | prefix(접두어) | 주요 기능                           |
-  | ------------------- | ---------------------------------------- | -------------- | ----------------------------------- |
-  | Core(가장많이 사용) | `http://java.sun.com/jsp/jstl/core`      | `c`            | 조건문, 반복문, 변수 선언, URL 처리 |
-  | Formatting          | `http://java.sun.com/jsp/jstl/fmt`       | fmt            | 숫자, 날짜, 시간 포맷 및 국제화     |
-  | Functions           | `http://java.sun.com/jsp/jstl/functions` | fn             | 문자열 처리 함수 제공               |
-  | XML                 | `http://java.sun.com/jsp/jstl/xml`       | x              | XML 문서 처리                       |
-  | SQL                 | `http://java.sun.com/jsp/jstl/sql`       | sql            | JSP 내에서 SQL 처리                 |
-
-```jsp
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>JSP Example</title>
-</head>
-<body>
-
-<!-- 선언부(선언만 가능) -->
-<%! String name = "김철수"; %>
-<%! 
-    public String greeting(String name) {
-        return "안녕하세요, " + name + "님!";
-    }
-%>
-
-<!-- 스크립트릿 + 내장객체(request) -->
-<%
-    String userName = request.getParameter("user");
-    if(userName == null) {
-        userName = "손님";
-    }
-%>
-
-<h2>환영합니다!</h2>
-
-<!-- 표현식 -->
-<p><%= greeting(userName) %></p>
-
-<!-- 액션 태그 -->
-<jsp:include page="footer.jsp" />
-```
-
-```jsp
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<html>
-<body>
-<h2>안녕하세요 테스트 입니다.</h2>
-<!-- 컨트롤러에서 모델에 담긴 변수명 'custNm' -->
-<c:choose>
-    <c:when test="${custNm == '홍길동'}">
-        홍길동님 환영합니다.
-    </c:when>
-
-    <c:when test="${custNm == '이순신'}">
-        이순신님 환영합니다.
-    </c:when>
-
-    <c:otherwise>
-        등록되지 않은 사용자입니다.
-    </c:otherwise>
-</c:choose>
-</body>
-</html>
-```
-
-<br>
-
-<br>
-
-## 전자정부프레임워크4.2 학습하기
-
-공식홈페이지에 좋은 가이드 파일들을 제공하므로 해당 가이드를 보고 학습하자.
-
-추가로 현재 4.3도 출시되어서 4.3Dev(개발용) 이클립스가 있음.(2025-03)
-
-<br>
-
-**플젝 진행해보면서 나한테 맞는 쳌리 만들기!!!!!!!!!!! (본인은 부트 많이 사용하려함)**  
-순수스프링 플젝(+XML설정)은 easycompany 위주로 복습! 애초에 아래 공부내용 대부분 순수스프링 방식임.   
-
-일단 **MVC패턴으로 egovframe라이브러리 사용하여 레포DAO, 서비스**를 만드는건 필수이고..   
-엔티티의 경우도 VO로 하며 인터페이스도 넣는것 같더라. @Entity도 쓰긴 하려고그냥 원래하던것 처럼  
-=> **빈 주입 방식은 내가하던 생성자 주입**으로 하게. 짜피 다른것들은 아래 학습한것들 복습하면 충분함.  
-Spring Data JPA도 사용해도 될것 같기도 하고(물론, crudRepository를 우선 써야할것 같다만..) + 일단 JPA보단 **MyBatis(egovframe있으+인터페이스방식ver+DBIO Editor활용!)**를 많이 사용하는것 같아 보이니 이거 쓰는게 나을것 같긴 하다만,,  
-**DB(내부테스트DB쓰다가 MySQL ㄱㄱㄹ)**는 뭘 써도 상관없어 보이고  
-어느정도 SpringBoot2.x 사용해도 괜찮은것 같음. 꼭 XML로 빈을 전부 등록하며 이럴 필요없이 Boot로 애노테이션 활용하여 자바코드로 간단히 해도 딱히 지침에 위반될것 같진 않는..?    
-=> 눈치껏 easycompany플젝 흐름대로하다가 웬만하면 내가쓰던 Boot방식 주로 쓰자.   
-=> 예로 **로그레벨 설정, 트랜잭션도 딱히따로 등록안할거라 DataSource연결, 빈 등록 등등 properties우선!!**  
-=> 혼합 가능하니까 부가적인걸 XML로 설정ㄱ.(**Exception, AOP, Validation-자카트라 커믄 정도려나?**)  
-검색은 **ajax써서 자동완성기능** 꼭 넣자.  
-로그인쪽(게시판 등?) **"공통기능" 이용 + Spring Security(공통기능)**도 표준프레임워크로 [security](https://arckwon.tistory.com/entry/%EC%A0%84%EC%9E%90%EC%A0%95%EB%B6%80%ED%94%84%EB%A0%88%EC%9E%84%EC%9B%8C%ED%81%AC-%EC%8A%A4%ED%94%84%EB%A7%81%EC%8B%9C%ED%81%90%EB%A6%AC%ED%8B%B0-%EB%A1%9C%EA%B7%B8%EC%9D%B8-%EC%A0%81%EC%9A%A912), [암호화](https://arckwon.tistory.com/entry/%EC%A0%84%EC%9E%90%EC%A0%95%EB%B6%80%ED%94%84%EB%A0%88%EC%9E%84%EC%9B%8C%ED%81%AC-DB%EC%A0%91%EC%86%8D%EC%A0%95%EB%B3%B4-%EC%95%94%ED%98%B8%ED%99%94-crypto-%EC%84%9C%EB%B9%84%EC%8A%A4), [공문](https://www.egovframe.go.kr/wiki/doku.php?id=egovframework:rte4.0:fdl:server_security) 참고!   
-=> 단, Spring Security는.. JWT를 eGov에서도 하지않을까? 맞으면 이건 맨 마지막에 삽입! (형상기록으로 세션방식이랑 구분해두겡)  
-이건 **마지막쯤?**에 하장ㅇ. 01.개발환경_교육교재.pdf에 **Jenkins(CI)**설치 사용, 형상관리(SVN, GIT-설명은 안보임. 어차피 GIT은 잘 아니까 뭐) 도 있으니 이걸로 하면 되겠고..   
-=> 이것도 마지막쯤.. **Spring Batch**는 간단히 웹하나 만들어서 HTTP로 트리거줘서 egovframe껄로 같이 구현해둬도 좋을듯.
-
-주저리 주저리.. 아래 내용도 참고해서 개발 -> 개발 때 꼭 연구노트에 나만의 쳌리 만들면서 진행하기!
-
-이클립스:live플러그인(애초에 톰캣구동하는데 Python이 아닌이상 이건 필요없을듯), 실행빨리하는 단축키?, 자동완성..플러그인이있는건지..(우선 easycompany플젝은 소스 저장시 자동으로 반영되는듯 했음- **Build Automatically** 일듯. 체크해보쟈)  
-**빈 등록이든 뭐든 설정**엔 어노테이션과 XML혼합해서 사용 당연히 가능. **부트는 어노테이션 기반 설정을 주로 쓰되 특정 상황에선 XML도 잘 사용.(부트인데.. 원래하던 어노테이션 꼭 많이쓰자 그냥!)**  
-**Validation**은 기존에 했던것도 좋지만 이번엔 Jakarta Commons 써보기.(XML이네. +검증 메시지.)  
-=> @Validation 이런걸 안쓸 뿐이지 bindingresult 다 쓰네 뭐 ㅇㅇ. 비슷하네역시. 기존이랑.   
-=> 까먹지말고 JSP 클라에도 Valid적용!  
-**Exception**은 API아닌 JSP고 부트쓰긴 하지만 /error 이 기능말고 XML+AOP로 해보장.  
-=> 그럼 **AOP**는 Exception뿐만아니라 메소드시간구하는 것도 XML로 같이 해보자.   
-=> EgovAbstractServiceImpl의 processException, leaveaTrace도 활용하자!  
-**국제화메시지, 로그인, ajax(자동완성)**은 "실행환경 - 화면처리(Presentation)" + easycompany 보는게 나을것 같음~ -> 로그인은 나랑 똑같이 세션이라. 유사한데 @Login 쓰는게 다름ㅇㅇ.  
-**로그레벨**은 xml말고 properties에서 해도 충분할 듯!(부트 사용시)  
-**페이징**은 Pagination Tag 정리한 공.문 꼭 참고
-
-<br><br>
-
-### 프레임워크 환경(아키텍처), 적용지침
-
-<details><summary><b>재사용 방식의 발전 흐름: 소스 재사용 -> 재사용 메소드 -> 재사용 객체 -> 디자인 패턴 -> 프레임워크</b></summary>
-<div markdown="1">
-- 소스 재사용 예: 클래스 A에서 ‘Date’를 ‘String’으로 변환하는 코딩을 해놓았다고 한다면 클래스 B에서 동일한 로직이 필요해서 클래스A에서 해당부분을 복사해서 사용할 수 있습니다. (진짜 코드를 복붙)
-- 재사용 메소드 예: C언어에서 라이브러리로 만들어 재사용하는것 처럼, 유사한 기능을 모아 하나의 클래스에 정의해 놓으면 메소드 라이브러리로 구성되며 해당 라이브러리를 가져와서 재사용 가능. 이후에 JDK내용이 바뀌거나 향상된 기능을 제공하고 싶을 경우에도 해당 메소드만 수정하여 제공하면 됨
-- 재사용 객체 예: 앞이랑 유사한데 이건 객체 지향 언어에서 새로 소개된 방식임. Person 클래스의 printBirthDate()의 내용이 변경되면 이를 상속 받고 있는 Client, Employee의 printBirthDate()도 자동적으로 변경
-- 디자인 패턴 예: "클래스의 재사용 방식"이 객체의 수직적인 재사용에 초점을 맞추었다면 "디자인 패턴"은 상황적인 문제를 해결하여 주는 재사용 방식. 즉, 공통적인 로직 문제에 대한 일반화된 해결 
-  - 상황: DB를 관계형이나 txt, xml 등으로 저장하고 싶을때 -> Adapter패턴을 활용!
-  - Adapter패턴으로 객체를 DB에 저장하거나 운영 시스템에 다양한 SW에 Adapter패턴을 적용(꼭 DB저장이 아니여도 Adapter 패턴을 쓸 수 있다는거). 단지 동일한 패턴 하에서 유사한 역할을 하고 있을 뿐임.
-- 프레임워크 예: 디자인 패턴을 전체적인 앱 시스템에서 보면 부분적인 해결책일 뿐임. 전체적인 관점에서 통합하여 애플리케이션의 설계 및 구현 틀을 제공하는 것이 프레임워크
-</div>
-</details>
-
-<details><summary><b>전자정부프레임워크로 개발자는 비즈니스 로직 개발에만 전념한다는 장점</b></summary>
-<div markdown="1"><br>
-<img src="https://github.com/user-attachments/assets/5efb9915-7170-4edf-a373-a8e9af76908d" alt="Image" style="zoom:80%;" /><br>  
-**프레임워크(Spring) VS 전자정부 표준프레임워크**<br>
-<img src="https://github.com/user-attachments/assets/b1e67524-b5b5-4b09-826e-1ba6481f0dc5" alt="Image" style="zoom:80%;" /> 
-</div>
-</details>
-<details><summary><b>표준프레임워크는 "실행,개발,관리,운영" 4개의 환경과 "모바일, 공통컴포넌트"로 구성</b></summary>
-<div markdown="1"><br>
-<img src="https://github.com/user-attachments/assets/4ac6060d-de89-438b-9005-b55a31ff681a" alt="Image" style="zoom:80%;" /><br> **표준프레임워크 실행환경**<br>
-<img src="https://github.com/user-attachments/assets/18e66285-25bd-446a-b204-fb3ab69d4b45" alt="Image" style="zoom:80%;" /><br>
-**표준프레임워크 개발환경**<br>
-<img src="https://github.com/user-attachments/assets/da0e76ab-8bc2-4869-b5c6-db45164bac52" alt="Image" style="zoom:80%;" /><br>
-**표준프레임워크 관리환경**<br>
-<img src="https://github.com/user-attachments/assets/7e167e44-8cfa-42ab-af5c-8f4b92c70638" alt="Image" style="zoom:80%;" /><br>
-**표준프레임워크 운영환경**<br>
-<img src="https://github.com/user-attachments/assets/b9aca047-073b-40ae-91a4-eb990daa61fe" alt="Image" style="zoom:80%;" /><br>
-**공통컴포넌트**<br>
-<img src="https://github.com/user-attachments/assets/25aa899f-6100-48a7-a58f-3f154e0678ba" alt="Image" style="zoom:80%;" /><br>
-**모바일 표준프레임워크**<br>
-<img src="https://github.com/user-attachments/assets/9feaf183-2d6a-43bc-b4bc-023f851b0c6d" alt="Image" style="zoom:80%;" />
-</div>
-</details>
-<details><summary><b>표준프레임워크 개발(iBatis) 예시 - 전체흐름+코드 </b></summary>
-<div markdown="1"><br>
-<img src="https://github.com/user-attachments/assets/d26f7392-1a4b-4f63-b577-4318aba5a4e3" alt="Image" style="zoom:80%;" /><br>
-<img src="https://github.com/user-attachments/assets/e6a9ad68-7331-4fc5-97f5-8c80c2ed65f8" alt="Image"  /><br>
-<img src="https://github.com/user-attachments/assets/56b598b8-6519-438b-ac1e-62e91dbc75c5" alt="Image" style="zoom:80%;" /><br>
-<img src="https://github.com/user-attachments/assets/dc4a9bcf-4750-413c-9c69-40baa5d54df7" alt="Image" style="zoom:80%;" /><br>
-<img src="https://github.com/user-attachments/assets/51357a57-d2b8-498b-a1f3-6387554fcdc1" alt="Image" style="zoom:80%;" /><br>
-<img src="https://github.com/user-attachments/assets/485a5494-3979-418d-9d6c-dacbea9d5086" alt="Image" style="zoom:80%;" /><br>
-<img src="https://github.com/user-attachments/assets/3a68ca81-4f03-44c8-bbc3-57e89ab50a3d" alt="Image" style="zoom:80%;" /><br>
-<img src="https://github.com/user-attachments/assets/86dbb1c2-eb44-4b01-a37e-4af59a217fe8" alt="Image" style="zoom:80%;" /><br>
-<img src="https://github.com/user-attachments/assets/60af2603-d44a-45d8-8cb4-546ad8b8768b" alt="Image" style="zoom:80%;" /> 
-</div>
-</details>
-<details><summary><b>적용 지침서 보기: 공홈>알림마당>관련참고문서>정보시스템 구축 발주자를 위한 표준프레임워크 적용가이드</b></summary>
-<div markdown="1">
-- 권고사항: 
-  - 수정없이 사용: "실행환경", "모바일표준프레임워크" 
-  - 수정가능: "개발환경"(다른 상용 솔루션 조합도 가능), "운영환경 및 공통컴포넌트"
-- **기본 2가지 적용 확인:**
-  1. 표준프레임워크 실행환경의 정상적인 설치 여부 점검
-     - 운영서버(WAS)의 "[웹어플리케이션 루트 디렉토리]/WEB-INF/lib/" 폴더에 "org.egovframe.rte"로 시작하는 .jar 파일이 존재하는지 확인  
-       **=> 즉, egovframe 라이브러리 사용하는지 체크**
-  2. 실제 소스코드에서 실행환경이 활용되고 있는지 점검
-     - import org.egovframe.rte 검색되는지 체크
-     - EgovAbstractDAO(EgovAbstractMapper) 와 EgovAbstractServiceImpl(또는 AbstractServiceImpl) 클래스를 상속한 구문이 존재하는지 체크
-       - (예: public class NotificationDAO extends EgovAbstractDAO)
-       - (예: public class NotificationServiceImpl extends EgovAbstractServiceImpl)
-- 상세한 적용 확인:
-  1. 아키텍처 규칙 
-     - Annotation 기반 Spring MVC 준수 : **@Controller 및 @RequestMapping**을 통한 URL mapping 활용 (View 부분과 model(business logic 및 data) 부분을 controller를 통해 분리) 
-     - Annotation 기반 layered architecture 준수 : 화면처리, 업무처리, 데이터처리에 부분에 대하여 각각 **@Controller, @Service, @Repository** 활용 (인접 layer간 호출만 가능) 
-     - 업무처리를 담당하는 서비스 클래스(@Service)는 **EgovAbstractServiceImpl**(또는 AbstractServiceImpl)을 확장하고 업무에 대한 특정 인터페이스를 구현하여야 함 
-     - 데이터처리를 담당하는 DAO 클래스(@Repository)는 EgovAbstractDAO(iBatis) 또는 **EgovAbstractMapper**(MyBatis)를 상속하여야 함 (**Hibernate/JPA를 적용한 경우는 예외**이며 자세한 사항은 하단 ‘데이터처리 규칙’ 참조) 
-  2. 데이터처리 규칙 
-     - Data Access 서비스 준수 : 데이터처리 부분은 iBatis 활용 (SqlMapClientDaoSupport 를 상속한 EgovAbstractDAO 활용) 또는 MyBatis 활용 (SqlSessionDaoSupport를 상속 한 **EgovAbstractMapper** 활용)<br>※ MyBatis의 경우 **Mapper interface 방식**으로 사용가능(권장)하며, 이 경우는 **interface 상에 @Mapper를 지정**하여 사용되어야 함 
-     - ORM 서비스 준수 : 데이터처리 부분은 Hibernate/JPA 적용 (DAO에서 SessionFactory 또는 EntityManagerFactory 설정을 통해 HibernateTemplate/JpaTemplate를 활용하거나, HibernateDaoSupport/JpaDaoSupport를 상속하여 활용) 
-     - Data 서비스 준수 : 데이터 처리 부분은 다양한 persistence store(Big Data, NoSQL 등)를 지원하기 위한 Spring Data 적용 (**DAO에서 CrudRepository를 상속하는 interface 방식의 Repository를 활용**) 
-       - JpaRepository와 다르게 진짜 CRUD만 제공
-  3. 활용 및 확장 규칙 
-     - 표준프레임워크 실행환경 준수 : 표준프레임워크 실행환경은 적극적으로 활용되어야 함 (실행환경 부분 임의 변경 금지) 
-     - 확장 규칙 : 업무 클래스는 org.egovframe.rte 패키지 내에 정의될 수 없음 
-  4. 기타 
-     - 이외에 개발환경, 운영환경 및 공통컴포넌트 부분은 선택적으로 적용 가능하며, 임의 변경 및 확장 가능함 
-     - UI부분에 RIA(Rich Internet Appliation)가 적용되는 경우는 UI Adaptor 또는 RESTful 방식을 적용 활용해야 함
-</div>
-</details>
-
-<br><br>
-
-### 기본 프로젝트 생성
-
-**순수(스프링) Web**은 Maven Install로 WAR 빌드 후 톰캣과 함께 Server 실행이 필요  
-**스프링부트 Web**은 starter-web 있으니까 내장 톰캣으로 바로 실행  
-=> init: Eclipse + Spring Framework(+Boot) + Maven(=Build Tool) + MyBatis + HSQLDB(=테스트용) + 리팩토링{message + Validation + Exception}
-
-- 순수스프링: 
-  - 빈을 XML 에서 설정. 이 빈을 @Resource(name)으로 주입하여 사용
-    - 참고: @Resource(이름기반주입), @Autowired(타입기반주입), setter주입(EX:XML빈에 property사용시 자동setter주입), **생성자주입(제일권장!)**
-    - **헷갈리는 Autowired, Qualifier, Resource**: **@Autowired**와 함께 @*Qualifier*를 사용하고, **@Resource는** @*Autowired*와 @*Qualifier*를 한번에 간결하게 표현
-  - 테스트 코드엔 이 2가지 사용(jUnit4 기준)  
-    @RunWith(SpringJUnit4ClassRunner.**class**)  
-    @ContextConfiguration(locations= {"/context-helloworld.xml"})
-- 스프링부트:
-  - 빈을 자바코드로 설정 가능 (EX: @Bean). 보통 생성자 주입하여 사용
-  - 테스트 코드엔 이 2가지 사용(jUnit4 기준)   
-    @RunWith(SpringRunner.**class**)  
-    @SpringBootTest
-
-**eclipse 응답없음** 자주 뜬다면? 힙 메모리 사용량이라도.. 최적화하자 ㅠ  
-
-- **주의!!** 윈도우의 경우 알집으로 압축풀면 몇개는 에러뜨는데 그대로 사용시 이클립스가 미쳐 날뛰는걸 확인할 수 있음... 한참 찾았네 ㅠ  
-  bak log파일이 미친듯이 발생하는데, 압축 제대로 안풀려서 미친듯이 충돌 난건가 봄. 에효ㅠㅠ  
-  **7-zip 외부 파일로 압축풀어서 간단히 해결했음!**
-- window>preferences>general>show heap status 체크 -> 메모리 부족하다면?
-- eclipse.ini 파일에서 Xms, Xmx 수정 (최소, 최대 힙 메모리 용량)
-- 추가TIP) 안 사용하는 플젝은 close project / General>Appearance>Theme>Classic, Use mixed fonts and colors for labels 체크X
-
-**pom.xml** - Run As Maven {Build, Clean, Install}: 
-
-- Clean은 target 폴더 삭제랑 이전 빌드내용 삭제
-- Build는 의존성 Install 전까지 (JAR나 WAR패키징 까지)
-- Install은 Build를 포함하여 의존성 Install 까지
-
-**boot의 config 코드 분석? (직접 주석 달음. 주석과 코드 함께 보기)**
-
-<details><summary><b>EgovConfigAspect</b></summary>
-<div markdown="1"><br>
-```java
-package egovframework.example.config;
-import egovframework.example.exception.EgovAopExceptionTransfer;
-import egovframework.example.exception.EgovSampleExcepHndlr;
-import egovframework.example.exception.EgovSampleOthersExcepHndlr;
-import org.egovframe.rte.fdl.cmmn.aspect.ExceptionTransfer;
-import org.egovframe.rte.fdl.cmmn.exception.handler.ExceptionHandler;
-import org.egovframe.rte.fdl.cmmn.exception.manager.DefaultExceptionHandleManager;
-import org.egovframe.rte.fdl.cmmn.exception.manager.ExceptionHandlerService;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
-import org.springframework.util.AntPathMatcher;
-/*
-Spring 기반의 AOP-예외처리 설정을 위한 클래스
-Transfer, Handler, Manager, Service 등은 egovframe 라이브러리에서 가져옴.
-예외 발생: 애플리케이션에서 예외가 발생하면, Spring의 AOP 설정에 의해 예외 처리기가 호출됩니다.
-예외 처리기 실행: 예외 처리기는 발생한 예외를 처리하고 적절한 응답을 반환합니다.
-예외 전송: ExceptionTransfer 빈은 예외를 전송하는 역할을 하며, 이는 여러 예외 처리 매니저를 통해 이루어집니다.
- */
-@Configuration //빈 정의 목적
-@EnableAspectJAutoProxy //AspectJ를 사용해 AOP 활성화 (자동 프록시 생성후 Aspect 적용)
-public class EgovConfigAspect {
-	@Bean //스프링 컨테이너에 등록
-	public EgovSampleExcepHndlr egovHandler() {
-		return new EgovSampleExcepHndlr(); //예외 처리기(Handler): 예외처리 후 응답반환
-	}
-	@Bean
-	public EgovSampleOthersExcepHndlr otherHandler() {
-		return new EgovSampleOthersExcepHndlr(); //예외 처리기(Handler): 예외처리 후 응답반환
-	}
-	//AntPathMatcher(URL패턴 매치)하고, 위 예외 처리기 활용1
-	@Bean 
-	public DefaultExceptionHandleManager defaultExceptionHandleManager(AntPathMatcher antPathMatcher, EgovSampleExcepHndlr egovHandler) {
-		DefaultExceptionHandleManager defaultExceptionHandleManager = new DefaultExceptionHandleManager();
-		defaultExceptionHandleManager.setReqExpMatcher(antPathMatcher);
-		defaultExceptionHandleManager.setPatterns(new String[]{"**service.impl.*"});
-		defaultExceptionHandleManager.setHandlers(new ExceptionHandler[]{egovHandler});
-		return defaultExceptionHandleManager;
-	}
-	//AntPathMatcher(URL패턴 매치)하고, 위 예외 처리기 활용2
-	@Bean
-	public DefaultExceptionHandleManager otherExceptionHandleManager(AntPathMatcher antPathMatcher, EgovSampleOthersExcepHndlr othersExcepHndlr) {
-		DefaultExceptionHandleManager defaultExceptionHandleManager = new DefaultExceptionHandleManager();
-		defaultExceptionHandleManager.setReqExpMatcher(antPathMatcher);
-		defaultExceptionHandleManager.setPatterns(new String[]{"**service.impl.*"});
-		defaultExceptionHandleManager.setHandlers(new ExceptionHandler[]{othersExcepHndlr});
-		return defaultExceptionHandleManager;
-	}
-	//예외 전송 서비스 역할, 위 예외 처리 매니저 활용
-	@Bean
-	public ExceptionTransfer exceptionTransfer(
-		@Qualifier("defaultExceptionHandleManager") DefaultExceptionHandleManager defaultExceptionHandleManager,
-		@Qualifier("otherExceptionHandleManager") DefaultExceptionHandleManager otherExceptionHandleManager) {
-		ExceptionTransfer exceptionTransfer = new ExceptionTransfer();
-		exceptionTransfer.setExceptionHandlerService(new ExceptionHandlerService[] {
-			defaultExceptionHandleManager, otherExceptionHandleManager
-		});
-		return exceptionTransfer;
-	}
-	//AOP 기반 예외 전송 설정, 위 예외 전송 서비스 활용
-	@Bean
-	public EgovAopExceptionTransfer aopExceptionTransfer(ExceptionTransfer exceptionTransfer) {
-		EgovAopExceptionTransfer egovAopExceptionTransfer = new EgovAopExceptionTransfer();
-		egovAopExceptionTransfer.setExceptionTransfer(exceptionTransfer);
-		return egovAopExceptionTransfer;
-	}
-}
-```
-</div>
-</details>
-
-<details><summary><b>EgovConfigCommon</b></summary>
-<div markdown="1"><br>
-```java
-package egovframework.example.config;
-import org.egovframe.rte.fdl.cmmn.trace.LeaveaTrace;
-import org.egovframe.rte.fdl.cmmn.trace.handler.DefaultTraceHandler;
-import org.egovframe.rte.fdl.cmmn.trace.handler.TraceHandler;
-import org.egovframe.rte.fdl.cmmn.trace.manager.DefaultTraceHandleManager;
-import org.egovframe.rte.fdl.cmmn.trace.manager.TraceHandlerService;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.support.MessageSourceAccessor;
-import org.springframework.context.support.ReloadableResourceBundleMessageSource;
-import org.springframework.util.AntPathMatcher;
-/*
-Spring 기반의 공통 설정을 위한 클래스입니다. 
-이 클래스는 메시지 소스, 트레이스(Trace) 설정, 그리고 Ant 경로 매처와 같은 공통적인 설정
-LeaveaTrace, Handler, Manager, Service 등은 egovframe 라이브러리에서 가져옴.
- */
-@Configuration
-public class EgovConfigCommon {
-	//요청 경로를 매칭
-	@Bean
-	public AntPathMatcher antPathMatcher() {
-		return new AntPathMatcher();
-	}
-	//트레이스 정보를 처리기.
-	@Bean
-	public DefaultTraceHandler defaultTraceHandler() {
-		return new DefaultTraceHandler();
-	}
-	//메시지 소스를 제공하며, 여러 리소스 번들 파일에서 메시지를 읽어옴.
-	@Bean
-	public ReloadableResourceBundleMessageSource messageSource() {
-		ReloadableResourceBundleMessageSource reloadableResourceBundleMessageSource = new ReloadableResourceBundleMessageSource();
-		reloadableResourceBundleMessageSource.setBasenames(
-				"classpath:/egovframework/message/message-common",
-				"classpath:/org/egovframe/rte/fdl/idgnr/messages/idgnr",
-				"classpath:/org/egovframe/rte/fdl/property/messages/properties");
-		reloadableResourceBundleMessageSource.setDefaultEncoding("UTF-8");
-		reloadableResourceBundleMessageSource.setCacheSeconds(60); //캐시60초
-		return reloadableResourceBundleMessageSource;
-	}
-	//메시지 소스를 쉽게 접근하게 함. 위 메소드 활용. 
-	@Bean
-	public MessageSourceAccessor messageSourceAccessor() {
-		return new MessageSourceAccessor(this.messageSource());
-	}
-	//AntPathMatcher로 요청 경로 매칭 후 트레이스 정보 처리기를 매칭 
-	@Bean
-	public DefaultTraceHandleManager traceHandlerService() {
-		DefaultTraceHandleManager defaultTraceHandleManager = new DefaultTraceHandleManager();
-		defaultTraceHandleManager.setReqExpMatcher(antPathMatcher());
-		defaultTraceHandleManager.setPatterns(new String[]{"*"});
-		defaultTraceHandleManager.setHandlers(new TraceHandler[]{defaultTraceHandler()});
-		return defaultTraceHandleManager;
-	}
-	//트레이스 서비스 설정. 위 메소드 활용.
-	@Bean
-	public LeaveaTrace leaveaTrace() {
-		LeaveaTrace leaveaTrace = new LeaveaTrace();
-		leaveaTrace.setTraceHandlerServices(new TraceHandlerService[]{traceHandlerService()});
-		return leaveaTrace;
-	}
-}
-```
-</div>
-</details>
-
-<details><summary><b>EgovConfigDatasource</b></summary>
-<div markdown="1"><br>
-```java
-package egovframework.example.config;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
-import javax.sql.DataSource;
-/*
-데이터베이스를 설정 -> HSQL로.
-addScript 메서드를 통해 초기 데이터베이스 스크립트를 실행하여 데이터베이스를 초기화
- */
-@Configuration
-public class EgovConfigDatasource {
-	@Bean(name="dataSource") //생성된 데이터소스를 빈 등록
-	public DataSource dataSource() {
-	    EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
-	    return builder.setType(EmbeddedDatabaseType.HSQL).addScript("classpath:/db/sampledb.sql").build();
-	}
-}
-```
-</div>
-</details>
-
-<details><summary><b>EgovConfigIdGeneration</b></summary>
-<div markdown="1"><br>
-```java
-package egovframework.example.config;
-import org.egovframe.rte.fdl.idgnr.impl.EgovTableIdGnrServiceImpl;
-import org.egovframe.rte.fdl.idgnr.impl.strategy.EgovIdGnrStrategyImpl;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import javax.sql.DataSource;
-/*
-ID 생성 설정을 위한 클래스
-Egov 프레임워크의 ID 생성기 서비스를 설정하여 애플리케이션에서 사용할 수 있는 고유한 ID를 생성
-아래 메소드의 반환타입 전부 egovframe 라이브러리에서 가져옴.
- */
-@Configuration
-public class EgovConfigIdGeneration {
-	@Bean
-	public EgovIdGnrStrategyImpl mixPrefixSample() {
-		EgovIdGnrStrategyImpl egovIdGnrStrategyImpl = new EgovIdGnrStrategyImpl();
-		egovIdGnrStrategyImpl.setPrefix("SAMPLE-"); //ID의 접두사
-		egovIdGnrStrategyImpl.setCipers(5); //ID의 숫자부분 길이
-		egovIdGnrStrategyImpl.setFillChar('0'); //ID의 숫자부분 채울 문자
-		return egovIdGnrStrategyImpl;
-	}
-	@Bean(destroyMethod="destroy")
-	public EgovTableIdGnrServiceImpl egovIdGnrService(@Qualifier("dataSource") DataSource dataSource) {
-		EgovTableIdGnrServiceImpl egovTableIdGnrServiceImpl = new EgovTableIdGnrServiceImpl();
-		egovTableIdGnrServiceImpl.setDataSource(dataSource);
-		egovTableIdGnrServiceImpl.setStrategy(mixPrefixSample());
-		egovTableIdGnrServiceImpl.setBlockSize(10);
-		egovTableIdGnrServiceImpl.setTable("IDS"); //ID를 생성할 테이블 이름
-		egovTableIdGnrServiceImpl.setTableName("SAMPLE"); //ID를 생성할 테이블 이름
-		return egovTableIdGnrServiceImpl;	
-	}
-}
-```
-</div>
-</details>
-
-<details><summary><b>EgovConfigMapper</b></summary>
-<div markdown="1"><br>
-```java
-package egovframework.example.config;
-import org.apache.ibatis.session.SqlSessionFactory;
-import org.mybatis.spring.SqlSessionFactoryBean;
-import org.mybatis.spring.SqlSessionTemplate;
-import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import javax.sql.DataSource;
-import java.io.IOException;
-/*
-Spring 기반의 MyBatis 설정을 위한 클래스
- */
-@Configuration
-@MapperScan(basePackages="egovframework.example.sample.service.impl")
-public class EgovConfigMapper {
-	//dataSource 빈을 주입받아 데이터베이스 연결 + MyBatis 설정 파일, 매퍼 파일 위치 지정
-	@Bean
-	public SqlSessionFactoryBean sqlSessionFactory(@Qualifier("dataSource") DataSource dataSource) throws IOException {
-		PathMatchingResourcePatternResolver pmrpr = new PathMatchingResourcePatternResolver();
-		SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
-		sqlSessionFactoryBean.setDataSource(dataSource);
-		sqlSessionFactoryBean.setConfigLocation(pmrpr.getResource("classpath:/egovframework/sqlmap/example/sql-mapper-config.xml"));
-		sqlSessionFactoryBean.setMapperLocations(pmrpr.getResources("classpath:/egovframework/sqlmap/example/mappers/*.xml"));
-		return sqlSessionFactoryBean;
-	}
-	//템플릿화하여 사용
-	@Bean
-	public SqlSessionTemplate sqlSession(SqlSessionFactory sqlSessionFactory) {
-		return new SqlSessionTemplate(sqlSessionFactory);
-	}
-}
-```
-</div>
-</details>
-
-<details><summary><b>EgovConfigProperties</b></summary>
-<div markdown="1"><br>
-```java
-package egovframework.example.config;
-import org.egovframe.rte.fdl.property.impl.EgovPropertyServiceImpl;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import java.util.HashMap;
-import java.util.Map;
-/*
-프로퍼티 서비스 제공하는 클래스. 공통적인 프로퍼티에 좋겠죠?
-EgovPropertyServiceImpl은 egovframe 라이브러리에서 가져옴..
- */
-@Configuration
-public class EgovConfigProperties {
-	@Bean(destroyMethod="destroy") //빈이 소멸될 때 destroy() 메서드 호출되게 설정
-	public EgovPropertyServiceImpl propertiesService() {
-		Map<String, String> properties = new HashMap<>();
-		properties.put("pageUnit", "10");
-		properties.put("pageSize", "10");
-		EgovPropertyServiceImpl egovPropertyServiceImpl = new EgovPropertyServiceImpl();
-		egovPropertyServiceImpl.setProperties(properties);
-		return egovPropertyServiceImpl; //리턴값을 통해 앱의 다른 부분에서 이 프로퍼티 접근가능
-	}
-}
-```
-</div>
-</details>
-
-<details><summary><b>EgovConfigTransaction</b></summary>
-<div markdown="1"><br>
-```java
-package egovframework.example.config;
-import org.springframework.aop.Advisor;
-import org.springframework.aop.aspectj.AspectJExpressionPointcut;
-import org.springframework.aop.support.DefaultPointcutAdvisor;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.interceptor.*;
-import javax.sql.DataSource;
-import java.util.Collections;
-import java.util.HashMap;
-/*
-트랜잭션 설정을 위한 클래스 - 애초에 부트로 @Transcational... 써도 대부분 ㅇㅋ.
-다만, 이 프레임워크대로 여기선 써야지.. (장점:직접 설정한거라 포인트컷 설정이나 예외처리 명시같은게 자유롭)
- */
-@Configuration
-public class EgovConfigTransaction {
-	//dataSource 주입받아 DB연결 설정
-	@Bean(name="txManager")
-	public DataSourceTransactionManager txManager(@Qualifier("dataSource") DataSource dataSource) {
-		DataSourceTransactionManager dataSourceTransactionManager = new DataSourceTransactionManager();
-		dataSourceTransactionManager.setDataSource(dataSource);
-		return dataSourceTransactionManager;
-	}
-	//트랜잭션을 적용할 메서드에 대한 규칙을 설정 - 트랜잭션 필수사용+예외 시 롤백규칙
-	@Bean
-	public TransactionInterceptor txAdvice(DataSourceTransactionManager txManager) {
-		RuleBasedTransactionAttribute txAttribute = new RuleBasedTransactionAttribute();
-		txAttribute.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-		txAttribute.setRollbackRules(Collections.singletonList(new RollbackRuleAttribute(Exception.class)));
-		HashMap<String, TransactionAttribute> txMethods = new HashMap<String, TransactionAttribute>();
-		txMethods.put("*", txAttribute);
-		NameMatchTransactionAttributeSource txAttributeSource = new NameMatchTransactionAttributeSource();
-		txAttributeSource.setNameMap(txMethods);
-		TransactionInterceptor txAdvice = new TransactionInterceptor();
-		txAdvice.setTransactionAttributeSource(txAttributeSource);
-		txAdvice.setTransactionManager(txManager);
-		return txAdvice;
-	}
-	//트랜잭션 인터셉터를 적용할 포인트컷을 정의 - 특정 패턴의 메서드에 트랜잭션 적용
-	@Bean
-	public Advisor txAdvisor(@Qualifier("txManager") DataSourceTransactionManager txManager) {
-		AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
-		pointcut.setExpression("execution(* egovframework.example.sample..impl.*Impl.*(..))");
-		return new DefaultPointcutAdvisor(pointcut, txAdvice(txManager));
-	}
-}
-```
-</div>
-</details>
-
-<details><summary><b>EgovConfigValidation</b></summary>
-<div markdown="1"><br>
-```java
-package egovframework.example.config;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.MessageSource;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.validation.Validator;
-import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
-/*
-검증 설정을 위한 클래스 - Bean Validation API를 사용하여 검증기를 생성 +  MessageSource 주입 받아 검증 메시지 관리
- */
-@Configuration
-public class EgovConfigValidation {
-    @Bean
-    public Validator getValidator(@Qualifier("messageSource") MessageSource messageSource) {
-        LocalValidatorFactoryBean localValidatorFactoryBean = new LocalValidatorFactoryBean();
-        localValidatorFactoryBean.setValidationMessageSource(messageSource);
-        return localValidatorFactoryBean;
-    }
-}
-```
-</div>
-</details>
-
-<details><summary><b>EgovConfigWeb</b></summary>
-<div markdown="1"><br>
-```java
-package egovframework.example.config;
-import egovframework.example.pagination.EgovPaginationDialect;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.web.servlet.HandlerExceptionResolver;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
-import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
-import org.springframework.web.servlet.i18n.SessionLocaleResolver;
-import org.thymeleaf.spring5.SpringTemplateEngine;
-import org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver;
-import org.thymeleaf.spring5.view.ThymeleafViewResolver;
-import org.thymeleaf.templatemode.TemplateMode;
-import java.util.List;
-import java.util.Properties;
-/*
-Spring MVC 설정을 위한 클래스
-Thymeleaf 템플릿 엔진 설정, 리소스 핸들러 설정, 인터셉터 설정, 예외 처리 설정 등을 포함
- */
-@Configuration
-@Import({
-		EgovConfigAspect.class,
-		EgovConfigCommon.class,
-		EgovConfigDatasource.class,
-		EgovConfigIdGeneration.class,
-		EgovConfigMapper.class,
-		EgovConfigProperties.class,
-		EgovConfigTransaction.class,
-		EgovConfigValidation.class
-})
-public class EgovConfigWeb implements WebMvcConfigurer, ApplicationContextAware {
-	private ApplicationContext applicationContext;
-	public void setApplicationContext(final ApplicationContext applicationContext) {
-		this.applicationContext = applicationContext;
-	}
-	//Thymeleaf 템플릿 파일의 위치와 접미사를 설정
-	@Bean
-	public SpringResourceTemplateResolver templateResolver() {
-		SpringResourceTemplateResolver templateResolver = new SpringResourceTemplateResolver();
-		templateResolver.setApplicationContext(this.applicationContext);
-		templateResolver.setPrefix("classpath:/templates/thymeleaf/"); //기본경로
-		templateResolver.setSuffix(".html"); //확장자
-		templateResolver.setTemplateMode(TemplateMode.HTML);
-		templateResolver.setCacheable(true);
-		return templateResolver;
-	}
-	//Thymeleaf 템플릿 엔진을 설정
-	@Bean
-	public SpringTemplateEngine templateEngine() {
-		SpringTemplateEngine templateEngine = new SpringTemplateEngine();
-		templateEngine.setTemplateResolver(templateResolver());
-		templateEngine.setEnableSpringELCompiler(true);
-		// add custom tag
-		templateEngine.addDialect(new EgovPaginationDialect()); //만든 페이징 기능을 지원
-		return templateEngine;
-	}
-	//Thymeleaf 템플릿을 뷰로 사용
-	@Bean
-	public ThymeleafViewResolver thymeleafViewResolver() {
-		ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();
-		viewResolver.setCharacterEncoding("UTF-8");
-		viewResolver.setTemplateEngine(templateEngine());
-		return viewResolver;
-	}
-	//정적 리소스 파일(CSS, 이미지, 자바스크립트 등)의 경로를 설정
-	@Override
-	public void addResourceHandlers(ResourceHandlerRegistry registry) {
-		registry.addResourceHandler("/css/**").addResourceLocations("classpath:/static/css/");
-        registry.addResourceHandler("/images/**").addResourceLocations("classpath:/static/images/");
-        registry.addResourceHandler("/js/**").addResourceLocations("classpath:/static/js/");
-	}
-	//세션 기반의 로케일(지역?) 리졸버를 설정
-	@Bean
-	public SessionLocaleResolver localeResolver() {
-		return new SessionLocaleResolver();
-	}
-	//URL 파라미터를 통해 로케일을 변경 지원
-	@Bean
-	public LocaleChangeInterceptor localeChangeInterceptor() {
-		LocaleChangeInterceptor interceptor = new LocaleChangeInterceptor();
-		interceptor.setParamName("language");
-		return interceptor;
-	}
-	//인터셉터 등록(요청에 적용) - 로케일 변경 인터셉터를 등록하여 로케일 변경 요청을 처리
-	@Override
-	public void addInterceptors(InterceptorRegistry registry) {
-		registry.addInterceptor(localeChangeInterceptor());
-	}
-	//예외 처리기를 설정하여 예외 발생 시 적절한 응답 - 에러 뷰 매핑
-	@Override
-	public void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> resolvers) {
-		Properties prop = new Properties();
-		prop.setProperty("org.springframework.dao.DataAccessException", "egovSampleError");
-		prop.setProperty("org.springframework.transaction.TransactionException", "egovSampleError");
-		prop.setProperty("org.egovframe.rte.fdl.cmmn.exception.EgovBizException", "egovSampleError");
-		prop.setProperty("org.springframework.security.AccessDeniedException", "egovSampleError");
-		prop.setProperty("java.lang.Throwable", "egovSampleError");
-//
-		Properties statusCode = new Properties();
-		statusCode.setProperty("egovSampleError", "400");
-		statusCode.setProperty("egovSampleError", "500");
-//
-		SimpleMappingExceptionResolver smer = new SimpleMappingExceptionResolver();
-		smer.setDefaultErrorView("egovSampleError");
-		smer.setExceptionMappings(prop);
-		smer.setStatusCodes(statusCode);
-		resolvers.add(smer);
-	}
-}
-```
-</div>
-</details>
-<br><br>
-
-### 개발환경 - Code Generation
-
-말 그대로 소스 코드 자동생성.. WOW  
-
-**예로 CRUD 자동생성을 해보자면?** (완료하면 생성된 샘플을 볼 수 있다.)
-
-1. (HSQL)DB 실행 -> (이클립스)Data Source Explorer 에서 DB Connection에 HSQLDB 우클릭 connect
-
-2. (이클립스)window>Show View>Other.. 선택 후 eGovFrame>Templates 선택
-
-3. 원하는 자동생성 중에 CRUD 선택 후 PUBLIC>SAMPLE>디렉토리 정보.. 하면 끝!
-
-   <img src="https://github.com/user-attachments/assets/c0dbf6f4-2a94-4545-9b3c-44b9be178b2a" alt="Image" style="zoom:80%;" /> 
-
-   실제로 해당 패키지에서 보면 CRUD 생성 됨을 확인. (VO=실제 데이터. 엔티티)
-
-4. src/main/resources 에서 본인 패키지의 mapper-config.xml 파일을 우클릭 > Open With > Other… > mapperConfiguration Editor > OK 후 생성된 Sample_MAPPER.xml 파일을 추가되어 있는지 확인
-
-4. maven clean -> maven install 후 server 실행해보면 잘 구동된 웹 확인 가능
-
-**생성된 파일들 모습**  
-
-SampleDefaultVO는 SampleVO(**"엔티티"**)의 부모클래스, SampleService는 인터페이스, SampleDAO는 eGovFram쪽 상속받아 구현한 **"레포"**, SampleServiceImpl은 위 인터페이스 구현체인 **"서비스"**, SampleController는 **"컨트롤러"**  
-+) SampleMapper, mapper-config, Sample_MAPPER는 MyBatis!!
-
-@Resource로 여기선 빈 등록 받는중.
-
-<img src="https://github.com/user-attachments/assets/8c36b51e-e8d3-46c1-be24-f1dc5c620719" alt="Image" style="zoom:80%;" /> 
-
-![Image](https://github.com/user-attachments/assets/623bba22-fef4-44d6-9c41-7e239d5648ec) 
-
-<br><br>
-
-### 개발환경 - 테스트, 공통컴포넌트, 템플릿
-
-**플젝>Run As>jUnit Test** or Maven test -> **jUnit4 사용 (JUnit뷰 콘솔에서 결과 확인)**
-
-(아래사진)**Data Source Explorer**에서 간편히 **DB연결 및 테이블 확인** 가능  
-=> DB연결(실행)이 되어야 계층 구조가 나타나며, DB추가는 우클릭 NEW로 간단히 가능(별첨 참고)
-
-- <img src="https://github.com/user-attachments/assets/08b270c7-9195-4c6a-9dd8-8b7d42fb65cb" alt="Image" style="zoom:50%;" /> 
-
-프로젝트 우클릭> New > eGovFrame Common Component > 원하는 **공통 컴포넌트** 선택  
-예로 "게시판, 역할관리 컴포넌트" 선택시 아래 사이트 자동 생성 (Java, DB 소스도 자동!)
-
-- <img src="https://github.com/user-attachments/assets/c94c43b7-e84d-4094-8d69-b0e5c57a43ff" alt="Image" style="zoom: 80%;" />  
-
-eGovFrame>Start>New Template Project 생성,실행 후 "admin / 1" 로그인하면 홈페이지 확인 가능  
-**템플릿 프로젝트는 아래와 같은 기능을 제공!!**
-
-- ![Image](https://github.com/user-attachments/assets/adbcbf81-b4d2-4890-90db-500845262154) 
-
-<br><br>
-
-### 개발환경 - DBIO Editor 실습(EX:MyBatis)
-
-MyBatis는 예전에 토이플젝에 직접 세팅해서 해봄. 여기선 다른점있나?   
-**=> 여기선 XML세팅때 우클릭>NEW>Open With>Other>mapper 에디터 를 활용!**
-
-1. DB실행
-
-2. DBIO 실습(자세히는 PDF)
-
-   - Mapper Configuration 파일 생성(sample_config.xml): 프로젝트 우클릭 > New > mapperConfiguration
-
-   - Mapper 파일 생성(sample_map.xml):  Mapper Configuration Editor > New
-
-   - Mapper 파일 편집 -> mapper 에디터를 활용!  
-     **에디터로 간단히 설정하는데 "xml코드가 자동 생성되는 편리!!"**
-
-     1. Result Map 작성: Mapper Editor> ResultMap 우클릭> Add resultMap
-     2. Query 작성: Mapper Editor> Query 우클릭> Add Select Query
-
-     자동생성 코드 예시(sample_map.xml): 
-
-     ```xml
-     <?xml version="1.0" encoding="UTF-8"?>
-     <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-     <mapper ><resultMap id="resultMap" type="java.lang.String"><result property="deptName" column="DEPT_NAME"/>
-     </resultMap>
-     <select id="selectDept" parameterType="java.lang.String" resultMap="resultMap">
-     SELECT DEPT_NAME
-       FROM PUBLIC.DEPT
-       WHERE DEPT_NO = #{deptNo}
-     </select>
-     </mapper>
-     ```
-3. Query  테스트
-
-   <img src="https://github.com/user-attachments/assets/66c16c69-5daa-4854-9fc4-4df12ad1254e" alt="Image" style="zoom:80%;" /> 
-
-<br><br>
-
-### 실행환경-공통기반(Foundation)
-
-**여기까지 개발환경 PART였고, 아래부턴 실행환경 PART 교육자료이다.**
-
-**개발프레임워크 아키텍처는 항상 기억하고 있자.**
-
-<img src="https://github.com/user-attachments/assets/415e6678-2e01-43ad-9b0f-7a7225464266" alt="Image" style="zoom:80%;" /> 
-
-<img src="https://github.com/user-attachments/assets/8bf68d75-6b56-42e9-8e95-1b0b273d934d" alt="Image" style="zoom:80%;" /> 
-
-<br>
-
-**XML 설정 방식의 Spring Bean vs Annotation로 설정하는 Spring Bean**
-
-- XML
-  - 개발 양식에 맞춰서(물론 제네릭하게! 전자정부라이브러리는 미사용 상태)   
-    EmpService interface, EmpVo class를 만듬 -> DAO, SeriveImpl도 만듬 
-  - text만 할거라 test 하위에 META-INF엔 context-emp xml만들고, test코드엔 EmpServiceTest class 만듬
-    - xml에 빈 등록은 생각보다 간단. 특히, Service의 경우 XmlEmpDAO를 필드로 가지는데 이를위해 Bean등록에 property로 등록해줌. **-> 이게 setter 주입방식**
-      - `property` **태그가 setter 메서드를 자동 호출!**
-    - Test코드엔 순수스프링+JUnit4 사용을 위해 @RunWith와 @ContextConfiguration를 사용 및 @Resource(name="xmlEmpService") 이런식으로 주입했음 -> Autowired해도 잘 돌아갈거임.
-
-- Annotation
-  - Annotation에선 DAO, SeriveImpl에 @Repository, @Service를 사용했고, **@Resource로 필드 주입**했음.
-  - test만 할거라 META-INF엔 context-common xml만들고 컴포넌트 스캔을 지정함. (Boot 썻을땐 Main에서 했던 그것!)
-
-**XML으로 설정해보는 AOP**
-
-- AOP 자바코드를 만들고, XML에서 이 AOP를 빈으로 추가 및 AOP 설정을 함(targetMethod 등)
-- 예제: 코드위주 해석 -> 2개의 핵심 파일인 AdviceUsingXML.java, context-advice.xml
-  - AdviceUsingXML.java 에는 beforeTargetMethod(객체 정보를 로깅로직), afterTargetMethod(실행 완료 로깅로직), afterReturningTargetMethod(결과 값 로깅로직), afterThrowingTargetMethod(예외랩핑-BizException발생로직), aroundTargetMethod(실행시간 측정로직)
-  - context-advice.xml 에는 Pointcut 설정으로 어느 패키지에 AOP적용할지, Aspect설정으로 AdviceUsingXML클래스의 메소드들을 Advice로 등록!
-    - **Before Advice**: 실행 전 로깅
-    - **After Returning Advice**: 정상 실행 후 결과값 로깅
-    - **After Throwing Advice**: 예외 발생 시 `BizException`으로 변환
-    - **After Advice**: 실행 완료 후 로깅
-    - **Around Advice**: 실행 전후 시간을 측정
-- JSP 뷰에 에러를 반환하고 싶다면 -> WEB-INF/config/springmvc/context-servlet.xml 에서 SimpleMappingExceptionResolver 빈을 등록해서 매핑해줄 것
-
-<details><summary><b>AdviceUsingXML.java, context-advice.xml 코드</b></summary>
-<div markdown="1"><br>
-```java
-public class AdviceUsingXML {
-	// TODO [Step 1-6] AdviceUsingXML 작성
-	private static final Logger LOGGER = LoggerFactory.getLogger(AdviceUsingXML.class);
-	public void beforeTargetMethod(JoinPoint thisJoinPoint) {
-		LOGGER.debug("\nAdviceUsingXML.beforeTargetMethod executed.");
-		@SuppressWarnings("unused")
-		Class<? extends Object> clazz = thisJoinPoint.getTarget().getClass();
-		String className = thisJoinPoint.getTarget().getClass().getSimpleName();
-		String methodName = thisJoinPoint.getSignature().getName();
-		// 현재 class, method 정보 및 method arguments 로깅
-		StringBuffer buf = new StringBuffer();
-		buf.append("\n== AdviceUsingXML.beforeTargetMethod : [" + className + "." + methodName + "()] ==");
-		Object[] arguments = thisJoinPoint.getArgs();
-		int argCount = 0;
-		for (Object obj : arguments) {
-			buf.append("\n - arg ");
-			buf.append(argCount++);
-			buf.append(" : ");
-			// commons-lang 의 ToStringBuilder 를
-			// 통해(reflection 을 이용)한 VO 정보 출력
-			buf.append(ToStringBuilder.reflectionToString(obj));
-		}
-		// 대상 클래스의 logger 를 사용하여 method arguments 로깅
-		// 하였음.
-		LOGGER.debug(buf.toString());
-	}
-	public void afterTargetMethod(JoinPoint thisJoinPoint) {
-		LOGGER.debug("AdviceUsingXML.afterTargetMethod executed.");
-	}
-	public void afterReturningTargetMethod(JoinPoint thisJoinPoint, Object retVal) {
-		LOGGER.debug("AdviceUsingXML.afterReturningTargetMethod executed.");
-		@SuppressWarnings("unused")
-		Class<? extends Object> clazz = thisJoinPoint.getTarget().getClass();
-		String className = thisJoinPoint.getTarget().getClass().getSimpleName();
-		String methodName = thisJoinPoint.getSignature().getName();
-		// 현재 class, method 정보 및 method arguments 로깅
-		StringBuffer buf = new StringBuffer();
-		buf.append("\n== AdviceUsingXML.afterReturningTargetMethod : [" + className + "." + methodName + "()] ==");
-		buf.append("\n");
-		// 결과값이 List 이면 size 와 전체 List 데이터를 풀어
-		// reflection 으로 출력 - 성능상 사용 않는 것이 좋음
-		if (retVal instanceof List) {
-			List<?> resultList = (List<?>) retVal;
-			buf.append("resultList size : " + resultList.size() + "\n");
-			for (Object oneRow : resultList) {
-				buf.append(ToStringBuilder.reflectionToString(oneRow));
-				buf.append("\n");
-			}
-		} else {
-		}
-		// 대상 클래스의 logger 를 사용하여 결과값 로깅 하였음.
-		LOGGER.debug(buf.toString());
-		// return value 의 변경은 불가함에 유의!
-	}
-	public void afterThrowingTargetMethod(JoinPoint thisJoinPoint, Exception exception) throws Exception {
-		LOGGER.debug("AdviceUsingXML.afterThrowingTargetMethod executed.");
-		LOGGER.error("에러가 발생했습니다. {}", exception);
-		// 원본 exception 을 wrapping 하고 user-friendly 한메시지를 설정하여 새로운 Exception 으로 re-throw
-		throw new BizException("에러가 발생했습니다.", exception);
-		// 여기서는 간단하게 작성하였지만 일반적으로 messageSource 를 사용한 locale 에 따른 다국어 처리 및 egov.
-		// exceptionHandler
-		// 를 확장한 Biz. (ex. email 공지 등) 기능 적용이 가능함.
-	}
-	public Object aroundTargetMethod(ProceedingJoinPoint thisJoinPoint) throws Throwable {
-		LOGGER.debug("AdviceUsingXML.aroundTargetMethod start.");
-		long time1 = System.currentTimeMillis();
-		Object retVal = thisJoinPoint.proceed();
-		// Around advice 의 경우 결과값을 변경할 수도 있음!
-		// 위의 retVal 을 가공하거나 심지어 전혀 다른 결과값을 대체하여
-		// caller 에 되돌려줄 수 있음
-		long time2 = System.currentTimeMillis();
-		// 메서드 실행 시간을 측정
-		LOGGER.debug("AdviceUsingXML.aroundTargetMethod end. Time({})", (time2 - time1));
-		return retVal;
-	}
-}
-```
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:aop="http://www.springframework.org/schema/aop"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-				http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd">
-	<!-- TODO [Step 1-7] xml 설정 방식의 AOP 설정 -->
-	<!-- 모든 비지니스 메서드(Impl 로 끝나는 모든 class 의 모든 메서드)에 대해 다양한 Advice 기능을 동시에 적용하였음에 유의 -->
-	<bean id="adviceUsingXML"
-		class="egovframework.lab.aop.xml.AdviceUsingXML" />
-	<aop:config>
-		<aop:pointcut id="targetMethod"
-			expression="execution(* egovframework.lab.aop..Xml*Impl.*(..))" />
-		<aop:aspect ref="adviceUsingXML">
-			<aop:before pointcut-ref="targetMethod"
-				method="beforeTargetMethod" />
-			<aop:after-returning pointcut-ref="targetMethod"
-				method="afterReturningTargetMethod" returning="retVal" />
-			<aop:after-throwing pointcut-ref="targetMethod"
-				method="afterThrowingTargetMethod" throwing="exception" />
-			<aop:after pointcut-ref="targetMethod"
-				method="afterTargetMethod" />
-			<aop:around pointcut-ref="targetMethod"
-				method="aroundTargetMethod" />
-		</aop:aspect>
-	</aop:config>
-</beans>
-```
-</div>
-</details>
-
-<br><br>
-
-### 실행환경 - 데이터처리(Persistence)
-
-**데이터 처리에 사용중인 오픈소스**
-
-<img src="https://github.com/user-attachments/assets/df4e2121-c8f1-435b-bac7-5bf858e1f6b0" alt="Image" style="zoom:80%;" /> 
-
-<br>
-
-**알고가자:** 
-
-- DataSource를 빈 등록?
-  - DB와 연동을 위해서는 DataSource가 필수로 필요한데, "스프링 부트"는 dataSource 빈 이름으로 properties를 보고 자동으로 등록!
-  - 반면, "순수 스프링"은 빈 등록도 직접 해줘야 한다.
-- Transaction을 빈 등록?
-  - 트랜잭션도 직접 빈 등록을 하면 다양한 커스텀이 가능! 물론, @Transactional 이 충분히 좋으므로 이걸로 끝내는게 많다.
-  - 직접 빈 등록(EX:트랜잭션 매니저를 등록한 경우)을 한 경우 @Transactional(transactionManager = "txManager") 이런식으로 사용.
-- iBatis를 빈 등록?
-  - EgovAbstractDAO 에선 이 빈을 사용하므로 **필수로 등록**해줘야 한다.
-- Spring에서 제공하는 `PropertyPlaceholderConfigurer`는 **외부 properties 파일을 로드하고, 이를 Bean 설정에서 사용할 수 있도록 해주는 기능**을 담당하는 클래스
-  - 예로 context-common.xml 에서 PropertyPlaceholderConfigurer를 설정 시 "빈 등록xml"에서 &{db.drvier} 이런식 사용!
-
-<br>
-
-**iBatis를 사용한 Persistence  Layer 개발 순서**
-
-1. [iBatis  설정  1]  SQL  Mapping  XML  파일  작성
-   
-   - 실행할  SQL문과  관련  정보  설정
-   - SELECT/INSERT/UPDATE/DELETE,  Parameter/Result  Object,  Dynamic  SQL  등
-   
-2. [iBatis  설정  2]  iBatis  Configuration  XML  파일  작성
-   
-   - iBatis  동작에  필요한  옵션을  설정
-   - \<sqlMap>:  SQL  Mapping  XML  파일의  위치
-     - 최신 스프링은 아래 Bean정의에서 mapperLocations로 \<mapper> 역할까지 포함
-   
-3. **[스프링연동  설정]  SqlMapClientFactoryBean  정의 -> 빈 등록!**  
-   **중요: 여기서 sqlMapClient로 등록한 빈을 EgovAbstractDAO에서 사용!!**
-   
-   - Spring와  iBatis  연동을  위한  설정
-   - 역할)  iBatis  관련  메서드  실행을  위한  **SqlMapClient  객체**를  생성
-   - dataSource:  DB  Connection  생성
-   - configLocation:  iBatis  Configuration  XML  파일의  위치
-   - mappingLocations:  모든  SQL  Mapping  XML  파일을  일괄  지정  가능
-   
-4. DAO  클래스  작성
-
-   • 실행할 SQL문을 호출하기 위한 메서드 구현: SQL Mapping XML 내에 정의한 각 Statement id를 매개변수로 전달
-   •  규칙)  SqlMapClientDaoSupport를  상속하는  **EgovAbstractDAO**  클래스를  상속받아  확장/구현
-
-**코드 모음:**
-
-이 실습의 대표적 생성 빈id: empService, empDAO, sqlMapClient, txManager, dataSource
-
-<details><summary><b>DB연동을 위한 DataSource 부터 - bean id="dataSource</b></summary>
-<div markdown="1"><br>
-{src/test/resources/}META-INF/spring/context-datasource.xml -> DataSource 빈 등록!
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-						http://www.springframework.org/schema/jdbc  http://www.springframework.org/schema/jdbc/spring-jdbc-4.0.xsd">
-	<!-- TODO [Step 1-2] dataSource 설정: 빈 사용 편 -->
-	<!-- &{db.?} 는 .properties에 선언한 변수 가져와 사용한 것! -> PropertyPlaceholderConfigurer를 
-		따로 설정했으므로 가능! Spring에서 제공하는 PropertyPlaceholderConfigurer는 외부 properties 
-		파일을 로드하고, 이를 Bean 설정에서 사용할 수 있도록 해주는 기능을 담당하는 클래스 -->
-	<bean id="dataSource"
-		class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
-		<property name="driverClassName" value="${db.driver}" />
-		<property name="url" value="${db.dburl}" />
-		<property name="username" value="${db.username}" />
-		<property name="password" value="${db.password}" />
-		<property name="defaultAutoCommit" value="false" />
-		<property name="poolPreparedStatements" value="true" />
-	</bean>
-	<!-- [Step 1-2] dataSource 설정: jdbc의 ebedded-db 사용 편 -->
-	<!-- <jdbc:embedded-database id="dataSource" type="HSQL"> <jdbc:script location= 
-		"META-INF/testdata/sample_schema_hsql.sql"/> </jdbc:embedded-database> -->
-</beans>
-```
-META-INF/spring/context-common.xml -> PropertyPlaceholderConfigurer 설정 (properties 읽기 위해)
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:context="http://www.springframework.org/schema/context"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-				http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
-	<!-- TODO [Step 1-2] PropertyPlaceholderConfigurer 설정 -->
-	<context:property-placeholder location="classpath:/META-INF/spring/jdbc.properties" />
-	<!-- TODO [Step 1-7] common 설정 확인 -->
-	<!-- MessageSource 설정: 다국어 처리 빈 -->
-	<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
-		<property name="basenames">
-			<list>
-				<value>classpath:/message/message-common</value>
-				<value>classpath:/org/egovframe/rte/fdl/idgnr/messages/idgnr</value>
-				<value>classpath:/org/egovframe/rte/fdl/property/messages/properties</value>
-			</list>
-		</property>
-		<property name="cacheSeconds">
-			<value>60</value>
-		</property>
-	</bean>
-	<!-- 전자정부 TraceHandler 설정 관련: 특정 상황에서 사용자가 핸들러 사용할 수 있게 하는 빈 -->
-	<bean id="leaveaTrace" class="org.egovframe.rte.fdl.cmmn.trace.LeaveaTrace">
-		<property name="traceHandlerServices">
-			<list>
-				<ref bean="traceHandlerService" />
-			</list>
-		</property>
-	</bean>
-	<bean id="traceHandlerService" class="org.egovframe.rte.fdl.cmmn.trace.manager.DefaultTraceHandleManager">
-		<property name="reqExpMatcher">
-			<ref bean="antPathMater" />
-		</property>
-		<property name="patterns">
-			<list>
-				<value>*</value>
-			</list>
-		</property>
-		<property name="handlers">
-			<list>
-				<ref bean="defaultTraceHandler" />
-			</list>
-		</property>
-	</bean>
-	<!-- 경로 패턴 비교용 빈 -->
-	<bean id="antPathMater" class="org.springframework.util.AntPathMatcher" />
-	<bean id="defaultTraceHandler" class="org.egovframe.rte.fdl.cmmn.trace.handler.DefaultTraceHandler" />
-	<!-- 스테레오 타입 Annotation 을 인식하여 Spring bean 으로 자동 등록하기 위한 component-scan 설정 -->
-    <context:component-scan base-package="egovframework"/>
-</beans>
-```
-META-INF/spring/jdbc.properties -> db연동에 사용할 변수 설정
-```properties
-#TODO [Step 1-2] dataSource 설정
-db.driver=org.hsqldb.jdbcDriver
-#db.dburl=jdbc:hsqldb:mem:testdb
-db.dburl=jdbc:hsqldb:hsql://localhost/sampledb
-db.username=sa
-db.password=
-```
-META-INF/spring/context-trasaction.xml -> 여기선 트랜잭션 매니저만 직접 빈 등록(DataSource 연결)
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
-	<!-- TODO [Step 1-3] transaction 설정: 여기서는 transaction manager 만을 설정 -->
-	<bean id="txManager"
-		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-		<property name="dataSource" ref="dataSource" />
-	</bean>
-</beans>
-```
-</div>
-</details>
-
-<details><summary><b>IBATIS 연동 설정</b></summary>
-<div markdown="1"><br>
-{src/test/resources/}META-INF/spring/context-sqlMap.xml -> sqlMapClient 빈 등록! (FactoryBean)
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
-	<!-- TODO [Step 1-4] Spring 의 iBATIS 연동 설정: 빈 등록 -->
-	<!-- mappingLocations 영역을 주석 해제하여 Spring 의 ResourceLoader 형식으로 패턴 매칭에 의거한 일괄 로딩으로 처리가 가능하다. -->
-	<bean id="sqlMapClient" class="org.egovframe.rte.psl.orm.ibatis.SqlMapClientFactoryBean ">
-		<property name="configLocation"
-			value="classpath:/META-INF/sqlmap/sql-map-config.xml" />
-		<!-- <property name="mappingLocations" value="classpath:/META-INF/sqlmap/mappings/lab-*.xml" 
-			/> -->
-		<property name="dataSource" ref="dataSource" />
-	</bean>
-</beans>
-```
-META-INF/sqlmap/sql-map-config.xml -> iBATIS 연동위한 iBatis  Configuration  XML 설정
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE sqlMapConfig PUBLIC "-//ibatis.apache.org//DTD SQL Map Config 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-config-2.dtd">
-<sqlMapConfig>
-	<!-- TODO [Step 1-5] iBATIS 의 sql-map-config 설정 파일 작성 -->
-	<settings useStatementNamespaces="false"
-		cacheModelsEnabled="true" />
-	<!-- Spring 2.5.5 이상, iBATIS 2.3.2 이상에서는 iBATIS 연동을 위한 SqlMapClientFactoryBean 
-		정의 시 mappingLocations 속성으로 Sql 매핑 파일의 일괄 지정이 가능하다. ("sqlMapClient" bean 설정 
-		시 mappingLocations="classpath:/META- INF/sqlmap/mappings/lab-*.xml" 로 지정하였음) 
-		단, sql-map-config-2.dtd 에서 sqlMap 요소를 하나 이상 지정하도록 되어 있으므로 아래 의 dummy 매핑 파일을 
-		설정한다. -->
-	<sqlMap resource="META-INF/sqlmap/mappings/lab-emp.xml" />
-</sqlMapConfig>
-```
-META-INF/sqlmap/mappings/lab-emp.xml -> iBATIS 쿼리위한 SQL  Mapping  XML 설정
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
-<sqlMap namespace="Emp">
-	<!-- TODO [Step 2-5] lab-emp.xml mapping xml 작성 -->
-	<typeAlias alias="empVO"
-		type="egovframework.lab.dataaccess.service.EmpVO" />
-	<resultMap id="empResult" class="empVO">
-		<result property="empNo" column="EMP_NO" />
-		<result property="empName" column="EMP_NAME" />
-		<result property="job" column="JOB" />
-		<result property="mgr" column="MGR" />
-		<result property="hireDate" column="HIRE_DATE" />
-		<result property="sal" column="SAL" />
-		<result property="comm" column="COMM" />
-		<result property="deptNo" column="DEPT_NO" />
-	</resultMap>
-	<insert id="insertEmp" parameterClass="empVO"> 
-<![CDATA[
-insert into EMP
-(EMP_NO,
-EMP_NAME,
-JOB,
-MGR,
-HIRE_DATE,
-SAL,
-COMM,
-DEPT_NO)
-values   (#empNo#, 
-#empName#,
-#job#,
-#mgr#,
-#hireDate#, 
-#sal#,
-#comm#, 
-#deptNo#)
-]]>
-	</insert>
-	<update id="updateEmp" parameterClass="empVO"> 
-<![CDATA[
-update EMP
-set EMP_NAME= #empName#, 
-JOB = #job#,
-MGR = #mgr#,
-HIRE_DATE = #hireDate#, 
-SAL = #sal#,
-COMM = #comm#, 
-DEPT_NO = #deptNo#
-where EMP_NO = #empNo#
-]]>
-	</update>
-	<delete id="deleteEmp" parameterClass="empVO"> 
-<![CDATA[
-delete from EMP
-where EMP_NO = #empNo#
-]]>
-	</delete>
-	<select id="selectEmp" parameterClass="empVO"
-		resultMap="empResult"> 
-<![CDATA[
-select EMP_NO, 
-EMP_NAME, 
-JOB,
-MGR,
-HIRE_DATE, 
-SAL,
-COMM, 
-DEPT_NO
-from EMP
-where EMP_NO = #empNo#
-]]>
-	</select>
-	<select id="selectEmpList" parameterClass="empVO"
-		resultMap="empResult"> 
-<![CDATA[
-select EMP_NO, 
-EMP_NAME, 
-JOB,
-MGR,
-HIRE_DATE, 
-SAL,
-COMM, 
-DEPT_NO
-from EMP 
-where 1 = 1
-]]>
-		<isNotNull prepend="and" property="empNo">
-			EMP_NO = #empNo#
-		</isNotNull>
-		<isNotNull prepend="and" property="empName">
-			EMP_NAME LIKE '%' ||
-			#empName# || '%'
-		</isNotNull>
-	</select>
-</sqlMap>
-```
-</div>
-</details>
-
-<details><summary><b>DB Sequence 기반의 ID Generation 사용 설정</b></summary>
-<div markdown="1"><br>
-META-INF/spring/context-idgen.xml -> select next value... 문법은 Hsqldb의 sequence 사용 문법!
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
-	<!-- TODO [Step 1-6] Id Generation Service 설정 확인 -->
-    <!-- from절의 DUAL의 경우 Oracle의 DUAL 테이블과 동일하다. 이를 위해 초기화 스크립트 sql(=sample_chema_hsql.sql)에 create를 미리 한다. -->
-	<bean name="primaryTypeSequenceIds" class="org.egovframe.rte.fdl.idgnr.impl.EgovSequenceIdGnrService" destroy-method="destroy">
-		<property name="dataSource" ref="dataSource" />
-		<property name="query" value="SELECT NEXT VALUE FOR empseq FROM DUAL" />
-	</bean>
-</beans>
-```
-META-INF/testdata/sample_schema_hsql.sql -> DUAL, SEQUENCE 생성 및 테스트코드에서 사용하려는 DB 테이블 재생성 sql문
-```sql
-drop table jobhist IF EXISTS;
-drop table emp IF EXISTS;
-drop table dept IF EXISTS;
-drop table dual IF EXISTS;
-drop sequence empseq IF EXISTS;
-CREATE SEQUENCE empseq START WITH 8000;
-CREATE TABLE dual (
-    dummy        VARCHAR(1) PRIMARY KEY
-);
-CREATE TABLE dept (
-    dept_no          NUMERIC(2) NOT NULL,
-    dept_name        VARCHAR(14),
-    loc             VARCHAR(13),
-    CONSTRAINT dept_pk PRIMARY KEY (dept_no),
-    CONSTRAINT dept_name_uq UNIQUE (dept_name)
-);
-CREATE TABLE emp (
-    emp_no          NUMERIC(4) NOT NULL,
-    emp_name        VARCHAR(10),
-    job             VARCHAR(9),
-    mgr             NUMERIC(4),
-    hire_date       DATE,
-    sal             NUMERIC(7),
-    comm            NUMERIC(7),
-    dept_no         NUMERIC(2),
-	CONSTRAINT emp_pk PRIMARY KEY (emp_no),
-	CONSTRAINT emp_sal_ck CHECK (sal > 0),
-	CONSTRAINT emp_ref_dept_fk FOREIGN KEY (dept_no) REFERENCES dept(dept_no)
-);
-CREATE TABLE jobhist (
-    emp_no           NUMERIC(4) NOT NULL,
-    start_date       DATE NOT NULL,
-    end_date         DATE,
-    job             VARCHAR(9),
-    sal             NUMERIC(7),
-    comm            NUMERIC(7),
-    dept_no          NUMERIC(2),
-    chg_desc         VARCHAR(80),
-    CONSTRAINT jobhist_pk PRIMARY KEY (emp_no, start_date),
-    CONSTRAINT jobhist_ref_emp_fk FOREIGN KEY (emp_no)
-        REFERENCES emp(emp_no) ON DELETE CASCADE,
-    CONSTRAINT jobhist_ref_dept_fk FOREIGN KEY (dept_no)
-        REFERENCES dept (dept_no) ON DELETE SET NULL,
-	CONSTRAINT jobhist_date_chk CHECK (start_date <= end_date)
-);
--- dual 
-INSERT INTO dual VALUES ('X');
---  Load the 'dept' table
---
-INSERT INTO dept VALUES (10,'ACCOUNTING','NEW YORK');
-INSERT INTO dept VALUES (20,'RESEARCH','DALLAS');
-INSERT INTO dept VALUES (30,'SALES','CHICAGO');
-INSERT INTO dept VALUES (40,'OPERATIONS','BOSTON');
---
---  Load the 'emp' table
---
-INSERT INTO emp VALUES (7369,'SMITH','CLERK',7902,'1980-12-17',800,NULL,20);
-INSERT INTO emp VALUES (7499,'ALLEN','SALESMAN',7698,'1981-02-20',1600,300,30);
-INSERT INTO emp VALUES (7521,'WARD','SALESMAN',7698,'1981-02-22',1250,500,30);
-INSERT INTO emp VALUES (7566,'JONES','MANAGER',7839,'1981-04-02',2975,NULL,20);
-INSERT INTO emp VALUES (7654,'MARTIN','SALESMAN',7698,'1981-09-28',1250,1400,30);
-INSERT INTO emp VALUES (7698,'BLAKE','MANAGER',7839,'1981-05-01',2850,NULL,30);
-INSERT INTO emp VALUES (7782,'CLARK','MANAGER',7839,'1981-06-09',2450,NULL,10);
-INSERT INTO emp VALUES (7788,'SCOTT','ANALYST',7566,'1987-04-19',3000,NULL,20);
-INSERT INTO emp VALUES (7839,'KING','PRESIDENT',NULL,'1981-11-17',5000,NULL,10);
-INSERT INTO emp VALUES (7844,'TURNER','SALESMAN',7698,'1981-09-08',1500,0,30);
-INSERT INTO emp VALUES (7876,'ADAMS','CLERK',7788,'1987-05-23',1100,NULL,20);
-INSERT INTO emp VALUES (7900,'JAMES','CLERK',7698,'1981-12-03',950,NULL,30);
-INSERT INTO emp VALUES (7902,'FORD','ANALYST',7566,'1981-12-03',3000,NULL,20);
-INSERT INTO emp VALUES (7934,'MILLER','CLERK',7782,'1982-01-23',1300,NULL,10);
---
---  Load the 'jobhist' table
---
-INSERT INTO jobhist VALUES (7369,'1980-12-17',NULL,'CLERK',800,NULL,20,'New Hire');
-INSERT INTO jobhist VALUES (7499,'1981-02-20',NULL,'SALESMAN',1600,300,30,'New Hire');
-INSERT INTO jobhist VALUES (7521,'1981-02-22',NULL,'SALESMAN',1250,500,30,'New Hire');
-INSERT INTO jobhist VALUES (7566,'1981-04-02',NULL,'MANAGER',2975,NULL,20,'New Hire');
-INSERT INTO jobhist VALUES (7654,'1981-09-28',NULL,'SALESMAN',1250,1400,30,'New Hire');
-INSERT INTO jobhist VALUES (7698,'1981-05-01',NULL,'MANAGER',2850,NULL,30,'New Hire');
-INSERT INTO jobhist VALUES (7782,'1981-06-09',NULL,'MANAGER',2450,NULL,10,'New Hire');
-INSERT INTO jobhist VALUES (7788,'1987-04-19','1988-04-12','CLERK',1000,NULL,20,'New Hire');
-INSERT INTO jobhist VALUES (7788,'1988-04-13','1989-05-04','CLERK',1040,NULL,20,'Raise');
-INSERT INTO jobhist VALUES (7788,'1990-05-05',NULL,'ANALYST',3000,NULL,20,'Promoted to Analyst');
-INSERT INTO jobhist VALUES (7839,'1981-11-17',NULL,'PRESIDENT',5000,NULL,10,'New Hire');
-INSERT INTO jobhist VALUES (7844,'1981-09-08',NULL,'SALESMAN',1500,0,30,'New Hire');
-INSERT INTO jobhist VALUES (7876,'1987-05-23',NULL,'CLERK',1100,NULL,20,'New Hire');
-INSERT INTO jobhist VALUES (7900,'1981-12-03','1983-01-14','CLERK',950,NULL,10,'New Hire');
-INSERT INTO jobhist VALUES (7900,'1983-01-15',NULL,'CLERK',950,NULL,30,'Changed to Dept 30');
-INSERT INTO jobhist VALUES (7902,'1981-12-03',NULL,'ANALYST',3000,NULL,20,'New Hire');
-INSERT INTO jobhist VALUES (7934,'1982-01-23',NULL,'CLERK',1300,NULL,10,'New Hire');
-commit;
-```
-</div>
-</details>
-
-<details><summary><b>aop 설정</b></summary>
-<div markdown="1"><br>
-/META-INF/spring/context-aspect.xml -> AOP 설정 (Exception 예외처리 핸들)
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:aop="http://www.springframework.org/schema/aop"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd">
-	<!-- TODO [Step 1-8] aspect 설정 확인 -->
-	<aop:config>
-		<aop:pointcut id="serviceMethod" expression="execution(* egovframework.lab..impl.*Impl.*(..))" />
-		<aop:aspect ref="exceptionTransfer">
-			<aop:after-throwing throwing="exception" pointcut-ref="serviceMethod" method="transfer" />
-		</aop:aspect>
-	</aop:config>
-    <!-- 빈 등록 -->
-	<bean id="exceptionTransfer" class="org.egovframe.rte.fdl.cmmn.aspect.ExceptionTransfer">
-		<property name="exceptionHandlerService">
-			<list>
-				<ref bean="defaultExceptionHandleManager" />
-			</list>
-		</property>
-	</bean>
-	<bean id="defaultExceptionHandleManager" class="org.egovframe.rte.fdl.cmmn.exception.manager.DefaultExceptionHandleManager">
-		<property name="reqExpMatcher" ref="antPathMater" />
-		<property name="patterns">
-			<list>
-				<value>**service.impl.*</value>
-			</list>
-		</property>
-		<property name="handlers">
-			<list>
-				<ref bean="egovHandler" />
-			</list>
-		</property>
-	</bean>
-	<bean id="egovHandler" class="egovframework.lab.dataaccess.common.JdbcLoggingExcepHndlr" />
-</beans>
-```
-</div>
-</details>
-
-<details><summary><b>DAO, Service 로직은?</b></summary>
-<div markdown="1"><br>
-EmpService, EmpVO 생략<br>EmpServiceImpl.java -> 서비스 구현 + EgovAbstractServiceImpl 상속<br>insert 부분의 sequence 기반 id generation 이 있어서 이것만 참고
-```java
-@Service("empService")
-public class EmpServiceImpl extends EgovAbstractServiceImpl implements EmpService {
-	// TODO [Step 2-3] EmpServiceImpl 작성 추가
-	@Resource(name = "primaryTypeSequenceIds")
-	EgovIdGnrService egovIdGnrService;
-	@Resource(name = "empDAO")
-	private EmpDAO empDAO;
-	public BigDecimal insertEmp(EmpVO empVO) throws Exception {
-		// ID generation Service 를 사용하여 key 를 땀. 여기서
-		// primaryTypeSequenceIds 는 Sequence 기반임.
-		BigDecimal generatedEmpNo = egovIdGnrService.getNextBigDecimalId();
-		egovLogger.debug("EmpServiceImpl.insertEmp - generated empNo : " + generatedEmpNo);
-		empVO.setEmpNo(generatedEmpNo);
-		empDAO.insertEmp(empVO);
-		return generatedEmpNo;
-	}
-    //...
-}
-```
-EmpDAO.java -> EgovAbstractDAO 상속 (상속받은 메소드 사용하는 스타일)
-```java
-@Repository("empDAO")
-public class EmpDAO extends EgovAbstractDAO {
-	// TODO [Step 2-4] EmpDAO 작성
-	public void insertEmp(EmpVO vo) {
-		insert("insertEmp", vo);
-	}
-	public int updateEmp(EmpVO vo) {
-		return update("updateEmp", vo);
-	}
-	public int deleteEmp(EmpVO vo) {
-		return delete("deleteEmp", vo);
-	}
-	public EmpVO selectEmp(EmpVO vo) {
-		return (EmpVO) select("selectEmp", vo);
-		// return (EmpVO) select ("selectEmpUsingCacheModelLRU", vo);
-	}
-	@SuppressWarnings("unchecked")
-	public List<EmpVO> selectEmpList(EmpVO searchVO) {
-		return (List<EmpVO>) list("selectEmpList", searchVO);
-	}
-}
-```
-</div>
-</details>
-
-<br>
-
-**MyBatis를  활용한  Persistence  Layer  개발**
-
-1)  [MyBatis  설정  1]  SQL  Mapper  XML  파일  작성    설정
-- 실행할  SQL문과  관련  정보  설정
-- SELECT/INSERT/UPDATE/DELETE,  Parameter/Result  Object,  Dynamic  SQL  등
-2)  [MyBatis  설정  2]  MyBatis  Configuration  XML  파일  작성
-    - MyBatis  동작에  필요한  옵션을  설정
-    - \<mapper>:  SQL  Mapper  XML  파일의  위치
-      - **최신 스프링은 아래 Bean정의에서 mapperLocations로 \<mapper> 역할까지 포함**
-3)  **[스프링연동  설정]  SqlSessionFactoryBean  정의 -> 빈 등록!**  
-    **@Mapper 방식 사용시 MapperConfigurer 빈 등록 필수!**
-- Spring와  MyBatis  연동을  위한  설정
-- 역할)  MyBatis  관련  메서드  실행을  위한  SqlSession  객체를  생성 (IBATIS는 sqlMapClient이름)
-- dataSource,  configLocation,  mapperLocations  속성  설정
-4)  DAO  클래스  작성
-    - 방법1) SqlSessionDaoSupport를  상속하는  **EgovAbstractMapper**  클래스를  상속받아  확장/구현
-      - 실행할  SQL문을  호출하기  위한  메서드  구현:  SQL  Mapping  XML  내에  정의한  각  Statement  id를  매개변수로  전달
-      - 단, namespace.qureyId 를 매개변수로 전달해서 구분하기도 하는듯. (qureyId만 해도 됨ㅇㅇ.)
-    - 방법2) DAO  클래스를  Interface로  작성하고,  각  Statement  id와  **메서드명을  동일하게**  작성  **(Mapper  Interface  방식)**  
-      **=> 권장하는 방식!** IBATIS와는 다르게 이런 부분이 MYBATIS가 좋네
-      - Annotation을  이용한  SQL문  작성  가능
-      - 메서드명을  Statement  id로  사용하기  때문에,  코드  최소화  가능
-      - **Mapper Interface 방식을 사용 시 EgovAbstractMapper를 상속할 필요 없음**
-
-**코드 모음:**
-
-이 실습의 대표적 생성 빈id: empService, empDAO(+empMapper), sqlSession, txManager, dataSource
-
-<details><summary><b>DB연동을 위한 DataSource 부터 - jdbc:embedded-database</b></summary>
-<div markdown="1"><br>
-{src/test/resources/}META-INF/spring/context-datasource.xml -> DataSource 빈 등록!
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-						http://www.springframework.org/schema/jdbc  http://www.springframework.org/schema/jdbc/spring-jdbc-4.0.xsd">
-	<!-- TODO [Step 1-2] DataSource 설정 확인 -->
-	<!-- 
-	<bean id="dataSource"
-		class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
-		<property name="driverClassName" value="${db.driver}" />
-		<property name="url" value="${db.dburl}" />
-		<property name="username" value="${db.username}" />
-		<property name="password" value="${db.password}" />
-		<property name="defaultAutoCommit" value="false" />
-		<property name="poolPreparedStatements" value="true" />
-	</bean>
-	-->
-	<!-- [Step 1-2] DataSource 설정
-	embedded-database는 TEST환경에서 주로사용. 임베디드DB지원해줘서!
-	그래서 위에처럼 따로 db아이디나 비번 설정 이런게 없이 자동으로 Spring이 설정해줄수 있는것! 
-	특히, DB구동도 필요없음. 단, 위 빈등록 방식은 운영환경에서 주로사용하고 반드시 DB구동이 필요함. 메모리DB가 아니니까! 
-	특히, script등록할 수 있어서 앱 실행 시 "글로벌"로 1번 수행한다. 
-	단, 테스트땐 메소드마다 db초기화 필요할수도 있어서 편의상 @Before에 직접 execute로 외부쿼리 실행하게 하기도 한다. -->
-	<jdbc:embedded-database id="dataSource"
-		type="HSQL">
-		<jdbc:script
-			location="META-INF/testdata/sample_schema_hsql.sql" />
-	</jdbc:embedded-database>
-</beans>
-```
-META-INF/spring/context-common.xml -> PropertyPlaceholderConfigurer 설정 (여기선 생략가능. .properties 활용 안했었거든)
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:context="http://www.springframework.org/schema/context"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-				http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
-   	<!-- dataSource property를 위한 PropertyPlaceholderConfigurer 설정(사용 안했긴 함) 
-	<context:property-placeholder location="classpath:/META-INF/spring/jdbc.properties" />       
-    -->
-	<!-- 스테레오 타입 Annotation 을 인식하여 Spring bean 으로 자동 등록하기 위한 component-scan 설정 -->
-    <context:component-scan base-package="egovframework"/>
-    <!-- TODO [Step 1-7] 공통 설정 확인 -->
-	<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
-		<property name="basenames">
-			<list>
-				<value>classpath:/message/message-common</value>
-				<value>classpath:/org/egovframe/rte/fdl/idgnr/messages/idgnr</value>
-				<value>classpath:/org/egovframe/rte/fdl/property/messages/properties</value>
-			</list>
-		</property>
-		<property name="cacheSeconds">
-			<value>60</value>
-		</property>
-	</bean>
-	<bean id="leaveaTrace" class="org.egovframe.rte.fdl.cmmn.trace.LeaveaTrace">
-		<property name="traceHandlerServices">
-			<list>
-				<ref bean="traceHandlerService" />
-			</list>
-		</property>
-	</bean>
-	<bean id="traceHandlerService" class="org.egovframe.rte.fdl.cmmn.trace.manager.DefaultTraceHandleManager">
-		<property name="reqExpMatcher">
-			<ref bean="antPathMater" />
-		</property>
-		<property name="patterns">
-			<list>
-				<value>*</value>
-			</list>
-		</property>
-		<property name="handlers">
-			<list>
-				<ref bean="defaultTraceHandler" />
-			</list>
-		</property>
-	</bean>
-	<bean id="antPathMater" class="org.springframework.util.AntPathMatcher" />
-	<bean id="defaultTraceHandler" class="org.egovframe.rte.fdl.cmmn.trace.handler.DefaultTraceHandler" />
-</beans>
-```
-META-INF/spring/jdbc.properties -> db연동에 사용할 변수 설정 (이것도 사용안했음. 생략.)
-```properties
-#TODO [Step 1-2] dataSource 설정
-db.driver=org.hsqldb.jdbcDriver
-#db.dburl=jdbc:hsqldb:mem:testdb
-db.dburl=jdbc:hsqldb:hsql://localhost/sampledb
-db.username=sa
-db.password=
-```
-META-INF/spring/context-trasaction.xml -> 트랜잭션 매니저 빈 등록하면서 driven을 추가!(스캔)
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:tx="http://www.springframework.org/schema/tx"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
-	<!-- TODO [Step 1-3] Transaction 설정 
-	IBATIS에선 driven을 추가안했는데 아마 전역 @Transactional 설정해서 그런듯 하다. 
-	driven을 추가하면 메서드에 개별로 따로 지정 가능하다는 말인것 같다. -> @Transactional  Anntation  스캔을  위해서는  <tx:annotation-driven  />을  선언해야  한다. 
-	특히, tx:aop 형식으로 트랜잭션 대상을 지정하여 비즈니스 서비스 메서드에 일괄 지정하는 경우가 많다. -->
-	<bean id="txManager"
-		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-		<property name="dataSource" ref="dataSource" />
-	</bean>
-	<tx:annotation-driven
-		transaction-manager="txManager" />
-</beans>	
-```
-</div>
-</details>
-
-<details><summary><b>MyBatis 연동 설정</b></summary>
-<div markdown="1"><br>
-{src/test/resources/}META-INF/spring/context-mybatis.xml -> sqlSession 빈 등록(FactoryBean)과 @Mapper setup
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
-	<!-- SqlSession setup for MyBatis Database Layer -->
-	<!-- TODO [Step 1-4] MyBatis와 Spring 연동 설정 -->
-	<bean id="sqlSession"
-		class="org.mybatis.spring.SqlSessionFactoryBean">
-		<property name="dataSource" ref="dataSource" />
-		<property name="configLocation"
-			value="classpath:/META-INF/sqlmap/sql-mybatis-config.xml" />
-		<!-- <property name="mapperLocations" value="classpath:**/lab-*.xml" /> -->
-	</bean>
-	<!-- MapperConfigurer setup for @Mapper -->
-	<!-- TODO [Step 3-3] MyBatis의 Mapper Interface 자동스캔 설정 -->
-	<bean class="org.egovframe.rte.psl.dataaccess.mapper.MapperConfigurer ">
-		<property name="basePackage"
-			value="egovframework.lab.dataaccess.service.impl" />
-	</bean>
-</beans>	
-```
-META-INF/sqlmap/sql-mybatis-config.xml -> MyBatis 연동위한 MyBatis  Configuration  XML 설정(여긴 \<mappers>방식)
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
-<configuration>
-	<!-- TODO [Step 1-5] MyBatis Configuration File 작성 -->
-	<typeAliases>
-		<typeAlias alias="empVO"
-			type="egovframework.lab.dataaccess.service.EmpVO" />
-	</typeAliases>
-	<!-- MyBatis 연동을 위한 SqlSessionFactoryBean 정의 시 mapperLocations 속성으로 한 번에 
-		모든 Mapper XML File을 설정할 수 있다. (<property name="mapperLocations" value="classpath:**/lab-*.xml" 
-		/> 추가) 단, 아래 <mappers> 설정과 mapperLocations 설정 중 한가지만 선택해야 한다. -->
-	<mappers>
-		<mapper resource="META-INF/sqlmap/mappers/lab-dao-class.xml" />
-		<mapper
-			resource="META-INF/sqlmap/mappers/lab-mapper-interface.xml" />
-	</mappers>
-</configuration>
-```
-META-INF/sqlmap/mappers/lab-dao-class.xml -> MyBatis 쿼리위한 SQL  Mapping  XML 설정(DAO-Class Statement 호출 방식)
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="Emp">
-	<!-- TODO [Step 2-3] lab-dao-class.xml 작성 (EgovAbstractMapper 상속한 DAO) -->
-	<!-- DAO 클래스의 Statement 호출 방식: 사용자가 직접 지정해준 ID 파라미터 값과 일치하는 Statement를 호출.
-		동일한 Statement ID가 있으면, <mapper>의 namespace를 지정한다. 
-		− namespace=A, statement id=insertEmp  A.insertEmp으로 호출 
-		− namespace=B, statement id=insertEmp  B.insertEmp으로 호출 -->
-	<resultMap id="empResult" type="empVO">
-		<id property="empNo" column="EMP_NO" />
-		<result property="empName" column="EMP_NAME" />
-		<result property="job" column="JOB" />
-		<result property="mgr" column="MGR" />
-		<result property="hireDate" column="HIRE_DATE" />
-		<result property="sal" column="SAL" />
-		<result property="comm" column="COMM" />
-		<result property="deptNo" column="DEPT_NO" />
-	</resultMap>
-	<insert id="insertEmp" parameterType="empVO"> 
-<![CDATA[
-insert into EMP (EMP_NO, EMP_NAME, JOB, MGR, HIRE_DATE, SAL, COMM, DEPT_NO) 
-values(#{empNo}, #{empName}, #{job}, #{mgr}, #{hireDate}, #{sal}, #{comm}, #{deptNo})
-]]>
-	</insert>
-	<update id="updateEmp" parameterType="empVO"> 
-<![CDATA[
-update EMP
-set EMP_NAME = #{empName}, 
-JOB = #{job},
-MGR = #{mgr},
-HIRE_DATE = #{hireDate}, 
-SAL = #{sal},
-COMM = #{comm},
-DEPT_NO = #{deptNo} 
-where EMP_NO = #{empNo}
-]]>
-	</update>
-	<delete id="deleteEmp" parameterType="empVO"> 
-<![CDATA[
-delete from EMP
-where EMP_NO = #{empNo}
-]]>
-	</delete>
-	<select id="selectEmp" parameterType="empVO"
-		resultMap="empResult"> 
-<![CDATA[
-select EMP_NO, EMP_NAME, JOB, MGR, HIRE_DATE, SAL, COMM, DEPT_NO 
-from EMP
-where EMP_NO = #{empNo}
-]]>
-	</select>
-	<select id="selectEmpList" parameterType="empVO"
-		resultMap="empResult"> 
-<![CDATA[
-Select EMP_NO, EMP_NAME, JOB, MGR, HIRE_DATE, SAL, COMM, DEPT_NO 
-From EMP
-where 1 = 1
-]]>
-		<if test="empNo != null">
-			AND EMP_NO = #{empNo}
-		</if>
-		<if test="empName != null">
-			AND EMP_NAME LIKE '%' || #{empName} || '%'
-		</if>
-	</select>
-</mapper>
-```
-META-INF/sqlmap/mappers/lab-mapper-interface.xml -> MyBatis 쿼리위한 SQL  Mapping  XML 설정(Mapper-Interface Statement 호출 방식)
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper
-	namespace="egovframework.lab.dataaccess.service.impl.EmpMapper">
-	<!-- TODO [Step 3-4] lab-mapper-interface.xml 작성 (Mapper Interface) -->
-	<!-- Mapper 인터페이스의 Statement 호출 방식: 메소드명과 일치하는 Statement를 자동 호출. 
-	이 때 MyBatis는 호출된 메서드가 포함된 인터페이스의 풀네임을 namespace 값으로 사용하기 때문에, 
-	반드시 namesapce 값 을 지정해주어야 한다. 
-	− namespace=x.y.z.EmpMapper, statement id=insertEmp -> 내부적으로 x.y.z.EmpMapper.insertEmp을 호출 -->
-	<resultMap id="empResult" type="empVO">
-		<id property="empNo" column="EMP_NO" />
-		<result property="empName" column="EMP_NAME" />
-		<result property="job" column="JOB" />
-		<result property="mgr" column="MGR" />
-		<result property="hireDate" column="HIRE_DATE" />
-		<result property="sal" column="SAL" />
-		<result property="comm" column="COMM" />
-		<result property="deptNo" column="DEPT_NO" />
-	</resultMap>
-	<insert id="insertEmp" parameterType="empVO"> 
-<![CDATA[
-insert into EMP (EMP_NO, EMP_NAME, JOB, MGR, HIRE_DATE, SAL, COMM, DEPT_NO) 
-values(#{empNo}, #{empName}, #{job}, #{mgr}, #{hireDate}, #{sal}, #{comm}, #{deptNo})
-]]>
-	</insert>
-	<update id="updateEmp" parameterType="empVO"> 
-<![CDATA[
-update EMP
-set EMP_NAME = #{empName}, 
-JOB = #{job},
-MGR = #{mgr},
-HIRE_DATE = #{hireDate}, 
-SAL = #{sal},
-COMM = #{comm},
-DEPT_NO = #{deptNo} 
-where EMP_NO = #{empNo}
-]]>
-	</update>
-	<delete id="deleteEmp" parameterType="empVO"> 
-<![CDATA[
-delete from EMP
-where EMP_NO = #{empNo}
-]]>
-	</delete>
-	<select id="selectEmp" parameterType="empVO"
-		resultMap="empResult"> 
-<![CDATA[
-select EMP_NO, EMP_NAME, JOB, MGR, HIRE_DATE, SAL, COMM, DEPT_NO 
-from EMP
-where EMP_NO = #{empNo}
-]]>
-	</select>
-	<select id="selectEmpList" parameterType="empVO"
-		resultMap="empResult"> 
-<![CDATA[
-Select EMP_NO, EMP_NAME, JOB, MGR, HIRE_DATE, SAL, COMM, DEPT_NO 
-From EMP
-where 1 = 1
-]]>
-		<if test="empNo != null">
-			AND EMP_NO = #{empNo}
-		</if>
-		<if test="empName != null">
-			AND EMP_NAME LIKE '%' || #{empName} || '%'
-		</if>
-	</select>
-</mapper>
-```
-</div>
-</details>
-
-<details><summary><b>DB Sequence 기반의 ID Generation 사용 설정</b></summary>
-<div markdown="1"><br>
-META-INF/spring/context-idgen.xml -> select next value... 문법은 Hsqldb의 sequence 사용 문법!
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
-	<!-- TODO [Step 1-6] Id Generation Service 설정 확인 -->
-    <!-- from절의 DUAL의 경우 Oracle의 DUAL 테이블과 동일하다. 이를 위해 초기화 스크립트 sql(=sample_chema_hsql.sql)에 create를 미리 한다. -->
-	<bean name="primaryTypeSequenceIds" class="org.egovframe.rte.fdl.idgnr.impl.EgovSequenceIdGnrService" destroy-method="destroy">
-		<property name="dataSource" ref="dataSource" />
-		<property name="query" value="SELECT NEXT VALUE FOR empseq FROM DUAL" />
-	</bean>
-</beans>
-```
-META-INF/testdata/sample_schema_hsql.sql -> DUAL, SEQUENCE 생성 및 테스트코드에서 사용하려는 DB 테이블 재생성 sql문
-```sql
-drop table jobhist IF EXISTS;
-drop table emp IF EXISTS;
-drop table dept IF EXISTS;
-drop table dual IF EXISTS;
-drop sequence empseq IF EXISTS;
-CREATE SEQUENCE empseq START WITH 8000;
-CREATE TABLE dual (
-    dummy        VARCHAR(1) PRIMARY KEY
-);
-CREATE TABLE dept (
-    dept_no          NUMERIC(2) NOT NULL,
-    dept_name        VARCHAR(14),
-    loc             VARCHAR(13),
-    CONSTRAINT dept_pk PRIMARY KEY (dept_no),
-    CONSTRAINT dept_name_uq UNIQUE (dept_name)
-);
-CREATE TABLE emp (
-    emp_no          NUMERIC(4) NOT NULL,
-    emp_name        VARCHAR(10),
-    job             VARCHAR(9),
-    mgr             NUMERIC(4),
-    hire_date       DATE,
-    sal             NUMERIC(7),
-    comm            NUMERIC(7),
-    dept_no         NUMERIC(2),
-	CONSTRAINT emp_pk PRIMARY KEY (emp_no),
-	CONSTRAINT emp_sal_ck CHECK (sal > 0),
-	CONSTRAINT emp_ref_dept_fk FOREIGN KEY (dept_no) REFERENCES dept(dept_no)
-);
-CREATE TABLE jobhist (
-    emp_no           NUMERIC(4) NOT NULL,
-    start_date       DATE NOT NULL,
-    end_date         DATE,
-    job             VARCHAR(9),
-    sal             NUMERIC(7),
-    comm            NUMERIC(7),
-    dept_no          NUMERIC(2),
-    chg_desc         VARCHAR(80),
-    CONSTRAINT jobhist_pk PRIMARY KEY (emp_no, start_date),
-    CONSTRAINT jobhist_ref_emp_fk FOREIGN KEY (emp_no)
-        REFERENCES emp(emp_no) ON DELETE CASCADE,
-    CONSTRAINT jobhist_ref_dept_fk FOREIGN KEY (dept_no)
-        REFERENCES dept (dept_no) ON DELETE SET NULL,
-	CONSTRAINT jobhist_date_chk CHECK (start_date <= end_date)
-);
--- dual 
-INSERT INTO dual VALUES ('X');
---  Load the 'dept' table
---
-INSERT INTO dept VALUES (10,'ACCOUNTING','NEW YORK');
-INSERT INTO dept VALUES (20,'RESEARCH','DALLAS');
-INSERT INTO dept VALUES (30,'SALES','CHICAGO');
-INSERT INTO dept VALUES (40,'OPERATIONS','BOSTON');
---
---  Load the 'emp' table
---
-INSERT INTO emp VALUES (7369,'SMITH','CLERK',7902,'1980-12-17',800,NULL,20);
-INSERT INTO emp VALUES (7499,'ALLEN','SALESMAN',7698,'1981-02-20',1600,300,30);
-INSERT INTO emp VALUES (7521,'WARD','SALESMAN',7698,'1981-02-22',1250,500,30);
-INSERT INTO emp VALUES (7566,'JONES','MANAGER',7839,'1981-04-02',2975,NULL,20);
-INSERT INTO emp VALUES (7654,'MARTIN','SALESMAN',7698,'1981-09-28',1250,1400,30);
-INSERT INTO emp VALUES (7698,'BLAKE','MANAGER',7839,'1981-05-01',2850,NULL,30);
-INSERT INTO emp VALUES (7782,'CLARK','MANAGER',7839,'1981-06-09',2450,NULL,10);
-INSERT INTO emp VALUES (7788,'SCOTT','ANALYST',7566,'1987-04-19',3000,NULL,20);
-INSERT INTO emp VALUES (7839,'KING','PRESIDENT',NULL,'1981-11-17',5000,NULL,10);
-INSERT INTO emp VALUES (7844,'TURNER','SALESMAN',7698,'1981-09-08',1500,0,30);
-INSERT INTO emp VALUES (7876,'ADAMS','CLERK',7788,'1987-05-23',1100,NULL,20);
-INSERT INTO emp VALUES (7900,'JAMES','CLERK',7698,'1981-12-03',950,NULL,30);
-INSERT INTO emp VALUES (7902,'FORD','ANALYST',7566,'1981-12-03',3000,NULL,20);
-INSERT INTO emp VALUES (7934,'MILLER','CLERK',7782,'1982-01-23',1300,NULL,10);
---
---  Load the 'jobhist' table
---
-INSERT INTO jobhist VALUES (7369,'1980-12-17',NULL,'CLERK',800,NULL,20,'New Hire');
-INSERT INTO jobhist VALUES (7499,'1981-02-20',NULL,'SALESMAN',1600,300,30,'New Hire');
-INSERT INTO jobhist VALUES (7521,'1981-02-22',NULL,'SALESMAN',1250,500,30,'New Hire');
-INSERT INTO jobhist VALUES (7566,'1981-04-02',NULL,'MANAGER',2975,NULL,20,'New Hire');
-INSERT INTO jobhist VALUES (7654,'1981-09-28',NULL,'SALESMAN',1250,1400,30,'New Hire');
-INSERT INTO jobhist VALUES (7698,'1981-05-01',NULL,'MANAGER',2850,NULL,30,'New Hire');
-INSERT INTO jobhist VALUES (7782,'1981-06-09',NULL,'MANAGER',2450,NULL,10,'New Hire');
-INSERT INTO jobhist VALUES (7788,'1987-04-19','1988-04-12','CLERK',1000,NULL,20,'New Hire');
-INSERT INTO jobhist VALUES (7788,'1988-04-13','1989-05-04','CLERK',1040,NULL,20,'Raise');
-INSERT INTO jobhist VALUES (7788,'1990-05-05',NULL,'ANALYST',3000,NULL,20,'Promoted to Analyst');
-INSERT INTO jobhist VALUES (7839,'1981-11-17',NULL,'PRESIDENT',5000,NULL,10,'New Hire');
-INSERT INTO jobhist VALUES (7844,'1981-09-08',NULL,'SALESMAN',1500,0,30,'New Hire');
-INSERT INTO jobhist VALUES (7876,'1987-05-23',NULL,'CLERK',1100,NULL,20,'New Hire');
-INSERT INTO jobhist VALUES (7900,'1981-12-03','1983-01-14','CLERK',950,NULL,10,'New Hire');
-INSERT INTO jobhist VALUES (7900,'1983-01-15',NULL,'CLERK',950,NULL,30,'Changed to Dept 30');
-INSERT INTO jobhist VALUES (7902,'1981-12-03',NULL,'ANALYST',3000,NULL,20,'New Hire');
-INSERT INTO jobhist VALUES (7934,'1982-01-23',NULL,'CLERK',1300,NULL,10,'New Hire');
-commit;
-```
-</div>
-</details>
-
-<details><summary><b>aop 설정</b></summary>
-<div markdown="1"><br>
-/META-INF/spring/context-aspect.xml -> AOP 설정 (Exception 예외처리 핸들)
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:aop="http://www.springframework.org/schema/aop"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd">
-	<!-- TODO [Step 1-8] aspect 설정 확인 (예외처리) -->
-	<aop:config>
-		<aop:pointcut id="serviceMethod" expression="execution(* egovframework.lab..impl.*Impl.*(..))" />
-		<aop:aspect ref="exceptionTransfer">
-			<aop:after-throwing throwing="exception" pointcut-ref="serviceMethod" method="transfer" />
-		</aop:aspect>
-	</aop:config>
-    <!-- 빈 등록 -->
-	<bean id="exceptionTransfer" class="org.egovframe.rte.fdl.cmmn.aspect.ExceptionTransfer">
-		<property name="exceptionHandlerService">
-			<list>
-				<ref bean="defaultExceptionHandleManager" />
-			</list>
-		</property>
-	</bean>
-	<bean id="defaultExceptionHandleManager" class="org.egovframe.rte.fdl.cmmn.exception.manager.DefaultExceptionHandleManager">
-		<property name="reqExpMatcher" ref="antPathMater" />
-		<property name="patterns">
-			<list>
-				<value>**service.impl.*</value>
-			</list>
-		</property>
-		<property name="handlers">
-			<list>
-				<ref bean="egovHandler" />
-			</list>
-		</property>
-	</bean>
-	<bean id="egovHandler" class="egovframework.lab.dataaccess.common.JdbcLoggingExcepHndlr" />
-</beans>
-```
-</div>
-</details>
-
-<details><summary><b>DAO, Service 로직은?</b></summary>
-<div markdown="1"><br>
-EmpService(인터페이스), EmpVO 생략<br>EmpServiceImpl.java -> EmpService 구현 + EgovAbstractServiceImpl 상속<br>insert 부분의 sequence 기반 id generation 와 EmpDAO vs EmpMapper 만 참고
-```java
-@Service("empService")
-public class EmpServiceImpl extends EgovAbstractServiceImpl implements EmpService {
-	// EmpDAO를 사용 (DAO방법1: 직접 쿼리ID 넘겨 매칭)
-//	@Resource(name = "empDAO")
-//	private EmpDAO empDAO;
-	// EmpMapper를 사용 (DAO방법2: 메소드명을 쿼리ID와 같게 만들면 자동 매칭)
-	 @Resource(name = "empMapper")
-	 EmpMapper empDAO;
-	@Resource(name = "primaryTypeSequenceIds")
-	EgovIdGnrService egovIdGnrService; // primaryTypeSequenceIds 는 Sequence 기반으로 key 생성
-//
-	// insert Emp -> 메소드단에서 트랜잭션
-	// @Transactional(value="txManager", propagation=Propagation.REQUIRED,
-	// rollbackFor=Exception.class)
-	@Transactional(value = "txManager", propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
-	public BigDecimal insertEmp(EmpVO empVO) throws Exception {
-		// IDGeneration Service 를 사용하여 key 생성
-		// primaryTypeSequenceIds 는 Sequence 기반임.
-		BigDecimal generatedEmpNo = egovIdGnrService.getNextBigDecimalId();
-		egovLogger.debug("EmpServiceImpl.insertEmp - generated empNo : " + generatedEmpNo);
-		empVO.setEmpNo(generatedEmpNo);
-		empDAO.insertEmp(empVO);
-		return generatedEmpNo;
-	}
-```
-EmpDAO.java -> EgovAbstractMapper 상속 (상속받은 메소드 사용하는 스타일) EgovAbstractMapper(MyBatis)나 EgovAbstractDAO(IBATIS) 상속받아서 사용하면 됨.
-```java
-@Repository("empDAO")
-public class EmpDAO extends EgovAbstractMapper {
-	// TODO [Step 2-2] EmpDAO 작성 (EgovAbstractMapper 상속한 DAO)
-	public void insertEmp(EmpVO vo) {
-		insert("Emp.insertEmp", vo);
-	}
-	public int updateEmp(EmpVO vo) {
-		return update("Emp.updateEmp", vo);
-	}
-	public int deleteEmp(EmpVO vo) {
-		return delete("Emp.deleteEmp", vo);
-	}
-	public EmpVO selectEmp(EmpVO vo) {
-		return selectOne("Emp.selectEmp", vo);
-	}
-	@SuppressWarnings("unchecked")
-	public List<EmpVO> selectEmpList(EmpVO searchVO) {
-		return selectList("Emp.selectEmpList", searchVO);
-	}
-}
-```
-EmpMapper.java 인터페이스 작성 -> 메소드명과 쿼리ID 꼭 동일하게! (자동매핑)<br>Mapper Interface 방식을 사용하는경우 EgovAbstractMapper를 사용할 필요 없음.
-```java
-@Mapper("empMapper")
-public interface EmpMapper {
-	// TODO [Step 3-2] EmpMapper 작성 (Mapper Interface)
-	public void insertEmp(EmpVO vo);
-	public int updateEmp(EmpVO vo);
-	public int deleteEmp(EmpVO vo);
-	public EmpVO selectEmp(EmpVO vo);
-	public List<EmpVO> selectEmpList(EmpVO searchVO);
-}
-```
-</div>
-</details>
-<br><br>
-
-### 실행환경 - 배치처리(Batch)
-
-대용량 데이터를 한번에 처리하는 Batch 실행환경이고 Spring Batch를 활용한다. 
-
-**자세한 Job, JobLauncher, JobRepository, Job Runner, Step 등 개념은 pdf 보기**
-
-**배치 실행법은 주로 3가지:** 외부통신 트리거(ex:HTTP), 스케줄링(ex:cron), 터미널 명령
-
-<details><summary><b>Spring Batch 구성요소(아키텍처)</b></summary>
-<div markdown="1"><br>
-<img src="https://github.com/user-attachments/assets/8a5e130b-2149-4c13-85a9-4d4e9ba25b6e" alt="Image" style="zoom:80%;" /><br>
-<img src="https://github.com/user-attachments/assets/3facb69b-beeb-4da4-855a-351e7bed3f3b" alt="Image" style="zoom:80%;" /><br> 
-<img src="https://github.com/user-attachments/assets/06bb11df-aa77-4427-96cf-340165400805" alt="Image" style="zoom:80%;" /><br> 
-<img src="https://github.com/user-attachments/assets/839dc4e7-bde5-498d-9298-15f8b70160ed" alt="Image"  /><br>
-<img src="https://github.com/user-attachments/assets/fafd6952-34e3-469f-93dc-286d8a31dbef" alt="Image" style="zoom:80%;" />  
-</div>
-</details>
-
-<br>
-
-**배치템플릿 프로젝트 생성:**
-
-- 프로젝트 생성은 eGovFrame>Start>New Boot Batch Template Project>File(SAM)>Scheduler
-- 테스트코드 생성은 eGovFrame>Test>Batch Job Test
-
-**프로젝트 분석:**
-
-- src/main/java: 
-
-  - domain/trade에 **CustomerCredit.java, CustomerCreditIncreaseProcessor.java**, CustomerCreditRowMapper.java 가 있고
-    - **CustomerCredit**는 엔티티!
-    - **CustomerCreditIncreaseProcessor**는 비즈니스 로직!
-
-  - jdbc/cubrid/incrementer에 CubridDataFieldMaxValueIncrementerFactory.java, CubridSequenceMaxValueIncrementer.java 가 있고
-    - Cubrid DB 사용 시 자동 증가 값 처리!
-
-  - scheduler에 EgovSchedulerJobRunner.java 가 있고  
-    scheduler/support에 EgovJobLauncherDetails 가 있다.
-    - 스케줄러 기반 배치 작업 자동실행 지원!
-
-- src/main/resources:
-
-  - batch/data/inputs 에 **csvData.csv**, txtData.txt 가 있고
-
-  - batch/job/abstract 에 **eGovBase.xml** 있고
-    - 공통적인 배치 Job 및 Step 설정을 정의하여 중복 제거 및 표준화!
-    - 예로 미리 스프링빈에 등록한 **jobRepository도 연결** (공통로직이잖)
-
-  - batch/job 에 **delimitedToDelimitedJob.xml**, fixedLengthToFixedLengthJob.xml, fixedLengthToJdbcJob.xml, fixedLengthToMybatisJob.xml 가 있고
-    - **배치 Job 설정**. 아래 테스트 코드는 delimitedToDelimitedJob 사용! -> **File To File**이고, FlatFileItemWriter 사용한다!
-    - fixedLengthToJdbcJob 의 경우 **File To DB(JDBC방식)**이고, EgovJdbcBatchItemWriter 사용한다!
-
-  - batch/propertie 에 context-batch-datasource.xml, **context-batch-job-launcher.xml**, context-batch-mapper.xml, context-batch-scheduler.xml, context-common.xml, context-batch-scheduler-job.xml 이 있다.
-    - **job-launcher**는 배치 JobLauncher 관련 설정!
-      - 자세히: eGovBatchRunner빈 등록(Job 실행관리), jobLauncher빈 등록(Job 실행역할), jobRepository빈 등록(작업상태기록 저장소), jobExplorer빈 등록(모니터링), jobRegistry빈 등록(Job관리-여러Job 중 선택가능), jdbcTemplate빈 등록(JDBC 사용한 DB연결이 필요한경우)
-      - Cubrid, Tibero 등 DBMS 에 맞게 코드 주석해제
-    - scheduler관련은 스케줄링 설정
-    - datasource, mapper, common 은 흔하니 PASS
-
-- 나머지 더 있는데 배치와는 관련 없어 보여서 PASS
-
-**아래 테스트 코드의 전체 프로세스 요약:**
-
-```
-[Test 코드 실행]
-       │ EgovBatchRunner.start()
-       ▼ 
-[delimitedToDelimitedJob.xml 로딩]
-       │ Job 및 Step 구성: CSV 파일 읽기 → 데이터 객체로 변환 → 데이터 처리 → CSV 파일 쓰기
-       │ 상속: eGovBase.xml (jobRepository같은 공통로직 적용)
-       ▼ 
-[FlatFileItemReader]───▶ csvData.csv 읽기 
-       │ 라인 매핑(EgovDefaultLineMapper)
-       │ └─▶ 필드 분리(EgovDelimitedLineTokenizer) - "," 기준
-       │ └─▶ 객체 변환(EgovObjectMapper)───▶ CustomerCredit 객체 생성(엔티티)
-       ▼ 
-[CustomerCreditIncreaseProcessor]───▶ 데이터 처리(신용점수 증가 등)
-       ▼ 
-[FlatFileItemWriter]───▶ csvOutput.csv에 결과 저장 
-       ▼ 
-[Test 코드]───▶ BatchStatus.COMPLETED 검증 (성공 여부 확인)
-```
-
-<details><summary><b>테스트코드에 사용한 전체 코드와 결과</b></summary>
-<div markdown="1"><br>
-테스트코드는 아래와 같다 -> **JOB은 delimitedToDelimitedJob.xml 사용 + Job Launcher도 context-batch-job-launcher.xml 사용**
-```java
-/** 
- * Test File Information 
- * Job:: /egovframework/batch/job/delimitedToDelimitedJob.xml
- * Job Launcher:: /egovframework/batch/context-batch-job-launcher.xml
- * job Parameters:: Date_Default Timestamp
- */ 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = { "/egovframework/batch/context-batch-job-launcher.xml", "/egovframework/batch/job/delimitedToDelimitedJob.xml", "/egovframework/batch/context-batch-datasource.xml" })
-public class BatchJobTestR{
-	@Autowired
-	@Qualifier("eGovBatchRunner")
-	private EgovBatchRunner egovBatchRunner;
-	@Test
-	public void testJobRun() throws Exception {
-		String jobName = "delimitedToDelimitedJob";
-		JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
-		jobParametersBuilder.addLong("timestamp", new Date().getTime());
-		String jobParameters = egovBatchRunner.convertJobParametersToString(jobParametersBuilder.toJobParameters());
-        //테스트시작 (정상구동 확인위해 Id받음)
-		long executionId = egovBatchRunner.start(jobName, jobParameters);
-		assertEquals(BatchStatus.COMPLETED, egovBatchRunner.getJobExecution(executionId).getStatus());
-	}
-}
-```
-delimitedToDelimitedJob.xml 보기 -> 전체적인 찐 배치 작업과정 설정 부분!!
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-		http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch-3.0.xsd">
-    <import resource="abstract/eGovBase.xml" />
-    <!-- Job, Step을 결정하는 중요한 부분이 아래 코드이다. 인터벌2는 2개 데이터씩 -->
-    <job id="delimitedToDelimitedJob" parent="eGovBaseJob" xmlns="http://www.springframework.org/schema/batch">
-        <step id="delimitedToDelimitedStep" parent="eGovBaseStep">
-            <tasklet>
-                <chunk reader="delimitedToDelimitedJob.delimitedToDelimitedStep.delimitedItemReader" processor="delimitedToDelimitedJob.delimitedToDelimitedStep.itemProcessor"
-                    writer="delimitedToDelimitedJob.delimitedToDelimitedStep.delimitedItemWriter" commit-interval="2" />
-            </tasklet>
-        </step>
-    </job>
-    <bean id="delimitedToDelimitedJob.delimitedToDelimitedStep.delimitedItemReader" class="org.springframework.batch.item.file.FlatFileItemReader" scope="step">
-        <property name="resource" value="file:./src/main/resources/egovframework/batch/data/inputs/csvData.csv" />
-        <property name="lineMapper">
-            <bean class="org.egovframe.rte.bat.core.item.file.mapping.EgovDefaultLineMapper">
-                <property name="lineTokenizer">
-                    <bean class="org.egovframe.rte.bat.core.item.file.transform.EgovDelimitedLineTokenizer">
-                        <property name="delimiter" value="," />
-                    </bean>
-                </property>
-                <property name="objectMapper">
-                    <bean class="org.egovframe.rte.bat.core.item.file.mapping.EgovObjectMapper">
-                        <property name="type" value="egovframework.example.bat.domain.trade.CustomerCredit" />
-                        <property name="names" value="name,credit" />
-                    </bean>
-                </property>
-            </bean>
-        </property>
-    </bean>
-    <bean id="delimitedToDelimitedJob.delimitedToDelimitedStep.delimitedItemWriter" class="org.springframework.batch.item.file.FlatFileItemWriter" scope="step">
-        <property name="resource" value="file:./target/test-outputs/csvOutput.csv" />
-        <property name="lineAggregator">
-            <bean class="org.springframework.batch.item.file.transform.DelimitedLineAggregator">
-                <property name="delimiter" value="," />
-                <property name="fieldExtractor">
-                    <bean class="org.egovframe.rte.bat.core.item.file.transform.EgovFieldExtractor">
-                        <property name="names" value="name,credit" />
-                    </bean>
-                </property>
-            </bean>
-        </property>
-    </bean>
-    <bean id="delimitedToDelimitedJob.delimitedToDelimitedStep.itemProcessor" class="egovframework.example.bat.domain.trade.CustomerCreditIncreaseProcessor" />
-</beans>
-```
-context-batch-job-launcher.xml -> JobLauncher 설정 (수많은 빈 등록)
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:p="http://www.springframework.org/schema/p"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-			http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
-			http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch-3.0.xsd">
-	<import resource="classpath:/egovframework/batch/context-batch-datasource.xml" />
-	<import resource="classpath:/egovframework/batch/context-batch-mapper.xml" />
-	<bean id="eGovBatchRunner" class="org.egovframe.rte.bat.core.launch.support.EgovBatchRunner">
-		<constructor-arg ref="jobOperator" />
-		<constructor-arg ref="jobExplorer" />
-		<constructor-arg ref="jobRepository" />
-	</bean>
-	<bean id="jobLauncher" class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
-		<property name="jobRepository" ref="jobRepository" />
-	</bean>
-	<bean class="org.springframework.batch.core.configuration.support.JobRegistryBeanPostProcessor">
-		<property name="jobRegistry" ref="jobRegistry" />
-	</bean>
-	<bean id="jobRepository" class="org.springframework.batch.core.repository.support.JobRepositoryFactoryBean"
-		p:dataSource-ref="dataSource" p:transactionManager-ref="transactionManager"
-		p:lobHandler-ref="lobHandler" />
-	 <!-- tibero 사용시 주석해제-->
-	 <!-- 
-	<bean id="jobRepository" class="org.springframework.batch.core.repository.support.JobRepositoryFactoryBean"
-		p:dataSource-ref="dataSource" p:transactionManager-ref="transactionManager"
-		p:lobHandler-ref="lobHandler" p:databaseType="oracle" />
-	 -->
-	<!-- altibase/oracle 사용시 주석해제-->
-	<!-- 
-	<bean id="jobRepository" class="org.springframework.batch.core.repository.support.JobRepositoryFactoryBean"
-		p:dataSource-ref="dataSource" p:transactionManager-ref="transactionManager"
-		p:lobHandler-ref="lobHandler" p:isolationLevelForCreate="ISOLATION_DEFAULT"/>
-	-->
-	<!-- cubrid 사용시 주석해제 -->
-	<!-- 
-	<bean id="jobRepository" class="org.springframework.batch.core.repository.support.JobRepositoryFactoryBean"
-		p:dataSource-ref="dataSource" p:transactionManager-ref="transactionManager" p:lobHandler-ref="lobHandler"
-		p:incrementerFactory-ref="cubridDatabaseTypeFactory" p:databaseType="oracle" />
-	<bean id="cubridDatabaseTypeFactory" class="egovframework.example.bat.jdbc.cubrid.incrementer.CubridDataFieldMaxValueIncrementerFactory">
-		<constructor-arg index="0" ref="dataSource"/>
-	</bean> 
-	 -->
-	<bean id="jobOperator" class="org.springframework.batch.core.launch.support.SimpleJobOperator"
-		p:jobLauncher-ref="jobLauncher" p:jobExplorer-ref="jobExplorer"
-		p:jobRepository-ref="jobRepository" p:jobRegistry-ref="jobRegistry" />
-	<bean id="jobExplorer" class="org.springframework.batch.core.explore.support.JobExplorerFactoryBean"
-		p:dataSource-ref="dataSource" />
-	<bean id="jobRegistry" class="org.springframework.batch.core.configuration.support.MapJobRegistry" />
-	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
-		<property name="dataSource" ref="dataSource" />
-	</bean>
-</beans>
-```
-eGovBase.xml -> 공통로직 추상화 (ex: jobRepository)
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-		http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch-3.0.xsd">
-    <job id="eGovBaseJob" abstract="true" job-repository="jobRepository" restartable="true" xmlns="http://www.springframework.org/schema/batch" />
-    <step id="eGovBaseStep" abstract="true" xmlns="http://www.springframework.org/schema/batch">
-        <tasklet allow-start-if-complete="false" start-limit="" transaction-manager="transactionManager">
-            <chunk commit-interval="" reader="" writer="" />
-        </tasklet>
-    </step>
-</beans>
-```
-CustomerCredit.java 는 @Entity만든거라 간단해서 생략<br>CustomerCreditIncreaseProcessor.java
-```java
-public class CustomerCreditIncreaseProcessor implements ItemProcessor<CustomerCredit, CustomerCredit> {
-	// 증가할 수
-	public static final BigDecimal FIXED_AMOUNT = new BigDecimal("5");
-	/**
-	 * FIXED_AMOUNT만큼 증가 시킨 후 return
-	 */
-	@Override
-	public CustomerCredit process(CustomerCredit item) throws Exception {
-		return item.increaseCreditBy(FIXED_AMOUNT);
-	}
-}
-```
-**실행결과:**
-```
-input: csvData.csv
-customer1	10
-customer2	20
-customer3	30
-customer4	40
-output: csvOutput.txt
-customer1,15
-customer2,25
-customer3,35
-customer4,45
-```
-</div>
-</details>
-<br><br>
-
-### 실행환경 - 화면처리(Presentation)
-
-MVC 패턴 개발은 앞에서도 봤고, 잘 이해하고 있어서 **로그인방식, 전역@ModelAttribute, 국제화 메시지, 자동완성Ajax만 추가적으로 보자.**
-
-**해당 실습은 로그인 방식이 "세션"** 
-
-- 본인은 직접 `httpSession.setAttribute()` 이런식으로 기록했었다.  
-  그리고 컨트롤러(java)에서 로그인정보 필요할 경우 `@SessionAttribute(name = "loginMember", required = false) Member loginMember` 대신 AOP를 활용해서 `@Login` 방식으로 구현했었다.
-
-- **이 실습은 @SessionAttributes("login")를 전역에 + @ModelAttribute("login") 으로 자동 세션 등록을 수행했다!**  
-  물론, AOP로 @Login 방식으로 가져오는건 생략했고!
-
-  - 로그인 정보를 세션에 기록할 땐 **클래스 전역에서 @SessionAttributes("login")**를 사용시 자동 생성한다.
-
-    - 단, 지정한 네임(ex:"login")으로 로그인 **메소드 인자에서 @ModelAttribute("login")**를 해야한다.
-
-    - ```java
-      @Controller
-      @SessionAttributes("login") //@ModelAttribute("login") 보고 자동 세션 등록
-      public class LoginController {
-          @RequestMapping(value = "/loginProcess1.do", method = RequestMethod.POST)
-          public String loginProcess(@ModelAttribute("login") LoginCommand loginCommand) {
-              return "login/loginSuccess";
-          }
-      }
-      ```
-
-    - ```jsp
-      <!--jsp의 표현식 문법 사용하면 "모델,request,session" 등 속성을 바로 참조 가능-->
-      <%@ page language="java" contentType="text/html; charset=UTF-8" %>
-      <html>
-          <head>
-              <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-              <title>로그인 성공</title>
-          </head>
-          <body>
-              <p>${login.id} 님은 로그인에 성공했습니다. </p>
-          </body>
-      </html>
-      ```
-
-  - 로그인 정보를 가져올땐 메소드 인자에서 @SessionAttribute를 사용시 가능하다.
-
-<br>
-
-**@ModelAttribute를 메소드인자 에서 사용 시:** 입력 데이터(ex:form)를 자동으로 원하는 객체로 변환 및 응답에도 담아줌!(MVC의 M부분)   
-만약, 입력 데이터가 없어도 빈 객체를 생성! **(Null Pointer Exception 방지)**
-
-**@ModelAttribute를 메소드에서 사용 시:** 매 요청마다 메소드가 사용!(@GetMapping 보다먼저)   
-초기객체를 추가하여 JSP에게 제공하기 좋다. **(Null Pointer Exception 방지 + 전역 항상 적용)**
-
-- `form modelAttribute="login"`: @ModelAttribute의 객체와 바인딩
-- `<td><form:select path="loginType">`: 폼 필드 생성하고 path로 객체 속성과 바인딩(login.loginType)
-- `<form:options items="${loginTypes}" itemValue="code" itemLabel="value"/>`: select태그 하위로써 드롭다운 데이터 생성
-  - **items**: 옵션 데이터를 제공하는 모델 속성의 이름을 지정, `${loginTypes}`가 사용!
-  - **itemValue**: 옵션의 값으로 사용할 속성 이름을 지정, `code`가 사용! (login.loginType.code)
-  - **itemLabel**: 옵션의 레이블로 사용할 속성 이름을 지정, `value`가 사용! (login.loginType.value)
-- `<td><form:errors path="loginType"/></td>`: path로 바인딩된 폼 필드의 오류 메시지를 출력
-
-**@ModelAttribute를 메소드에서 사용 시 -> 사용안해야 할 때:** "공통으로 사용할 이유가 없을 때" or "파라미터 사용으로 인해 URL패턴이 안맞는 경우가 하나라도 존재할 때"
-
-- ```java
-  @RequestMapping(value = "/updateEmployee.do", method = RequestMethod.GET)
-  public String defaultUpdateEmployee(@RequestParam("employeeid") String employeeid, ModelMap model) {
-      model.addAttribute("employee", getEmployeeInfo(employeeid));
-      return "modifyemployee";
-  }
-  
-  //@ModelAttribute("employee") //-> 이거 안써야 잘 동작.
-  //String employeeid를 스프링이 찾지 못해 에러가 뜬다. 업데이트 URL은 ...?id 로 파라미터 준다고 하지만, 다른 URL은 파라미터 안주는것도 있음.
-  //그니까 에러 뜸. 안쓰는게 맞음. 어차피 defaultUpdateEmployee 에서만 필요한거라 "공통으로 쓸 이유도 없음". String id 못 찾는것도 여전히 문제고.
-  public Employee getEmployeeInfo(String employeeid) {
-      return employeeService.getEmployeeInfoById(employeeid);
-  }
-  ```
-
-<details><summary><b>@ModelAttribute를 메소드에서 사용 코드:</b></summary>
-<div markdown="1"><br>
-**Java**
-```java
-/*
- * TODO [Step 1-2-5] @ModelAttribute - 모델의 초기화 ModelAttribute를 이용하여 loginTypes와
- * login 객체를 초기화 해주는 메소드를 만든다.
-*/
-@ModelAttribute("loginTypes")
-protected List<LoginType> referenceData() throws Exception {
-    List<LoginType> loginTypes = new ArrayList<LoginType>();
-    loginTypes.add(new LoginType("A", "개인회원"));
-    loginTypes.add(new LoginType("B", "기업회원"));
-    loginTypes.add(new LoginType("C", "관리자"));
-    return loginTypes;
-}
-@ModelAttribute("login")
-protected Object referenceData4login() throws Exception {
-    return new LoginCommand();
-}
-```
-**JSP -> form modelAttribute="login" + loginTypes를 select태그의 option절에 사용하는 모습**
-```jsp
-<%@ page contentType="text/html; charset=UTF-8"%>
-<%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
-<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title><spring:message code="login.form.title" /></title>
-<link type="text/css" rel="stylesheet" href="<c:url value='/css/egovframework/egov.css'/>"/>
-</head>
-<body>
-<h3>Login Page</h3>
-<form:form modelAttribute="login">
-	<form:errors />
-	<table>
-		<tr>
-			<!-- TODO [Step 1-2-2] SpringMessage 사용 -->
-			<%-- <td><label for="id"><spring:message code="login.form.id" /></label></td> --%>
-			<td><label for="id">아이디</label></td>
-			<td><form:input id="id" path="id" /></td>
-			<td><form:errors path="id" /></td>
-		</tr>
-		<tr>
-			<td><label for="password"><spring:message code="login.form.password" /></label></td>
-			<td><form:password id="password" path="password" /></td>
-			<td><form:errors path="password" /></td>
-		</tr>
-		<tr>
-			<td><label for="loginType"> 
-			<spring:message	code="login.form.type" /></label></td>
-			<td><form:select path="loginType">
-				<option value="">---선택하세요---</option>
-				<form:options items="${loginTypes}" itemValue="code" itemLabel="value" />
-			</form:select></td>
-			<td><form:errors path="loginType" /></td>
-		</tr>
-        <tr>
-            <td colspan="3" align="right" >
-                <input type="submit" value="<spring:message code="login.form.submit" />">
-            </td>
-        </tr>
-	</table>
-</form:form>
-</body>
-</html>
-```
-</div>
-</details>
-<br>
-
-**국제화 메시지 설정**도 쉽다.   
-**ResourceBundleMessageSource 빈을 message-common.propeties 연결하여 등록**하고,  
-**JSP**에서 `<spring:message code="Login.form.id"/>` 이런식으로 사용.(propeties의 Login.form.id 매핑)  
-
-마지막 **국제화(lang)는?**
-
-1. **요청 수신**: 사용자가 `http://example.com?lang=ko` 처럼 lang을 담아 서버에 요청!
-2. **인터셉터 실행(context-servlet.xml)**: `RequestMappingHandlerMapping`은 요청을 처리하기 전에 등록된 인터셉터(`LocaleChangeInterceptor`: 로케일 변경 역할)를 호출
-3. **로케일 변경(context-servlet.xml)**: 인터셉터는 URL 파라미터에서 `lang=ko`를 추출하고, 이를 **세션**(`SessionLocaleResolver`: 로케일을 세션에 관리하는 리졸버)에 저장하여 로케일을 변경
-4. **컨트롤러 호출**: 인터셉터 -> 컨트롤러 순서는 자명.
-5. **로케일 적용**: 이후 모든 요청에서 변경된 로케일이 적용되어 국제화된 콘텐츠가 제공!
-
-<details><summary><b>국제화 적용 코드:</b></summary>
-<div markdown="1"><br>
-```xml
-<!-- setting Locale Locale Interceptor 설정하기  -->   
-<!-- TODO [Step 1-3-1] Internalization - 국제화 관련 bean 설정  -->
-<!-- HandlerMapping 설정방법 참고 -->
-<bean id="localeChangeInterceptor" class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"
-      p:paramName="lang" />
-<bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver" />
-<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping">
-    <property name="interceptors">
-        <list>
-            <ref bean="localeChangeInterceptor"/>
-        </list>
-    </property>
-</bean>
-<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter" />
-```
-</div>
-</details>
-
-<br>
-
-**ajax로 jQuery UI 기능인 autocomplete(자동완성), autoSelected(자동완성-select태그) 구현하기**
-
-- **(공통) jquery.js 와 jqueryui.js 가 필요**하다.
-
-- **(공통) MappingJackson2JsonView 빈 등록** -> 컨트롤러에서 JSON으로 클라에게 반환 목적 (JSON 통신)
-
-  - ```java
-    //사원정보 리스트 페이지에서 검색입력창(사원이름)에 사용되는 자동완성기능
-    @RequestMapping("/suggestName.do")
-    protected ModelAndView suggestName(HttpServletRequest request)throws Exception{
-    
-        ModelAndView modelAndView = new ModelAndView();
-        modelAndView.setViewName("jsonView");
-    
-        String searchName = URLDecoder.decode(request.getParameter("searchName"),"utf-8");
-    
-        System.out.println("searchName: "+searchName);
-        List<String> nameList = employeeService.getNameListForSuggest(searchName);
-    
-        modelAndView.addObject("nameList", nameList);
-    
-        return modelAndView;
-    }
-    ```
-
-  - 근데, @ResponseBody 사용하면 더 간결한 코드 가능하다. (JSON 자동 반환 해주니까)
-
-- **autocomplete(자동완성)**
-
-  - ```jsp
-    $("#searchName").autocomplete({
-      source: function(request, response){
-    	   $.ajax({
-    		  url:"<c:url value='/autoComplete.do'/>",
-    		  contentType: "application/x-www-form-urlencoded; charset=UTF-8",
-    		  data: {keyword : encodeURIComponent(request.term)},	 
-    		  dataType:'json',
-    		  success: function(returnData, status){	  
-    			response(returnData.resultList);
-    		  }
-    	  }); 
-      },
-      minLength : 1,
-      select: function(event, ui){
-    	    $("#searchName").val(this.value);
-      }
-    });
-    ```
-
-  - **source 함수**: Autocomplete의 소스코드 설정 -> 사용자가 입력 필드에 텍스트를 입력할 때마다 호출 (input 이벤트 감지는 Autocomplete API에 구현되어 있을거임)
-
-  - **request.term**: 사용자가 입력 필드에 입력한 현재 텍스트
-
-  - **encodeURIComponent(request.term)**: 입력한 텍스트를 URL 인코딩하여 서버로 전송 -> 특수 문자가 올바르게 전송
-
-  - **minLength: 1**: 최소 1글자 이상 입력해야 자동 완성 기능이 작동
-  - **select:** 자동 완성 목록에서 항목을 선택할 때 호출 -> searchName 필드로 선택 값(this.value) 저장
-
-- **autoSelected(자동완성-select태그)**
-
-  - ```jsp
-    $('#superdeptid').change(function(){ 
-    	$.ajax({
-    		url: "<c:url value='/autoSelectDept.do'/>",
-    		contentType: "application/x-www-form-urlencoded; charset=UTF-8",
-    		data: {depth:2, superdeptid:encodeURIComponent($('#superdeptid 					option:selected').val())}, 
-    		dataType: "json",
-    		success: function(returnData, status){
-    			$('#departmentid').loadSelectDept(returnData,"근무부서를 선택하세요."); 
-    		}
-    	});
-    });
-    ```
-
-  - **$('#superdeptid').change(function() { ... }):** 부서 번호 선택 필드(`#superdeptid`)의 변경 이벤트를 감지
-
-  - **data: { depth: 2, superdeptid: encodeURIComponent($('#superdeptid option:selected').val()) }:** superdeptid인 select태그 값으로 요청 데이터를 준비한다.
-
-    - **depth**: 부서 깊이를 지정합니다 (이 경우 2) -> DB테이블에 상위부서(1), 하위부서(2), 하위하위부서(3) 이렇게 데이터가 있을 수 있을텐데 depth=2로 지정해서 가져온다는 것.
-
-  - **$('#departmentid').loadSelectDept(returnData, "근무부서를 선택하세요."):** 하위 부서 목록을 로딩하는 함수를 호출
-
-    - **loadSelectDepth** 함수는 직접 JS로 구현한 함수고, select 태그에 option태그를 append하는 로직을 가진다.
-
-<details><summary><b>ajax 사용한 jsp 코드 보기:</b></summary>
-<div markdown="1"><br>
-```jsp
-<%@ page contentType="text/html; charset=UTF-8" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
-<%@ taglib prefix="ui" uri="http://egovframework.gov/ctl/ui"%>
-<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
-<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title><spring:message code="easaycompany.employeelist.title"/></title>
-<link type="text/css" rel="stylesheet" href="<c:url value='/css/easycompany.css'/>" />
-<!-- jQuery -->
-<link rel="stylesheet" href="<c:url value='/css/jqueryui.css'/>"/>
-<script src="<c:url value='/js/jquery.js'/>"></script>
-<script src="<c:url value='/js/jqueryui.js'/>"></script>
-<script src="<c:url value='/js/select_load.js'/>"></script>
-<script type="text/javascript">
-$(document).ready(function(){
-	//검색어에 대한 jquery ajax 자동완성 구현하기(jquery autocomplete)
-    $("#searchName").autocomplete({
-      source: function(request, response){
-    	   $.ajax({
-    		  url:"<c:url value='/autoComplete.do'/>",
-    		  contentType: "application/x-www-form-urlencoded; charset=UTF-8",
-    		  data: {keyword : encodeURIComponent(request.term)},	 
-    		  dataType:'json',
-    		  success: function(returnData, status){	  
-    			response(returnData.resultList);
-    		  }
-    	  }); 
-      },
-      minLength : 1,
-      select: function(event, ui){
-    	    $("#searchName").val(this.value);
-      }
-    });
-	//
-   // TODO [Step 2-2-1] 부서번호에 대한 jquery autoSelected 기능 구현하기(jquery autoselected)
-    $('#superdeptid').change(function(){ 
-        $.ajax({
-            url: "<c:url value='/autoSelectDept.do'/>",
-            contentType: "application/x-www-form-urlencoded; charset=UTF-8",
-            data: {depth:2, superdeptid:encodeURIComponent($('#superdeptid 					option:selected').val())}, 
-            dataType: "json",
-            success: function(returnData, status){
-                $('#departmentid').loadSelectDept(returnData,"근무부서를 선택하세요."); 
-            }
-        });
-    });
-});
-</script>
-</head>
-<body>
-<br/>
-<h2>AJAX : AutoComplete 기능 </h2>
-<div id="searchform">
-<form:form modelAttribute="searchCriteria" action="employeelist.do">
-<table width="80%" border="0">
-<tr>
-        <td>이름 : <form:input path="searchName"/></td>
-</tr>
-</table>
-</form:form>
-</div>
-<br/>
-<br/>
-<h2>AJAX : AutoSelected 기능 </h2>
-<div id="editform">
-<form:form modelAttribute="employee">
-<table>
-    <tr>
-        <td>부서번호 : </td>
-        <td>
-            <form:select path="superdeptid">
-                <option value="">상위부서를 선택하세요.</option>
-                <form:options items="${deptInfoOneDepthCategory}" />
-            </form:select>
-            </td><td>
-            <form:select path="departmentid">
-                <option value="">근무부서를 선택하세요.</option>
-                <form:options items="${deptInfoTwoDepthCategory}" />
-            </form:select>
-        </td>
-    </tr>
-</table>
-</form:form>
-</div>
-</body>
-</html>
-```
-</div>
-</details>
-<br><br>
-
-### 실행환경 - easycompany 해답
-
-실행환경 잘 적응했나 예제 문제로 학습하기(배치는 없음)
-
-<details><summary><b>프로젝트 구조 분석:</b></summary>
-<div markdown="1"><br>
-1. **src/main/webapp:**
-   - css
-     - jqueryui css가 있음 -> 공홈에서 다운
-     - images
-       - button 이미지가 있음
-     - js
-       - jquery.js, **jqueryui.js**가 있음 -> 공홈에서 다운
-       - **select_load.js** -> 직접 제작 (loadSelectDept함수: select태그 기입함수!)
-     - scripts
-       - easycompany.css -> 해당 플젝에서 사용하는 css
-   - WEB-INF
-     - config
-       - springmvc/**context-servlet.xml**
-         - 뷰리졸버, ajax로 autocomplete위한 MappingJacksonJsonView, Exception, Message, Pagination Tag, mvc:interceptors, mvc:view-controller, 컴포넌트 스캔까지(include-filter, exclude-filter)
-       - jsp
-       - cmmn/egovBizException.jsp, genneralException.jsp, taglibs.jsp
-         -  부트에서 /error 하위 자동 페이지등록 출력해주던 에러페이지처럼 **"에러"페이지**
-       - 다양한 페이지들 jsp...
-       - lib -> 비어있음
-       - tlds/ui.tld -> 뭔지 모르겠음.. pagination tag 관련 같은데..
-       - web.xml -> 이건 뭐 DispatcherServlet 설정하는 극 상위 설정
-2. **src/main/resources:**
-   - db/sampledb.sql -> 초기 create table, insert 데이터 쿼리
-     - message/message-common_en, message-common_ko, message-common.properties -> 메시지 국제화
-       - jakarta commons validator (검증 메시지), spring message&validator, label(jsp에 사용) 등 메시지 관련 전부 모음
-   - property/db.properties -> datasource에 사용할 db설정을 변수로 선언
-     - spring
-       - context-datasource.xml -> db.properties 변수 활용
-       - **context-common.xml** -> 공통부분 설정 (메시지, 빈 스캔, **추적-LeaveaTrace, Pagination Tag**)
-         - leaveaTrace는 Exception을 던지지 않고 후처리 로직 수행(로그, 모니터링 등)
-           - TraceHandlerService는 로그를 넘어서 별도의 모니터링 연동 등 다양한 확장성을 제공
-         - Pagination Tag는 공문의 라이프 사이클 확인: [페이징설명-공식문서](https://www.egovframe.go.kr/wiki/doku.php?id=egovframework%3Arte%3Aptl%3Aview%3Apaginationtag)
-       - context-aspect.xml -> AOP 설정 (여긴 Exception AOP만)
-       - context-sqlMap.xml -> MyBatis 설정
-       - context-transaction.xml -> 트랜잭션 직접 빈 등록 (select절 read-only, 적용범위 등 상세 설정)
-       - **context-validator.xml** -> Spring Modules-jakarta commons validator 빈 등록
-     - sqlmap
-       - config/sql-map-config.xml -> mybatis 설정..
-       - sql/com/easycompany/*.xml -> mybatis 설정 sql문..
-     - **validator**
-       - validator.xml -> 어떤 객체에 어떤 룰 적용할지 설정
-         - required: 값 비었나, integer: int형탠가, email: 이메일 형식인가... 등등
-       - validator-rules.xml -> jakarta commons validator 의 공식 rules (커스텀 당연히 가능)
-   - **log4j2.xml** -> 부트에서 properties에 debug, trace등 로그레벨 설정하던 그 설정을 하게 됨.
-     - 부트 사용한다면 이건 properties에서 선언해도 충분할 듯!
-3. **src/main/java:** 
-   - interceptor(login-authentic), controller, service, dao, vo, mapper, exception, validator, ajax, imagepaginationrenderer 관련 자바 파일
-   - 설명은 생략.
-4. **pom.xml** -> Maven 빌드 툴 사용 (gradle이면 build.gradle 사용)
-</div>
-</details>
-<br>
-
-**WEB-INF 하위의 context-servlet.xml과 resources 하위의 context-*.xml 들이 설정이 많이 겹치는데 역할이 다르다.**
-
-<img src="https://github.com/user-attachments/assets/d8e08cd6-6882-4b5b-b8a3-65b283a1495c" alt="Image" style="zoom:80%;" /> 
-
-**순수스프링 기본설정은 크게 2가지 계층 XML + 젤 최상위 web.xml:**   
-
-1. **WEB-INF 하위 XML(오른쪽-Child)** → 컨트롤러 및 웹 관련 빈 관리
-
-   - 예로 컴포넌트스캔(Controller), mvc:interceptors, mvc:view-controller 등
-
-   - 특히, mvc:view-controller 는 컨트롤러 메소드 없이 **직접 URL을 뷰에 매핑**
-
-2. **resources 하위 XML(왼쪽-Root)** → 서비스, 리포지토리 및 공통 빈 관리
-
-   - 예로 컴포넌트스캔(Repository, Service) 등
-
-3. **최상위(그림X)**: 톰캣이 항상 체크하는 web.xml -> 젤 최상위 설정
-   - 예로 필터, 서블릿(ex:디스패처서블릿), 1번과 2번 XML 등록 등
-
-**참고:**
-
-1. **1번, 2번 xml 설정**을 반드시 맞출 필요없지만, **유지보수 위해서라도 개념적으로 구분 하는 것!**
-
-2. web.xml에 필터, 디스패처 서블릿 등 덕분에 main함수 없어도 톰캣 위에서 정상 실행
-
-   **ContextLoaderListener**는 **web.xml** 파일에 설정되어, 웹 애플리케이션이 시작될 때 **Spring** 애플리케이션 **컨텍스트를 초기화**
-
-   이 리스너는 **contextConfigLocation** 파라미터를 통해 **XML** 파일의 위치를 지정받고, 해당 파일을 로드하여 빈을 등록
-
-   이를 담당해주는 web.xml이 없으면 당연히 "자바코드"로 직접 작성해서 main함수로 실행해줘야 할거임.
-
-3. 헷갈리는 스프링의 설정 인식 방법:
-
-   web.xml에서 xml들 다 인식하게 설정하는건 자명. (web.xml은 반드시 톰캣에 의해 수행되기도 하고)
-
-   web.xml이 없다면?
-
-   - Test코드라면 `@ContextConfiguration(locations = {"classpath:...*.xml"}` 이런식 등록
-   - 부트라면 `@ImportResource("classpath...xml")` 이렇게 간단히 가능하다.
-   - 추가방법(GPT): Java Config로 등록 or ClassPathXmlApplicationContext 로 등록 법이 있음  
-     => 둘다 main함수에서 직접 applicationContext초기화 방식
-
-<details><summary><b>예시 코드 XML 설정 3개</b></summary>
-<div markdown="1"><br>
-**webapp/WEB-INF/web.xml**
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<web-app id="WebApp_ID" version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee; http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
-	<display-name>Lab301-mvc</display-name>
-	<filter>
-		<filter-name>encodingFilter</filter-name>
-		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
-		<init-param>
-			<param-name>encoding</param-name>
-			<param-value>utf-8</param-value>
-		</init-param>
-	</filter>
-<!--  -->
-	<filter-mapping>
-		<filter-name>encodingFilter</filter-name>
-		<url-pattern>*.do</url-pattern>
-	</filter-mapping>
-<!--  -->
-	<!-- Spring  context configuration -->
-	<context-param>
-		<param-name>contextConfigLocation</param-name>
-		<param-value>classpath*:spring/context-*.xml</param-value>
-	</context-param>
-<!--  -->
-	<listener>
-		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-	</listener>
-<!--  -->
-	<!-- Spring WEB context configuration -->
-	<servlet>
-		<servlet-name>mvcAction</servlet-name>
-		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-		<init-param>
-			<param-name>contextConfigLocation</param-name>
-			<param-value>/WEB-INF/config/springmvc/context-*.xml</param-value>
-		</init-param>
-		<load-on-startup>1</load-on-startup>
-	</servlet>
-<!--  -->
-	<servlet-mapping>
-		<servlet-name>mvcAction</servlet-name>
-		<url-pattern>*.do</url-pattern>
-	</servlet-mapping>
-<!--  -->
-	<welcome-file-list>
-		<welcome-file>index.jsp</welcome-file>
-	</welcome-file-list>
-	<login-config>
-		<auth-method>BASIC</auth-method>
-	</login-config>
-</web-app>
-```
-**webapp/WEB-INF/config/context-servlet.xml**
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:p="http://www.springframework.org/schema/p"
-	xmlns:context="http://www.springframework.org/schema/context"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-				http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
-<!--  -->
-	<!-- set component scan -> include:Controller -->
-	<context:component-scan base-package="com.easycompany">
-		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
-		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Service"/>
-		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Repository"/>
-	</context:component-scan>
-<!-- -->	
-	<mvc:annotation-driven/>
-	<!-- 모든 핸들러매핑에 인터셉터 등록하는 부트와 유사한 방식! 
-	인터셉터가 적용될 URL 매핑과 exclude로 제외할 URL을 지정할 수 있다. -->
-	<mvc:interceptors>
-		<mvc:interceptor>
-			<mvc:mapping path="/*Employee.do" />
-			<mvc:mapping path="/employeeList.do" />
-			<bean class="com.easycompany.cmm.interceptor.AuthenticInterceptor" />
-		</mvc:interceptor>
-	</mvc:interceptors>
-<!--  -->	
-	<!-- set view resolver -->
-	<!-- TODO [Step 1-1-1] ViewResolver - View를 처리할 해결사를 설정하자 (이거하면 /WEB-INF/jsp/ 접근가능) -->
-	<bean  class="org.springframework.web.servlet.view.InternalResourceViewResolver"
-		p:prefix="/WEB-INF/jsp/" p:suffix=".jsp" /> 
-    <!-- 컨트롤러 메소드 필요없이 직접 매핑! login.jsp와 validator.jsp로 매핑
-	validator.jsp는 JavaScript 유효성 검사 코드를 생성하는 역할을 합니다. -->
-	<mvc:view-controller path="/login.do"/>
-	<mvc:view-controller path="/validator.do"/>
-<!--  -->
-	<!-- set message source -->
-	<!-- TODO [Step 1-2-1] SpringMessage - messageSource 활성화 설정 -->
-	<!-- messageSource 활성화하는 부분 -->
-	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
-		<property name="basenames">
-			<list>
-				<value>messages.message-common</value>
-			</list>
-		</property>
-	</bean>
-<!--  -->
-	<!-- setting Locale -->
-	<!-- setting Locale Locale Interceptor 설정하기  -->   
-	<!-- TODO [Step 1-3-1] Internalization - 국제화 관련 bean 설정  -->
-	<!-- *HandlerMapping 설정방법 참고 -->
-	<bean id="localeChangeInterceptor" class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"
-		p:paramName="lang" />
-	<bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver" />
-	<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping">
-		<property name="interceptors">
-			<list>
-				<ref bean="localeChangeInterceptor"/>
-			</list>
-		</property>
-	</bean>
-	<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter" />
-</beans>
-```
-**src/main/resources/spring/context-common.xml**
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xmlns:context="http://www.springframework.org/schema/context"
-		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-				http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
-<!--  -->	
-    <!-- set component scan -> include: Service, Repository -->
-	<context:component-scan base-package="com.easycompany">
-		<context:include-filter type="annotation" expression="org.springframework.stereotype.Service"/>
-		<context:include-filter type="annotation" expression="org.springframework.stereotype.Repository"/>
-		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
-	</context:component-scan>
-<!--  -->
-	<bean id="leaveaTrace" class="org.egovframe.rte.fdl.cmmn.trace.LeaveaTrace">
-		<property name="traceHandlerServices">
-			<list>
-				<ref bean="traceHandlerService" />
-			</list>
-		</property>
-	</bean>
-	<bean id="traceHandlerService" class="org.egovframe.rte.fdl.cmmn.trace.manager.DefaultTraceHandleManager">
-		<property name="reqExpMatcher">
-			<ref bean="antPathMater" />
-		</property>
-		<property name="patterns">
-			<list>
-				<value>*</value>
-			</list>
-		</property>
-		<property name="handlers">
-			<list>
-				<ref bean="defaultTraceHandler" />
-			</list>
-		</property>
-	</bean>
-	<bean id="antPathMater" class="org.springframework.util.AntPathMatcher" />
-	<bean id="defaultTraceHandler" class="org.egovframe.rte.fdl.cmmn.trace.handler.DefaultTraceHandler" />
-<!-- 	 -->
-	<!-- For Pagination Tag -->
-	<bean id="imageRenderer" class="com.easycompany.cmm.tag.ImagePaginationRenderer"/>
-	<bean id="paginationManager" class="org.egovframe.rte.ptl.mvc.tags.ui.pagination.DefaultPaginationManager">
-		<property name="rendererType">
-			<map>
-				<entry key="image" value-ref="imageRenderer"/> 
-			</map>
-		</property>
-	</bean>
-</beans>
-```
-</div>
-</details>
-
-<br>
-
-void를 반환하면 loginSuccess.jsp를 자동으로 렌더링함 -> 원래 String 반환으로 직접 jsp 이름을 반환 했었음. (위에서 정리했었긴 함!)
-
-```java
-@RequestMapping(value="/loginSuccess.do", method=RequestMethod.GET)
-public void loginSuccess() {
-}
-```
-
-@ModelAttribute 좀 더 심화  
-(위에서 정리했었긴 함!)
-
-- 안써야 할 때?
-
-  - ```java
-    @RequestMapping(value = "/updateEmployee.do", method = RequestMethod.GET)
-    public String defaultUpdateEmployee(@RequestParam("employeeid") String employeeid, ModelMap model) {
-        model.addAttribute("employee", getEmployeeInfo(employeeid));
-        return "modifyemployee";
-    }
-    
-    //@ModelAttribute("employee") //-> 이거 안써야 잘 동작.
-    //String employeeid를 스프링이 찾지 못해 에러가 뜬다. 업데이트 URL은 ...?id 로 주겠지만 다른 URL은 아니잖아.
-    //그니까 에러 뜸. 안쓰는게 맞음. 어차피 defaultUpdateEmployee 에서만 필요한거라 "공통으로 쓸 이유도 없음". String id 못 찾는것도 여전히 문제고.
-    public Employee getEmployeeInfo(String employeeid) {
-        return employeeService.getEmployeeInfoById(employeeid);
-    }
-    ```
-
-- 원래는 이렇게 써야지
-
-  - ```java
-    //deptInfoOneDepthCategory 객체를 JS에서 바로 사용하기 위해.
-    @ModelAttribute("deptInfoOneDepthCategory")
-    private Map<String, String> referenceDataOneDepthDept() {
-        return departmentService.getDepartmentIdNameList("1");
-    }
-    
-    //employee 추가하는 form 화면이라면 이걸 사용해줘야 null pointer 에러 방지.
-    //물론, form 화면 매핑하는 GET컨트롤러에서 직접 model.addAttribute("employee", new Emplyee()) 해도 됨.
-    //더 쉬운건 @ModelAttribute("employee") Employee employee 이렇게 인자로 넣으면 model.addAttribute를 자동으로 해준다는거~!
-    @ModelAttribute("employee")
-    public Employee defaultEmployee() {
-        return new Employee();
-    }
-    ```
-
-**(학습?) Pagination Tag**
-
-[이거봐-공문](https://www.egovframe.go.kr/wiki/doku.php?id=egovframework%3Arte%3Aptl%3Aview%3Apaginationtag) 로 페이징 페이지 만드는것 좀 따로 정리. 커스텀 당연히 가능. 이거보고 커스텀 해야할듯ㅇㅇ.
-
-**(학습?) 여러가지 Exception**
-
-- **XML 설정 + AOP**: 예외가 발생하면 지정된 **JSP 뷰**로 매핑되어 예외 메시지를 출력
-
-- **REST API 예외 처리**: 예외가 발생하면 **JSON** 형태의 응답을 반환
-  
-  - 이전에 이미 Boot로 하는거 정리했다. (부트의 타임리프는 뷰로 /error 하위 자동 페이지 반환 기억)
-  
-- **전체적인 흐름 정리: 서비스계층, 컨트롤러 계층 나눠서 보기**
-
-- | 단계 | 위치                                                | 처리 방식                                           | 설명 및 역할                                                 |
-  | ---- | --------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------ |
-  | ①    | Service Layer (`EgovAbstractServiceImpl`)           | `processException()` 호출하여 EgovBizException 발생 | 중요한 비즈니스 로직 오류 시 메시지를 다국어로 처리하여 명확히 사용자에게 전달 |
-  | ②    | Service Layer (`EgovAbstractServiceImpl`)           | `leaveaTrace()` 호출하여 로그만 남김 (예외 미발생)  | 심각하지 않은 상황에서 로그만 남기고 정상 흐름 유지          |
-  | ③    | Controller Layer (`SimpleMappingExceptionResolver`) | 서비스에서 던진 Exception을 JSP 뷰로 매핑           | Exception 종류에 따라 적절한 에러 페이지로 안내              |
-
-  - **EgovAbstractServiceImpl** 를 보면 EgovBizException 발생 메소드(**processException**) 와 Exception 발생없이 후처리로직 메소드(**leaveaTrace**)를 제공한다.
-    - processException는 어떤 예외든 EgovBizException로 예외처리 하게끔!
-    - leaveaTrace는 내부적으로 TraceHandlerService로 로그처리 하는데 TraceHandlerService는 로그를 넘어서 별도의 모니터링 연동 등 다양한 확장성을 제공
-
-  - **의문점: 왜 processException, leaveaTrace를 사용하지?**
-    - try-catch로 간단히 logger쓰고 넘어가면 leaveaTrace를 사용할 필요 없을텐데...  
-      try-catch에서 throw로 EgovBizException 직접 발생시켜도 될텐데...
-    - **다국어 지원 메시지, 확장성, 표준화 로직** 때문에 사용!
-
-
-**(학습?) 여러가지 Validator**
-
-| 프레임워크                        | 특징                        | 사용 방법                                                    |
-| --------------------------------- | --------------------------- | ------------------------------------------------------------ |
-| **Valang**                        | XML 기반 유효성 검사        | XML 파일에서 규칙 정의                                       |
-| **Jakarta Commons Validator**     | 템플릿 기반 유효성 검사     | validator-rules.xml 파일 사용 (Spring Module에서 Jakatra Commons도 제공 중) |
-| **Spring (Java Bean Validation)** | 어노테이션 기반 유효성 검사 | @Valid, @Validated 어노테이션 사용                           |
-
-- Jakarta Commons: eGovframe학습할 때 계속 이것만 사용하더라.
-
-  - **적용법:**
-
-    1. 제공된 **validator-rules.xml** 사용 및 기본제공 룰 말고 **커스텀 룰 추가**하는법: [공문](https://www.egovframe.go.kr/wiki/doku.php?id=egovframework:rte:ptl:validation:add_rules_in_commons_validator)
-
-    1. **validation.xml, validator.jsp, URL매핑** : 공통 규칙 정의 (서버+클라이언트)
-
-       validation.xml로 공통 규칙 정의
-
-       validator.jsp로 \<validator:javascript> 수행 시 자동으로 검증 JS코드 생성하게 선언
-
-       URL 매핑은 "컨트롤러"로 하던지 context-servlet.xml에서 \<mvc:view-controller> 등록하던지!
-
-    2. **JSP validator 태그** : 클라이언트 측 JavaScript 코드 자동 생성 및 적용
-
-       ```jsp
-       <script type="text/javascript" src="<c:url value="/validator.do"/>"></script>
-       <validator:javascript formName="employee"/>
-       <!-- 위 코드 수행시 자동으로 검증하는 JS코드를 생성해 줌. -->  
-       <!-- validateEmployee(this.form) 이런식으로 생성된 JS코드를 사용한 후(검증후) 버튼 submit 할 것 -->
-       ```
-
-    3. **Spring MVC Controller** : 서버 측에서 동일한 validation.xml 기반으로 다시 한번 검증 수행  
-       -> beanValidator + bindingResult 활용
-
-       스프링모듈의 DefaultBeanValidator빈을 사용해서 @Validated 처럼 검증할 수 있다.(@Validated는 스프링프레임워크의 LocalValidatorFactoryBean 빈이였음)   
-       스프링모듈에서는 Jakarta Commons 와 연동할 수 있게 지원해 준다.  
-       따라서 DefaultBeanValidator 를 직접 사용하자!   
-       **=> @Validated 는 beanValidator.validate() 를 자동 수행해 bindingResult에 결과를 담았었는데, Jakarta Commons에선 이걸 수동으로 직접 해야함!**
-       
-    4. JSP에 BindingResult결과도 보여주고싶다면 Bean Validation이나 Jakarta Commons나 똑같이 Model에 담아서 보여줌.  
-       타임리프의 th:error와 유사하게 JSP도 form:errors로 가능 (th:error로 자동으로 bindingresult확인하여 @NotNull("이미지가 없습니다") 이런 메시지 출력, 물론 message.properties와 연동도 되고)
-
-- **Spring 어노테이션 기반: 이건 우리가 하던 그거**임 ㅇㅇ. 이미 옛날에 정리해둠.
-
-<br>
-
-<br>
-
 ## 참고 지식
 
 **여러가지**
@@ -10726,7 +9036,7 @@ public void loginSuccess() {
     </div>
   * **따라서 Redirect 할때는 RedirectAttributes.addAttribute() 추천, html 반환(렌더링) 할때는 Model.addAttribute() 추천**
     * `redirectAttributes.addAttribute` 는 파라미터로 전송되므로 **@RequestParam(defaultValue = "")** 등으로 간편히 사용가능!!
-    * 참고: `redirectAttributes.addFlashAttribute` 의 경우 불가능!! 파라미터 전송이 아니고 딱 한번 세션에 저장해서 전달하는 방식이라서!! 아마 @ModelAttribute로 받아질걸??
+    * 참고: `redirectAttributes.addFlashAttribute` 의 경우 불가능!! 파라미터 전송이 아니고 딱 한번 세션에 저장해서 전달하는 방식이라서!! 파라미터에 담아서 전송 후 바로 제거한다고도 하더라
 </div>
 </details>
 
@@ -10745,7 +9055,6 @@ public void loginSuccess() {
 </div>
 </details>
 
-
 <br>
 
 **Content-Type 헤더 기반 Media Type 과 Accept 헤더 기반 Media Type**
@@ -10754,6 +9063,8 @@ public void loginSuccess() {
 * **요청때나 응답할때나 body를 사용할때는 필수로 존재 및 서로 맞게 요청해야 함**
 
 <br>
+
+> 참고: GET은 쿼리파라미터(url) 방식, POST는 body에 데이터 방식, from 데이터는 name,value 방식으로써 데이터 바인딩하기 수월
 
 **API URI 설계에는 "리소스"가 중요하다. "행위"는 메서드(get, post 등)로 구분하자.**  
 **단, 실무에서는 행위(동사)를 URI에 작성해야 할 때도 좀 있는데 이를 "컨트롤 URI"라 부른다.**
