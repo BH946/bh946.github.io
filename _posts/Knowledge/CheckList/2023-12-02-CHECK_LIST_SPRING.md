@@ -2636,6 +2636,7 @@ public void initCacheMembers() {
 </div>
 </details>
 
+
 <details><summary><b>타임리프 + 스프링 통합 문법</b></summary>
 <div markdown="1">
 * **th:object, th:field, *{itemName} 활용**
@@ -3607,47 +3608,45 @@ public class MessageTest {
 ```
 </div>
 </details>
-
 <details><summary><b>국제화 예시 - Java Config로</b></summary>
-    <div markdown="1"><br>
-        ```java
-        @Configuration
-        public class WebConfig implements WebMvcConfigurer {
-        @Override
-        public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(localeChangeInterceptor()); //국제화 인터셉터 등록
-        }
-        //국제화 빈 -> 파라미터 lang 가져오는 용도
-        @Bean
-        public LocaleChangeInterceptor localeChangeInterceptor() {
-        LocaleChangeInterceptor interceptor = new LocaleChangeInterceptor();
-        interceptor.setParamName("lang");
-        return interceptor;
-        }
-        //국제화 빈 -> 세션사용 및 Locale 자동 생성 용도
-        @Bean
-        public LocaleResolver localeResolver() {
-        SessionLocaleResolver resolver = new SessionLocaleResolver();
-        resolver.setDefaultLocale(Locale.KOREA); // 또는 원하는 기본 로케일
-        return resolver;
-        }
-        //메시지소스 빈 -> 국제화 빈과 항상 세트로 사용하자.
-        //yml에서 이미 등록했으니 생략해도 될걸?
-        @Bean
-        public MessageSource messageSource() {
-        ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
-        messageSource.setBasenames(
+<div markdown="1"><br>
+```java
+@Configuration
+public class WebConfig implements WebMvcConfigurer {
+@Override
+public void addInterceptors(InterceptorRegistry registry) {
+    registry.addInterceptor(localeChangeInterceptor()); //국제화 인터셉터 등록
+}
+//국제화 빈 -> 파라미터 lang 가져오는 용도
+@Bean
+public LocaleChangeInterceptor localeChangeInterceptor() {
+    LocaleChangeInterceptor interceptor = new LocaleChangeInterceptor();
+    interceptor.setParamName("lang");
+    return interceptor;
+}
+//국제화 빈 -> 세션사용 및 Locale 자동 생성 용도
+@Bean
+public LocaleResolver localeResolver() {
+    SessionLocaleResolver resolver = new SessionLocaleResolver();
+    resolver.setDefaultLocale(Locale.KOREA); // 또는 원하는 기본 로케일
+    return resolver;
+}
+//메시지소스 빈 -> 국제화 빈과 항상 세트로 사용하자.
+//yml에서 이미 등록했으니 생략해도 될걸?
+@Bean
+public MessageSource messageSource() {
+    ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+    messageSource.setBasenames(
         "message.message-common", 
         "org.egovframe.rte.fdl.idgnr.messages.idgnr",
         "org.egovframe.rte.fdl.property.messages.properties"
-        );
-        messageSource.setCacheSeconds(60);
-        messageSource.setDefaultEncoding("UTF-8");
-        return messageSource;
-        }   
-        }
-        ```
-    </div>
+    );
+    messageSource.setCacheSeconds(60);
+    messageSource.setDefaultEncoding("UTF-8");
+    return messageSource;
+}   
+```
+</div>
 </details>
 
 <br><br>
