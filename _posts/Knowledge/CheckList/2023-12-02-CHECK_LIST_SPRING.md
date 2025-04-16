@@ -4024,7 +4024,7 @@ public class TimeTraceAop {
     - **기존** : `@SessionAttribute(name = "loginMember", required = false) Member loginMember`
 
     - **적용** : `@Login Member loginMember`
-- “**Interceptor **” 는 “필터” 보다 더 많이 호출 (**컨트롤러 도달 전과 후에 공통 수행**)
+- “**Interceptor**” 는 “필터” 보다 더 많이 호출 (**컨트롤러 도달 전과 후에 공통 수행**)
   - “로그인 인증” 을 예시로 구현 가능
     - `preHandle` 에 “세션정보(쿠키)” 인증을 시도 및 실패시 다시 “로그인 창” 으로 이동
       - 이를 다양한 **URL 패턴으로 적용 가능** -> 적용URL, 미적용URL 구분도 간편
@@ -4960,61 +4960,62 @@ public interface ItemService {
 반환타입 void일 때: 자동으로 뷰리졸버는 요청URL과 동일한 뷰를 탐색해서 반환! (직접 String반환 안해도!)
 
 **특히, JSP는 타임리프꺼 복붙하여 문법 JSP로 바꾸는게 전부.**  
-예로: fragment -> jsp:include, th:src -> c:url, th:text -> spring:message, text -> c:out, th:each -> c:forEach,  th:if -> c:if, th:error -> form:error 등 코드는 아래 참고
 
-<details><summary><b>타임리프 -> JSP 예시: img, message, fragment, text, forEach, if, error</b></summary>
-<div markdown="1"><br>
-```jsp
-<!-- img 예시 -->
-<img class="img-fluid" src="<c:url value='/images/gallery/6-2.svg'/>"
-     style="width: 100%;"/>
-<!-- message 예시 -->
-<span class="px-3" style="font-size: 2vw; font-weight: 700; color: white; white-space: nowrap;">
-    <spring:message code="page.gallery" text="전시실" />
-</span>
-<!-- fragment 예시 (param 도 가능) -->
-<jsp:include page="fragments/header.jsp"/>
-<jsp:include page="fragments/head.jsp">
-    <jsp:param value="갤러리" name="title" />
-</jsp:include>
-<!-- text 예시 (c:out, fmt: 등 다양함) -->
-<span class="nav-item-inner">B1 ~ B<fmt:formatNumber value="${paginationInfo.getTotalRecordCount() / paginationInfo.getRecordCountPerPage()}" pattern="#" />F
-</span>
-<span style="font-weight: 500; color: white; font-size: 1.4vw;">B
-    <c:out value='${paginationInfo.getCurrentPageNo()}'/>F
-</span>
-<!-- text 번외: fmt는 Date만 지원, LocalDate는?? -->
-<%@ page import="java.time.format.DateTimeFormatter" %>
-${itemResDto.date1.format(DateTimeFormatter.ofPattern('yy.MM.dd.HH:mm'))}
-<!-- forEach 예시 (반복문) -->
-<c:forEach items="${itemsResDto}" var="itemResDto" varStatus="status">
-    ...
-</c:forEach>
-<!-- if 예시 Java or JSP-->
-<%
-if (item != null && item.getImgSrc() != null) {
-%>
-    <img src="<%= item.getImgSrc() %>" alt="이미지">
-<%
-}
-%>
-<c:if test="${item != null && item.imgSrc != null}">
-    <img src="${item.imgSrc}" alt="이미지">
-</c:if>
-<!-- error 예시: th:error처럼 form:error로 표현 가능 -->
-<!-- th:error, form:error 둘다 bindingResult의 검증결과를 활용하여 메시지 출력 -->
-<!-- 자세한건 뒤에 검증 파트를 보는걸 추천 --> 
-<!-- 아래 코드는 "직접 bindingResult 다루는 예시" -->
-컨트롤러에서 bindingResult를 model에 담아서 반환했다 가정:
-<div class="field-error">
-    <c:if test="${not empty bindingResult.fieldErrors}">
-        비밀번호 오류
-        <%-- 비밀번호 오류: <c:out value="${bindingResult.fieldErrors['password']}" /> --%>
-    </c:if>
-</div>
-```
-</div>
-</details>
+- 예로: fragment -> jsp:include, th:src -> c:url, th:text -> spring:message, text -> c:out, th:each -> c:forEach,  th:if -> c:if, th:error -> form:error 등 코드는 아래 참고
+
+- <details><summary><b>타임리프 -> JSP 예시: img, message, fragment, text, forEach, if, error</b></summary>
+  <div markdown="1"><br>
+  ```jsp
+  <!-- img 예시 -->
+  <img class="img-fluid" src="<c:url value='/images/gallery/6-2.svg'/>"
+       style="width: 100%;"/>
+  <!-- message 예시 -->
+  <span class="px-3" style="font-size: 2vw; font-weight: 700; color: white; white-space: nowrap;">
+      <spring:message code="page.gallery" text="전시실" />
+  </span>
+  <!-- fragment 예시 (param 도 가능) -->
+  <jsp:include page="fragments/header.jsp"/>
+  <jsp:include page="fragments/head.jsp">
+      <jsp:param value="갤러리" name="title" />
+  </jsp:include>
+  <!-- text 예시 (c:out, fmt: 등 다양함) -->
+  <span class="nav-item-inner">B1 ~ B<fmt:formatNumber value="${paginationInfo.getTotalRecordCount() / paginationInfo.getRecordCountPerPage()}" pattern="#" />F
+  </span>
+  <span style="font-weight: 500; color: white; font-size: 1.4vw;">B
+      <c:out value='${paginationInfo.getCurrentPageNo()}'/>F
+  </span>
+  <!-- text 번외: fmt는 Date만 지원, LocalDate는?? -->
+  <%@ page import="java.time.format.DateTimeFormatter" %>
+  ${itemResDto.date1.format(DateTimeFormatter.ofPattern('yy.MM.dd.HH:mm'))}
+  <!-- forEach 예시 (반복문) -->
+  <c:forEach items="${itemsResDto}" var="itemResDto" varStatus="status">
+      ...
+  </c:forEach>
+  <!-- if 예시 Java or JSP-->
+  <%
+  if (item != null && item.getImgSrc() != null) {
+  %>
+      <img src="<%= item.getImgSrc() %>" alt="이미지">
+  <%
+  }
+  %>
+  <c:if test="${item != null && item.imgSrc != null}">
+      <img src="${item.imgSrc}" alt="이미지">
+  </c:if>
+  <!-- error 예시: th:error처럼 form:error로 표현 가능 -->
+  <!-- th:error, form:error 둘다 bindingResult의 검증결과를 활용하여 메시지 출력 -->
+  <!-- 자세한건 뒤에 검증 파트를 보는걸 추천 --> 
+  <!-- 아래 코드는 "직접 bindingResult 다루는 예시" -->
+  컨트롤러에서 bindingResult를 model에 담아서 반환했다 가정:
+  <div class="field-error">
+      <c:if test="${not empty bindingResult.fieldErrors}">
+          비밀번호 오류
+          <%-- 비밀번호 오류: <c:out value="${bindingResult.fieldErrors['password']}" /> --%>
+      </c:if>
+  </div>
+  ```
+  </div>
+  </details>
 
 "게시물 페이징, 자동완성(검색)"에 AJAX를 적용했다! (SPA 방식. BGM 사용중이면 끊길 걱정도 없어짐)  
 => 아래 eGov 방식의 "검색(동적쿼리)+페이징, 자동완성(검색)" 파트 참고
@@ -5241,11 +5242,11 @@ if (item != null && item.getImgSrc() != null) {
 
    - <details><summary><b>페이징 쿼리 계산 원리와 자동완성(검색) 원리</b></summary>
      <div markdown="1"><br>
-     - 페이징 쿼리 계산 원리: `LIMIT #{recordCountPerPage} OFFSET #{firstIndex}`  
+     - 페이징 쿼리 계산 원리: `LIMIT #{recordCountPerPage} OFFSET #{firstIndex}`<br>
        (참고: jpa의 jpql은 페이징의 limit쿼리 사용불가하고 제공되는 메소드를 사용)
        - pageUnit값이 recordCountPerPage가 된다.
-       - (pageIndex-1)\*recordCountPerPage 수식이 firstIndex(**페이지 출력 시작** 게시물 위치)가 된다.   
-         (pageIndex)\*recordCountPerPage 수식이 lastIndex(**페이지 출력 마지막** 게시물 위치)가 된다.  
+       - `(pageIndex-1)*recordCountPerPage` 수식이 firstIndex(**페이지 출력 시작** 게시물 위치)가 된다.   
+       - `(pageIndex)*recordCountPerPage` 수식이 lastIndex(**페이지 출력 마지막** 게시물 위치)가 된다.  
          - pageUnit=5, pageIndex=2 라면 시작 게시물 위치는 (2-1)\*5=5이고 마지막은 2\*5=10이다.
      - 자동완성(검색) 원리: SampleDefaultVO의 searchCondition, searchKeyword를 활용!
        - searchCondition는 어떤 카테고리로 검색할지 담당하고,
@@ -5278,52 +5279,50 @@ if (item != null && item.getImgSrc() != null) {
           ```
           </div>
           </details>
-
-
-      - 페이징은 PaginationInfo(페이징 데이터)와 ItemDefault(=1번에서 만든 SampleDefaultVO) 필요
-
-
-      - 서비스 메소드 findAllWithPage, findTotalCount 를 사용해 각각 model, paginationInfo에 담음
-    
-        - <details><summary><b>페이징 컨트롤러 예시 코드</b></summary>
-          <div markdown="1"><br>
-          ```java
-          @GetMapping()
-          public String search(@ModelAttribute Item item, Model model) throws Exception {
-          	return this.gallery(item, model); //HTTP말고 그냥 메소드 호출한거.(포워드,리다이렉트 아님)
-          }
-          @PostMapping() // ...?pageIndex=1 이런식으로 페이지 파라미터 넘어 올거임(pageIndex란 Item이 상속받고 있는 DefaultItem의 필드)
-          public String gallery(@ModelAttribute Item item, Model model) throws Exception {
-          	// item.setPageUnit(myDataSource.getPageUnit());
-          	// item.setPageSize(myDataSource.getPageSize());
-          	item.setPageUnit(10);
-          	item.setPageSize(10);
-          //
-          	// pagination setting
-          	PaginationInfo paginationInfo = new PaginationInfo();
-          	paginationInfo.setCurrentPageNo(item.getPageIndex());
-          	paginationInfo.setRecordCountPerPage(item.getPageUnit());
-          	paginationInfo.setPageSize(item.getPageSize());
-          //
-          	item.setFirstIndex(paginationInfo.getFirstRecordIndex());
-          	item.setLastIndex(paginationInfo.getLastRecordIndex());
-          	item.setRecordCountPerPage(paginationInfo.getRecordCountPerPage());
-          //
-          	// List
-              List<Item> items = itemService.findAllWithPage(item);
-              List<ItemResDto> itemsResDto = items.stream().map(o -> new ItemResDto(o)).collect(Collectors.toList());
-              int totCnt = itemService.findTotalCount(item);
-          //
-              model.addAttribute("itemsResDto", itemsResDto);
-              paginationInfo.setTotalRecordCount(totCnt);
-              // Pagination
-              model.addAttribute("paginationInfo", paginationInfo);
-              log.info("cnt: {}, resultList: {}", totCnt, items);
-              return "jsp/gallery";
-          }
-          ```
-          </div>
-          </details>
+   
+   - 페이징은 PaginationInfo(페이징 데이터)와 ItemDefault(=1번에서 만든 SampleDefaultVO) 필요
+   
+   - 서비스 메소드 findAllWithPage, findTotalCount 를 사용해 각각 model, paginationInfo에 담음
+   
+     - <details><summary><b>페이징 컨트롤러 예시 코드</b></summary>
+       <div markdown="1"><br>
+       ```java
+       @GetMapping()
+       public String search(@ModelAttribute Item item, Model model) throws Exception {
+       	return this.gallery(item, model); //HTTP말고 그냥 메소드 호출한거.(포워드,리다이렉트 아님)
+       }
+       @PostMapping() // ...?pageIndex=1 이런식으로 페이지 파라미터 넘어 올거임(pageIndex란 Item이 상속받고 있는 DefaultItem의 필드)
+       public String gallery(@ModelAttribute Item item, Model model) throws Exception {
+       	// item.setPageUnit(myDataSource.getPageUnit());
+       	// item.setPageSize(myDataSource.getPageSize());
+       	item.setPageUnit(10);
+       	item.setPageSize(10);
+       //
+       	// pagination setting
+       	PaginationInfo paginationInfo = new PaginationInfo();
+       	paginationInfo.setCurrentPageNo(item.getPageIndex());
+       	paginationInfo.setRecordCountPerPage(item.getPageUnit());
+       	paginationInfo.setPageSize(item.getPageSize());
+       //
+       	item.setFirstIndex(paginationInfo.getFirstRecordIndex());
+       	item.setLastIndex(paginationInfo.getLastRecordIndex());
+       	item.setRecordCountPerPage(paginationInfo.getRecordCountPerPage());
+       //
+       	// List
+           List<Item> items = itemService.findAllWithPage(item);
+           List<ItemResDto> itemsResDto = items.stream().map(o -> new ItemResDto(o)).collect(Collectors.toList());
+           int totCnt = itemService.findTotalCount(item);
+       //
+           model.addAttribute("itemsResDto", itemsResDto);
+           paginationInfo.setTotalRecordCount(totCnt);
+           // Pagination
+           model.addAttribute("paginationInfo", paginationInfo);
+           log.info("cnt: {}, resultList: {}", totCnt, items);
+           return "jsp/gallery";
+       }
+       ```
+       </div>
+       </details>
 
 3. **페이징과 검색란 JSP**
 
@@ -5414,30 +5413,29 @@ if (item != null && item.getImgSrc() != null) {
    $(function() {
    	// jquery autocomplete 코드를 생성한다.
    	$("#searchKeyword")
-   			.autocomplete(
-   					{
-   						source : function(request, response) {
-   							$
-   									.ajax({
-   										url : '/suggestKeyword',
-   										type : 'post',
-   										contentType : "application/x-www-form-urlencoded; charset=UTF-8",
-   										data : {
-   											searchKeyword : request.term
-   										},
-   										dataType : 'json',
-   										success : function(returnData) {
-   											// @ResponseBody 사용 시: response(returnData);
-   											// ModelAndView 사용 시: response(returnData.nameList);
-   											response(returnData);
-   										}
-   									});
-   						},
-   						minLength : 1,
-   						select : function(event, ui) {
-   							$("#searchKeyword").val(this.value);
-   						}
-   					});
+   		.autocomplete(
+   			{
+   				source : function(request, response) {
+   					$.ajax({
+   							url : '/suggestKeyword',
+   							type : 'post',
+   							contentType : "application/x-www-form-urlencoded; charset=UTF-8",
+   							data : {
+   									searchKeyword : request.term
+   							},
+   							dataType : 'json',
+   							success : function(returnData) {
+   							// @ResponseBody 사용 시: response(returnData);
+   							// ModelAndView 사용 시: response(returnData.nameList);
+   								response(returnData);
+   							}
+   						});
+   					},
+   				minLength : 1,
+   				select : function(event, ui) {
+   					$("#searchKeyword").val(this.value);
+   				}
+   		});
    });
    function notNullCheck(value) {
    	return !(value === '' || value == null || (typeof value == 'object' && !Object
@@ -5471,6 +5469,7 @@ if (item != null && item.getImgSrc() != null) {
    - select: 자동 완성 목록에서 항목을 선택할 때 호출 -> searchName 필드로 선택 값(this.value) 저장
    </div>
    </details>
+
 
 4. **하단 네비게이션바 커스텀은? -> [공식문서](https://www.egovframe.go.kr/wiki/doku.php?id=egovframework%3Arte%3Aptl%3Aview%3Apaginationtag) 잘 정리되어 있음**
 
