@@ -820,6 +820,7 @@ private Profile profile;
       - 그럼, 엔티티 메모리 상에선 Lists의 tasks의 요소는 어떡하냐고?
         - Lists 새로 조회하면 DB와 동기화 하니까 상관 없어. 
         - 만약 필요하다면 직접 영속성 컨텍스트 초기화 하거나, 연관관계 편의메서드로 tasks요소 삭제를 해도 좋고.
+      <div markdown="1">
       ```java
       //Task.java
       @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL) // 1:1관계며 같이 존재함. (생명주기 같아야함)
@@ -837,6 +838,7 @@ private Profile profile;
       @JoinColumn(name = "lists_id")
       private Lists lists;
       ```
+      </div>
       </div>
       </details>
 
@@ -1051,9 +1053,11 @@ JPA는 즉시 or 지연 로딩 중에서 무조건 **"지연 로딩"** 으로 �
 - **컬렉션(List같은)은 필드**에서 초기화 하자
   - 코드간결, **null 문제에서 안전**
   - ex: `private List<Task> tasks = new ArrayList<>();`
-- 의존성 주입(DI)은 필드 주입이나 setter 주입 대신에 **생성자 주입을 사용**하자. 
-  - 즉, DI 중 @Resource, @Autowired를 이용한 Field Injection보다는  
+- 의존성 주입(DI)은 Field 주입이나 setter 주입 대신에 **생성자 주입을 사용**하자. 
+  - 즉, DI 중 @Resource(이름기반), @Autowired(타입기반)를 이용한 Field Injection보다는  
     **@RequiredArgsConstructor와 final**을 이용한 **Constructor Injection**을 사용하자
+    - setter 주입 예시: XML빈에 property사용시 자동setter주입 or java에서 setter 사용
+    - **헷갈리는 Autowired, Qualifier, Resource**: **@Autowired**와 함께 @Qualifier를 사용하고, **@Resource는** @Autowired와 @Qualifier를 한번에 대체
   - **@RequiredArgsConstructor는 “final 붙은 필드를 인자로 받는 생성자"를 자동 생성**
     - ex: `private final ExpService expService` 선언만 해도 바로 사용 가능!
   - **주의**: 객체에 관한 생성자가 1개일때 Spring 4.3이후부턴 자동으로 @Autowired 가 붙어서 위 final 방식을 사용한거지만<br>여러 생성자를 사용할 경우는 무슨 생성자에 생성자 주입을 사용할지 선택해서 @Autowired를 꼭 붙여줘야 함.
@@ -1350,7 +1354,6 @@ JPA는 즉시 or 지연 로딩 중에서 무조건 **"지연 로딩"** 으로 �
         - **ConversionService**는 주로 **폼 데이터**(예: 템플릿 렌더링)에서 쓰이고, **`HttpMessageConverter`는 JSON 변환**처럼 **HTTP 메시지 본문을 처리**할 때 사용됩니다.
     </div>
     </details>
-
 
 <br><br>
 
@@ -2145,18 +2148,16 @@ public void initCacheMembers() {
 
 <details><summary><b>HTML 태그 위치별 사용 구조</b></summary>
 <div markdown="1"><br>
-- - **\<html>** → thymeleaf 선언
-    - **\<head>**
-      - **\<meta>** → utf-8(문자인코딩), viewport(모바일 뷰크기 설정) : 이 2개는 필수 사용
-      - **\<link>** → 주로 bootstrap(css), 커스텀css(ex:/basic.css) 선언
-        - bootstrap(js)의 경우 \<script>에서!!!!
-        - **css코드 예시?! basic.css, custom.css**<br>basic은 전역(기본) css, custom은 basic말고 적용하려고 추가로 만든 css
-          <details><summary><b>basic.css → 글꼴, 색상, 스타일 전역변수 정의도 함!</b></summary>
+- **\<html>** → thymeleaf 선언
+  - **\<head>**
+    - **\<meta>** → utf-8(문자인코딩), viewport(모바일 뷰크기 설정) : 이 2개는 필수 사용
+    - **\<link>** → 주로 bootstrap(css), 커스텀css(ex:/basic.css) 선언
+      - bootstrap(js)의 경우 \<script>에서!!!!
+      - **css코드 예시?! basic.css, custom.css**<br>basic은 전역(기본) css, custom은 basic말고 적용하려고 추가로 만든 css
+        <details><summary><b>basic.css → 글꼴, 색상, 스타일 전역변수 정의도 함!</b></summary>
           <div markdown="1">
           ```css
-          /*
-           * 글꼴, 색상, 스타일 전역변수 정의
-           */
+          //글꼴, 색상, 스타일 전역변수 정의
           @font-face {
             font-family: 'SUITE-Regular';
             /* src: url('../static/SUITE-Regular.woff2') format('woff2'); */
@@ -2170,9 +2171,7 @@ public void initCacheMembers() {
             --main-2: #323338;
             --text-2: #8E8F9B;
           }
-          /*
-           * Base structure
-           */
+          //Base structure
            body {
               background-color: var(--main-1);
               /* SUITE 못 찾으면 sans-serif 사용 */
@@ -2182,9 +2181,7 @@ public void initCacheMembers() {
            .field-error {
               color: red; font-weight: 700; padding:10px;
            }
-          /*
-           * Header
-           */
+          //Header
             nav {
               border-left-width: 0px;
               border-right-width: 0px;
@@ -2228,9 +2225,7 @@ public void initCacheMembers() {
             color:white; font-weight: 400; letter-spacing: -0.14px; opacity: 0.6;
             padding: 16px;
           }
-          /*
-           * Main
-           */
+          //Main
               .custom-container-default {
               padding-top: 5vh;
               padding-bottom: 5vh;
@@ -2256,9 +2251,7 @@ public void initCacheMembers() {
             input[type="number"]::-webkit-outer-spin-button {
             -webkit-appearance: none;
             }
-            /*
-          * Footer
-          */
+            //Footer
           .custom-footer {
             color:var(--text-2);
             display: flex;
@@ -2274,9 +2267,9 @@ public void initCacheMembers() {
             margin-right: 15vw;
           }
           ```
-          </div>
-          </details>
-          <details><summary><b>custom.css(=gallery.css)</b></summary>
+        </div>
+        </details>
+        <details><summary><b>custom.css(=gallery.css)</b></summary>
           <div markdown="1">
           ```css
           .gallery-item-first{
@@ -2316,19 +2309,19 @@ public void initCacheMembers() {
           color:white;
           }
           ```
-          </div>
-          </details>
-      - **\<title>** → 브라우저의 URL링크 상단바에 실제 제목
-    - **\<body>** → 배경색, 커서 설정하기 좋지, 전체 폰트도~!
-      - **\<style>** → css처럼 스타일링. 위 \<link> 스타일 보다 더 높은레벨 (실제 \<div style=""> 처럼 태그안에 스타일은 최상위레벨)
-      - **\<nav>** → header 부분으로 시작~!
-      - **\<div class="container">** 처럼 이제 쭉 레이아웃 형성 + 실제 웹 화면 구성 ㄱㄱ
-      - **\<footer>** → 마지막은 footer로 마무리~!
-    - **\<script>** → javascript 관련 모든 것 (+jquery, bootstrap 설치도 포함)
+        </div>
+        </details>
+    - **\<title>** → 브라우저의 URL링크 상단바에 실제 제목
+  - **\<body>** → 배경색, 커서 설정하기 좋지, 전체 폰트도~!
+    - **\<style>** → css처럼 스타일링. 위 \<link> 스타일 보다 더 높은레벨 (실제 \<div style=""> 처럼 태그안에 스타일은 최상위레벨)
+    - **\<nav>** → header 부분으로 시작~!
+    - **\<div class="container">** 처럼 이제 쭉 레이아웃 형성 + 실제 웹 화면 구성 ㄱㄱ
+    - **\<footer>** → 마지막은 footer로 마무리~!
+  - **\<script>** → javascript 관련 모든 것 (+jquery, bootstrap 설치도 포함)
       bootstrap4까지는 jquery 사용 때문에 jquery먼저 설치코드 필요하지만, bootstrap5부터는 그런 의존성 없애서 꼭 상관없다~
       **물론, jquery 유용하니까 항상 설정하는것도 좋지.**
-    <details><summary><b>html 전체 코드</b></summary>
-    <div markdown="1">
+  <details><summary><b>html 전체 코드</b></summary>
+  <div markdown="1">
     ```html
     <!doctype html>
     <html xmlns:th="http://www.thymeleaf.org">
@@ -2408,8 +2401,8 @@ public void initCacheMembers() {
       </body>
     </html>
     ```
-    </div>
-    </details>
+  </div>
+  </details>
 </div>
 </details>
 
@@ -2457,8 +2450,8 @@ public void initCacheMembers() {
   - **modal은 공.문 참고!**
 * **데이터 표현** : `table, td, tr 등등` 또는 `div로 잘 구현`
   * `th:each` + `<th:block>` 도 적절히 함께 활용
-    <details><summary><b>참고 코드</b></summary>
-    <div markdown="1">
+  <details><summary><b>참고 코드</b></summary>
+  <div markdown="1"><br>
     ```html
     <!-- 렌더링시 제거 block -->
     <th:block th:each="item : ${items}" th:object="${item}">
@@ -2488,8 +2481,8 @@ public void initCacheMembers() {
       </div>
     </th:block>
     ```
-    </div>
-    </details>
+  </div>
+  </details>
 * **FORM 데이터** : `label, input, 체크박스 등등` 권장
   * `th:field`(name,id,value자동생성) 와 `*{...}` 랑 `th:object`(데이터 관리쉽게) 함께 사용 권장
   * `th:errors` 등등 도 함께 사용<br>-> ex: `<div class="field-error" th:errors="${item.imgSrc}">이미지 오류</div>`
@@ -2499,8 +2492,8 @@ public void initCacheMembers() {
   * \|\...\| : `<span th:text="|Welcome to our application, ${user.name}!|">`
   * @{} : 간편) -`th:href="@{|/basic/items/${item.id}|}"`
   * 등등 아래 문법 정리 참고...
-  </div>
-  </details>
+</div>
+</details>
 
 <br>
 
@@ -2697,7 +2690,6 @@ public void initCacheMembers() {
     ```
 </div>
 </details>
-
 <br><br>
 
 ### (Test) 테스트 코드 작성
@@ -5293,7 +5285,7 @@ if (item != null && item.getImgSrc() != null) {
 
 
       - 서비스 메소드 findAllWithPage, findTotalCount 를 사용해 각각 model, paginationInfo에 담음
-
+    
         - <details><summary><b>페이징 컨트롤러 예시 코드</b></summary>
           <div markdown="1"><br>
           ```java
@@ -5909,6 +5901,11 @@ propertiesService.getInt("pageUnit"); //10
 
 ### 검증(Validation-Jakarta Commons) - XML
 
+웹(JSP) 방식으로 주로 정리 -> API 방식은 "JPA + Boot 파트" 참고
+
+**Jakarta Commons Validation 방식을 설명한다.** (일반적인 스프링 제공 검증 방식이 아님)    
+⇒ JPA 플젝은 다른 방식 (Bean Validation)
+
 > **API의 경우 클라쪽 "검증"은 서버가 할 일이 아니다(JS는 프론트쪽 개발진이 해야지!)**  
 > **웹의 경우 클라와 서버쪽 둘 다 "검증"**해주는게 좋다.
 >
@@ -6267,6 +6264,8 @@ public class UpdateItemDto {
 
 ### 예외처리와 AOP - XML
 
+XML 방식으로 주로 정리 -> Java Config 방식은 "JPA + Boot 파트" 참고
+
 > **API의 경우 클라쪽 "검증"은 서버가 할 일이 아니다(JS는 프론트쪽 개발진이 해야지!)**  
 > **웹의 경우 클라와 서버쪽 둘 다 "검증"**해주는게 좋다.
 >
@@ -6560,6 +6559,72 @@ public class UpdateItemDto {
   ```
   </div>
   </details>
+
+<br><br>
+
+### "공통컴포넌트", "DBIO Editor", "운영환경", "배치"
+
+<details><summary><b>표준프레임워크는 "실행,개발,관리,운영" 4개의 환경과 "모바일, 공통컴포넌트"로 구성</b></summary>
+<div markdown="1"><br>
+<img src="https://github.com/user-attachments/assets/4ac6060d-de89-438b-9005-b55a31ff681a" alt="Image" style="zoom:80%;" /><br> **표준프레임워크 실행환경**<br>
+<img src="https://github.com/user-attachments/assets/18e66285-25bd-446a-b204-fb3ab69d4b45" alt="Image" style="zoom:80%;" /><br>
+**표준프레임워크 개발환경**<br>
+<img src="https://github.com/user-attachments/assets/da0e76ab-8bc2-4869-b5c6-db45164bac52" alt="Image" style="zoom:80%;" /><br>
+**표준프레임워크 관리환경**<br>
+<img src="https://github.com/user-attachments/assets/7e167e44-8cfa-42ab-af5c-8f4b92c70638" alt="Image" style="zoom:80%;" /><br>
+**표준프레임워크 운영환경**<br>
+<img src="https://github.com/user-attachments/assets/b9aca047-073b-40ae-91a4-eb990daa61fe" alt="Image" style="zoom:80%;" /><br>
+**공통컴포넌트**<br>
+<img src="https://github.com/user-attachments/assets/25aa899f-6100-48a7-a58f-3f154e0678ba" alt="Image" style="zoom:80%;" /><br>
+**모바일 표준프레임워크**<br>
+<img src="https://github.com/user-attachments/assets/9feaf183-2d6a-43bc-b4bc-023f851b0c6d" alt="Image" style="zoom:80%;" />
+</div>
+</details>
+
+<br>
+
+이클립스의 기능에 로그인쪽(게시판 등?) **"공통컴포넌트" 이용 + Spring Security(공통기능)**도 표준프레임워크로 [security](https://arckwon.tistory.com/entry/%EC%A0%84%EC%9E%90%EC%A0%95%EB%B6%80%ED%94%84%EB%A0%88%EC%9E%84%EC%9B%8C%ED%81%AC-%EC%8A%A4%ED%94%84%EB%A7%81%EC%8B%9C%ED%81%90%EB%A6%AC%ED%8B%B0-%EB%A1%9C%EA%B7%B8%EC%9D%B8-%EC%A0%81%EC%9A%A912), [암호화](https://arckwon.tistory.com/entry/%EC%A0%84%EC%9E%90%EC%A0%95%EB%B6%80%ED%94%84%EB%A0%88%EC%9E%84%EC%9B%8C%ED%81%AC-DB%EC%A0%91%EC%86%8D%EC%A0%95%EB%B3%B4-%EC%95%94%ED%98%B8%ED%99%94-crypto-%EC%84%9C%EB%B9%84%EC%8A%A4), [공문](https://www.egovframe.go.kr/wiki/doku.php?id=egovframework:rte4.0:fdl:server_security) 참고!  
+
+- 프로젝트 우클릭> New > eGovFrame Common Component > 에 위치
+- 자동 코드 예시를 제공
+
+<br>
+
+<details><summary><b>DBIO Editor 예시:</b></summary>
+<div markdown="1"><br>
+1. DB실행
+2. DBIO 실습(자세히는 PDF)
+   - Mapper Configuration 파일 생성(sample_config.xml): 프로젝트 우클릭 > New > mapperConfiguration
+   - Mapper 파일 생성(sample_map.xml):  Mapper Configuration Editor > New
+   - Mapper 파일 편집 -> mapper 에디터를 활용!<br>
+     **에디터로 간단히 설정하는데 "xml코드가 자동 생성되는 편리!!"**
+     1. Result Map 작성: Mapper Editor> ResultMap 우클릭> Add resultMap
+     2. Query 작성: Mapper Editor> Query 우클릭> Add Select Query
+   - 자동생성 코드 예시(sample_map.xml):
+     ```xml
+     <?xml version="1.0" encoding="UTF-8"?>
+     <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+     <mapper ><resultMap id="resultMap" type="java.lang.String"><result property="deptName" column="DEPT_NAME"/>
+     </resultMap>
+     <select id="selectDept" parameterType="java.lang.String" resultMap="resultMap">
+     SELECT DEPT_NAME
+       FROM PUBLIC.DEPT
+       WHERE DEPT_NO = #{deptNo}
+     </select>
+     </mapper>
+     ```
+3. Query  테스트
+   <img src="https://github.com/user-attachments/assets/66c16c69-5daa-4854-9fc4-4df12ad1254e" alt="Image" style="zoom:80%;" />
+</div>
+</details>
+
+<br>
+
+이클립스의 기능에 01.개발환경_교육교재.pdf에 **Jenkins(CI)** 이거 pdf 참고하기
+
+<br>
+
+**Spring Batch**는 "eGov 가이드 학습하기" 게시물이랑 "프로젝트 코드" 참고
 
 <br>
 
