@@ -5219,9 +5219,7 @@ public interface ItemService {
    - **동적쿼리(검색)+페이징을 합친이유**: 기본 게시물조회 자체가 검색 키워드 빈값("")과 동일하기 때문  
      따라서 전체 조회 쿼리에 "동적쿼리 where,if-searchKeyword" + "limit,offset"구조를 사용!  
      +) 페이징을 위해 전체 게시물 수 조회 쿼리도 필수!
-
    - **페이징에 필요한 것 2가지**: 변수3개(pageUnit, pageSize, pageIndex) + PaginationInfo클래스(egov)
-
      - **직접 설정**하는 변수: pageUnit, pageSize
        - 페이지당 뷰에 나타낼 게시물 수: pageUnit
        - 하단 네비게이션 바에 표시할 페이지 수: pageSize  
@@ -5239,25 +5237,22 @@ public interface ItemService {
          - lastPageNoOnPageList : 페이지 리스트의 마지막 페이지 번호
          - firstRecordIndex : 페이징 SQL의 조건절에 사용되는 시작 rownum. 
          - lastRecordIndex : 페이징 SQL의 조건절에 사용되는 마지막 rownum.
-
-   - <details><summary><b>페이징 쿼리 계산 원리와 자동완성(검색) 원리</b></summary>
-     <div markdown="1"><br>
+   - **페이징 쿼리 계산 원리와 자동완성(검색) 원리**
      - 페이징 쿼리 계산 원리: `LIMIT #{recordCountPerPage} OFFSET #{firstIndex}`<br>
        (참고: jpa의 jpql은 페이징의 limit쿼리 사용불가하고 제공되는 메소드를 사용)
        - pageUnit값이 recordCountPerPage가 된다.
-       - `(pageIndex-1)*recordCountPerPage` 수식이 firstIndex(**페이지 출력 시작** 게시물 위치)가 된다.   
-       - `(pageIndex)*recordCountPerPage` 수식이 lastIndex(**페이지 출력 마지막** 게시물 위치)가 된다.  
+       - `(pageIndex-1)*recordCountPerPage` 수식이 firstIndex(**페이지 출력 시작** 게시물 위치)가 된다.
+       - `(pageIndex)*recordCountPerPage` 수식이 lastIndex(**페이지 출력 마지막** 게시물 위치)가 된다.
          - pageUnit=5, pageIndex=2 라면 시작 게시물 위치는 (2-1)\*5=5이고 마지막은 2\*5=10이다.
      - 자동완성(검색) 원리: SampleDefaultVO의 searchCondition, searchKeyword를 활용!
        - searchCondition는 어떤 카테고리로 검색할지 담당하고,
        - searchKeyword는 검색 키워드를 담당한다.
-     </div>
-     </details>
-
+   
+   
    **컨트롤러에서 페이징과 자동완성 검색** 마무리 해보자.
-
+   
       - 자동완성은 검색 키워드로 매칭되는 데이터 찾아서 JSON으로 응답하면 됨
-
+   
         - <details><summary><b>자동완성 컨트롤러 예시 코드</b></summary>
           <div markdown="1"><br>
           ```java
@@ -6404,7 +6399,8 @@ XML 방식으로 주로 정리 -> Java Config 방식은 "JPA + Boot 파트" 참�
     </body>
     </html>
     ```
-    ```**genneralException.jsp**
+    **genneralException.jsp**
+    ```jsp
     <%@ page language="java" contentType="text/html; charset=UTF-8" %>
     <html>
     <head>
@@ -6860,7 +6856,7 @@ public HelloData requestBodyJsonV5(@RequestBody HelloData data) {
 
 ## 필독! JPQL(JPA-ORM) vs SQL(MyBatis-SQL Mapper)
 
-**MyBatis는 "스프링 DB 관련 추가 지식" -> "MyBatis" 파트를 보자  **
+**MyBatis는 "스프링 DB 관련 추가 지식" -> "MyBatis" 파트를 보자**
 => JPA와 MyBatis 개발은 확연히 다르단걸 인지하자. 그차이도 "MyBatis"파트를 보자
 
 > [JPA vs Mybatis 참고 문헌](https://www.elancer.co.kr/blog/detail/231?seq=231)
