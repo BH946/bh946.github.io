@@ -12,8 +12,6 @@ typora-root-url: ../../..
 
 
 
-# Intro
-
 **컴퓨터 그래픽스에 관련한 고급 알고리즘들을 알아보겠다.**
 
 **구현한 코드가 궁금하다면 [컴퓨터그래픽스 구현](https://bh946.github.io/algorithmtest/(%EA%B5%AC%ED%98%84)-%EC%BB%B4%ED%93%A8%ED%84%B0%EA%B7%B8%EB%9E%98%ED%94%BD%EC%8A%A4(%EA%B8%B0%ED%95%98%EC%97%B0%EC%82%B0,-%EB%8B%A4%EA%B0%81%ED%98%95-%EB%A9%B4%EC%A0%81%EA%B3%BC-%ED%8F%AC%ED%95%A8,-Convex-Hull,-Plane-Sweeping)/) 게시물을 참고!!**

@@ -13,8 +13,6 @@ typora-root-url: ../../..
 
 
 
-# Intro
-
 **`Wolfgang Ertel, "Introduction to Artificial Intelligence", Springer` 라는 책에 관한 내용들을 포스팅하려고 한다.**
 
 **해당 책은 https://www.academia.edu/ 에서  pdf 다운로드가 가능하다.**

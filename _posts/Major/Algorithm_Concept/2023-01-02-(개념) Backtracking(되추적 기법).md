@@ -12,7 +12,9 @@ typora-root-url: ../../..
 
 
 
-## Intro..
+**백트래킹(Backtracking)은 깊이우선검색(DFS)을 기반으로 하는 알고리즘 기법으로, 가능한 모든 경우를 탐색하되 유망하지 않은 경로는 즉시 포기하고 이전 단계로 돌아가는 방식입니다. 이 글에서는 백트래킹의 개념과 4-Queens Problem, Sum-of-Subsets Problem(부분합), Graph Coloring(그래프 색칠), Hamiltonian Circuits(해밀토니안 회로) 등 대표적인 응용 사례를 설명합니다.**
+
+<br>
 
 백트래킹과 분기한정법을 같이 알아두면 좋다.
 

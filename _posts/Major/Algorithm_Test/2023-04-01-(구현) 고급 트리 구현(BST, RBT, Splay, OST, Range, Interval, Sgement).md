@@ -12,8 +12,6 @@ typora-root-url: ../../..
 
 
 
-# Intro
-
 **앞서 정리한 고급 트리들을 구현해보겠다.  
 구현할 트리 : BST, RBT, Splay, OST, Range, Interval, Sgement**
 

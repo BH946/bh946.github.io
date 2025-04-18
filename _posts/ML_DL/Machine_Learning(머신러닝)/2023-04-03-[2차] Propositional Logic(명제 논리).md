@@ -13,6 +13,10 @@ typora-root-url: ../../..
 
 
 
+**인공지능 질의응답 시스템의 기반이 되는 명제 논리(Propositional Logic)의 개념, 문법(Syntax), 의미론(Semantics), 그리고 추론 시스템(Proof Systems)에 대해 설명합니다. 지식 베이스(KB)를 활용한 논리적 추론 방식, CNF와 Horn Clauses, 그리고 Resolution과 SLD Resolution 같은 추론 규칙을 포함하고 있습니다.**
+
+<br><br>
+
 # Question Answering System
 
 **Question Answering (QA) System : 질문자의 질문에 대해  
