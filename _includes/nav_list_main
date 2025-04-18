@@ -116,42 +116,6 @@
                   {% endif %}
               {% endfor %}
           </ul>
-        <span class="nav__sub-title">WEB&JAVASCRIPT</span>
-            <ul>
-                {% for category in site.categories %}
-                    {% if category[0] == "WebProgramming" %}
-                        <li><a href="/categories/webp" class="">웹 프로그래밍 ({{category[1].size}})</a></li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
-            <ul>
-                {% for category in site.categories %}
-                    {% if category[0] == "Modern_JavaScript_Deep_Dive" %}
-                        <li><a href="/categories/jsdd" class="">모던 자바스크립트 Deep Dive ({{category[1].size}})</a></li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
-            <ul>
-                {% for category in site.categories %}
-                    {% if category[0] == "React_JS" %}
-                        <li><a href="/categories/react_js" class="">React(리액트) ({{category[1].size}})</a></li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
-            <ul>
-              {% for category in site.categories %}
-                  {% if category[0] == "Node_JS" %}
-                      <li><a href="/categories/node_js" class="">NodeJS ({{category[1].size}})</a></li>
-                  {% endif %}
-              {% endfor %}
-            </ul>
-            <ul>
-              {% for category in site.categories %}
-                  {% if category[0] == "Css" %}
-                      <li><a href="/categories/css" class="">CSS ({{category[1].size}})</a></li>
-                  {% endif %}
-              {% endfor %}
-            </ul>
         <span class="nav__sub-title">ML&DL</span>
             <ul>
               {% for category in site.categories %}
@@ -249,7 +213,42 @@
                   {% endif %}
               {% endfor %}
           </ul>
-
+        <span class="nav__sub-title">WEB&JAVASCRIPT</span>
+          <ul>
+              {% for category in site.categories %}
+                  {% if category[0] == "WebProgramming" %}
+                      <li><a href="/categories/webp" class="">웹 프로그래밍 ({{category[1].size}})</a></li>
+                  {% endif %}
+              {% endfor %}
+          </ul>
+          <ul>
+              {% for category in site.categories %}
+                  {% if category[0] == "Modern_JavaScript_Deep_Dive" %}
+                      <li><a href="/categories/jsdd" class="">모던 자바스크립트 Deep Dive ({{category[1].size}})</a></li>
+                  {% endif %}
+              {% endfor %}
+          </ul>
+          <ul>
+              {% for category in site.categories %}
+                  {% if category[0] == "React_JS" %}
+                      <li><a href="/categories/react_js" class="">React(리액트) ({{category[1].size}})</a></li>
+                  {% endif %}
+              {% endfor %}
+          </ul>
+          <ul>
+            {% for category in site.categories %}
+                {% if category[0] == "Node_JS" %}
+                    <li><a href="/categories/node_js" class="">NodeJS ({{category[1].size}})</a></li>
+                {% endif %}
+            {% endfor %}
+          </ul>
+          <ul>
+            {% for category in site.categories %}
+                {% if category[0] == "Css" %}
+                    <li><a href="/categories/css" class="">CSS ({{category[1].size}})</a></li>
+                {% endif %}
+            {% endfor %}
+          </ul>
         <span class="nav__sub-title">ETC</span>
             <ul>
                 {% for category in site.categories %}
