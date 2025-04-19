@@ -96,6 +96,13 @@
                 {% endfor %}
             </ul>
             <ul>
+              {% for category in site.categories %}
+                  {% if category[0] == "Spring" %}
+                      <li><a href="/categories/spring" class="">Spring(스프링) ({{category[1].size}})</a></li>
+                  {% endif %}
+              {% endfor %}
+            </ul>
+            <ul>
                 {% for category in site.categories %}
                     {% if category[0] == "Kotlin" %}
                         <li><a href="/categories/kotlin" class="">Kotlin(코틀린) ({{category[1].size}})</a></li>
