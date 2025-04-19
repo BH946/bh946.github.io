@@ -348,7 +348,6 @@ tdd 등록: Window > Preferences > Java > Editor > Templates > new > ...<br>
   - 오류 수정 제안: Ctrl + .
 </div>
 </details>
-
 <br><br>
 
 ### 스프링, 스프링부트 비교 이해
@@ -367,7 +366,6 @@ tdd 등록: Window > Preferences > Java > Editor > Templates > new > ...<br>
 - 참고: 원래 WAR는 따로 WAS(톰캣)을 구동후 위에 돌려야 하고, JAR는 JVM위에서 바로 돌릴수 있다.
 </div>
 </details>
-
 **순수스프링:**
 
 - “내장 서버”가 없었고, **외부 톰캣**에 올려야 했음 + **JSP가 기본**
@@ -1021,7 +1019,6 @@ JPA는 즉시 or 지연 로딩 중에서 무조건 **"지연 로딩"** 으로 �
     </div>
     </div>
     </details>
-    
     **참고 어노테이션:**
     
     - `@PrePersist`: 엔티티가 **처음 저장되기 전에** 실행되는 메서드를 정의. (`createdAt`, `updatedAt` 자동 설정)
@@ -1369,8 +1366,7 @@ JPA는 즉시 or 지연 로딩 중에서 무조건 **"지연 로딩"** 으로 �
 - 상속 시 **서비스 단에서 바로 사용**이 가능하다.   
   **-> 자동으로 구현체를 만들어 주기 때문**
 - **Sring Data JPA 기본 제공 CRUD표**
-
-  - 참고: [JpaRepository 메소드 규칙 정리](https://priming.tistory.com/114)
+- 참고: [JpaRepository 메소드 규칙 정리](https://priming.tistory.com/114)
 
 
 단, 아래 예시 코드는 어댑터추가ver-type2이고, 본인은 보통 **단순ver을 사용!**
@@ -1597,7 +1593,6 @@ public void initCacheMembers() {
 ```
 </div>
 </details>
-
 <br><br>
 
 ### (컨트롤러API) HTTP 구현 + 컴포넌트 스캔 + DTO
@@ -1987,7 +1982,6 @@ public void initCacheMembers() {
 </div>
 </div>
 </details>
-
 <br><br>
 
 ### (컨트롤러Thymeleaf) HTTP 구현 + 컴포넌트 스캔 + DTO
@@ -3504,7 +3498,6 @@ logging:
 ```
 </div>
 </details>
-
 <br><br>
 
 ### 메시지 국제화
@@ -5811,7 +5804,7 @@ class ItemServiceImplTest {
 
 <br><br>
 
-### 메시지국제화,외부설정,캐시
+### 메시지국제화,외부설정,캐시 - XML
 
 **(1)메시지 국제화 - XML**
 
